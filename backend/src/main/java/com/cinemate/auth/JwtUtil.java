@@ -46,7 +46,7 @@ public class JwtUtil {
     }
 
     /**
-     * extract Expiration
+     * extract expiration
      * @param token
      * @return
      */

@@ -20,7 +20,11 @@ public class AuthController {
     @Autowired
     private JwtUtil jwtUtil;
 
-    // Register user
+    /**
+     * register user
+     * @param user
+     * @return
+     */
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody User user) {
         if (userRepository.findByUsername(user.getUsername()).isPresent()) {
@@ -31,7 +35,11 @@ public class AuthController {
         return ResponseEntity.ok("User registered successfully");
     }
 
-    // Login user
+    /**
+     * user login
+     * @param user
+     * @return
+     */
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody User user) {
         Optional<User> existingUser = userRepository.findByUsername(user.getUsername());
