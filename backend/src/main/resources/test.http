@@ -5,3 +5,14 @@ Content-Type: application/json
   "username": "deinUsername",
   "password": "deinPasswort"
 }
+
+###
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+"username": "hallo2",
+"password": "hallo2",
+  "email": "hallo@gmail.com"
+}
+

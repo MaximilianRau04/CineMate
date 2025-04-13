@@ -1,25 +1,26 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Login from './login/login'; 
+import Dashboard from './login/Dashboard'; 
+import PrivateRoute from './login/PrivateRoute'; // private route for protected routes
 
-function App() {
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div className="App">
+        <Routes>
+          {/* public route: login page */}
+          <Route path="/login" element={<Login />} />
+          
+          {/* protected route: dashboard */}
+          <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+          
+          {/* forward to login page if no route was found */}
+          <Route path="*" element={<Login />} />
+        </Routes>
+      </div>
+    </Router>
   );
-}
+};
 
 export default App;
