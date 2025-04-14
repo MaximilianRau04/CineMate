@@ -25,11 +25,81 @@ Content-Type: application/json
 
 {
   "title": "Inception",
-  "description": "Ein Traum im Traum im Traum...",
+  "description": "Ein Dieb, der Informationen aus Träumen stiehlt, erhält die Aufgabe, eine Idee einzupflanzen.",
   "genre": "Sci-Fi",
-  "rating": 4.8,
-  "releaseDate": "2010-07-16T00:00:00Z",
-  "duration": "2h 28min",
-  "posterUrl": "https://linkzumimage.jpg"
+  "rating": 8.8,
+  "releaseDate": "2010-07-16",
+  "duration": "2h 28m",
+  "posterUrl": "https://image.tmdb.org/t/p/w500/edv5CZvWj09upOsy2Y6IwDhK8bt.jpg"
+}
+
+###
+POST http://localhost:8080/api/movies
+Content-Type: application/json
+
+{
+  "title": "The Dark Knight",
+  "description": "Batman stellt sich dem Joker, einem kriminellen Genie, das Chaos über Gotham bringen will.",
+  "genre": "Action",
+  "rating": 9.0,
+  "releaseDate": "2008-07-18",
+  "duration": "2h 32m",
+  "posterUrl": "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg"
+}
+
+###
+POST http://localhost:8080/api/movies
+Content-Type: application/json
+
+{
+  "title": "Interstellar",
+  "description": "Ein Team von Forschern reist durch ein Wurmloch im Weltraum auf der Suche nach einer neuen Heimat für die Menschheit.",
+  "genre": "Sci-Fi",
+  "rating": 8.6,
+  "releaseDate": "2014-11-07",
+  "duration": "2h 49m",
+  "posterUrl": "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg"
+}
+
+###
+POST http://localhost:8080/api/movies
+Content-Type: application/json
+
+{
+  "title": "Fight Club",
+  "description": "Ein gelangweilter Büroarbeiter gründet mit einem Seifenverkäufer einen geheimen Fight Club.",
+  "genre": "Drama",
+  "rating": 8.8,
+  "releaseDate": "1999-10-15",
+  "duration": "2h 19m",
+  "posterUrl": "https://image.tmdb.org/t/p/w500/bptfVGEQuv6vDTIMVCHjJ9Dz8PX.jpg"
+}
+
+###
+POST http://localhost:8080/api/movies
+Content-Type: application/json
+
+{
+  "title": "The Matrix",
+  "description": "Ein Hacker entdeckt die Wahrheit über seine Realität und seine Rolle im Krieg gegen ihre Kontrolleure.",
+  "genre": "Sci-Fi",
+  "rating": 8.7,
+  "releaseDate": "1999-03-31",
+  "duration": "2h 16m",
+  "posterUrl": "https://image.tmdb.org/t/p/w500/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg"
+}
+
+###
+GET http://localhost:8080/api/movies
+###
+DELETE http://localhost:8080/api/movies/67fd6c6db9c65836190d6085
+
+###
+PUT http://localhost:8080/api/movies/67fd6c67b9c65836190d6082
+Content-Type: application/json
+
+{
+
+  "posterUrl": "https://image.tmdb.org/t/p/w500/nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg"
 }
 

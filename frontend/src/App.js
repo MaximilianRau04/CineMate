@@ -1,8 +1,9 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Login from './login/login'; 
-import Dashboard from './login/Dashboard'; 
-import PrivateRoute from './login/PrivateRoute'; // private route for protected routes
+import 'bootstrap/dist/css/bootstrap.min.css';
+import MovieList from './movies/MovieList';
+import MovieDetail from './movies/MovieDetail';
 
 const App = () => {
   return (
@@ -12,11 +13,11 @@ const App = () => {
           {/* public route: login page */}
           <Route path="/login" element={<Login />} />
           
-          {/* protected route: dashboard */}
-          <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-          
           {/* forward to login page if no route was found */}
           <Route path="*" element={<Login />} />
+
+          <Route path="/movies" element={<MovieList />} />
+          <Route path="/movies/:id" element={<MovieDetail />} />
         </Routes>
       </div>
     </Router>

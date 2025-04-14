@@ -27,7 +27,7 @@ const LoginForm = () => {
 
       // Weiterleiten nach kurzem Delay
       setTimeout(() => {
-        window.location.href = "/dashboard";
+        window.location.href = "/movies";
       }, 1500);
     } catch (error) {
       setError("Ungültige Anmeldedaten! Bitte versuche es erneut.");
