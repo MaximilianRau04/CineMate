@@ -16,3 +16,20 @@ Content-Type: application/json
   "email": "hallo@gmail.com"
 }
 
+###
+GET http://localhost:8080/api/users
+
+###
+POST http://localhost:8080/api/movies
+Content-Type: application/json
+
+{
+  "title": "Inception",
+  "description": "Ein Traum im Traum im Traum...",
+  "genre": "Sci-Fi",
+  "rating": 4.8,
+  "releaseDate": "2010-07-16T00:00:00Z",
+  "duration": "2h 28min",
+  "posterUrl": "https://linkzumimage.jpg"
+}
+
