@@ -1,25 +1,38 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Login from './login/login'; 
+import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
+
+import Header from './navigation/Header';
+import Login from './login/login';
 import MovieList from './movies/MovieList';
 import MovieDetail from './movies/MovieDetail';
+
+const AppContent = () => {
+  const location = useLocation();
+  const hideHeader = location.pathname === '/login';
+
+  return (
+    <>
+      {!hideHeader && <Header />}
+      <Routes>
+        {/* Public Route: Login */}
+        <Route path="/login" element={<Login />} />
+
+        {/* Geschützte Routen */}
+        <Route path="/movies" element={<MovieList />} />
+        <Route path="/movies/:id" element={<MovieDetail />} />
+
+        {/* Catch-all => Weiterleitung zu Login */}
+        <Route path="*" element={<Login />} />
+      </Routes>
+    </>
+  );
+};
 
 const App = () => {
   return (
     <Router>
-      <div className="App">
-        <Routes>
-          {/* public route: login page */}
-          <Route path="/login" element={<Login />} />
-          
-          {/* forward to login page if no route was found */}
-          <Route path="*" element={<Login />} />
-
-          <Route path="/movies" element={<MovieList />} />
-          <Route path="/movies/:id" element={<MovieDetail />} />
-        </Routes>
-      </div>
+      <AppContent />
     </Router>
   );
 };
