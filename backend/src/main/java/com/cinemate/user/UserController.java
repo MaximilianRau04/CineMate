@@ -2,9 +2,7 @@ package com.cinemate.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
@@ -14,35 +12,31 @@ import java.util.Optional;
 @RequestMapping("/api/users")
 public class UserController {
 
+    private final UserService userService;
+
     @Autowired
-    private UserRepository userRepository;
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping
     public ResponseEntity<List<User>> getAllUsers() {
-        List<User> users = userRepository.findAll();
-
-        users.forEach(user -> user.setPassword(null));
-
-        return ResponseEntity.ok(users);
+        return userService.getAllUsers();
     }
 
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity.status(401).body("Nicht eingeloggt");
-        }
+        return userService.getCurrentUser(authentication);
+    }
 
-        String username = authentication.getName();
-        Optional<User> optionalUser = userRepository.findByUsername(username);
+    @GetMapping("/watchlist")
+    public ResponseEntity<List<User>> getAllWatchlist() {
+        return null;
+    }
 
-        if (optionalUser.isEmpty()) {
-            return ResponseEntity.status(404).body("User nicht gefunden");
-        }
-
-        User user = optionalUser.get();
-        user.setPassword(null);
-
-        return ResponseEntity.ok(user);
+    @PutMapping("/{id}/watchlist")
+    public ResponseEntity<List<User>> getWatchlistOfUser(@PathVariable int id) {
+        return null;
     }
 
 }

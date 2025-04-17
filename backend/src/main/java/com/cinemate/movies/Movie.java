@@ -33,9 +33,7 @@ public class Movie {
         this.posterUrl = posterUrl;
     }
 
-    public String getId() {
-        return id;
-    }
+    public String getId() { return id; }
 
     public void setId(String id) {
         this.id = id;
@@ -96,4 +94,5 @@ public class Movie {
     public void setPosterUrl(String posterUrl) {
         this.posterUrl = posterUrl;
     }
+
 }
