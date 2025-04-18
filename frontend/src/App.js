@@ -2,10 +2,11 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-import Header from './navigation/Header';
-import Login from './login/login';
-import MovieList from './movies/MovieList';
-import MovieDetail from './movies/MovieDetail';
+import Header from './components/navigation/Header';
+import Login from './components/login/Login';
+import MovieList from './components/movies/MovieList';
+import MovieDetail from './components/movies/MovieDetail';
+import Watchlist from './components/movies/Watchlist';
 
 const AppContent = () => {
   const location = useLocation();
@@ -22,8 +23,8 @@ const AppContent = () => {
         <Route path="/movies" element={<MovieList />} />
         <Route path="/movies/:id" element={<MovieDetail />} />
 
-        {/* Catch-all => Weiterleitung zu Login */}
-        <Route path="*" element={<Login />} />
+        <Route path="/watchlist" element={<Watchlist />} />
+
       </Routes>
     </>
   );

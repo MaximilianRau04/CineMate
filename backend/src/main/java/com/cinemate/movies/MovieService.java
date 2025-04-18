@@ -1,7 +1,9 @@
 package com.cinemate.movies;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,12 +30,13 @@ public class MovieService {
         return movieRepository.save(movie);
     }
 
-    public void deleteMovie(String id) {
-        movieRepository.deleteById(id);
-    }
 
     public Movie updateMovie(String id, Movie updatedMovie) {
         updatedMovie.setId(id);
         return movieRepository.save(updatedMovie);
+    }
+
+    public void deleteMovie(String id) {
+        movieRepository.deleteById(id);
     }
 }
