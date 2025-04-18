@@ -40,11 +40,11 @@ const Watchlist = () => {
   }, [userId]); // Abhängigkeit: user.id, um die Watchlist bei Änderungen zu aktualisieren
 
   if (loading) {
-    return <p className="text-center mt-4">Watchlist wird geladen...</p>;
+    return <p className="text-center mt-4 text-white">Watchlist wird geladen...</p>;
   }
 
   if (watchlist.length === 0) {
-    return <p className="text-center mt-4">Noch keine Filme in der Watchlist.</p>;
+    return <p className="text-center mt-4 text-white">Noch keine Filme in der Watchlist.</p>;
   }
 
   return (

@@ -72,6 +72,6 @@ public class User {
     }
 
     public void removeMovieFromWatchlist(Movie movie) {
-        watchlist.remove(movie);
+        watchlist.removeIf(m -> m.getId().equals(movie.getId()));
     }
 }
