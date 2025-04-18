@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
-import '../assets/login.css';
+import "bootstrap/dist/css/bootstrap.min.css";
+import '../../assets/login.css';
+
 
 const LoginForm = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -21,16 +23,11 @@ const LoginForm = () => {
         password,
       });
 
-      // Speichere den Token im LocalStorage
       localStorage.setItem("token", response.data.token || response.data);
-      setSuccess("Login erfolgreich! Sie werden weitergeleitet...");
-
-      // Weiterleiten nach kurzem Delay
-      setTimeout(() => {
-        window.location.href = "/movies";
-      }, 1500);
-    } catch (error) {
-      setError("Ungültige Anmeldedaten! Bitte versuche es erneut.");
+      setSuccess("Login erfolgreich! Weiterleitung...");
+      setTimeout(() => (window.location.href = "/movies"), 1500);
+    } catch (err) {
+      setError("Ungültige Anmeldedaten.");
     }
   };
 
@@ -39,9 +36,8 @@ const LoginForm = () => {
     setError("");
     setSuccess("");
 
-    // Einfache Validierung
     if (password.length < 6) {
-      setError("Das Passwort muss mindestens 6 Zeichen lang sein");
+      setError("Passwort muss mindestens 6 Zeichen lang sein.");
       return;
     }
 
@@ -51,14 +47,10 @@ const LoginForm = () => {
         email,
         password,
       });
-      
-      setSuccess("Registrierung erfolgreich! Sie können sich jetzt anmelden.");
-      // Nach der Registrierung zur Anmeldeform wechseln
-      setTimeout(() => {
-        setIsLogin(true);
-      }, 2000);
-    } catch (error) {
-      setError("Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut.");
+      setSuccess("Registrierung erfolgreich!");
+      setTimeout(() => setIsLogin(true), 2000);
+    } catch (err) {
+      setError("Registrierung fehlgeschlagen.");
     }
   };
 
@@ -69,69 +61,68 @@ const LoginForm = () => {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-box">
-        <div className="form-header">
-          <h2>{isLogin ? "Anmelden" : "Registrieren"}</h2>
-          <div className="logo">CineMate</div>
-        </div>
-        
-        {error && <div className="error-message">{error}</div>}
-        {success && <div className="success-message">{success}</div>}
-        
+    <div className="container d-flex justify-content-center align-items-center min-vh-100 bg-dark text-white">
+      <div className="card p-4 shadow-lg" style={{ width: "100%", maxWidth: "400px" }}>
+        <h2 className="text-center mb-3">{isLogin ? "Anmelden" : "Registrieren"}</h2>
+        <div className="text-center mb-4 fw-bold fs-4 text-danger">CineMate</div>
+
+        {error && <div className="alert alert-danger">{error}</div>}
+        {success && <div className="alert alert-success">{success}</div>}
+
         <form onSubmit={isLogin ? handleLogin : handleRegister}>
-          <div className="form-group">
-            <label htmlFor="username">Benutzername</label>
+          <div className="mb-3">
+            <label htmlFor="username" className="form-label">Benutzername</label>
             <input
               type="text"
+              className="form-control"
               id="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
-              placeholder="Benutzername eingeben"
+              placeholder="Benutzername"
             />
           </div>
-          
+
           {!isLogin && (
-            <div className="form-group">
-              <label htmlFor="email">E-Mail</label>
+            <div className="mb-3">
+              <label htmlFor="email" className="form-label">E-Mail</label>
               <input
                 type="email"
+                className="form-control"
                 id="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                placeholder="E-Mail Adresse eingeben"
+                placeholder="E-Mail"
               />
             </div>
           )}
-          
-          <div className="form-group">
-            <label htmlFor="password">Passwort</label>
+
+          <div className="mb-3">
+            <label htmlFor="password" className="form-label">Passwort</label>
             <input
               type="password"
+              className="form-control"
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              placeholder="Passwort eingeben"
+              placeholder="Passwort"
             />
           </div>
-          
-          <button type="submit" className="submit-btn">
+
+          <button type="submit" className="btn btn-danger w-100">
             {isLogin ? "Einloggen" : "Registrieren"}
           </button>
         </form>
-        
-        <div className="form-footer">
-          <p>
-            {isLogin
-              ? "Noch kein Konto?"
-              : "Bereits registriert?"}
-            <button onClick={toggleForm} className="toggle-btn">
-              {isLogin ? "Jetzt registrieren" : "Anmelden"}
+
+        <div className="text-center mt-3">
+          <small>
+            {isLogin ? "Noch kein Konto?" : "Bereits registriert?"}
+            <button onClick={toggleForm} className="btn btn-link p-0 ms-2">
+              {isLogin ? "Registrieren" : "Anmelden"}
             </button>
-          </p>
+          </small>
         </div>
       </div>
     </div>

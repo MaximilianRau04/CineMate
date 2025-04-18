@@ -1,5 +1,6 @@
 package com.cinemate.user;
 
+import com.cinemate.movies.Movie;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,14 +30,19 @@ public class UserController {
         return userService.getCurrentUser(authentication);
     }
 
-    @GetMapping("/watchlist")
-    public ResponseEntity<List<User>> getAllWatchlist() {
-        return null;
+    @GetMapping("/{id}/watchlist")
+    public ResponseEntity<List<Movie>> getWatchlist(@PathVariable String id) {
+        return userService.getWatchlist(id);
     }
 
-    @PutMapping("/{id}/watchlist")
-    public ResponseEntity<List<User>> getWatchlistOfUser(@PathVariable int id) {
-        return null;
+    @PutMapping("/{id}/watchlist/{movieId}")
+    public ResponseEntity<User> addMovieToWatchlist(@PathVariable String id, @PathVariable String movieId) {
+        return userService.addMovieToWatchlist(id, movieId);
+    }
+
+    @DeleteMapping("/{id}/watchlist/{movieId}")
+    public ResponseEntity<User> removeMovieFromWatchlist(@PathVariable String id, @PathVariable String movieId) {
+        return userService.removeMovieFromWatchlist(id, movieId);
     }
 
 }
