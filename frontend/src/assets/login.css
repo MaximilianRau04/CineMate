@@ -1,11 +1,11 @@
-html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    background-color: #212529; /* dunkler Hintergrund */
-  }
-  
-  /* Optional: verhindert Scroll-Leiste */
-  body {
-    overflow: hidden;
-  }
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background-color: #212529;
+}
+
+body {
+  overflow: hidden;
+}

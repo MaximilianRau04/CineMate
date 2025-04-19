@@ -1,9 +1,12 @@
 import React, { useState } from "react";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
-import '../../assets/login.css';
+import "../../assets/login.css";
 
-
+/**
+ * LoginForm component for user authentication
+ * @returns {JSX.Element}
+ */
 const LoginForm = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [username, setUsername] = useState("");
@@ -12,16 +15,23 @@ const LoginForm = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  /**
+   * function to handle user login
+   * @param {*} e
+   */
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
     setSuccess("");
 
     try {
-      const response = await axios.post("http://localhost:8080/api/auth/login", {
-        username,
-        password,
-      });
+      const response = await axios.post(
+        "http://localhost:8080/api/auth/login",
+        {
+          username,
+          password,
+        }
+      );
 
       localStorage.setItem("token", response.data.token || response.data);
       setSuccess("Login erfolgreich! Weiterleitung...");
@@ -31,6 +41,10 @@ const LoginForm = () => {
     }
   };
 
+  /**
+   * function to handle user registration
+   * @param {*} e
+   */
   const handleRegister = async (e) => {
     e.preventDefault();
     setError("");
@@ -54,6 +68,9 @@ const LoginForm = () => {
     }
   };
 
+  /**
+   * function to toggle between login and registration forms
+   */
   const toggleForm = () => {
     setIsLogin(!isLogin);
     setError("");
@@ -62,16 +79,26 @@ const LoginForm = () => {
 
   return (
     <div className="container d-flex justify-content-center align-items-center min-vh-100 bg-dark text-white">
-      <div className="card p-4 shadow-lg" style={{ width: "100%", maxWidth: "400px" }}>
-        <h2 className="text-center mb-3">{isLogin ? "Anmelden" : "Registrieren"}</h2>
-        <div className="text-center mb-4 fw-bold fs-4 text-danger">CineMate</div>
+      <div
+        className="card p-4 shadow-lg m-10"
+        style={{ width: "100%", maxWidth: "400px" }}
+      >
+        <h2 className="text-center mb-3">
+          {isLogin ? "Anmelden" : "Registrieren"}
+        </h2>
+        <div className="text-center mb-4 fw-bold fs-4 text-danger">
+          CineMate
+        </div>
 
         {error && <div className="alert alert-danger">{error}</div>}
         {success && <div className="alert alert-success">{success}</div>}
 
+        {/* username */}
         <form onSubmit={isLogin ? handleLogin : handleRegister}>
           <div className="mb-3">
-            <label htmlFor="username" className="form-label">Benutzername</label>
+            <label htmlFor="username" className="form-label">
+              Benutzername
+            </label>
             <input
               type="text"
               className="form-control"
@@ -83,9 +110,12 @@ const LoginForm = () => {
             />
           </div>
 
+          {/* email if registration form */}
           {!isLogin && (
             <div className="mb-3">
-              <label htmlFor="email" className="form-label">E-Mail</label>
+              <label htmlFor="email" className="form-label">
+                E-Mail
+              </label>
               <input
                 type="email"
                 className="form-control"
@@ -98,8 +128,11 @@ const LoginForm = () => {
             </div>
           )}
 
+          {/* password */}
           <div className="mb-3">
-            <label htmlFor="password" className="form-label">Passwort</label>
+            <label htmlFor="password" className="form-label">
+              Passwort
+            </label>
             <input
               type="password"
               className="form-control"
@@ -111,11 +144,13 @@ const LoginForm = () => {
             />
           </div>
 
+          {/* submit button */}
           <button type="submit" className="btn btn-danger w-100">
             {isLogin ? "Einloggen" : "Registrieren"}
           </button>
         </form>
 
+        {/* toggle link */}
         <div className="text-center mt-3">
           <small>
             {isLogin ? "Noch kein Konto?" : "Bereits registriert?"}

@@ -22,7 +22,6 @@ const AppContent = () => {
         {/* Geschützte Routen */}
         <Route path="/movies" element={<MovieList />} />
         <Route path="/movies/:id" element={<MovieDetail />} />
-
         <Route path="/watchlist" element={<Watchlist />} />
 
       </Routes>

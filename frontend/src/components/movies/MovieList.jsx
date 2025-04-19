@@ -1,10 +1,19 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
+/**
+ * MovieList component to display a list of movies
+ * and allows users to view details of each movie
+ * @returns {JSX.Element}
+ */
 const MovieList = () => {
   const [movies, setMovies] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  /**
+   * Fetches the list of movies from the API
+   * and updates the state with the fetched data
+   */
   useEffect(() => {
     setIsLoading(true);
     fetch("http://localhost:8080/api/movies")
@@ -42,7 +51,7 @@ const MovieList = () => {
             <div className="col-md-6 mb-4" key={movie.id}>
               <div className="card h-100 shadow-sm">
                 <div className="row g-0">
-                  {/* Poster Bild */}
+                  {/* movie poster */}
                   <div className="col-auto">
                     <img
                       src={movie.posterUrl}
@@ -57,7 +66,7 @@ const MovieList = () => {
                     />
                   </div>
 
-                  {/* Infos */}
+                  {/* movie data */}
                   <div className="col">
                     <div className="card-body d-flex flex-column justify-content-between h-100">
                       <div>

@@ -4,20 +4,20 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 const Header = () => {
   const navigate = useNavigate();
+  const isLoggedIn = !!localStorage.getItem("token"); 
 
   const handleLogout = () => {
+    localStorage.removeItem("token"); 
     navigate("/");
   };
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm sticky-top">
       <div className="container">
-        {/* Logo / Brand */}
         <Link className="navbar-brand fw-bold text-primary" to="/movies">
           🎬 CineMate
         </Link>
 
-        {/* Toggle Button (Mobile) */}
         <button
           className="navbar-toggler"
           type="button"
@@ -27,33 +27,41 @@ const Header = () => {
           <span className="navbar-toggler-icon"></span>
         </button>
 
-        {/* Navigation */}
+        {/* Navbar links for logged-in users */}
         <div className="collapse navbar-collapse" id="navbarNav">
-          <ul className="navbar-nav me-auto">
-            <li className="nav-item">
-              <Link className="nav-link" to="/movies">
-                Filmsammlung
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/watchlist">
-                Watchlist
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/calendar">
-                Kalender
-              </Link>
-            </li>
-          </ul>
+          {isLoggedIn && (
+            <ul className="navbar-nav me-auto">
+              <li className="nav-item">
+                <Link className="nav-link" to="/movies">
+                  Filmsammlung
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link" to="/watchlist">
+                  Watchlist
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link" to="/calendar">
+                  Kalender
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link" to="/profile">
+                  Profil
+                </Link>
+              </li>
+            </ul>
+          )}
 
-          {/* Optionaler Logout-Button */}
-          <button
-            className="btn btn-sm btn-outline-light"
-            onClick={handleLogout}
-          >
-            Logout
-          </button>
+          {isLoggedIn && (
+            <button
+              className="btn btn-sm btn-outline-light"
+              onClick={handleLogout}
+            >
+              Logout
+            </button>
+          )}
         </div>
       </div>
     </nav>
