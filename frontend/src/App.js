@@ -16,10 +16,9 @@ const AppContent = () => {
     <>
       {!hideHeader && <Header />}
       <Routes>
-        {/* Public Route: Login */}
         <Route path="/" element={<Login />} />
 
-        {/* Geschützte Routen */}
+        {/* protected routes */}
         <Route path="/movies" element={<MovieList />} />
         <Route path="/movies/:id" element={<MovieDetail />} />
         <Route path="/watchlist" element={<Watchlist />} />

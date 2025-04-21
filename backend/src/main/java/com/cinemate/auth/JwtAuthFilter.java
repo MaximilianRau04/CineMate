@@ -29,7 +29,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     /**
-     * do filter internal
+     * JWT authentication filter for incoming HTTP requests.
+     * - Extracts JWT from the Authorization header.
+     * - Validates the token and retrieves the username.
+     * - If valid and user is not yet authenticated, sets authentication in the SecurityContext.
+     * - Proceeds with the filter chain regardless of authentication result.
      * @param request
      * @param response
      * @param filterChain
@@ -45,8 +49,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7);  // Extrahiere den Token
-            String username = jwtUtil.extractUsername(token);  // Extrahiere den Benutzernamen aus dem Token
+            String token = authHeader.substring(7);
+            String username = jwtUtil.extractUsername(token);
 
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 Optional<User> userOptional = userRepository.findByUsername(username);

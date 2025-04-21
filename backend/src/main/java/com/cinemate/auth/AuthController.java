@@ -23,9 +23,9 @@ public class AuthController {
     private JwtUtil jwtUtil;
 
     /**
-     * register user
+     * registers an user
      * @param user
-     * @return
+     * @return User
      */
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody User user) {
@@ -38,9 +38,9 @@ public class AuthController {
     }
 
     /**
-     * user login
+     * user login via username and password
      * @param user
-     * @return
+     * @return User
      */
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody User user) {

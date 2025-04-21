@@ -23,12 +23,17 @@ public class UserService {
         this.movieRepository = movieRepository;
     }
 
+    /**
+     *
+     * @param authentication
+     * @return user
+     */
     public ResponseEntity<?> getCurrentUser(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(401).body("Nicht eingeloggt");
         }
 
-        // Überprüfen, welcher Typ der Principal ist
+        // Check what type of client is the principal is
         Object principal = authentication.getPrincipal();
         String username;
 
@@ -47,11 +52,15 @@ public class UserService {
         }
 
         User user = optionalUser.get();
-        user.setPassword(null);  // Passwort nicht zurückgeben
+        user.setPassword(null);  // password is not returned
 
         return ResponseEntity.ok(user);
     }
 
+    /**
+     * returns all users
+     * @return List<User>
+     */
     public ResponseEntity<List<User>> getAllUsers() {
         List<User> users = userRepository.findAll();
 
@@ -60,51 +69,64 @@ public class UserService {
         return ResponseEntity.ok(users);
     }
 
+    /**
+     * returns the movies in the watchlist of the given user
+     * @param userId
+     * @return List<Movie>
+     */
     public ResponseEntity<List<Movie>> getWatchlist(String userId) {
         Optional<User> userOptional = userRepository.findById(userId);
         if (userOptional.isEmpty()) {
-            return ResponseEntity.notFound().build();  // Wenn der Nutzer nicht gefunden wird
+            return ResponseEntity.notFound().build();
         }
 
         User user = userOptional.get();
-        return ResponseEntity.ok(user.getWatchlist());  // Gibt die Watchlist des Nutzers zurück
+        return ResponseEntity.ok(user.getWatchlist());
     }
 
-    // Methode zum Hinzufügen eines Films zur Watchlist eines Nutzers
+    /**
+     * add movie with the given id to the watchlist of the given user
+     * @param userId
+     * @param movieId
+     * @return User
+     */
     public ResponseEntity<User> addMovieToWatchlist(String userId, String movieId) {
         Optional<User> userOptional = userRepository.findById(userId);
         Optional<Movie> movieOptional = movieRepository.findById(movieId);
 
         if (userOptional.isEmpty() || movieOptional.isEmpty()) {
-            return ResponseEntity.badRequest().build();  // Wenn der Nutzer oder Film nicht gefunden wird
+            return ResponseEntity.badRequest().build();
         }
 
         User user = userOptional.get();
         Movie movie = movieOptional.get();
 
-        // Füge den Film zur Watchlist hinzu
         user.addMovieToWatchlist(movie);
-        userRepository.save(user);  // Speichere den Nutzer
+        userRepository.save(user);
 
-        return ResponseEntity.ok(user);  // Erfolgreiches Hinzufügen
+        return ResponseEntity.ok(user);
     }
 
-    // Methode zum Entfernen eines Films aus der Watchlist eines Nutzers
+    /**
+     * deletes the movie with the given id from the watchlist of the given user
+     * @param userId
+     * @param movieId
+     * @return User
+     */
     public ResponseEntity<User> removeMovieFromWatchlist(String userId, String movieId) {
         Optional<User> userOptional = userRepository.findById(userId);
         Optional<Movie> movieOptional = movieRepository.findById(movieId);
 
         if (userOptional.isEmpty() || movieOptional.isEmpty()) {
-            return ResponseEntity.badRequest().build();  // Wenn der Nutzer oder Film nicht gefunden wird
+            return ResponseEntity.badRequest().build();
         }
 
         User user = userOptional.get();
         Movie movie = movieOptional.get();
 
-        // Entferne den Film aus der Watchlist, wenn er vorhanden ist
         user.removeMovieFromWatchlist(movie);
-        userRepository.save(user);  // Speichere den geänderten Nutzer
+        userRepository.save(user);
 
-        return ResponseEntity.ok(user);  // Erfolgreiches Entfernen
+        return ResponseEntity.ok(user);
     }
 }

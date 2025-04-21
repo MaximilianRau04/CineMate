@@ -10,10 +10,11 @@ import java.util.Map;
 
 @Component
 public class JwtUtil {
-    private String secretKey = "cinemateSecretKey"; // Achtung: In der Produktion sollte der Schlüssel sicher aufbewahrt werden
+    private String secretKey = "cinemateSecretKey";
 
     /**
-     * generates token for user
+     * Generates a JWT token for the given username.
+     * The token is available for 10 hours
      * @param username
      * @return
      */
@@ -23,13 +24,13 @@ public class JwtUtil {
                 .setClaims(claims)
                 .setSubject(username)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // Gültig für 10 Stunden
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10))
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
     }
 
     /**
-     * extract username
+     * Extracts the username from the JWT token.
      * @param token
      * @return
      */
@@ -41,12 +42,16 @@ public class JwtUtil {
                 .getSubject();
     }
 
+    /**
+     * Checks if the JWT token is expired.
+     * @param token
+     */
     public boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 
     /**
-     * extract expiration
+     * Extracts the expiration date from the JWT token.
      * @param token
      * @return
      */
@@ -58,6 +63,11 @@ public class JwtUtil {
                 .getExpiration();
     }
 
+    /**
+     * Validates the token by comparing the username and checking expiration.
+     * @param token
+     * @param username
+     */
     public boolean validateToken(String token, String username) {
         return (username.equals(extractUsername(token)) && !isTokenExpired(token));
     }
