@@ -1,7 +1,7 @@
 package com.cinemate.user;
 
-import com.cinemate.movies.Movie;
-import com.cinemate.movies.MovieRepository;
+import com.cinemate.movie.Movie;
+import com.cinemate.movie.MovieRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;

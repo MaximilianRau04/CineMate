@@ -1,4 +1,4 @@
-package com.cinemate.movies;
+package com.cinemate.movie;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 
