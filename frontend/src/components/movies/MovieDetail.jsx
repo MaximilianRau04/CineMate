@@ -1,11 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import { FaPlus, FaCheck, FaArrowLeft } from "react-icons/fa";
 
-/**
- * MovieDetail component to display detailed information about a movie
- * contains a button to add the movie to the user's watchlist
- * @returns {JSX.Element}
- */
 const MovieDetail = () => {
   const { id } = useParams();
   const [movie, setMovie] = useState(null);
@@ -16,7 +12,7 @@ const MovieDetail = () => {
   const [added, setAdded] = useState(false);
 
   /**
-   * Fetches the current user's ID from the API
+   * fetches the currently logged in user from the API
    */
   useEffect(() => {
     fetch("http://localhost:8080/api/users/me", {
@@ -26,15 +22,13 @@ const MovieDetail = () => {
     })
       .then((res) => res.json())
       .then((data) => {
-        if (data && data.id) {
-          setUserId(data.id);
-        }
+        if (data?.id) setUserId(data.id);
       })
       .catch((err) => console.error("Fehler beim Laden des Users:", err));
   }, []);
 
   /**
-   * Fetches movie details from the API based on the movie ID from the URL
+   * fetches the movie details from the API
    */
   useEffect(() => {
     setIsLoading(true);
@@ -55,8 +49,7 @@ const MovieDetail = () => {
   }, [id]);
 
   /**
-   * Checks if the movie is already in the user's watchlist
-   * and updates the state accordingly
+   * checks if the movie is already in the user's watchlist
    */
   useEffect(() => {
     if (!userId || !id) return;
@@ -75,11 +68,10 @@ const MovieDetail = () => {
   }, [userId, id]);
 
   /**
-   * adds the movie to the user's watchlist if not already added
-   * @returns {void}
+   * adds the movie to the user's watchlist
    */
   const handleAddToWatchlist = () => {
-    if (!userId || added) return; 
+    if (!userId || added) return;
 
     setAdding(true);
     fetch(`http://localhost:8080/api/users/${userId}/watchlist/${id}`, {
@@ -95,7 +87,6 @@ const MovieDetail = () => {
       .then(() => {
         setAdded(true);
         setAdding(false);
-
       })
       .catch((err) => {
         console.error(err);
@@ -106,10 +97,8 @@ const MovieDetail = () => {
   if (isLoading) {
     return (
       <div className="container text-center py-5">
-        <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Lade...</span>
-        </div>
-        <p className="mt-2">Film wird geladen...</p>
+        <div className="spinner-border text-primary" role="status" />
+        <p className="mt-3">Film wird geladen...</p>
       </div>
     );
   }
@@ -117,10 +106,11 @@ const MovieDetail = () => {
   if (error) {
     return (
       <div className="container py-5">
-        <div className="alert alert-danger" role="alert">
+        <div className="alert alert-danger shadow-sm" role="alert">
           <h4 className="alert-heading">Fehler</h4>
           <p>{error}</p>
           <Link to="/" className="btn btn-outline-secondary mt-3">
+            <FaArrowLeft className="me-2" />
             Zurück zur Übersicht
           </Link>
         </div>
@@ -132,72 +122,81 @@ const MovieDetail = () => {
 
   return (
     <div className="container py-5">
-      <div className="card shadow-lg">
+      <div className="card shadow-lg border-0">
         <div className="row g-0">
-          <div className="col-md-4 text-center p-3">
-            {/* movie poster */}
+          <div className="col-md-4 text-center bg-dark text-white p-4">
             <img
               src={movie.posterUrl}
               alt={movie.title}
-              className="img-fluid rounded shadow-sm"
-              style={{ maxHeight: "350px", objectFit: "cover" }}
+              className="img-fluid rounded shadow-sm mb-3"
+              style={{ maxHeight: "400px", objectFit: "cover" }}
               onError={(e) => {
                 e.target.src =
                   "https://via.placeholder.com/300x450?text=No+Image";
               }}
             />
+            <div className="small text-muted">Filmposter</div>
           </div>
 
           <div className="col-md-8 p-4">
             <h2 className="mb-3">{movie.title}</h2>
 
-            {/* movie data */}
-            <div className="mb-2">
-              <span className="badge bg-primary me-2">{movie.genre}</span>
+            <div className="mb-3">
+              {movie.genre && (
+                <span className="badge bg-primary me-2">{movie.genre}</span>
+              )}
               {movie.duration && (
-                <span className="badge bg-secondary me-2">
-                  {movie.duration}
-                </span>
+                <span className="badge bg-secondary me-2">{movie.duration}</span>
               )}
               {movie.releaseYear && (
-                <span className="badge bg-info">{movie.releaseYear}</span>
+                <span className="badge bg-info text-dark">
+                  {movie.releaseYear}
+                </span>
               )}
             </div>
 
-            <p className="text-muted mt-3">
+            <p className="text-muted mb-2">
               <strong>Bewertung:</strong> ⭐ {movie.rating}/10
             </p>
 
             {movie.description && (
-              <div className="mt-3">
-                <h5>Beschreibung</h5>
-                <p>{movie.description}</p>
+              <div className="mb-4">
+                <h5>📝 Beschreibung</h5>
+                <p className="text-secondary">{movie.description}</p>
               </div>
             )}
 
-            {/* add to watchlist button */}
+            {/* Watchlist Actions */}
             {userId && !added && (
               <button
-                className="btn btn-success me-2 mt-3"
+                className="btn btn-success me-2"
                 onClick={handleAddToWatchlist}
                 disabled={adding}
               >
-                {adding ? "Wird hinzugefügt..." : "Zur Watchlist hinzufügen"}
+                {adding ? (
+                  "Wird hinzugefügt..."
+                ) : (
+                  <>
+                    <FaPlus className="me-2" />
+                    Zur Watchlist hinzufügen
+                  </>
+                )}
               </button>
             )}
 
             {added && (
-              <div className="alert alert-success mt-3 py-2 px-3" role="alert">
-                ✅{" "}
-                {adding
-                  ? "Wird hinzugefügt..."
-                  : "Film ist in deiner Watchlist!"}
+              <div className="alert alert-success d-inline-flex align-items-center px-3 py-2 mt-2" role="alert">
+                <FaCheck className="me-2" />
+                In deiner Watchlist!
               </div>
             )}
 
-            <Link to="/movies" className="btn btn-outline-primary mt-4">
-              ← Zurück zur Übersicht
-            </Link>
+            <div className="mt-4">
+              <Link to="/movies" className="btn btn-outline-primary">
+                <FaArrowLeft className="me-2" />
+                Zurück zur Übersicht
+              </Link>
+            </div>
           </div>
         </div>
       </div>

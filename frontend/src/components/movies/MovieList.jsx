@@ -1,19 +1,17 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-/**
- * MovieList component to display a list of movies
- * and allows users to view details of each movie
- * @returns {JSX.Element}
- */
 const MovieList = () => {
   const [movies, setMovies] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  /**
-   * Fetches the list of movies from the API
-   * and updates the state with the fetched data
-   */
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortOrder, setSortOrder] = useState("asc");
+  const [selectedGenre, setSelectedGenre] = useState("alle");
+
+  // Genre-Liste generieren aus geladenen Filmen
+  const genres = ["alle", ...new Set(movies.map((m) => m.genre).filter(Boolean))];
+
   useEffect(() => {
     setIsLoading(true);
     fetch("http://localhost:8080/api/movies")
@@ -27,6 +25,24 @@ const MovieList = () => {
         setIsLoading(false);
       });
   }, []);
+
+ /**
+  * filter movies based on search term and selected genre
+  * sort movies based on selected sort order
+  */
+  const filteredMovies = movies
+    .filter((movie) =>
+      movie.title.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .filter((movie) =>
+      selectedGenre === "alle" ? true : movie.genre === selectedGenre
+    )
+    .sort((a, b) => {
+      const dateA = new Date(a.releaseDate);
+      const dateB = new Date(b.releaseDate);
+      return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
+    });
+
 
   if (isLoading) {
     return (
@@ -43,15 +59,51 @@ const MovieList = () => {
     <div className="container py-4">
       <h1 className="text-center mb-4 text-primary">🎬 Unsere Filmsammlung</h1>
 
-      {movies.length === 0 ? (
+      {/* serach and filter bar */}
+      <div className="row mb-4 gy-2">
+        <div className="col-md-4">
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Filmtitel suchen..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        <div className="col-md-4">
+          <select
+            className="form-select"
+            value={selectedGenre}
+            onChange={(e) => setSelectedGenre(e.target.value)}
+          >
+            {genres.map((genre, idx) => (
+              <option key={idx} value={genre}>
+                🎭 {genre.charAt(0).toUpperCase() + genre.slice(1)}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="col-md-4">
+          <select
+            className="form-select"
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value)}
+          >
+            <option value="asc">📅 Nach Datum (aufsteigend)</option>
+            <option value="desc">📅 Nach Datum (absteigend)</option>
+          </select>
+        </div>
+      </div>
+
+      {/* movie list */}
+      {filteredMovies.length === 0 ? (
         <div className="text-center text-muted">Keine Filme gefunden.</div>
       ) : (
         <div className="row">
-          {movies.map((movie) => (
+          {filteredMovies.map((movie) => (
             <div className="col-md-6 mb-4" key={movie.id}>
               <div className="card h-100 shadow-sm">
                 <div className="row g-0">
-                  {/* movie poster */}
                   <div className="col-auto">
                     <img
                       src={movie.posterUrl}
@@ -65,8 +117,6 @@ const MovieList = () => {
                       }}
                     />
                   </div>
-
-                  {/* movie data */}
                   <div className="col">
                     <div className="card-body d-flex flex-column justify-content-between h-100">
                       <div>
@@ -77,8 +127,13 @@ const MovieList = () => {
                         <p className="card-text mb-1">
                           ⭐ <strong>{movie.rating}</strong>
                         </p>
+                        <p className="card-text mb-1">
+                          📅{" "}
+                          {movie.releaseDate
+                            ? new Date(movie.releaseDate).toLocaleDateString()
+                            : "Unbekannt"}
+                        </p>
                       </div>
-
                       <Link
                         to={`/movies/${movie.id}`}
                         className="btn btn-primary btn-sm mt-2 align-self-start"
