@@ -1,6 +1,7 @@
 package com.cinemate.movie;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,22 +17,22 @@ public class MovieService {
         this.movieRepository = movieRepository;
     }
 
-    public List<Movie> getAllMovies() {
-        return movieRepository.findAll();
+    public ResponseEntity<List<Movie>> getAllMovies() {
+        return ResponseEntity.ok(movieRepository.findAll());
     }
 
     public Optional<Movie> getMovieById(String id) {
         return movieRepository.findById(id);
     }
 
-    public Movie createMovie(Movie movie) {
-        return movieRepository.save(movie);
+    public ResponseEntity<Movie> createMovie(Movie movie) {
+        return ResponseEntity.ok(movieRepository.save(movie));
     }
 
 
-    public Movie updateMovie(String id, Movie updatedMovie) {
+    public ResponseEntity<Movie> updateMovie(String id, Movie updatedMovie) {
         updatedMovie.setId(id);
-        return movieRepository.save(updatedMovie);
+        return ResponseEntity.ok(movieRepository.save(updatedMovie));
     }
 
     public void deleteMovie(String id) {

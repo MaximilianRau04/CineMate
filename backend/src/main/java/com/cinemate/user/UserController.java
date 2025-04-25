@@ -28,6 +28,13 @@ public class UserController {
         return userService.getAllUsers();
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getUserById(@PathVariable String id) {
+        return userService.getUserById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     /**
      * returns the user currently logged in
      * @param authentication
@@ -49,6 +56,21 @@ public class UserController {
     }
 
     /**
+     * creates an user
+     * @param user
+     * @return
+     */
+    @PostMapping
+    public ResponseEntity<User> createUser(@RequestBody User user) {
+        return userService.createUser(user);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<User> updateUser(@PathVariable String id, @RequestBody User user) {
+        return userService.updateUser(id, user);
+    }
+
+    /**
      * add movie with the given id to the watchlist of the given user
      * @param id
      * @param movieId
@@ -57,6 +79,12 @@ public class UserController {
     @PutMapping("/{id}/watchlist/{movieId}")
     public ResponseEntity<User> addMovieToWatchlist(@PathVariable String id, @PathVariable String movieId) {
         return userService.addMovieToWatchlist(id, movieId);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable String id) {
+        userService.deleteUser(id);
+        return ResponseEntity.noContent().build();
     }
 
     /**

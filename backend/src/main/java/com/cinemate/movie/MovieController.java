@@ -22,7 +22,7 @@ public class MovieController {
      * @return List<Movie>
      */
     @GetMapping
-    public List<Movie> getAllMovies() {
+    public ResponseEntity<List<Movie>> getAllMovies() {
         return movieService.getAllMovies();
     }
 
@@ -44,7 +44,7 @@ public class MovieController {
      * @return Movie
      */
     @PostMapping
-    public Movie createMovie(@RequestBody Movie movie) {
+    public ResponseEntity<Movie> createMovie(@RequestBody Movie movie) {
         return movieService.createMovie(movie);
     }
 
@@ -56,7 +56,7 @@ public class MovieController {
      */
     @PutMapping("/{id}")
     public ResponseEntity<Movie> updateMovie(@PathVariable String id, @RequestBody Movie movie) {
-        return ResponseEntity.ok(movieService.updateMovie(id, movie));
+        return movieService.updateMovie(id, movie);
     }
 
     /**

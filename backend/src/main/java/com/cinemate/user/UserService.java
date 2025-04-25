@@ -24,7 +24,7 @@ public class UserService {
     }
 
     /**
-     *
+     * returns the currently logged in user
      * @param authentication
      * @return user
      */
@@ -69,6 +69,10 @@ public class UserService {
         return ResponseEntity.ok(users);
     }
 
+    public Optional<User> getUserById(String id) {
+        return userRepository.findById(id);
+    }
+
     /**
      * returns the movies in the watchlist of the given user
      * @param userId
@@ -82,6 +86,20 @@ public class UserService {
 
         User user = userOptional.get();
         return ResponseEntity.ok(user.getWatchlist());
+    }
+
+    /**
+     * creates an user
+     * @param user
+     * @return User
+     */
+    public ResponseEntity<User> createUser(User user) {
+        return ResponseEntity.ok(userRepository.save(user));
+    }
+
+    public ResponseEntity<User> updateUser(String id, User updatedUser) {
+        updatedUser.setId(id);
+        return ResponseEntity.ok(userRepository.save(updatedUser));
     }
 
     /**
@@ -105,6 +123,10 @@ public class UserService {
         userRepository.save(user);
 
         return ResponseEntity.ok(user);
+    }
+
+    public void deleteUser(String id) {
+        userRepository.deleteById(id);
     }
 
     /**
