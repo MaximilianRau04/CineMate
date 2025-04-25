@@ -57,7 +57,7 @@ const MovieList = () => {
 
   return (
     <div className="container py-4">
-      <h1 className="text-center mb-4 text-primary">🎬 Unsere Filmsammlung</h1>
+      <h1 className="text-center mb-4 text-primary">🔎Entdecke neue FIlme und Serien</h1>
 
       {/* serach and filter bar */}
       <div className="row mb-4 gy-2">

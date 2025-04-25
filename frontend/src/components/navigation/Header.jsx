@@ -32,8 +32,8 @@ const Header = () => {
           {isLoggedIn && (
             <ul className="navbar-nav me-auto">
               <li className="nav-item">
-                <Link className="nav-link" to="/movies">
-                  Filmsammlung
+                <Link className="nav-link" to="/explore">
+                  Erkunden
                 </Link>
               </li>
               <li className="nav-item">

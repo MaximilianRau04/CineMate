@@ -114,10 +114,43 @@ GET http://localhost:8080/api/users/67fd70fdf86b765965cfa2cb/watchlist
 PUT http://localhost:8080/api/users/67fd70fdf86b765965cfa2cb/watchlist/67fd703bf86b765965cfa2c5
 Content-Type: application/json
 
-{
-
-}
-
 ###
 DELETE http://localhost:8080/api/users/67fd70fdf86b765965cfa2cb/watchlist/67fd703bf86b765965cfa2c5
+
+###
+GET http://localhost:8080/api/series
+
+###
+POST http://localhost:8080/api/series
+Content-Type: application/json
+
+{
+  "title": "Stranger Things",
+  "description": "Eine Gruppe von Kindern entdeckt übernatürliche Ereignisse und geheime Experimente in ihrer Kleinstadt.",
+  "genre": "Mystery, Sci-Fi, Horror",
+  "rating": 8.9,
+  "releaseDate": "2016-07-15",
+  "posterUrl": "https://image.tmdb.org/t/p/w500/x2LSRK2Cm7MZhjluni1msVJ3wDF.jpg",
+  "seasons": [
+    {
+      "seasonNumber": 1,
+      "episodes": [
+        {
+          "title": "Chapter One: The Vanishing of Will Byers",
+          "episodeNumber": 1,
+          "duration": "47m",
+          "releaseDate": "2016-07-15",
+          "description": "Will Byers verschwindet spurlos. Seine Freunde suchen ihn und stoßen dabei auf ein mysteriöses Mädchen."
+        },
+        {
+          "title": "Chapter Two: The Weirdo on Maple Street",
+          "episodeNumber": 2,
+          "duration": "55m",
+          "releaseDate": "2016-07-15",
+          "description": "Die Jungen verstecken das Mädchen, das offenbar übernatürliche Kräfte besitzt."
+        }
+      ]
+    }
+  ]
+}
 
