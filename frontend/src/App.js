@@ -1,16 +1,17 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import './assets/App.css';
 
 import Header from './components/navigation/Header';
 import Login from './components/login/Login';
-import MovieList from './components/movies/MovieList';
-import MovieDetail from './components/movies/MovieDetail';
-import Watchlist from './components/movies/Watchlist';
+import ExplorePage from './components/explore/ExplorePage';
+import MovieDetail from './components/explore/MovieDetail';
+import Watchlist from './components/explore/Watchlist';
 
 const AppContent = () => {
   const location = useLocation();
-  const hideHeader = location.pathname === '/login';
+  const hideHeader = location.pathname === '/';
 
   return (
     <>
@@ -19,7 +20,7 @@ const AppContent = () => {
         <Route path="/" element={<Login />} />
 
         {/* protected routes */}
-        <Route path="/movies" element={<MovieList />} />
+        <Route path="/explore" element={<ExplorePage />} />
         <Route path="/movies/:id" element={<MovieDetail />} />
         <Route path="/watchlist" element={<Watchlist />} />
 

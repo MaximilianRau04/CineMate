@@ -35,7 +35,7 @@ const LoginForm = () => {
 
       localStorage.setItem("token", response.data.token || response.data);
       setSuccess("Login erfolgreich! Weiterleitung...");
-      setTimeout(() => (window.location.href = "/movies"), 1500);
+      setTimeout(() => (window.location.href = "/explore"), 1500);
     } catch (err) {
       setError("Ungültige Anmeldedaten.");
     }
