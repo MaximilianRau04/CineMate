@@ -125,13 +125,15 @@ public class Series {
         private String duration;
         private Date releaseDate;
         private String description;
+        private String posterUrl;
 
-        public Episode(String title, int episodeNumber, String duration, Date releaseDate, String description) {
+        public Episode(String title, int episodeNumber, String duration, Date releaseDate, String description, String posterUrl) {
             this.title = title;
             this.episodeNumber = episodeNumber;
             this.duration = duration;
             this.releaseDate = releaseDate;
             this.description = description;
+            this.posterUrl = posterUrl;
         }
 
         public String getTitle() {
@@ -172,6 +174,14 @@ public class Series {
 
         public void setDescription(String description) {
             this.description = description;
+        }
+
+        public String getPosterUrl() {
+            return posterUrl;
+        }
+
+        public void setPosterUrl(String posterUrl) {
+            this.posterUrl = posterUrl;
         }
     }
 }

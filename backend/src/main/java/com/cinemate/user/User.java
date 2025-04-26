@@ -1,6 +1,7 @@
 package com.cinemate.user;
 
 import com.cinemate.movie.Movie;
+import com.cinemate.series.Series;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -15,16 +16,18 @@ public class User {
     private String username;
     private String password;
     private String email;
-    private List<Movie> watchlist;
-    private List<Movie> favorites;
-    private List<Movie> watched;
+    private List<Movie> movieWatchlist;
+    private List<Series> seriesWatchlist;
+    // private List<Movie> favorites;
+    // private List<Movie> watched;
 
     public User(String username, String id, String password, String email) {
         this.username = username;
         this.id = id;
         this.password = password;
         this.email = email;
-        this.watchlist = new ArrayList<>();
+        this.movieWatchlist = new ArrayList<>();
+        this.seriesWatchlist = new ArrayList<>();
     }
 
     public String getId() {
@@ -59,21 +62,39 @@ public class User {
         this.email = email;
     }
 
-    public List<Movie> getWatchlist() {
-        return watchlist;
+    public List<Movie> getMovieWatchlist() {
+        return movieWatchlist;
     }
 
-    public void setWatchlist(List<Movie> watchlist) {
-        this.watchlist = watchlist;
+    public void setMovieWatchlist(List<Movie> movieWatchlist) {
+        this.movieWatchlist = movieWatchlist;
+    }
+
+    public List<Series> getSeriesWatchlist() {
+        return seriesWatchlist;
+    }
+
+    public void setSeriesWatchlist(List<Series> seriesWatchlist) {
+        this.seriesWatchlist = seriesWatchlist;
     }
 
     public void addMovieToWatchlist(Movie movie) {
-        if (!watchlist.contains(movie)) {
-            watchlist.add(movie);
+        if (!movieWatchlist.contains(movie)) {
+            movieWatchlist.add(movie);
         }
     }
 
     public void removeMovieFromWatchlist(Movie movie) {
-        watchlist.removeIf(m -> m.getId().equals(movie.getId()));
+        movieWatchlist.removeIf(m -> m.getId().equals(movie.getId()));
+    }
+
+    public void addSeriesToWatchlist(Series series) {
+        if (!seriesWatchlist.contains(series)) {
+            seriesWatchlist.add(series);
+        }
+    }
+
+    public void removeSeriesFromWatchlist(Series series) {
+        seriesWatchlist.removeIf(m -> m.getId().equals(series.getId()));
     }
 }

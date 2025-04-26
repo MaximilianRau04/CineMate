@@ -108,11 +108,18 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:8080/api/users/67fd70fdf86b765965cfa2cb/watchlist
+GET http://localhost:8080/api/users/67fd70fdf86b765965cfa2cb/watchlist/movies
 
 ###
-PUT http://localhost:8080/api/users/67fd70fdf86b765965cfa2cb/watchlist/67fd703bf86b765965cfa2c5
+PUT http://localhost:8080/api/users/67fd70fdf86b765965cfa2cb/watchlist/movies/67fd703bf86b765965cfa2c5
 Content-Type: application/json
+
+###
+PUT http://localhost:8080/api/users/67fd70fdf86b765965cfa2cb/watchlist/series/680bdb533ee10e7e79fa82b3
+Content-Type: application/json
+
+###
+GET http://localhost:8080/api/users/67fd70fdf86b765965cfa2cb/watchlist/series
 
 ###
 DELETE http://localhost:8080/api/users/67fd70fdf86b765965cfa2cb/watchlist/67fd703bf86b765965cfa2c5
@@ -121,7 +128,7 @@ DELETE http://localhost:8080/api/users/67fd70fdf86b765965cfa2cb/watchlist/67fd70
 GET http://localhost:8080/api/series
 
 ###
-POST http://localhost:8080/api/series
+PUT http://localhost:8080/api/series/680bd7093ee10e7e79fa82b1
 Content-Type: application/json
 
 {
@@ -136,18 +143,28 @@ Content-Type: application/json
       "seasonNumber": 1,
       "episodes": [
         {
-          "title": "Chapter One: The Vanishing of Will Byers",
           "episodeNumber": 1,
+          "title": "Chapter One: The Vanishing of Will Byers",
           "duration": "47m",
-          "releaseDate": "2016-07-15",
-          "description": "Will Byers verschwindet spurlos. Seine Freunde suchen ihn und stoßen dabei auf ein mysteriöses Mädchen."
+          "releaseDate": "2016-07-15T00:00:00.000+00:00",
+          "description": "Will Byers verschwindet spurlos. Seine Freunde suchen ihn und stoßen dabei auf ein mysteriöses Mädchen.",
+          "posterUrl": "https://image.tmdb.org/t/p/original/AdwF2jXvhdODr6gUZ61bHKRkz09.jpg"
         },
         {
-          "title": "Chapter Two: The Weirdo on Maple Street",
           "episodeNumber": 2,
+          "title": "Chapter Two: The Weirdo on Maple Street",
           "duration": "55m",
-          "releaseDate": "2016-07-15",
-          "description": "Die Jungen verstecken das Mädchen, das offenbar übernatürliche Kräfte besitzt."
+          "releaseDate": "2016-07-15T00:00:00.000+00:00",
+          "description": "Die Jungen verstecken das Mädchen, das offenbar übernatürliche Kräfte besitzt.",
+          "posterUrl": "https://image.tmdb.org/t/p/original/8iA56ugQyHZmX81wSsNqwXjCE6F.jpg"
+        },
+        {
+          "episodeNumber": 3,
+          "title": "Chapter Three: Holly, Jolly",
+          "duration": "51m",
+          "releaseDate": "2016-07-15T00:00:00.000+00:00",
+          "description": "Joyce glaubt, dass Will ihr über Lichter Signale sendet. Nancy sucht ihre verschwundene Freundin Barb.",
+          "posterUrl": "https://image.tmdb.org/t/p/original/5snULpWQWp7aqFto7UbRcEkEyyS.jpg"
         }
       ]
     }

@@ -7,6 +7,7 @@ import Header from './components/navigation/Header';
 import Login from './components/login/Login';
 import ExplorePage from './components/explore/ExplorePage';
 import MovieDetail from './components/explore/MovieDetail';
+import SeriesDetail from './components/explore/SeriesDetail';
 import Watchlist from './components/explore/Watchlist';
 
 const AppContent = () => {
@@ -22,6 +23,7 @@ const AppContent = () => {
         {/* protected routes */}
         <Route path="/explore" element={<ExplorePage />} />
         <Route path="/movies/:id" element={<MovieDetail />} />
+        <Route path="/series/:id" element={<SeriesDetail />} />
         <Route path="/watchlist" element={<Watchlist />} />
 
       </Routes>

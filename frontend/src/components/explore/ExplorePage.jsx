@@ -10,7 +10,10 @@ const ExplorePage = () => {
   const [sortOrder, setSortOrder] = useState("asc");
   const [selectedGenre, setSelectedGenre] = useState("alle");
 
-  // Genre-Liste generieren aus geladenen Filmen
+  /**
+   * generate genre list from loaded movies and series
+   * use a Set to avoid duplicates and filter out empty values
+   */
   const genres = [
     "alle",
     ...new Set(movies.map((m) => m.genre).filter(Boolean)),
@@ -124,7 +127,7 @@ const ExplorePage = () => {
       )}
 
       {/* movies */}
-      {filteredMovies.length > 0 && <h2 className="mt-5 mb-3">🎥 Filme</h2>}
+      {filteredMovies.length > 0 && <h2 className="mt-5 mb-3 text-white">🎥 Filme</h2>}
       {filteredMovies.length === 0 ? (
         <div className="text-muted">Keine Filme gefunden.</div>
       ) : (
@@ -179,7 +182,7 @@ const ExplorePage = () => {
       )}
 
       {/* series */}
-      {filteredSeries.length > 0 && <h2 className="mt-5 mb-3">📺 Serien</h2>}
+      {filteredSeries.length > 0 && <h2 className="mt-5 mb-3 text-white">📺 Serien</h2>}
       {filteredSeries.length === 0 ? (
         <div className="text-muted">Keine Serien gefunden.</div>
       ) : (

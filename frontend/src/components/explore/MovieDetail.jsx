@@ -54,10 +54,7 @@ const MovieDetail = () => {
   useEffect(() => {
     if (!userId || !id) return;
 
-    fetch(`http://localhost:8080/api/users/${userId}/watchlist`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
+    fetch(`http://localhost:8080/api/users/${userId}/watchlist/movies`, {   
     })
       .then((res) => res.json())
       .then((data) => {
@@ -74,7 +71,7 @@ const MovieDetail = () => {
     if (!userId || added) return;
 
     setAdding(true);
-    fetch(`http://localhost:8080/api/users/${userId}/watchlist/${id}`, {
+    fetch(`http://localhost:8080/api/users/${userId}/watchlist/movies/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -109,7 +106,7 @@ const MovieDetail = () => {
         <div className="alert alert-danger shadow-sm" role="alert">
           <h4 className="alert-heading">Fehler</h4>
           <p>{error}</p>
-          <Link to="/" className="btn btn-outline-secondary mt-3">
+          <Link to="/explore" className="btn btn-outline-secondary mt-3">
             <FaArrowLeft className="me-2" />
             Zurück zur Übersicht
           </Link>
@@ -192,7 +189,7 @@ const MovieDetail = () => {
             )}
 
             <div className="mt-4">
-              <Link to="/movies" className="btn btn-outline-primary">
+              <Link to="/explore" className="btn btn-outline-primary">
                 <FaArrowLeft className="me-2" />
                 Zurück zur Übersicht
               </Link>

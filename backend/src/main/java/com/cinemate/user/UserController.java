@@ -1,6 +1,7 @@
 package com.cinemate.user;
 
 import com.cinemate.movie.Movie;
+import com.cinemate.series.Series;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -50,9 +51,14 @@ public class UserController {
      * @param id
      * @return List<Movie>
      */
-    @GetMapping("/{id}/watchlist")
-    public ResponseEntity<List<Movie>> getWatchlist(@PathVariable String id) {
-        return userService.getWatchlist(id);
+    @GetMapping("/{id}/watchlist/movies")
+    public ResponseEntity<List<Movie>> getMovieWatchlist(@PathVariable String id) {
+        return userService.getMovieWatchlist(id);
+    }
+
+    @GetMapping("/{id}/watchlist/series")
+    public ResponseEntity<List<Series>> getSeriesWatchlist(@PathVariable String id) {
+        return userService.getSeriesWatchlist(id);
     }
 
     /**
@@ -76,9 +82,20 @@ public class UserController {
      * @param movieId
      * @return User
      */
-    @PutMapping("/{id}/watchlist/{movieId}")
+    @PutMapping("/{id}/watchlist/movies/{movieId}")
     public ResponseEntity<User> addMovieToWatchlist(@PathVariable String id, @PathVariable String movieId) {
         return userService.addMovieToWatchlist(id, movieId);
+    }
+
+    /**
+     * add series with the given id to the watchlist of the given user
+     * @param id
+     * @param seriesId
+     * @return User
+     */
+    @PutMapping("/{id}/watchlist/series/{seriesId}")
+    public ResponseEntity<User> addSeriesToWatchlist(@PathVariable String id, @PathVariable String seriesId) {
+        return userService.addSeriesToWatchlist(id, seriesId);
     }
 
     @DeleteMapping("/{id}")
@@ -93,9 +110,14 @@ public class UserController {
      * @param movieId
      * @return User
      */
-    @DeleteMapping("/{id}/watchlist/{movieId}")
+    @DeleteMapping("/{id}/watchlist/movies/{movieId}")
     public ResponseEntity<User> removeMovieFromWatchlist(@PathVariable String id, @PathVariable String movieId) {
         return userService.removeMovieFromWatchlist(id, movieId);
+    }
+
+    @DeleteMapping("/{id}/watchlist/series/{seriesId}")
+    public ResponseEntity<User> removeSeriesFromWatchlist(@PathVariable String id, @PathVariable String seriesId) {
+        return userService.removeSeriesFromWatchlist(id, seriesId);
     }
 
 }

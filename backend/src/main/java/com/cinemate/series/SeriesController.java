@@ -35,7 +35,7 @@ public class SeriesController {
         return seriesService.createSeries(series);
     }
 
-    @PutMapping
+    @PutMapping("/{id}")
     public ResponseEntity<Series> updateSeries(@PathVariable String id, @RequestBody Series series) {
         return seriesService.updateSeries(id, series);
     }
