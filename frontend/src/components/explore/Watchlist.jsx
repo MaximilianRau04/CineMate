@@ -3,12 +3,13 @@ import { Link } from "react-router-dom";
 import { FaTrashAlt, FaFilm, FaInfoCircle } from "react-icons/fa";
 
 const Watchlist = () => {
-  const [watchlist, setWatchlist] = useState([]);
+  const [movieWatchlist, setMovieWatchlist] = useState([]);
+  const [seriesWatchlist, setSeriesWatchlist] = useState([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState(null);
 
   /**
-   * fetches the currently logged in user from the API  
+   * fetches the currently logged in user from the API
    */
   useEffect(() => {
     fetch("http://localhost:8080/api/users/me", {
@@ -30,41 +31,58 @@ const Watchlist = () => {
   useEffect(() => {
     if (!userId) return;
 
-    fetch(`http://localhost:8080/api/users/${userId}/watchlist`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Fehler beim Laden der Watchlist");
-        return res.json();
-      })
-      .then((data) => {
-        setWatchlist(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Fehler beim Laden der Watchlist:", err);
-        setLoading(false);
-      });
+    Promise.all([
+      fetch(`http://localhost:8080/api/users/${userId}/watchlist/movies`).then((res) => res.json()),
+      fetch(`http://localhost:8080/api/users/${userId}/watchlist/series`).then((res) => res.json())
+    ])
+    .then(([movies, series]) => {
+      setMovieWatchlist(movies);
+      setSeriesWatchlist(series);
+      setLoading(false);
+    })
+    .catch((err) => {
+      console.error("Fehler beim Laden der Watchlists:", err);
+      setLoading(false);
+    });
   }, [userId]);
 
   /**
-   * removes a movie from the watchlist
+   * removes a movie from the watchlist of the user
    * @param {*} movieId 
    * @returns 
    */
-  const removeFromWatchlist = (movieId) => {
+  const removeMovieFromWatchlist = (movieId) => {
     if (!window.confirm("Möchtest du diesen Film wirklich entfernen?")) return;
 
-    fetch(`http://localhost:8080/api/users/${userId}/watchlist/${movieId}`, {
+    fetch(`http://localhost:8080/api/users/${userId}/watchlist/movies/${movieId}`, {
       method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
     })
       .then((res) => {
         if (!res.ok) throw new Error("Fehler beim Entfernen des Films");
-        setWatchlist((prev) => prev.filter((movie) => movie.id !== movieId));
+        setMovieWatchlist((prev) => prev.filter((movie) => movie.id !== movieId));
       })
       .catch((err) => {
         console.error("Fehler beim Entfernen des Films:", err);
+      });
+  };
+
+  /**
+   * removes a series from the watchlist of the user
+   * @param {*} seriesId 
+   * @returns 
+   */
+  const removeSeriesFromWatchlist = (seriesId) => {
+    if (!window.confirm("Möchtest du diese Serie wirklich entfernen?")) return;
+
+    fetch(`http://localhost:8080/api/users/${userId}/watchlist/series/${seriesId}`, {
+      method: "DELETE",
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Fehler beim Entfernen der Serie");
+        setSeriesWatchlist((prev) => prev.filter((serie) => serie.id !== seriesId));
+      })
+      .catch((err) => {
+        console.error("Fehler beim Entfernen der Serie:", err);
       });
   };
 
@@ -77,15 +95,15 @@ const Watchlist = () => {
     );
   }
 
-  if (watchlist.length === 0) {
+  if (movieWatchlist.length === 0 && seriesWatchlist.length === 0) {
     return (
       <div className="text-center mt-5 p-5 bg-dark bg-opacity-50 rounded shadow">
         <FaFilm size={48} className="text-muted" />
         <p className="mt-3 text-white fs-5">
-          Noch keine Filme in der Watchlist.
+          Deine Watchlist ist noch leer.
         </p>
         <Link to="/movies" className="btn btn-outline-info mt-3">
-          Filme entdecken
+          Filme und Serien entdecken
         </Link>
       </div>
     );
@@ -94,56 +112,92 @@ const Watchlist = () => {
   return (
     <div className="container py-4">
       <h2 className="mb-4 text-center text-light">⭐ Deine Watchlist</h2>
-      <div className="row">
-        {watchlist.map((movie) => (
-          <div className="col-md-6 col-lg-4 mb-4" key={movie.id}>
-            <div className="card h-100 d-flex flex-column">
-              {/* Poster-Wrapper */}
-              <div
-                className="d-flex align-items-center justify-content-center bg-white"
-                style={{ height: "400px" }}
-              >
-                <img
-                  src={movie.posterUrl}
-                  alt={movie.title}
-                  style={{
-                    maxHeight: "100%",
-                    maxWidth: "100%",
-                    objectFit: "contain",
-                  }}
-                  className="img-fluid"
-                  onError={(e) => {
-                    e.target.src =
-                      "https://via.placeholder.com/300x450?text=No+Image";
-                  }}
-                />
-              </div>
-              <div className="card-body d-flex flex-column justify-content-between">
-                <div>
-                  <h5 className="card-title">{movie.title}</h5>
-                  <p className="card-text text-secondary mb-3">{movie.genre}</p>
-                </div>
-                <div>
-                  <Link
-                    to={`/movies/${movie.id}`}
-                    className="btn btn-outline-info btn-sm me-2"
+
+      {/* movies */}
+      {movieWatchlist.length > 0 && (
+        <>
+          <h3 className="text-light mb-3">🎬 Filme</h3>
+          <div className="row">
+            {movieWatchlist.map((movie) => (
+              <div className="col-md-6 col-lg-4 mb-4" key={movie.id}>
+                <div className="card h-100 d-flex flex-column">
+                  <div
+                    className="d-flex align-items-center justify-content-center bg-white"
+                    style={{ height: "400px" }}
                   >
-                    <FaInfoCircle className="me-1" />
-                    Details
-                  </Link>
-                  <button
-                    className="btn btn-outline-danger btn-sm"
-                    onClick={() => removeFromWatchlist(movie.id)}
-                  >
-                    <FaTrashAlt className="me-1" />
-                    Entfernen
-                  </button>
+                    <img
+                      src={movie.posterUrl}
+                      alt={movie.title}
+                      className="img-fluid"
+                      style={{ maxHeight: "100%", maxWidth: "100%", objectFit: "contain" }}
+                      onError={(e) => {
+                        e.target.src = "https://via.placeholder.com/300x450?text=No+Image";
+                      }}
+                    />
+                  </div>
+                  <div className="card-body d-flex flex-column justify-content-between">
+                    <div>
+                      <h5 className="card-title">{movie.title}</h5>
+                      <p className="card-text text-secondary mb-3">{movie.genre}</p>
+                    </div>
+                    <div>
+                      <Link to={`/movies/${movie.id}`} className="btn btn-outline-info btn-sm me-2">
+                        <FaInfoCircle className="me-1" /> Details
+                      </Link>
+                      <button className="btn btn-outline-danger btn-sm" onClick={() => removeMovieFromWatchlist(movie.id)}>
+                        <FaTrashAlt className="me-1" /> Entfernen
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </>
+      )}
+
+      {/* series */}
+      {seriesWatchlist.length > 0 && (
+        <>
+          <h3 className="text-light mt-5 mb-3">📺 Serien</h3>
+          <div className="row">
+            {seriesWatchlist.map((serie) => (
+              <div className="col-md-6 col-lg-4 mb-4" key={serie.id}>
+                <div className="card h-100 d-flex flex-column">
+                  <div
+                    className="d-flex align-items-center justify-content-center bg-white"
+                    style={{ height: "400px" }}
+                  >
+                    <img
+                      src={serie.posterUrl}
+                      alt={serie.title}
+                      className="img-fluid"
+                      style={{ maxHeight: "100%", maxWidth: "100%", objectFit: "contain" }}
+                      onError={(e) => {
+                        e.target.src = "https://via.placeholder.com/300x450?text=No+Image";
+                      }}
+                    />
+                  </div>
+                  <div className="card-body d-flex flex-column justify-content-between">
+                    <div>
+                      <h5 className="card-title">{serie.title}</h5>
+                      <p className="card-text text-secondary mb-3">{serie.genre}</p>
+                    </div>
+                    <div>
+                      <Link to={`/series/${serie.id}`} className="btn btn-outline-info btn-sm me-2">
+                        <FaInfoCircle className="me-1" /> Details
+                      </Link>
+                      <button className="btn btn-outline-danger btn-sm" onClick={() => removeSeriesFromWatchlist(serie.id)}>
+                        <FaTrashAlt className="me-1" /> Entfernen
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 };

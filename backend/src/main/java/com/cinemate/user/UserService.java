@@ -2,6 +2,8 @@ package com.cinemate.user;
 
 import com.cinemate.movie.Movie;
 import com.cinemate.movie.MovieRepository;
+import com.cinemate.series.Series;
+import com.cinemate.series.SeriesRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -14,13 +16,14 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
-
     private final MovieRepository movieRepository;
+    private final SeriesRepository seriesRepository;
 
     @Autowired
-    public UserService(UserRepository userRepository, MovieRepository movieRepository) {
+    public UserService(UserRepository userRepository, MovieRepository movieRepository, SeriesRepository seriesRepository) {
         this.userRepository = userRepository;
         this.movieRepository = movieRepository;
+        this.seriesRepository = seriesRepository;
     }
 
     /**
@@ -78,14 +81,24 @@ public class UserService {
      * @param userId
      * @return List<Movie>
      */
-    public ResponseEntity<List<Movie>> getWatchlist(String userId) {
+    public ResponseEntity<List<Movie>> getMovieWatchlist(String userId) {
         Optional<User> userOptional = userRepository.findById(userId);
         if (userOptional.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
         User user = userOptional.get();
-        return ResponseEntity.ok(user.getWatchlist());
+        return ResponseEntity.ok(user.getMovieWatchlist());
+    }
+
+    public ResponseEntity<List<Series>> getSeriesWatchlist(String userId) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        User user = userOptional.get();
+        return ResponseEntity.ok(user.getSeriesWatchlist());
     }
 
     /**
@@ -97,9 +110,38 @@ public class UserService {
         return ResponseEntity.ok(userRepository.save(user));
     }
 
+    /**
+     * updates an user
+     * @param id
+     * @param updatedUser
+     * @return User
+     */
     public ResponseEntity<User> updateUser(String id, User updatedUser) {
         updatedUser.setId(id);
         return ResponseEntity.ok(userRepository.save(updatedUser));
+    }
+
+    /**
+     * add series with the given id to the watchlist of the given user
+     * @param userId
+     * @param seriesId
+     * @return User
+     */
+    public ResponseEntity<User> addSeriesToWatchlist(String userId, String seriesId) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        Optional<Series> seriesOptional = seriesRepository.findById(seriesId);
+
+        if (userOptional.isEmpty() || seriesOptional.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        User user = userOptional.get();
+        Series series = seriesOptional.get();
+
+        user.addSeriesToWatchlist(series);
+        userRepository.save(user);
+
+        return ResponseEntity.ok(user);
     }
 
     /**
@@ -130,7 +172,7 @@ public class UserService {
     }
 
     /**
-     * deletes the movie with the given id from the watchlist of the given user
+     * removes the movie with the given id from the watchlist of the given user
      * @param userId
      * @param movieId
      * @return User
@@ -147,6 +189,29 @@ public class UserService {
         Movie movie = movieOptional.get();
 
         user.removeMovieFromWatchlist(movie);
+        userRepository.save(user);
+
+        return ResponseEntity.ok(user);
+    }
+
+    /**
+     * removes the series with the given id from the watchlist of the given user
+     * @param userId
+     * @param seriesId
+     * @return User
+     */
+    public ResponseEntity<User> removeSeriesFromWatchlist(String userId, String seriesId) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        Optional<Series> seriesOptional = seriesRepository.findById(seriesId);
+
+        if (userOptional.isEmpty() || seriesOptional.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        User user = userOptional.get();
+        Series series = seriesOptional.get();
+
+        user.removeSeriesFromWatchlist(series);
         userRepository.save(user);
 
         return ResponseEntity.ok(user);
