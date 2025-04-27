@@ -1,10 +1,14 @@
 package com.cinemate.review;
 
+import com.cinemate.review.DTOs.ReviewRequestDTO;
+import com.cinemate.review.DTOs.ReviewResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/reviews")
@@ -17,31 +21,125 @@ public class ReviewController {
         this.reviewService = reviewService;
     }
 
-    @GetMapping
-    public ResponseEntity<List<Review>> getAllReviews() {
-        return reviewService.getAllReviews();
+    /**
+     * creates a review for the given movie and the given user
+     * @param movieId
+     * @param userId
+     * @param reviewDTO
+     * @return ReviewResponseDTO
+     */
+    @PostMapping("/movie/{movieId}/{userId}")
+    public ResponseEntity<ReviewResponseDTO> createMovieReview(
+            @PathVariable String movieId,
+            @PathVariable String userId,
+            @RequestBody ReviewRequestDTO reviewDTO) {
+
+        reviewDTO.setItemId(movieId);
+        reviewDTO.setUserId(userId);
+
+        ReviewResponseDTO createdReview = reviewService.createReview(reviewDTO);
+        reviewService.calculateMovieRating(movieId);
+        return new ResponseEntity<>(createdReview, HttpStatus.CREATED);
     }
 
+    /**
+     * creates a review for the given series and the given user
+     * @param seriesId
+     * @param userId
+     * @param reviewDTO
+     * @return ReviewResponseDTO
+     */
+    @PostMapping("/series/{seriesId}/{userId}")
+    public ResponseEntity<ReviewResponseDTO> createSeriesReview(
+            @PathVariable String seriesId,
+            @PathVariable String userId,
+            @RequestBody ReviewRequestDTO reviewDTO) {
+
+        reviewDTO.setItemId(seriesId);
+        reviewDTO.setUserId(userId);
+
+        ReviewResponseDTO createdReview = reviewService.createReview(reviewDTO);
+        reviewService.calculateSeriesRating(seriesId);
+        return new ResponseEntity<>(createdReview, HttpStatus.CREATED);
+    }
+
+    /**
+     * returns a review by the given id
+     * @param id
+     * @return
+     */
     @GetMapping("/{id}")
-    public ResponseEntity<Review> getReviewById(@PathVariable String id) {
-        return reviewService.getReviewById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<ReviewResponseDTO> getReviewById(@PathVariable String id) {
+        Optional<ReviewResponseDTO> review = reviewService.getReviewById(id);
+        return review.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @PostMapping
-    public ResponseEntity<Review> createReview(@RequestBody Review review) {
-        return reviewService.createReview(review);
+    /**
+     * returns all reviews
+     * @return ReviewResponseDTO
+     */
+    @GetMapping
+    public ResponseEntity<List<ReviewResponseDTO>> getAllReviews() {
+        List<ReviewResponseDTO> reviews = reviewService.getAllReviews();
+        return new ResponseEntity<>(reviews, HttpStatus.OK);
     }
 
+    /**
+     * returns all reviews for the given movie
+     * @param movieId
+     * @return List<ReviewResponseDTO>
+     */
+    @GetMapping("/movie/{movieId}")
+    public ResponseEntity<List<ReviewResponseDTO>> getReviewsByMovie(@PathVariable String movieId) {
+        List<ReviewResponseDTO> reviews = reviewService.getReviewsByMovie(movieId);
+        return new ResponseEntity<>(reviews, HttpStatus.OK);
+    }
+
+    /**
+     * returns all reviews for the given movie
+     * @param seriesId
+     * @return List<ReviewResponseDTO>
+     */
+    @GetMapping("/series/{seriesId}")
+    public ResponseEntity<List<ReviewResponseDTO>> getReviewsBySeries(@PathVariable String seriesId) {
+        List<ReviewResponseDTO> reviews = reviewService.getReviewsBySeries(seriesId);
+        return new ResponseEntity<>(reviews, HttpStatus.OK);
+    }
+
+    /**
+     * returns all reviews for the given user
+     * @param userId
+     * @return List<ReviewResponseDTO>
+     */
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<ReviewResponseDTO>> getReviewsByUser(@PathVariable String userId) {
+        List<ReviewResponseDTO> reviews = reviewService.getReviewsByUser(userId);
+        return new ResponseEntity<>(reviews, HttpStatus.OK);
+    }
+
+    /**
+     * updates a review
+     * @param id
+     * @param reviewRequestDTO
+     * @return ReviewResponseDTO
+     */
     @PutMapping("/{id}")
-    public ResponseEntity<Review> updateReview(@PathVariable String id, @RequestBody Review review) {
-        return reviewService.updateReview(id, review);
+    public ResponseEntity<ReviewResponseDTO> updateReview(@PathVariable String id, @RequestBody ReviewRequestDTO reviewRequestDTO) {
+        Optional<ReviewResponseDTO> updatedReview = reviewService.updateReview(id, reviewRequestDTO);
+        return updatedReview.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
+    /**
+     * deletes a review by the given id
+     * @param id
+     * @return
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReview(@PathVariable String id) {
-        reviewService.deleteReview(id);
-        return ResponseEntity.noContent().build();
+        boolean deleted = reviewService.deleteReview(id);
+        return deleted ? new ResponseEntity<>(HttpStatus.NO_CONTENT) : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
+
 }

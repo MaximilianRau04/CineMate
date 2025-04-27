@@ -9,44 +9,44 @@ import java.util.Date;
 public class Review {
 
     @Id
-    private String id;
-    private String userId;
-    private String movieId;
+    private java.lang.String id;
+    private java.lang.String userId;
+    private java.lang.String itemId;
     private double rating;
-    private String comment;
+    private java.lang.String comment;
     private Date date;
 
-    public Review(String id, String userId, String movieId, double rating, String comment, Date date) {
+    public Review(java.lang.String id, java.lang.String userId, java.lang.String itemId, double rating, java.lang.String comment, Date date) {
         this.id = id;
         this.userId = userId;
-        this.movieId = movieId;
+        this.itemId = itemId;
         this.rating = rating;
         this.comment = comment;
         this.date = date;
     }
 
-    public String getId() {
+    public java.lang.String getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(java.lang.String id) {
         this.id = id;
     }
 
-    public String getUserId() {
+    public java.lang.String getUserId() {
         return userId;
     }
 
-    public void setUserId(String userId) {
+    public void setUserId(java.lang.String userId) {
         this.userId = userId;
     }
 
-    public String getMovieId() {
-        return movieId;
+    public java.lang.String getItemId() {
+        return itemId;
     }
 
-    public void setMovieId(String movieId) {
-        this.movieId = movieId;
+    public void setItemId(java.lang.String itemId) {
+        this.itemId = itemId;
     }
 
     public double getRating() {
@@ -57,11 +57,11 @@ public class Review {
         this.rating = rating;
     }
 
-    public String getComment() {
+    public java.lang.String getComment() {
         return comment;
     }
 
-    public void setComment(String comment) {
+    public void setComment(java.lang.String comment) {
         this.comment = comment;
     }
 
@@ -72,4 +72,5 @@ public class Review {
     public void setDate(Date date) {
         this.date = date;
     }
+
 }

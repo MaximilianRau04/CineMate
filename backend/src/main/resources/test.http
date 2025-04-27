@@ -2,8 +2,8 @@ POST http://localhost:8080/api/auth/login
 Content-Type: application/json
 
 {
-  "username": "maxi",
-  "password": "123456"
+  "username": "hallo1",
+  "password": "hallo1"
 }
 
 ###
@@ -11,9 +11,9 @@ POST http://localhost:8080/api/auth/register
 Content-Type: application/json
 
 {
-"username": "hallo2",
-"password": "hallo2",
-  "email": "hallo@gmail.com"
+"username": "hallo1",
+"password": "hallo1",
+  "email": "hallo1@gmail.com"
 }
 
 ###
@@ -31,7 +31,6 @@ Content-Type: application/json
   "title": "Inception",
   "description": "Ein Dieb, der Informationen aus Träumen stiehlt, erhält die Aufgabe, eine Idee einzupflanzen.",
   "genre": "Sci-Fi",
-  "rating": 8.8,
   "releaseDate": "2010-07-16",
   "duration": "2h 28m",
   "posterUrl": "https://image.tmdb.org/t/p/w500/edv5CZvWj09upOsy2Y6IwDhK8bt.jpg"
@@ -45,7 +44,6 @@ Content-Type: application/json
   "title": "The Dark Knight",
   "description": "Batman stellt sich dem Joker, einem kriminellen Genie, das Chaos über Gotham bringen will.",
   "genre": "Action",
-  "rating": 9.0,
   "releaseDate": "2008-07-18",
   "duration": "2h 32m",
   "posterUrl": "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg"
@@ -59,7 +57,6 @@ Content-Type: application/json
   "title": "Interstellar",
   "description": "Ein Team von Forschern reist durch ein Wurmloch im Weltraum auf der Suche nach einer neuen Heimat für die Menschheit.",
   "genre": "Sci-Fi",
-  "rating": 8.6,
   "releaseDate": "2014-11-07",
   "duration": "2h 49m",
   "posterUrl": "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg"
@@ -73,7 +70,6 @@ Content-Type: application/json
   "title": "Fight Club",
   "description": "Ein gelangweilter Büroarbeiter gründet mit einem Seifenverkäufer einen geheimen Fight Club.",
   "genre": "Drama",
-  "rating": 8.8,
   "releaseDate": "1999-10-15",
   "duration": "2h 19m",
   "posterUrl": "https://image.tmdb.org/t/p/w500/bptfVGEQuv6vDTIMVCHjJ9Dz8PX.jpg"
@@ -87,7 +83,6 @@ Content-Type: application/json
   "title": "The Matrix",
   "description": "Ein Hacker entdeckt die Wahrheit über seine Realität und seine Rolle im Krieg gegen ihre Kontrolleure.",
   "genre": "Sci-Fi",
-  "rating": 8.7,
   "releaseDate": "1999-03-31",
   "duration": "2h 16m",
   "posterUrl": "https://image.tmdb.org/t/p/w500/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg"
@@ -95,6 +90,7 @@ Content-Type: application/json
 
 ###
 GET http://localhost:8080/api/movies
+
 ###
 DELETE http://localhost:8080/api/movies/67fd6c6db9c65836190d6085
 
@@ -128,14 +124,13 @@ DELETE http://localhost:8080/api/users/67fd70fdf86b765965cfa2cb/watchlist/67fd70
 GET http://localhost:8080/api/series
 
 ###
-PUT http://localhost:8080/api/series/680bd7093ee10e7e79fa82b1
+POST http://localhost:8080/api/series
 Content-Type: application/json
 
 {
   "title": "Stranger Things",
   "description": "Eine Gruppe von Kindern entdeckt übernatürliche Ereignisse und geheime Experimente in ihrer Kleinstadt.",
   "genre": "Mystery, Sci-Fi, Horror",
-  "rating": 8.9,
   "releaseDate": "2016-07-15",
   "posterUrl": "https://image.tmdb.org/t/p/w500/x2LSRK2Cm7MZhjluni1msVJ3wDF.jpg",
   "seasons": [
@@ -179,7 +174,6 @@ Content-Type: application/json
   "title": "Breaking Bad",
   "description": "Ein Chemielehrer wird zum Drogenkoch, um seine Familie zu versorgen.",
   "genre": "Drama",
-  "rating": 9.5,
   "releaseDate": "2008-01-20",
   "duration": "47m",
   "posterUrl": "https://image.tmdb.org/t/p/w500/ggFHVNu6YYI5L9pCfOacjizRGt.jpg"
@@ -193,7 +187,6 @@ Content-Type: application/json
   "title": "The Office",
   "description": "Das Leben in einem Büro voller skurriler Kollegen – humorvoll und charmant.",
   "genre": "Comedy",
-  "rating": 8.9,
   "releaseDate": "2005-03-24",
   "duration": "22m",
   "posterUrl": "https://image.tmdb.org/t/p/w500/qWnJzyZhyy74gjpSjIXWmuk0ifX.jpg"
@@ -207,8 +200,20 @@ Content-Type: application/json
   "title": "The Witcher",
   "description": "Ein Monsterjäger kämpft gegen dunkle Magie und politische Intrigen.",
   "genre": "Fantasy",
-  "rating": 8.2,
   "releaseDate": "2019-12-20",
   "duration": "1h",
   "posterUrl": "https://image.tmdb.org/t/p/w500/7vjaCdMw15FEbXyLQTVa04URsPm.jpg"
 }
+
+###
+POST http://localhost:8080/api/reviews/movie/680e7b0723c0b14c9c4811b8/680e7af123c0b14c9c4811b5
+Content-Type: application/json
+
+{
+  "rating": 4,
+  "comment": "Ein fantastischer Film!",
+  "type": "movie"
+}
+
+###
+GET http://localhost:8080/api/reviews/movie/680e7b0923c0b14c9c4811b9

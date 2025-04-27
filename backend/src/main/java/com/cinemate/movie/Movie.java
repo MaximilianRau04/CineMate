@@ -13,7 +13,8 @@ public class Movie {
     private String title;
     private String description;
     private String genre;
-    private double rating;
+    private double rating ;
+    private int reviewCount ;
     private Date releaseDate;
     private String duration;
     private String posterUrl;
@@ -22,12 +23,13 @@ public class Movie {
     // languages, country
     // tags
 
-    public Movie(String id, String title, String description, String genre, double rating, Date releaseDate, String duration, String posterUrl) {
+    public Movie(String id, String title, String description, String genre, double rating, int reviewCount, Date releaseDate, String duration, String posterUrl) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.genre = genre;
         this.rating = rating;
+        this.reviewCount = reviewCount;
         this.releaseDate = releaseDate;
         this.duration = duration;
         this.posterUrl = posterUrl;
@@ -93,5 +95,12 @@ public class Movie {
 
     public void setPosterUrl(String posterUrl) {
         this.posterUrl = posterUrl;
+    }
+
+    public int getReviewCount() {
+        return reviewCount;
+    }
+    public void setReviewCount(int reviewCount) {
+        this.reviewCount = reviewCount;
     }
 }

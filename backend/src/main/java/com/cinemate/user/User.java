@@ -1,6 +1,7 @@
 package com.cinemate.user;
 
 import com.cinemate.movie.Movie;
+import com.cinemate.review.Review;
 import com.cinemate.series.Series;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -18,6 +19,7 @@ public class User {
     private String email;
     private List<Movie> movieWatchlist;
     private List<Series> seriesWatchlist;
+    private List<Review> ratings;
     // private List<Movie> favorites;
     // private List<Movie> watched;
 

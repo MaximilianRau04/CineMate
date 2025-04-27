@@ -15,16 +15,18 @@ public class Series {
     private String description;
     private String genre;
     private double rating;
+    private int reviewCount;
     private Date releaseDate;
     private String posterUrl;
     private List<Season> seasons;
 
-    public Series(String id, String title, String description, String genre, double rating, Date releaseDate, String posterUrl, List<Season> seasons) {
+    public Series(String id, String title, String description, String genre, double rating, int reviewCount, Date releaseDate, String posterUrl, List<Season> seasons) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.genre = genre;
         this.rating = rating;
+        this.reviewCount = reviewCount;
         this.releaseDate = releaseDate;
         this.posterUrl = posterUrl;
         this.seasons = seasons;
@@ -92,6 +94,14 @@ public class Series {
 
     public void setSeasons(List<Season> seasons) {
         this.seasons = seasons;
+    }
+
+    public int getReviewCount() {
+        return reviewCount;
+    }
+
+    public void setReviewCount(int reviewCount) {
+        this.reviewCount = reviewCount;
     }
 
     public static class Season {
