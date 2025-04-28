@@ -38,7 +38,6 @@ public class ReviewController {
         reviewDTO.setUserId(userId);
 
         ReviewResponseDTO createdReview = reviewService.createReview(reviewDTO);
-        reviewService.calculateMovieRating(movieId);
         return new ResponseEntity<>(createdReview, HttpStatus.CREATED);
     }
 
@@ -59,7 +58,6 @@ public class ReviewController {
         reviewDTO.setUserId(userId);
 
         ReviewResponseDTO createdReview = reviewService.createReview(reviewDTO);
-        reviewService.calculateSeriesRating(seriesId);
         return new ResponseEntity<>(createdReview, HttpStatus.CREATED);
     }
 
@@ -116,6 +114,22 @@ public class ReviewController {
     public ResponseEntity<List<ReviewResponseDTO>> getReviewsByUser(@PathVariable String userId) {
         List<ReviewResponseDTO> reviews = reviewService.getReviewsByUser(userId);
         return new ResponseEntity<>(reviews, HttpStatus.OK);
+    }
+
+    /**
+     * returns the review by the given user for the given movie
+     * @param movieId
+     * @param userId
+     * @return ReviewResponseDTO
+     */
+    @GetMapping("/movie/{movieId}/{userId}")
+    public ResponseEntity<ReviewResponseDTO> getReviewByMovieAndUser(@PathVariable String movieId, @PathVariable String userId) {
+        ReviewResponseDTO review = reviewService.findByMovieIdAndUserId(movieId, userId);
+        if (review != null) {
+            return ResponseEntity.ok(review);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     /**

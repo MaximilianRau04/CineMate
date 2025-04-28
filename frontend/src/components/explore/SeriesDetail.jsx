@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { FaPlus, FaCheck, FaArrowLeft } from "react-icons/fa";
+import {
+  FaPlus,
+  FaCheck,
+  FaArrowLeft,
+  FaStar,
+  FaStarHalfAlt,
+  FaRegStar,
+} from "react-icons/fa";
 
 const SeriesDetail = () => {
   const { id } = useParams();
@@ -10,6 +17,12 @@ const SeriesDetail = () => {
   const [userId, setUserId] = useState(null);
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [reviewed, setReviewed] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [hover, setHover] = useState(null);
 
   /**
    * fetches the currently logged in user from the API
@@ -91,6 +104,44 @@ const SeriesDetail = () => {
       });
   };
 
+  const handleRating = (newRating) => {
+    setRating(newRating);
+  };
+
+  /**
+   * adds a review to the series
+   * @returns
+   */
+  const handleSubmitReview = () => {
+    if (!userId || rating === 0) return;
+
+    setSubmitting(true);
+    fetch(`http://localhost:8080/api/reviews/series/${id}/${userId}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        rating: rating,
+        comment: "",
+        type: "series",
+      }),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Fehler beim Speichern der Bewertung");
+        return res.json();
+      })
+      .then(() => {
+        setReviewed(true);
+        setSubmitting(false);
+        setSubmitSuccess(true);
+      })
+      .catch((err) => {
+        console.error(err);
+        setSubmitting(false);
+      });
+  };
+
   if (isLoading) {
     return (
       <div className="container text-center py-5">
@@ -150,7 +201,7 @@ const SeriesDetail = () => {
             </div>
 
             <p className="text-muted mb-2">
-              <strong>Bewertung:</strong> ⭐ {series.rating}/10
+              <strong>Bewertung:</strong> ⭐ {series.rating.toFixed(1)}/5
             </p>
 
             {series.description && (
@@ -234,7 +285,7 @@ const SeriesDetail = () => {
                         key={episode.episodeNumber}
                         className="row mb-4 align-items-center"
                       >
-                        {/* Folgen-Poster */}
+                        {/* episode oster */}
                         <div className="col-md-3 text-center">
                           <img
                             src={
@@ -247,7 +298,7 @@ const SeriesDetail = () => {
                           />
                         </div>
 
-                        {/* Folgen-Infos */}
+                        {/* episode Infos */}
                         <div className="col-md-9">
                           <h5 className="text-white">
                             Episode {episode.episodeNumber}: {episode.title}

@@ -2,8 +2,8 @@ POST http://localhost:8080/api/auth/login
 Content-Type: application/json
 
 {
-  "username": "hallo1",
-  "password": "hallo1"
+  "username": "hallo3",
+  "password": "hallo3"
 }
 
 ###
@@ -11,8 +11,8 @@ POST http://localhost:8080/api/auth/register
 Content-Type: application/json
 
 {
-"username": "hallo1",
-"password": "hallo1",
+"username": "hallo3",
+"password": "hallo3",
   "email": "hallo1@gmail.com"
 }
 
@@ -206,7 +206,7 @@ Content-Type: application/json
 }
 
 ###
-POST http://localhost:8080/api/reviews/movie/680e7b0723c0b14c9c4811b8/680e7af123c0b14c9c4811b5
+POST http://localhost:8080/api/reviews/movie/680e7b0723c0b14c9c4811b8/680fb9bf040ad6445d9d4ef7
 Content-Type: application/json
 
 {
@@ -216,4 +216,4 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:8080/api/reviews/movie/680e7b0923c0b14c9c4811b9
+GET http://localhost:8080/api/reviews/user/680e7be823c0b14c9c4811c0

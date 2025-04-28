@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { FaPlus, FaCheck, FaArrowLeft } from "react-icons/fa";
+import {
+  FaPlus,
+  FaCheck,
+  FaArrowLeft,
+  FaStar,
+  FaStarHalfAlt,
+  FaRegStar,
+} from "react-icons/fa";
 
 const MovieDetail = () => {
   const { id } = useParams();
@@ -10,6 +17,12 @@ const MovieDetail = () => {
   const [userId, setUserId] = useState(null);
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [reviewed, setReviewed] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [hover, setHover] = useState(null);
 
   /**
    * fetches the currently logged in user from the API
@@ -54,14 +67,34 @@ const MovieDetail = () => {
   useEffect(() => {
     if (!userId || !id) return;
 
-    fetch(`http://localhost:8080/api/users/${userId}/watchlist/movies`, {   
-    })
+    fetch(`http://localhost:8080/api/users/${userId}/watchlist/movies`, {})
       .then((res) => res.json())
       .then((data) => {
         const alreadyInWatchlist = data.some((m) => m.id.toString() === id);
         setAdded(alreadyInWatchlist);
       })
       .catch((err) => console.error("Fehler beim Check der Watchlist:", err));
+  }, [userId, id]);
+
+  useEffect(() => {
+    if (!userId || !id) return;
+
+    fetch(`http://localhost:8080/api/reviews/movie/${id}/${userId}`, {})
+      .then((res) => {
+        if (!res.ok) {
+          if (res.status === 404) return null;
+          throw new Error("Fehler beim Laden der Bewertung");
+        }
+        return res.json();
+      })
+      .then((data) => {
+        if (data) {
+          setReviewed(true);
+          setRating(data.rating);
+          setComment(data.comment || "");
+        }
+      })
+      .catch((err) => console.error("Fehler beim Prüfen der Bewertung:", err));
   }, [userId, id]);
 
   /**
@@ -88,6 +121,46 @@ const MovieDetail = () => {
       .catch((err) => {
         console.error(err);
         setAdding(false);
+      });
+  };
+
+  const handleRating = (newRating) => {
+    setRating(newRating);
+  };
+
+  /**
+   * adds a review to the movie
+   * @returns
+   */
+  const handleSubmitReview = () => {
+    if (!userId || rating === 0) return;
+
+    setSubmitting(true);
+    fetch(`http://localhost:8080/api/reviews/movie/${id}/${userId}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userId,
+        itemId: id,
+        rating: rating,
+        comment: "",
+        type: "movie",
+      }),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Fehler beim Speichern der Bewertung");
+        return res.json();
+      })
+      .then(() => {
+        setReviewed(true);
+        setSubmitting(false);
+        setSubmitSuccess(true);
+      })
+      .catch((err) => {
+        console.error(err);
+        setSubmitting(false);
       });
   };
 
@@ -143,7 +216,9 @@ const MovieDetail = () => {
                 <span className="badge bg-primary me-2">{movie.genre}</span>
               )}
               {movie.duration && (
-                <span className="badge bg-secondary me-2">{movie.duration}</span>
+                <span className="badge bg-secondary me-2">
+                  {movie.duration}
+                </span>
               )}
               {movie.releaseYear && (
                 <span className="badge bg-info text-dark">
@@ -153,7 +228,7 @@ const MovieDetail = () => {
             </div>
 
             <p className="text-muted mb-2">
-              <strong>Bewertung:</strong> ⭐ {movie.rating}/10
+              <strong>Bewertung:</strong> ⭐ {movie.rating.toFixed(1)}/5
             </p>
 
             {movie.description && (
@@ -181,8 +256,97 @@ const MovieDetail = () => {
               </button>
             )}
 
+            {/* Rating Actions */}
+            {userId && !reviewed && (
+              <div className="mt-4">
+                <h5>⭐ Deine Bewertung</h5>
+                <div className="d-flex mb-3">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <span
+                      key={star}
+                      className="position-relative"
+                      style={{ fontSize: "32px", cursor: "pointer" }}
+                    >
+                      <span
+                        style={{
+                          position: "absolute",
+                          width: "50%",
+                          height: "100%",
+                          left: 0,
+                        }}
+                        onClick={() => handleRating(star - 0.5)}
+                        onMouseEnter={() => setHover(star - 0.5)}
+                        onMouseLeave={() => setHover(null)}
+                      />
+                      <span
+                        style={{
+                          position: "absolute",
+                          width: "50%",
+                          height: "100%",
+                          right: 0,
+                        }}
+                        onClick={() => handleRating(star)}
+                        onMouseEnter={() => setHover(star)}
+                        onMouseLeave={() => setHover(null)}
+                      />
+
+                      {(hover || rating) >= star ? (
+                        <FaStar color="#ffc107" />
+                      ) : (hover || rating) >= star - 0.5 ? (
+                        <FaStarHalfAlt color="#ffc107" />
+                      ) : (
+                        <FaRegStar color="#e4e5e9" />
+                      )}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="mb-3">
+                  <label htmlFor="comment" className="form-label">
+                    Kommentar (optional):
+                  </label>
+                  <textarea
+                    id="comment"
+                    className="form-control"
+                    rows="3"
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                  />
+                </div>
+
+                <button
+                  className="btn btn-primary"
+                  onClick={handleSubmitReview}
+                  disabled={submitting || rating === 0 || submitSuccess}
+                >
+                  {submitting
+                    ? "Wird gespeichert..."
+                    : submitSuccess
+                    ? "Bewertung gespeichert!"
+                    : "Bewertung abgeben"}
+                </button>
+              </div>
+            )}
+            {reviewed && (
+              <div className="alert alert-info mt-4">
+                <h5>⭐ Deine bisherige Bewertung</h5>
+                <p>
+                  Bewertung: {rating} / 5
+                  {comment && (
+                    <>
+                      <br />
+                      Kommentar: {comment}
+                    </>
+                  )}
+                </p>
+              </div>
+            )}
+
             {added && (
-              <div className="alert alert-success d-inline-flex align-items-center px-3 py-2 mt-2" role="alert">
+              <div
+                className="alert alert-success d-inline-flex align-items-center px-3 py-2 mt-2"
+                role="alert"
+              >
                 <FaCheck className="me-2" />
                 In deiner Watchlist!
               </div>
