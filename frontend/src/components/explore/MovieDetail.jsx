@@ -26,6 +26,8 @@ const MovieDetail = () => {
 
   /**
    * fetches the currently logged in user from the API
+   * @returns {Promise<void>}
+   * @throws {Error} if the user could not be loaded
    */
   useEffect(() => {
     fetch("http://localhost:8080/api/users/me", {
@@ -42,6 +44,8 @@ const MovieDetail = () => {
 
   /**
    * fetches the movie details from the API
+   * @returns {Promise<void>}
+   * @throws {Error} if the movie could not be loaded
    */
   useEffect(() => {
     setIsLoading(true);
@@ -63,6 +67,8 @@ const MovieDetail = () => {
 
   /**
    * checks if the movie is already in the user's watchlist
+   * @returns {Promise<void>}
+   * @throws {Error} if the watchlist could not be loaded
    */
   useEffect(() => {
     if (!userId || !id) return;
@@ -76,6 +82,11 @@ const MovieDetail = () => {
       .catch((err) => console.error("Fehler beim Check der Watchlist:", err));
   }, [userId, id]);
 
+  /**
+   * checks if the user has already reviewed the movie
+   * @returns {Promise<void>}
+   * @throws {Error} if the review could not be loaded
+   */
   useEffect(() => {
     if (!userId || !id) return;
 
@@ -99,6 +110,8 @@ const MovieDetail = () => {
 
   /**
    * adds the movie to the user's watchlist
+   * @returns
+   * @throws {Error} if the movie could not be added to the watchlist
    */
   const handleAddToWatchlist = () => {
     if (!userId || added) return;
@@ -131,6 +144,7 @@ const MovieDetail = () => {
   /**
    * adds a review to the movie
    * @returns
+   * @throws {Error} if the review could not be added
    */
   const handleSubmitReview = () => {
     if (!userId || rating === 0) return;

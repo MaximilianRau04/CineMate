@@ -26,6 +26,8 @@ const SeriesDetail = () => {
 
   /**
    * fetches the currently logged in user from the API
+   * @returns {Promise<void>}
+   * @throws {Error} if the user is not logged in
    */
   useEffect(() => {
     fetch("http://localhost:8080/api/users/me", {
@@ -42,6 +44,8 @@ const SeriesDetail = () => {
 
   /**
    * fetches the series details from the API
+   * @returns {Promise<void>}
+   * @throws {Error} if the series is not found
    */
   useEffect(() => {
     setIsLoading(true);
@@ -63,6 +67,8 @@ const SeriesDetail = () => {
 
   /**
    * checks if the series is already in the user's watchlist
+   * @returns {Promise<void>}
+   * @throws {Error} if the user is not logged in or the series is not found
    */
   useEffect(() => {
     if (!userId || !id) return;
@@ -77,8 +83,35 @@ const SeriesDetail = () => {
   }, [userId, id]);
 
   /**
+   * checks if the user has already reviewed the series
+   * @returns {Promise<void>}
+   * @throws {Error} if the user is not logged in or the series is not found
+   */
+  useEffect(() => {
+    if (!userId || !id) return;
+
+    fetch(`http://localhost:8080/api/reviews/movie/${id}/${userId}`, {})
+      .then((res) => {
+        if (!res.ok) {
+          if (res.status === 404) return null;
+          throw new Error("Fehler beim Laden der Bewertung");
+        }
+        return res.json();
+      })
+      .then((data) => {
+        if (data) {
+          setReviewed(true);
+          setRating(data.rating);
+          setComment(data.comment || "");
+        }
+      })
+      .catch((err) => console.error("Fehler beim Prüfen der Bewertung:", err));
+  }, [userId, id]);
+
+  /**
    * adds the series to the user's watchlist
    * @returns {Promise<void>}
+   * @throws {Error} if the user is not logged in or the series is already in the watchlist
    */
   const handleAddToWatchlist = () => {
     if (!userId || added) return;
@@ -109,8 +142,9 @@ const SeriesDetail = () => {
   };
 
   /**
-   * adds a review to the series
-   * @returns
+   * adds a review to the movie
+   * @returns {Promise<void>}
+   * @throws {Error} if the user is not logged in or the rating is 0
    */
   const handleSubmitReview = () => {
     if (!userId || rating === 0) return;
@@ -122,6 +156,8 @@ const SeriesDetail = () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
+        userId,
+        itemId: id,
         rating: rating,
         comment: "",
         type: "series",
@@ -226,6 +262,92 @@ const SeriesDetail = () => {
                   </>
                 )}
               </button>
+            )}
+
+            {/* Rating Actions */}
+            {userId && !reviewed && (
+              <div className="mt-4">
+                <h5>⭐ Deine Bewertung</h5>
+                <div className="d-flex mb-3">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <span
+                      key={star}
+                      className="position-relative"
+                      style={{ fontSize: "32px", cursor: "pointer" }}
+                    >
+                      <span
+                        style={{
+                          position: "absolute",
+                          width: "50%",
+                          height: "100%",
+                          left: 0,
+                        }}
+                        onClick={() => handleRating(star - 0.5)}
+                        onMouseEnter={() => setHover(star - 0.5)}
+                        onMouseLeave={() => setHover(null)}
+                      />
+                      <span
+                        style={{
+                          position: "absolute",
+                          width: "50%",
+                          height: "100%",
+                          right: 0,
+                        }}
+                        onClick={() => handleRating(star)}
+                        onMouseEnter={() => setHover(star)}
+                        onMouseLeave={() => setHover(null)}
+                      />
+
+                      {(hover || rating) >= star ? (
+                        <FaStar color="#ffc107" />
+                      ) : (hover || rating) >= star - 0.5 ? (
+                        <FaStarHalfAlt color="#ffc107" />
+                      ) : (
+                        <FaRegStar color="#e4e5e9" />
+                      )}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="mb-3">
+                  <label htmlFor="comment" className="form-label">
+                    Kommentar (optional):
+                  </label>
+                  <textarea
+                    id="comment"
+                    className="form-control"
+                    rows="3"
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                  />
+                </div>
+
+                <button
+                  className="btn btn-primary"
+                  onClick={handleSubmitReview}
+                  disabled={submitting || rating === 0 || submitSuccess}
+                >
+                  {submitting
+                    ? "Wird gespeichert..."
+                    : submitSuccess
+                    ? "Bewertung gespeichert!"
+                    : "Bewertung abgeben"}
+                </button>
+              </div>
+            )}
+            {reviewed && (
+              <div className="alert alert-info mt-4">
+                <h5>⭐ Deine bisherige Bewertung</h5>
+                <p>
+                  Bewertung: {rating} / 5
+                  {comment && (
+                    <>
+                      <br />
+                      Kommentar: {comment}
+                    </>
+                  )}
+                </p>
+              </div>
             )}
 
             {added && (
