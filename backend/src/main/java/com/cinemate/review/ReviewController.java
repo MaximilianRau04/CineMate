@@ -133,6 +133,23 @@ public class ReviewController {
     }
 
     /**
+     * returns the review by the given user for the given series
+     * @param seriesId
+     * @param userId
+     * @return ReviewResponseDTO
+     */
+    @GetMapping("/series/{seriesId}/{userId}")
+    public ResponseEntity<ReviewResponseDTO> getReviewBySeriesAndUser(@PathVariable String seriesId, @PathVariable String userId) {
+        ReviewResponseDTO review = reviewService.findBySeriesIdAndUserId(seriesId, userId);
+        if (review != null) {
+            return ResponseEntity.ok(review);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+
+    /**
      * updates a review
      * @param id
      * @param reviewRequestDTO

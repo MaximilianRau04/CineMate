@@ -23,6 +23,11 @@ const MovieDetail = () => {
   const [reviewed, setReviewed] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [hover, setHover] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [reviewId, setReviewId] = useState(null);
+  const [editRating, setEditRating] = useState(0);
+  const [editComment, setEditComment] = useState("");
+  const [editHover, setEditHover] = useState(null);
 
   /**
    * fetches the currently logged in user from the API
@@ -103,6 +108,7 @@ const MovieDetail = () => {
           setReviewed(true);
           setRating(data.rating);
           setComment(data.comment || "");
+          setReviewId(data.id);
         }
       })
       .catch((err) => console.error("Fehler beim Prüfen der Bewertung:", err));
@@ -110,7 +116,7 @@ const MovieDetail = () => {
 
   /**
    * adds the movie to the user's watchlist
-   * @returns
+   * @returns {Promise<void>}
    * @throws {Error} if the movie could not be added to the watchlist
    */
   const handleAddToWatchlist = () => {
@@ -143,7 +149,7 @@ const MovieDetail = () => {
 
   /**
    * adds a review to the movie
-   * @returns
+   * @returns {Promise<void>}
    * @throws {Error} if the review could not be added
    */
   const handleSubmitReview = () => {
@@ -159,7 +165,7 @@ const MovieDetail = () => {
         userId,
         itemId: id,
         rating: rating,
-        comment: "",
+        comment: comment,
         type: "movie",
       }),
     })
@@ -167,15 +173,86 @@ const MovieDetail = () => {
         if (!res.ok) throw new Error("Fehler beim Speichern der Bewertung");
         return res.json();
       })
-      .then(() => {
+      .then((data) => {
         setReviewed(true);
         setSubmitting(false);
         setSubmitSuccess(true);
+        if (data && data.id) {
+          setReviewId(data.id);
+        }
       })
       .catch((err) => {
         console.error(err);
         setSubmitting(false);
       });
+  };
+
+  // Initialize edit values when opening the modal
+  const handleOpenEditModal = () => {
+    setEditRating(rating);
+    setEditComment(comment);
+    setShowEditModal(true);
+  };
+
+  /**
+   * edits the review of the movie
+   * @returns {Promise<void>}
+   * @throws {Error} if the review could not be edited
+   */
+  const handleEditReview = () => {
+    if (!userId || !reviewId) return;
+    
+    setSubmitting(true);
+    
+    fetch(`http://localhost:8080/api/reviews/${reviewId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userId,
+        itemId: id,
+        rating: editRating,
+        comment: editComment,
+        type: "movie",
+      }),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Fehler beim Bearbeiten der Bewertung");
+        return res.json();
+      })
+      .then(() => {
+        setRating(editRating);
+        setComment(editComment);
+        setShowEditModal(false);
+        setSubmitting(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setSubmitting(false);
+      });
+  };
+
+  /**
+   * deletes the review of the movie
+   * @returns {Promise<void>}
+   * @throws {Error} if the review could not be deleted
+   */
+  const handleDeleteReview = () => {
+    const confirmDelete = window.confirm("Möchtest du deine Bewertung wirklich löschen?");
+    if (!confirmDelete) return;
+
+    fetch(`http://localhost:8080/api/reviews/${reviewId}`, {
+      method: "DELETE",
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Fehler beim Löschen der Bewertung");
+        setReviewed(false);
+        setRating(0);
+        setComment("");
+        setReviewId(null);
+      })
+      .catch((err) => console.error("Fehler beim Löschen:", err));
   };
 
   if (isLoading) {
@@ -353,6 +430,20 @@ const MovieDetail = () => {
                     </>
                   )}
                 </p>
+                <div className="d-flex gap-2 mt-3">
+                  <button
+                    className="btn btn-sm btn-outline-primary"
+                    onClick={handleOpenEditModal}
+                  >
+                    ✏️ Bearbeiten
+                  </button>
+                  <button
+                    className="btn btn-sm btn-outline-danger"
+                    onClick={handleDeleteReview}
+                  >
+                    ❌ Löschen
+                  </button>
+                </div>
               </div>
             )}
 
@@ -373,6 +464,94 @@ const MovieDetail = () => {
               </Link>
             </div>
           </div>
+          {showEditModal && (
+            <div
+              className="modal fade show d-block"
+              tabIndex="-1"
+              style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+            >
+              <div className="modal-dialog">
+                <div className="modal-content">
+                  <div className="modal-header">
+                    <h5 className="modal-title">Bewertung bearbeiten</h5>
+                    <button
+                      type="button"
+                      className="btn-close"
+                      onClick={() => setShowEditModal(false)}
+                    />
+                  </div>
+                  <div className="modal-body">
+                    <label className="form-label">⭐ Bewertung:</label>
+                    <div className="d-flex mb-3">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <span
+                          key={star}
+                          className="position-relative"
+                          style={{ fontSize: "32px", cursor: "pointer" }}
+                        >
+                          <span
+                            style={{
+                              position: "absolute",
+                              width: "50%",
+                              height: "100%",
+                              left: 0,
+                            }}
+                            onClick={() => setEditRating(star - 0.5)}
+                            onMouseEnter={() => setEditHover(star - 0.5)}
+                            onMouseLeave={() => setEditHover(null)}
+                          />
+                          <span
+                            style={{
+                              position: "absolute",
+                              width: "50%",
+                              height: "100%",
+                              right: 0,
+                            }}
+                            onClick={() => setEditRating(star)}
+                            onMouseEnter={() => setEditHover(star)}
+                            onMouseLeave={() => setEditHover(null)}
+                          />
+                          {(editHover || editRating) >= star ? (
+                            <FaStar color="#ffc107" />
+                          ) : (editHover || editRating) >= star - 0.5 ? (
+                            <FaStarHalfAlt color="#ffc107" />
+                          ) : (
+                            <FaRegStar color="#e4e5e9" />
+                          )}
+                        </span>
+                      ))}
+                    </div>
+
+                    <label htmlFor="editComment" className="form-label">
+                      Kommentar (optional):
+                    </label>
+                    <textarea
+                      id="editComment"
+                      className="form-control"
+                      rows="3"
+                      value={editComment}
+                      onChange={(e) => setEditComment(e.target.value)}
+                    />
+                  </div>
+                  <div className="modal-footer">
+                    <button
+                      className="btn btn-secondary"
+                      onClick={() => setShowEditModal(false)}
+                    >
+                      Abbrechen
+                    </button>
+                    <button
+                      className="btn btn-primary"
+                      onClick={handleEditReview}
+                      disabled={submitting}
+                    >
+                      {submitting ? "Speichern..." : "Speichern"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

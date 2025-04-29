@@ -133,7 +133,17 @@ public class ReviewService {
     public ReviewResponseDTO findByMovieIdAndUserId(String movieId, String userId) {
         Review review = reviewRepository.findByItemIdAndUserId(movieId, userId);
         return convertToResponseDTO(review);
+    }
 
+    /**
+     * returns a review by the given user for the given series
+     * @param seriesId
+     * @param userId
+     * @return ReviewResponseDTO
+     */
+    public ReviewResponseDTO findBySeriesIdAndUserId(String seriesId, String userId) {
+        Review review = reviewRepository.findByItemIdAndUserId(seriesId, userId);
+        return convertToResponseDTO(review);
     }
 
     /**
