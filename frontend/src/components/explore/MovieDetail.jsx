@@ -10,7 +10,7 @@ import {
 } from "react-icons/fa";
 
 const MovieDetail = () => {
-  const { id } = useParams();
+  const { id: movieId } = useParams();
   const [movie, setMovie] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -28,6 +28,7 @@ const MovieDetail = () => {
   const [editRating, setEditRating] = useState(0);
   const [editComment, setEditComment] = useState("");
   const [editHover, setEditHover] = useState(null);
+  const [reviews, setReviews] = useState([]); 
 
   /**
    * fetches the currently logged in user from the API
@@ -54,7 +55,7 @@ const MovieDetail = () => {
    */
   useEffect(() => {
     setIsLoading(true);
-    fetch(`http://localhost:8080/api/movies/${id}`)
+    fetch(`http://localhost:8080/api/movies/${movieId}`)
       .then((res) => {
         if (!res.ok) throw new Error("Film konnte nicht geladen werden");
         return res.json();
@@ -68,7 +69,7 @@ const MovieDetail = () => {
         setError(err.message);
         setIsLoading(false);
       });
-  }, [id]);
+  }, [movieId]);
 
   /**
    * checks if the movie is already in the user's watchlist
@@ -76,16 +77,16 @@ const MovieDetail = () => {
    * @throws {Error} if the watchlist could not be loaded
    */
   useEffect(() => {
-    if (!userId || !id) return;
+    if (!userId || !movieId) return;
 
     fetch(`http://localhost:8080/api/users/${userId}/watchlist/movies`, {})
       .then((res) => res.json())
       .then((data) => {
-        const alreadyInWatchlist = data.some((m) => m.id.toString() === id);
+        const alreadyInWatchlist = data.some((m) => m.id.toString() === movieId);
         setAdded(alreadyInWatchlist);
       })
       .catch((err) => console.error("Fehler beim Check der Watchlist:", err));
-  }, [userId, id]);
+  }, [userId, movieId]);
 
   /**
    * checks if the user has already reviewed the movie
@@ -93,9 +94,9 @@ const MovieDetail = () => {
    * @throws {Error} if the review could not be loaded
    */
   useEffect(() => {
-    if (!userId || !id) return;
+    if (!userId || !movieId) return;
 
-    fetch(`http://localhost:8080/api/reviews/movie/${id}/${userId}`, {})
+    fetch(`http://localhost:8080/api/reviews/movie/${movieId}/${userId}`, {})
       .then((res) => {
         if (!res.ok) {
           if (res.status === 404) return null;
@@ -112,7 +113,17 @@ const MovieDetail = () => {
         }
       })
       .catch((err) => console.error("Fehler beim Prüfen der Bewertung:", err));
-  }, [userId, id]);
+  }, [userId, movieId]);
+
+  /**
+   * fetches all reviews for this movie
+   * @returns {Promise<void>}
+   * @throws {Error} if the reviews could not be loaded
+   */
+  useEffect(() => {
+    if (!movieId) return;
+    loadReviews();
+  },);
 
   /**
    * adds the movie to the user's watchlist
@@ -123,7 +134,7 @@ const MovieDetail = () => {
     if (!userId || added) return;
 
     setAdding(true);
-    fetch(`http://localhost:8080/api/users/${userId}/watchlist/movies/${id}`, {
+    fetch(`http://localhost:8080/api/users/${userId}/watchlist/movies/${movieId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -148,6 +159,21 @@ const MovieDetail = () => {
   };
 
   /**
+   * fetches all reviews of a movie
+   * @returns {Promise<void>}
+   */
+  const loadReviews = async () => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/reviews/movie/${movieId}`);
+      if (!response.ok) throw new Error("Bewertungen konnten nicht geladen werden");
+      const data = await response.json();
+      setReviews(data);
+    } catch (error) {
+      console.error("Fehler beim Laden der Bewertungen:", error);
+    }
+  };
+
+  /**
    * adds a review to the movie
    * @returns {Promise<void>}
    * @throws {Error} if the review could not be added
@@ -156,14 +182,14 @@ const MovieDetail = () => {
     if (!userId || rating === 0) return;
 
     setSubmitting(true);
-    fetch(`http://localhost:8080/api/reviews/movie/${id}/${userId}`, {
+    fetch(`http://localhost:8080/api/reviews/movie/${movieId}/${userId}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         userId,
-        itemId: id,
+        itemId: movieId,
         rating: rating,
         comment: comment,
         type: "movie",
@@ -180,6 +206,8 @@ const MovieDetail = () => {
         if (data && data.id) {
           setReviewId(data.id);
         }
+   
+        loadReviews();
       })
       .catch((err) => {
         console.error(err);
@@ -201,9 +229,9 @@ const MovieDetail = () => {
    */
   const handleEditReview = () => {
     if (!userId || !reviewId) return;
-    
+
     setSubmitting(true);
-    
+
     fetch(`http://localhost:8080/api/reviews/${reviewId}`, {
       method: "PUT",
       headers: {
@@ -211,7 +239,7 @@ const MovieDetail = () => {
       },
       body: JSON.stringify({
         userId,
-        itemId: id,
+        itemId: movieId,
         rating: editRating,
         comment: editComment,
         type: "movie",
@@ -226,6 +254,8 @@ const MovieDetail = () => {
         setComment(editComment);
         setShowEditModal(false);
         setSubmitting(false);
+        
+        loadReviews();
       })
       .catch((err) => {
         console.error(err);
@@ -239,7 +269,9 @@ const MovieDetail = () => {
    * @throws {Error} if the review could not be deleted
    */
   const handleDeleteReview = () => {
-    const confirmDelete = window.confirm("Möchtest du deine Bewertung wirklich löschen?");
+    const confirmDelete = window.confirm(
+      "Möchtest du deine Bewertung wirklich löschen?"
+    );
     if (!confirmDelete) return;
 
     fetch(`http://localhost:8080/api/reviews/${reviewId}`, {
@@ -251,8 +283,33 @@ const MovieDetail = () => {
         setRating(0);
         setComment("");
         setReviewId(null);
+
+        loadReviews();
       })
       .catch((err) => console.error("Fehler beim Löschen:", err));
+  };
+
+  /**
+   * render star rating for movie
+   * @param {*} rating
+   * @returns {JSX.Element}
+   */
+  const renderStars = (rating) => {
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating - fullStars >= 0.5;
+
+    for (let i = 0; i < 5; i++) {
+      if (i < fullStars) {
+        stars.push(<FaStar key={i} color="#ffc107" />);
+      } else if (i === fullStars && hasHalfStar) {
+        stars.push(<FaStarHalfAlt key={i} color="#ffc107" />);
+      } else {
+        stars.push(<FaRegStar key={i} color="#e4e5e9" />);
+      }
+    }
+
+    return stars;
   };
 
   if (isLoading) {
@@ -408,7 +465,7 @@ const MovieDetail = () => {
                 <button
                   className="btn btn-primary"
                   onClick={handleSubmitReview}
-                  disabled={submitting || rating === 0 || submitSuccess}
+                  disabled={submitting || rating ===.0 || submitSuccess}
                 >
                   {submitting
                     ? "Wird gespeichert..."
@@ -464,96 +521,135 @@ const MovieDetail = () => {
               </Link>
             </div>
           </div>
-          {showEditModal && (
-            <div
-              className="modal fade show d-block"
-              tabIndex="-1"
-              style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
-            >
-              <div className="modal-dialog">
-                <div className="modal-content">
-                  <div className="modal-header">
-                    <h5 className="modal-title">Bewertung bearbeiten</h5>
-                    <button
-                      type="button"
-                      className="btn-close"
-                      onClick={() => setShowEditModal(false)}
-                    />
-                  </div>
-                  <div className="modal-body">
-                    <label className="form-label">⭐ Bewertung:</label>
-                    <div className="d-flex mb-3">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <span
-                          key={star}
-                          className="position-relative"
-                          style={{ fontSize: "32px", cursor: "pointer" }}
-                        >
-                          <span
-                            style={{
-                              position: "absolute",
-                              width: "50%",
-                              height: "100%",
-                              left: 0,
-                            }}
-                            onClick={() => setEditRating(star - 0.5)}
-                            onMouseEnter={() => setEditHover(star - 0.5)}
-                            onMouseLeave={() => setEditHover(null)}
-                          />
-                          <span
-                            style={{
-                              position: "absolute",
-                              width: "50%",
-                              height: "100%",
-                              right: 0,
-                            }}
-                            onClick={() => setEditRating(star)}
-                            onMouseEnter={() => setEditHover(star)}
-                            onMouseLeave={() => setEditHover(null)}
-                          />
-                          {(editHover || editRating) >= star ? (
-                            <FaStar color="#ffc107" />
-                          ) : (editHover || editRating) >= star - 0.5 ? (
-                            <FaStarHalfAlt color="#ffc107" />
-                          ) : (
-                            <FaRegStar color="#e4e5e9" />
-                          )}
-                        </span>
-                      ))}
-                    </div>
-
-                    <label htmlFor="editComment" className="form-label">
-                      Kommentar (optional):
-                    </label>
-                    <textarea
-                      id="editComment"
-                      className="form-control"
-                      rows="3"
-                      value={editComment}
-                      onChange={(e) => setEditComment(e.target.value)}
-                    />
-                  </div>
-                  <div className="modal-footer">
-                    <button
-                      className="btn btn-secondary"
-                      onClick={() => setShowEditModal(false)}
-                    >
-                      Abbrechen
-                    </button>
-                    <button
-                      className="btn btn-primary"
-                      onClick={handleEditReview}
-                      disabled={submitting}
-                    >
-                      {submitting ? "Speichern..." : "Speichern"}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </div>
+
+      {/* Reviews-Sektion */}
+      {reviews && reviews.length > 0 && (
+        <div className="card mt-4 shadow-sm">
+          <div className="card-header bg-light">
+            <h4 className="mb-0">📢 Nutzerbewertungen</h4>
+          </div>
+          <div className="card-body">
+            {reviews.map((review) => (
+              <div key={review.id} className="border rounded p-3 mb-3">
+                <div className="d-flex justify-content-between align-items-center mb-2">
+                  <strong>{review.user?.username || "Unbekannter Nutzer"}</strong>
+                  <span className="text-muted" style={{ fontSize: "0.9em" }}>
+                    {review.date 
+                      ? new Date(review.date).toLocaleDateString('de-DE', {day: '2-digit', month: '2-digit', year: 'numeric'}) 
+                      : new Date(review.createdAt).toLocaleDateString('de-DE', {day: '2-digit', month: '2-digit', year: 'numeric'})}
+                  </span>
+                </div>
+                <div className="mb-2">
+                  <div className="d-flex align-items-center">
+                    {renderStars(review.rating)}
+                    <span className="ms-2">({review.rating.toFixed(1)} / 5)</span>
+                  </div>
+                </div>
+                {review.comment && <p className="mb-0">{review.comment}</p>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {reviews && reviews.length === 0 && (
+        <div className="card mt-4 shadow-sm">
+          <div className="card-body text-center py-4">
+            <p className="text-muted mb-0">Noch keine Bewertungen für diesen Film.</p>
+          </div>
+        </div>
+      )}
+
+      {showEditModal && (
+        <div
+          className="modal fade show d-block"
+          tabIndex="-1"
+          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+        >
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Bewertung bearbeiten</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowEditModal(false)}
+                />
+              </div>
+              <div className="modal-body">
+                <label className="form-label">⭐ Bewertung:</label>
+                <div className="d-flex mb-3">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <span
+                      key={star}
+                      className="position-relative"
+                      style={{ fontSize: "32px", cursor: "pointer" }}
+                    >
+                      <span
+                        style={{
+                          position: "absolute",
+                          width: "50%",
+                          height: "100%",
+                          left: 0,
+                        }}
+                        onClick={() => setEditRating(star - 0.5)}
+                        onMouseEnter={() => setEditHover(star - 0.5)}
+                        onMouseLeave={() => setEditHover(null)}
+                      />
+                      <span
+                        style={{
+                          position: "absolute",
+                          width: "50%",
+                          height: "100%",
+                          right: 0,
+                        }}
+                        onClick={() => setEditRating(star)}
+                        onMouseEnter={() => setEditHover(star)}
+                        onMouseLeave={() => setEditHover(null)}
+                      />
+                      {(editHover || editRating) >= star ? (
+                        <FaStar color="#ffc107" />
+                      ) : (editHover || editRating) >= star - 0.5 ? (
+                        <FaStarHalfAlt color="#ffc107" />
+                      ) : (
+                        <FaRegStar color="#e4e5e9" />
+                      )}
+                    </span>
+                  ))}
+                </div>
+
+                <label htmlFor="editComment" className="form-label">
+                  Kommentar (optional):
+                </label>
+                <textarea
+                  id="editComment"
+                  className="form-control"
+                  rows="3"
+                  value={editComment}
+                  onChange={(e) => setEditComment(e.target.value)}
+                />
+              </div>
+              <div className="modal-footer">
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => setShowEditModal(false)}
+                >
+                  Abbrechen
+                </button>
+                <button
+                  className="btn btn-primary"
+                  onClick={handleEditReview}
+                  disabled={submitting}
+                >
+                  {submitting ? "Speichern..." : "Speichern"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

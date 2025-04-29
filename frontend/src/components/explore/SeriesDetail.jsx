@@ -10,7 +10,7 @@ import {
 } from "react-icons/fa";
 
 const SeriesDetail = () => {
-  const { id } = useParams();
+  const { id: seriesId } = useParams();
   const [series, setSeries] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -28,6 +28,7 @@ const SeriesDetail = () => {
   const [editRating, setEditRating] = useState(0);
   const [editComment, setEditComment] = useState("");
   const [editHover, setEditHover] = useState(null);
+  const [reviews, setReviews] = useState([]);
 
   /**
    * fetches the currently logged in user from the API
@@ -54,7 +55,7 @@ const SeriesDetail = () => {
    */
   useEffect(() => {
     setIsLoading(true);
-    fetch(`http://localhost:8080/api/series/${id}`)
+    fetch(`http://localhost:8080/api/series/${seriesId}`)
       .then((res) => {
         if (!res.ok) throw new Error("Serie konnte nicht geladen werden");
         return res.json();
@@ -68,7 +69,7 @@ const SeriesDetail = () => {
         setError(err.message);
         setIsLoading(false);
       });
-  }, [id]);
+  }, [seriesId]);
 
   /**
    * checks if the series is already in the user's watchlist
@@ -76,16 +77,18 @@ const SeriesDetail = () => {
    * @throws {Error} if the user is not logged in or the series is not found
    */
   useEffect(() => {
-    if (!userId || !id) return;
+    if (!userId || !seriesId) return;
 
     fetch(`http://localhost:8080/api/users/${userId}/watchlist/series`, {})
       .then((res) => res.json())
       .then((data) => {
-        const alreadyInWatchlist = data.some((m) => m.id.toString() === id);
+        const alreadyInWatchlist = data.some(
+          (m) => m.id.toString() === seriesId
+        );
         setAdded(alreadyInWatchlist);
       })
       .catch((err) => console.error("Fehler beim Check der Watchlist:", err));
-  }, [userId, id]);
+  }, [userId, seriesId]);
 
   /**
    * checks if the user has already reviewed the series
@@ -93,9 +96,9 @@ const SeriesDetail = () => {
    * @throws {Error} if the user is not logged in or the series is not found
    */
   useEffect(() => {
-    if (!userId || !id) return;
+    if (!userId || !seriesId) return;
 
-    fetch(`http://localhost:8080/api/reviews/series/${id}/${userId}`, {})
+    fetch(`http://localhost:8080/api/reviews/series/${seriesId}/${userId}`, {})
       .then((res) => {
         if (!res.ok) {
           if (res.status === 404) return null;
@@ -112,7 +115,47 @@ const SeriesDetail = () => {
         }
       })
       .catch((err) => console.error("Fehler beim Prüfen der Bewertung:", err));
-  }, [userId, id]);
+  }, [userId, seriesId]);
+
+  /**
+   * fetches all reviews for this series
+   * @returns {Promise<void>}
+   * @throws {Error} if the reviews could not be loaded
+   */
+  useEffect(() => {
+    if (!seriesId) return;
+
+    fetch(`http://localhost:8080/api/reviews/series/${seriesId}`)
+      .then((res) => {
+        if (!res.ok)
+          throw new Error("Bewertungen konnten nicht geladen werden");
+        return res.json();
+      })
+      .then((data) => {
+        setReviews(data);
+      })
+      .catch((err) => console.error("Fehler beim Laden der Bewertungen:", err));
+  }, [seriesId]);
+
+   /**
+   * fetches all reviews of a series
+   * @returns {Promise<void>}
+   */
+   const loadReviews = async () => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/reviews/series/${seriesId}`);
+      if (!response.ok) throw new Error("Bewertungen konnten nicht geladen werden");
+      const data = await response.json();
+      setReviews(data);
+    } catch (error) {
+      console.error("Fehler beim Laden der Bewertungen:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (!seriesId) return;
+    loadReviews();
+  });
 
   /**
    * adds the series to the user's watchlist
@@ -123,12 +166,15 @@ const SeriesDetail = () => {
     if (!userId || added) return;
 
     setAdding(true);
-    fetch(`http://localhost:8080/api/users/${userId}/watchlist/series/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
+    fetch(
+      `http://localhost:8080/api/users/${userId}/watchlist/series/${seriesId}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    )
       .then((res) => {
         if (!res.ok) throw new Error("Fehler beim Hinzufügen zur Watchlist");
         return res.json();
@@ -156,14 +202,14 @@ const SeriesDetail = () => {
     if (!userId || rating === 0) return;
 
     setSubmitting(true);
-    fetch(`http://localhost:8080/api/reviews/series/${id}/${userId}`, {
+    fetch(`http://localhost:8080/api/reviews/series/${seriesId}/${userId}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         userId,
-        itemId: id,
+        itemId: seriesId,
         rating: rating,
         comment: "",
         type: "series",
@@ -177,6 +223,8 @@ const SeriesDetail = () => {
         setReviewed(true);
         setSubmitting(false);
         setSubmitSuccess(true);
+
+        loadReviews();
       })
       .catch((err) => {
         console.error(err);
@@ -208,7 +256,7 @@ const SeriesDetail = () => {
       },
       body: JSON.stringify({
         userId,
-        itemId: id,
+        itemId: seriesId,
         rating: editRating,
         comment: editComment,
         type: "movie",
@@ -223,7 +271,9 @@ const SeriesDetail = () => {
         setComment(editComment);
         setShowEditModal(false);
         setSubmitting(false);
-      })
+
+        loadReviews();
+      }) 
       .catch((err) => {
         console.error(err);
         setSubmitting(false);
@@ -250,8 +300,32 @@ const SeriesDetail = () => {
         setRating(0);
         setComment("");
         setReviewId(null);
+
+        loadReviews();
       })
       .catch((err) => console.error("Fehler beim Löschen:", err));
+  };
+
+  /**
+   * render star rating for series
+   * @param {*} rating
+   * @returns {JSX.Element}
+   */
+  const renderStars = (rating) => {
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating - fullStars >= 0.5;
+
+    for (let i = 0; i < 5; i++) {
+      if (i < fullStars) {
+        stars.push(<FaStar key={i} color="#ffc107" />);
+      } else if (i === fullStars && hasHalfStar) {
+        stars.push(<FaStarHalfAlt key={i} color="#ffc107" />);
+      } else {
+        stars.push(<FaRegStar key={i} color="#e4e5e9" />);
+      }
+    }
+    return stars;
   };
 
   if (isLoading) {
@@ -460,6 +534,121 @@ const SeriesDetail = () => {
           </div>
         </div>
       </div>
+
+      {/* seasons and episodes */}
+      {series.seasons && series.seasons.length > 0 && (
+        <div className="mt-5">
+          <h3 className="mb-4 text-light">📺 Staffeln und Episoden</h3>
+          <div className="accordion" id="seasonsAccordion">
+            {series.seasons.map((season, index) => (
+              <div
+                className="accordion-item bg-dark text-light"
+                key={season.seasonNumber}
+              >
+                <h2
+                  className="accordion-header"
+                  id={`heading-${season.seasonNumber}`}
+                >
+                  <button
+                    className="accordion-button collapsed bg-dark text-light"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target={`#collapse-${season.seasonNumber}`}
+                    aria-expanded="false"
+                    aria-controls={`collapse-${season.seasonNumber}`}
+                  >
+                    Staffel {season.seasonNumber}
+                  </button>
+                </h2>
+                <div
+                  id={`collapse-${season.seasonNumber}`}
+                  className="accordion-collapse collapse"
+                  aria-labelledby={`heading-${season.seasonNumber}`}
+                  data-bs-parent="#seasonsAccordion"
+                >
+                  <div className="accordion-body">
+                    {season.episodes.map((episode) => (
+                      <div
+                        key={episode.episodeNumber}
+                        className="row mb-4 align-items-center"
+                      >
+                        {/* episode poster */}
+                        <div className="col-md-3 text-center">
+                          <img
+                            src={
+                              episode.posterUrl ||
+                              "https://via.placeholder.com/200x300?text=No+Image"
+                            }
+                            alt={episode.title}
+                            className="img-fluid rounded shadow-sm"
+                            style={{ maxHeight: "200px", objectFit: "cover" }}
+                          />
+                        </div>
+
+                        {/* episode Infos */}
+                        <div className="col-md-9">
+                          <h5 className="text-white">
+                            Episode {episode.episodeNumber}: {episode.title}
+                          </h5>
+                          <p className="small text-light mb-1">
+                            ⏱️ {episode.duration} | 📅{" "}
+                            {new Date(episode.releaseDate).toLocaleDateString()}
+                          </p>
+                          <p className="text-secondary">
+                            {episode.description}
+                          </p>
+                        </div>
+
+                        <hr className="border-secondary my-3" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Reviews-Sektion */}
+      {reviews && reviews.length > 0 && (
+        <div className="card mt-4 shadow-sm">
+          <div className="card-header bg-light">
+            <h4 className="mb-0">📢 Nutzerbewertungen</h4>
+          </div>
+          <div className="card-body">
+            {reviews.map((review) => (
+              <div key={review.id} className="border rounded p-3 mb-3">
+                <div className="d-flex justify-content-between align-items-center mb-2">
+                  <strong>
+                    {review.user?.username || "Unbekannter Nutzer"}
+                  </strong>
+                  <span className="text-muted" style={{ fontSize: "0.9em" }}>
+                    {review.date
+                      ? new Date(review.date).toLocaleDateString("de-DE", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
+                        })
+                      : new Date(review.createdAt).toLocaleDateString("de-DE", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
+                        })}
+                  </span>
+                </div>
+                <div className="mb-2">
+                  <div className="d-flex align-items-center">
+                    {renderStars(review.rating)}
+                  </div>
+                </div>
+                {review.comment && <p className="mb-0">{review.comment}</p>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {showEditModal && (
         <div
           className="modal fade show d-block"
@@ -549,80 +738,6 @@ const SeriesDetail = () => {
         </div>
       )}
 
-      {/* seasons and episodes */}
-      {series.seasons && series.seasons.length > 0 && (
-        <div className="mt-5">
-          <h3 className="mb-4 text-light">📺 Staffeln und Episoden</h3>
-          <div className="accordion" id="seasonsAccordion">
-            {series.seasons.map((season, index) => (
-              <div
-                className="accordion-item bg-dark text-light"
-                key={season.seasonNumber}
-              >
-                <h2
-                  className="accordion-header"
-                  id={`heading-${season.seasonNumber}`}
-                >
-                  <button
-                    className="accordion-button collapsed bg-dark text-light"
-                    type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target={`#collapse-${season.seasonNumber}`}
-                    aria-expanded="false"
-                    aria-controls={`collapse-${season.seasonNumber}`}
-                  >
-                    Staffel {season.seasonNumber}
-                  </button>
-                </h2>
-                <div
-                  id={`collapse-${season.seasonNumber}`}
-                  className="accordion-collapse collapse"
-                  aria-labelledby={`heading-${season.seasonNumber}`}
-                  data-bs-parent="#seasonsAccordion"
-                >
-                  <div className="accordion-body">
-                    {season.episodes.map((episode) => (
-                      <div
-                        key={episode.episodeNumber}
-                        className="row mb-4 align-items-center"
-                      >
-                        {/* episode poster */}
-                        <div className="col-md-3 text-center">
-                          <img
-                            src={
-                              episode.posterUrl ||
-                              "https://via.placeholder.com/200x300?text=No+Image"
-                            }
-                            alt={episode.title}
-                            className="img-fluid rounded shadow-sm"
-                            style={{ maxHeight: "200px", objectFit: "cover" }}
-                          />
-                        </div>
-
-                        {/* episode Infos */}
-                        <div className="col-md-9">
-                          <h5 className="text-white">
-                            Episode {episode.episodeNumber}: {episode.title}
-                          </h5>
-                          <p className="small text-light mb-1">
-                            ⏱️ {episode.duration} | 📅{" "}
-                            {new Date(episode.releaseDate).toLocaleDateString()}
-                          </p>
-                          <p className="text-secondary">
-                            {episode.description}
-                          </p>
-                        </div>
-
-                        <hr className="border-secondary my-3" />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 };
