@@ -29,6 +29,7 @@ const MovieDetail = () => {
   const [editComment, setEditComment] = useState("");
   const [editHover, setEditHover] = useState(null);
   const [reviews, setReviews] = useState([]); 
+  const [averageRating, setAverageRating] = useState(0);
 
   /**
    * fetches the currently logged in user from the API
@@ -62,6 +63,7 @@ const MovieDetail = () => {
       })
       .then((data) => {
         setMovie(data);
+        setAverageRating(data.rating);
         setIsLoading(false);
       })
       .catch((err) => {
@@ -123,7 +125,7 @@ const MovieDetail = () => {
   useEffect(() => {
     if (!movieId) return;
     loadReviews();
-  },);
+  }, );
 
   /**
    * adds the movie to the user's watchlist
@@ -159,7 +161,19 @@ const MovieDetail = () => {
   };
 
   /**
-   * fetches all reviews of a movie
+   * Calculates the new average rating based on reviews
+   * @param {Array} reviews - Array of review objects
+   * @returns {number} - The calculated average rating
+   */
+  const calculateAverageRating = (reviews) => {
+    if (!reviews || reviews.length === 0) return 0;
+    
+    const sum = reviews.reduce((acc, review) => acc + review.rating, 0);
+    return sum / reviews.length;
+  };
+
+  /**
+   * fetches all reviews of a movie and updates the average rating
    * @returns {Promise<void>}
    */
   const loadReviews = async () => {
@@ -168,6 +182,16 @@ const MovieDetail = () => {
       if (!response.ok) throw new Error("Bewertungen konnten nicht geladen werden");
       const data = await response.json();
       setReviews(data);
+      
+      const newAverageRating = calculateAverageRating(data);
+      setAverageRating(newAverageRating);
+
+      if (movie) {
+        setMovie({
+          ...movie,
+          rating: newAverageRating
+        });
+      }
     } catch (error) {
       console.error("Fehler beim Laden der Bewertungen:", error);
     }
@@ -376,7 +400,10 @@ const MovieDetail = () => {
             </div>
 
             <p className="text-muted mb-2">
-              <strong>Bewertung:</strong> ⭐ {movie.rating.toFixed(1)}/5
+              <strong>Bewertung:</strong> <span className="d-inline-flex align-items-center">
+                {renderStars(averageRating)}
+                <span className="ms-2">({averageRating.toFixed(1)}/5)</span>
+              </span>
             </p>
 
             {movie.description && (
@@ -465,7 +492,7 @@ const MovieDetail = () => {
                 <button
                   className="btn btn-primary"
                   onClick={handleSubmitReview}
-                  disabled={submitting || rating ===.0 || submitSuccess}
+                  disabled={submitting || rating === 0 || submitSuccess}
                 >
                   {submitting
                     ? "Wird gespeichert..."
@@ -479,7 +506,7 @@ const MovieDetail = () => {
               <div className="alert alert-info mt-4">
                 <h5>⭐ Deine bisherige Bewertung</h5>
                 <p>
-                  Bewertung: {rating} / 5
+                  Bewertung: {renderStars(averageRating)}
                   {comment && (
                     <>
                       <br />
@@ -544,7 +571,6 @@ const MovieDetail = () => {
                 <div className="mb-2">
                   <div className="d-flex align-items-center">
                     {renderStars(review.rating)}
-                    <span className="ms-2">({review.rating.toFixed(1)} / 5)</span>
                   </div>
                 </div>
                 {review.comment && <p className="mb-0">{review.comment}</p>}

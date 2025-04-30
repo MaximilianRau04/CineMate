@@ -212,7 +212,7 @@ const ExplorePage = () => {
                           <small className="text-muted">{serie.genre}</small>
                         </p>
                         <p className="card-text mb-1">
-                          ⭐ <strong>{serie.rating}</strong>
+                          ⭐ <strong>{serie.rating.toFixed(1)}</strong>
                         </p>
                         <p className="card-text mb-1">
                           📅{" "}

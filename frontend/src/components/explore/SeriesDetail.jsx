@@ -29,6 +29,7 @@ const SeriesDetail = () => {
   const [editComment, setEditComment] = useState("");
   const [editHover, setEditHover] = useState(null);
   const [reviews, setReviews] = useState([]);
+  const [averageRating, setAverageRating] = useState(0);
 
   /**
    * fetches the currently logged in user from the API
@@ -147,6 +148,16 @@ const SeriesDetail = () => {
       if (!response.ok) throw new Error("Bewertungen konnten nicht geladen werden");
       const data = await response.json();
       setReviews(data);
+      
+      const newAverageRating = calculateAverageRating(data);
+      setAverageRating(newAverageRating);
+      
+      if (series) {
+        setSeries({
+          ...series,
+          rating: newAverageRating
+        });
+      }
     } catch (error) {
       console.error("Fehler beim Laden der Bewertungen:", error);
     }
@@ -156,6 +167,19 @@ const SeriesDetail = () => {
     if (!seriesId) return;
     loadReviews();
   });
+
+  /**
+   * Calculates the new average rating based on reviews
+   * @param {Array} reviews - Array of review objects
+   * @returns {number} - The calculated average rating
+   */
+  const calculateAverageRating = (reviews) => {
+    if (!reviews || reviews.length === 0) return 0;
+    
+    const sum = reviews.reduce((acc, review) => acc + review.rating, 0);
+    return sum / reviews.length;
+  };
+
 
   /**
    * adds the series to the user's watchlist
@@ -387,7 +411,10 @@ const SeriesDetail = () => {
             </div>
 
             <p className="text-muted mb-2">
-              <strong>Bewertung:</strong> ⭐ {series.rating.toFixed(1)}/5
+              <strong>Bewertung:</strong> <span className="d-inline-flex align-items-center">
+                {renderStars(averageRating)}
+                <span className="ms-2">({averageRating.toFixed(1)}/5)</span>
+              </span>
             </p>
 
             {series.description && (
@@ -490,7 +517,7 @@ const SeriesDetail = () => {
               <div className="alert alert-info mt-4">
                 <h5>⭐ Deine bisherige Bewertung</h5>
                 <p>
-                  Bewertung: {rating} / 5
+                  Bewertung: {renderStars(averageRating)}
                   {comment && (
                     <>
                       <br />
