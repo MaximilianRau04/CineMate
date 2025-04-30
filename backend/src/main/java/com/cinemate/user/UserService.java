@@ -2,6 +2,7 @@ package com.cinemate.user;
 
 import com.cinemate.movie.Movie;
 import com.cinemate.movie.MovieRepository;
+import com.cinemate.review.Review;
 import com.cinemate.series.Series;
 import com.cinemate.series.SeriesRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -66,9 +68,7 @@ public class UserService {
      */
     public ResponseEntity<List<User>> getAllUsers() {
         List<User> users = userRepository.findAll();
-
         users.forEach(user -> user.setPassword(null));
-
         return ResponseEntity.ok(users);
     }
 
@@ -91,6 +91,11 @@ public class UserService {
         return ResponseEntity.ok(user.getMovieWatchlist());
     }
 
+    /**
+     * returns the series  in the watchlist of the given user
+     * @param userId
+     * @return List<Series>
+     */
     public ResponseEntity<List<Series>> getSeriesWatchlist(String userId) {
         Optional<User> userOptional = userRepository.findById(userId);
         if (userOptional.isEmpty()) {

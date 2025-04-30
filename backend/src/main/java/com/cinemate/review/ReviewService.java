@@ -184,6 +184,7 @@ public class ReviewService {
     @Transactional
     public boolean deleteReview(String id) {
         Optional<Review> reviewOpt = reviewRepository.findById(id);
+
         if (reviewOpt.isPresent()) {
             Review review = reviewOpt.get();
             String itemId = review.getItemId();

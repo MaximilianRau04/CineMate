@@ -11,9 +11,9 @@ POST http://localhost:8080/api/auth/register
 Content-Type: application/json
 
 {
-"username": "hallo3",
-"password": "hallo3",
-  "email": "hallo1@gmail.com"
+"username": "hallo4",
+"password": "hallo4",
+  "email": "hallo4@gmail.com"
 }
 
 ###
@@ -22,6 +22,9 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYXhpIiwiZXhwIjoxNzQ1MDQyN
 
 ###
 GET http://localhost:8080/api/users
+###
+
+DELETE http://localhost:8080/api/users/68126fcd517c4310fdd375f8
 
 ###
 POST http://localhost:8080/api/movies
@@ -216,11 +219,11 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:8080/api/reviews
+GET http://localhost:8080/api/movies
 
 ###
 
-PUT http://localhost:8080/api/reviews/6811204ce829e374947ebce8
+POST http://localhost:8080/api/reviews/movie/680e7b0923c0b14c9c4811b9/680fb9bf040ad6445d9d4ef7
 Content-Type: application/json
 
 {

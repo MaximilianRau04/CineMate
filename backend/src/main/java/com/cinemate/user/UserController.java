@@ -1,8 +1,12 @@
 package com.cinemate.user;
 
 import com.cinemate.movie.Movie;
+import com.cinemate.review.DTOs.ReviewResponseDTO;
+import com.cinemate.review.Review;
+import com.cinemate.review.ReviewService;
 import com.cinemate.series.Series;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
@@ -14,10 +18,12 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final ReviewService reviewService;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, ReviewService reviewService) {
         this.userService = userService;
+        this.reviewService = reviewService;
     }
 
     /**

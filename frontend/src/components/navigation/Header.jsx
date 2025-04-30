@@ -51,6 +51,11 @@ const Header = () => {
                   Profil
                 </Link>
               </li>
+              <li className="nav-item">
+                <Link className="nav-link" to="/admin">
+                  Admin-Panel
+                </Link>
+              </li>
             </ul>
           )}
 

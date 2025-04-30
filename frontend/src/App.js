@@ -8,7 +8,8 @@ import Login from './components/login/Login';
 import ExplorePage from './components/explore/ExplorePage';
 import MovieDetail from './components/explore/MovieDetail';
 import SeriesDetail from './components/explore/SeriesDetail';
-import Watchlist from './components/explore/Watchlist';
+import Watchlist from './components/profile/Watchlist';
+import UserProfile from './components/profile/UserProfile';
 
 const AppContent = () => {
   const location = useLocation();
@@ -25,6 +26,7 @@ const AppContent = () => {
         <Route path="/movies/:id" element={<MovieDetail />} />
         <Route path="/series/:id" element={<SeriesDetail />} />
         <Route path="/watchlist" element={<Watchlist />} />
+        <Route path="/profile" element={<UserProfile />} />
 
       </Routes>
     </>
