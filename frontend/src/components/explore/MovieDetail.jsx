@@ -28,7 +28,7 @@ const MovieDetail = () => {
   const [editRating, setEditRating] = useState(0);
   const [editComment, setEditComment] = useState("");
   const [editHover, setEditHover] = useState(null);
-  const [reviews, setReviews] = useState([]); 
+  const [reviews, setReviews] = useState([]);
   const [averageRating, setAverageRating] = useState(0);
 
   /**
@@ -81,10 +81,18 @@ const MovieDetail = () => {
   useEffect(() => {
     if (!userId || !movieId) return;
 
-    fetch(`http://localhost:8080/api/users/${userId}/watchlist/movies`, {})
-      .then((res) => res.json())
+    fetch(`http://localhost:8080/api/users/${userId}/watchlist/movies`, {
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`HTTP-Error: ${res.status}`);
+        }
+        return res.json(); 
+      })
       .then((data) => {
-        const alreadyInWatchlist = data.some((m) => m.id.toString() === movieId);
+        const alreadyInWatchlist = data.some(
+          (m) => m.id.toString() === movieId.toString()
+        );
         setAdded(alreadyInWatchlist);
       })
       .catch((err) => console.error("Fehler beim Check der Watchlist:", err));
@@ -98,7 +106,8 @@ const MovieDetail = () => {
   useEffect(() => {
     if (!userId || !movieId) return;
 
-    fetch(`http://localhost:8080/api/reviews/movie/${movieId}/${userId}`, {})
+    fetch(`http://localhost:8080/api/reviews/movie/${movieId}/${userId}`, {
+    })
       .then((res) => {
         if (!res.ok) {
           if (res.status === 404) return null;
@@ -125,7 +134,7 @@ const MovieDetail = () => {
   useEffect(() => {
     if (!movieId) return;
     loadReviews();
-  }, );
+  }, [movieId]);
 
   /**
    * adds the movie to the user's watchlist
@@ -136,14 +145,19 @@ const MovieDetail = () => {
     if (!userId || added) return;
 
     setAdding(true);
-    fetch(`http://localhost:8080/api/users/${userId}/watchlist/movies/${movieId}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Fehler beim Hinzufügen zur Watchlist");
+    fetch(
+      `http://localhost:8080/api/users/${userId}/watchlist/movies/${movieId}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    )
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`HTTP-Error: ${res.status}`);
+        }
         return res.json();
       })
       .then(() => {
@@ -167,7 +181,7 @@ const MovieDetail = () => {
    */
   const calculateAverageRating = (reviews) => {
     if (!reviews || reviews.length === 0) return 0;
-    
+
     const sum = reviews.reduce((acc, review) => acc + review.rating, 0);
     return sum / reviews.length;
   };
@@ -178,18 +192,21 @@ const MovieDetail = () => {
    */
   const loadReviews = async () => {
     try {
-      const response = await fetch(`http://localhost:8080/api/reviews/movie/${movieId}`);
-      if (!response.ok) throw new Error("Bewertungen konnten nicht geladen werden");
+      const response = await fetch(
+        `http://localhost:8080/api/reviews/movie/${movieId}`
+      );
+      if (!response.ok)
+        throw new Error("Bewertungen konnten nicht geladen werden");
       const data = await response.json();
       setReviews(data);
-      
+
       const newAverageRating = calculateAverageRating(data);
       setAverageRating(newAverageRating);
 
       if (movie) {
         setMovie({
           ...movie,
-          rating: newAverageRating
+          rating: newAverageRating,
         });
       }
     } catch (error) {
@@ -230,7 +247,7 @@ const MovieDetail = () => {
         if (data && data.id) {
           setReviewId(data.id);
         }
-   
+
         loadReviews();
       })
       .catch((err) => {
@@ -278,7 +295,7 @@ const MovieDetail = () => {
         setComment(editComment);
         setShowEditModal(false);
         setSubmitting(false);
-        
+
         loadReviews();
       })
       .catch((err) => {
@@ -300,6 +317,9 @@ const MovieDetail = () => {
 
     fetch(`http://localhost:8080/api/reviews/${reviewId}`, {
       method: "DELETE",
+      headers: {
+        "Authorization": `Bearer ${localStorage.getItem("token")}`,
+      }
     })
       .then((res) => {
         if (!res.ok) throw new Error("Fehler beim Löschen der Bewertung");
@@ -400,7 +420,8 @@ const MovieDetail = () => {
             </div>
 
             <p className="text-muted mb-2">
-              <strong>Bewertung:</strong> <span className="d-inline-flex align-items-center">
+              <strong>Bewertung:</strong>{" "}
+              <span className="d-inline-flex align-items-center">
                 {renderStars(averageRating)}
                 <span className="ms-2">({averageRating.toFixed(1)}/5)</span>
               </span>
@@ -506,7 +527,7 @@ const MovieDetail = () => {
               <div className="alert alert-info mt-4">
                 <h5>⭐ Deine bisherige Bewertung</h5>
                 <p>
-                  Bewertung: {renderStars(averageRating)}
+                  Bewertung: {renderStars(rating)}
                   {comment && (
                     <>
                       <br />
@@ -561,11 +582,21 @@ const MovieDetail = () => {
             {reviews.map((review) => (
               <div key={review.id} className="border rounded p-3 mb-3">
                 <div className="d-flex justify-content-between align-items-center mb-2">
-                  <strong>{review.user?.username || "Unbekannter Nutzer"}</strong>
+                  <strong>
+                    {review.user?.username || "Unbekannter Nutzer"}
+                  </strong>
                   <span className="text-muted" style={{ fontSize: "0.9em" }}>
-                    {review.date 
-                      ? new Date(review.date).toLocaleDateString('de-DE', {day: '2-digit', month: '2-digit', year: 'numeric'}) 
-                      : new Date(review.createdAt).toLocaleDateString('de-DE', {day: '2-digit', month: '2-digit', year: 'numeric'})}
+                    {review.date
+                      ? new Date(review.date).toLocaleDateString("de-DE", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
+                        })
+                      : new Date(review.createdAt).toLocaleDateString("de-DE", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
+                        })}
                   </span>
                 </div>
                 <div className="mb-2">
@@ -583,7 +614,9 @@ const MovieDetail = () => {
       {reviews && reviews.length === 0 && (
         <div className="card mt-4 shadow-sm">
           <div className="card-body text-center py-4">
-            <p className="text-muted mb-0">Noch keine Bewertungen für diesen Film.</p>
+            <p className="text-muted mb-0">
+              Noch keine Bewertungen für diesen Film.
+            </p>
           </div>
         </div>
       )}

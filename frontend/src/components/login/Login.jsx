@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../../assets/login.css";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 /**
  * LoginForm component for user authentication
@@ -14,6 +15,7 @@ const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   /**
    * function to handle user login
@@ -129,19 +131,32 @@ const LoginForm = () => {
           )}
 
           {/* password */}
-          <div className="mb-3">
+          <div className="mb-3 position-relative">
             <label htmlFor="password" className="form-label">
               Passwort
             </label>
             <input
-              type="password"
-              className="form-control"
+              type={showPassword ? "text" : "password"}
+              className="form-control pe-5" 
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               placeholder="Passwort"
             />
+            <span
+              onClick={() => setShowPassword(!showPassword)}
+              style={{
+                position: "absolute",
+                top: "70%",
+                right: "10px",
+                transform: "translateY(-50%)",
+                cursor: "pointer",
+                color: "#6c757d", 
+              }}
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </span>
           </div>
 
           {/* submit button */}

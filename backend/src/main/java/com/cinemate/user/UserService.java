@@ -122,8 +122,19 @@ public class UserService {
      * @return User
      */
     public ResponseEntity<User> updateUser(String id, User updatedUser) {
-        updatedUser.setId(id);
-        return ResponseEntity.ok(userRepository.save(updatedUser));
+        Optional<User> optionalUser = userRepository.findById(id);
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        User existingUser = optionalUser.get();
+
+        if (updatedUser.getUsername() != null) existingUser.setUsername(updatedUser.getUsername());
+        if (updatedUser.getPassword() != null) existingUser.setPassword(updatedUser.getPassword());
+        if (updatedUser.getEmail() != null) existingUser.setEmail(updatedUser.getEmail());
+        if (updatedUser.getBio() != null) existingUser.setBio(updatedUser.getBio());
+        if (updatedUser.getAvatarUrl() != null) existingUser.setAvatarUrl(updatedUser.getAvatarUrl());
+
+        return ResponseEntity.ok(userRepository.save(existingUser));
     }
 
     /**

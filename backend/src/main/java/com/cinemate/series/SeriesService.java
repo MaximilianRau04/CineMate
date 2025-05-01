@@ -1,5 +1,6 @@
 package com.cinemate.series;
 
+import com.cinemate.movie.Movie;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -30,8 +31,20 @@ public class SeriesService {
     }
 
     public ResponseEntity<Series> updateSeries(String id, Series updatedSeries) {
-        updatedSeries.setId(id);
-        return ResponseEntity.ok(seriesRepository.save(updatedSeries));
+        Optional<Series> optionalSeries = seriesRepository.findById(id);
+        if (optionalSeries.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        Series existingSeries = optionalSeries.get();
+
+        if (updatedSeries.getTitle() != null) existingSeries.setTitle(updatedSeries.getTitle());
+        if (updatedSeries.getDescription() != null) existingSeries.setDescription(updatedSeries.getDescription());
+        if (updatedSeries.getReleaseDate() != null) existingSeries.setReleaseDate(updatedSeries.getReleaseDate());
+        if (updatedSeries.getGenre() != null) existingSeries.setGenre(updatedSeries.getGenre());
+        if (updatedSeries.getSeasons() != null) existingSeries.setSeasons(updatedSeries.getSeasons());
+        if(updatedSeries.getPosterUrl() != null) existingSeries.setPosterUrl(updatedSeries.getPosterUrl());
+
+        return ResponseEntity.ok(seriesRepository.save(existingSeries));
     }
 
     public void deleteSeries(String id) {

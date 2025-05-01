@@ -5,11 +5,14 @@ import com.cinemate.series.Series;
 import jakarta.persistence.ManyToMany;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Document(collection = "users")
 public class User {
@@ -18,6 +21,7 @@ public class User {
     private String id;
     @NotNull
     private String username;
+    @Size(min = 6, max = 40)
     @NotNull
     private String password;
     @Email
@@ -41,8 +45,8 @@ public class User {
         this.bio = bio;
         this.avatarUrl = avatarUrl;
         this.joinedAt = joinedAt;
-        this.movieWatchlist = movieWatchlist;
-        this.seriesWatchlist = seriesWatchlist;
+        this.movieWatchlist = new ArrayList<>();;
+        this.seriesWatchlist = new ArrayList<>();;
     }
 
     public String getId() {
@@ -136,4 +140,5 @@ public class User {
     public void removeSeriesFromWatchlist(Series series) {
         seriesWatchlist.removeIf(m -> m.getId().equals(series.getId()));
     }
+
 }

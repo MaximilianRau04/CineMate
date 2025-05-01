@@ -29,10 +29,21 @@ public class MovieService {
         return ResponseEntity.ok(movieRepository.save(movie));
     }
 
-
     public ResponseEntity<Movie> updateMovie(String id, Movie updatedMovie) {
-        updatedMovie.setId(id);
-        return ResponseEntity.ok(movieRepository.save(updatedMovie));
+        Optional<Movie> optionalMovie = movieRepository.findById(id);
+        if (optionalMovie.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        Movie existingMovie = optionalMovie.get();
+
+        if (updatedMovie.getTitle() != null) existingMovie.setTitle(updatedMovie.getTitle());
+        if (updatedMovie.getDescription() != null) existingMovie.setDescription(updatedMovie.getDescription());
+        if (updatedMovie.getReleaseDate() != null) existingMovie.setReleaseDate(updatedMovie.getReleaseDate());
+        if (updatedMovie.getGenre() != null) existingMovie.setGenre(updatedMovie.getGenre());
+        if (updatedMovie.getDuration() != null) existingMovie.setDuration(updatedMovie.getDuration());
+        if(updatedMovie.getPosterUrl() != null) existingMovie.setPosterUrl(updatedMovie.getPosterUrl());
+
+        return ResponseEntity.ok(movieRepository.save(existingMovie));
     }
 
     public void deleteMovie(String id) {

@@ -138,24 +138,27 @@ const SeriesDetail = () => {
       .catch((err) => console.error("Fehler beim Laden der Bewertungen:", err));
   }, [seriesId]);
 
-   /**
+  /**
    * fetches all reviews of a series
    * @returns {Promise<void>}
    */
-   const loadReviews = async () => {
+  const loadReviews = async () => {
     try {
-      const response = await fetch(`http://localhost:8080/api/reviews/series/${seriesId}`);
-      if (!response.ok) throw new Error("Bewertungen konnten nicht geladen werden");
+      const response = await fetch(
+        `http://localhost:8080/api/reviews/series/${seriesId}`
+      );
+      if (!response.ok)
+        throw new Error("Bewertungen konnten nicht geladen werden");
       const data = await response.json();
       setReviews(data);
-      
+
       const newAverageRating = calculateAverageRating(data);
       setAverageRating(newAverageRating);
-      
+
       if (series) {
         setSeries({
           ...series,
-          rating: newAverageRating
+          rating: newAverageRating,
         });
       }
     } catch (error) {
@@ -166,7 +169,7 @@ const SeriesDetail = () => {
   useEffect(() => {
     if (!seriesId) return;
     loadReviews();
-  });
+  }, [seriesId]);
 
   /**
    * Calculates the new average rating based on reviews
@@ -175,11 +178,10 @@ const SeriesDetail = () => {
    */
   const calculateAverageRating = (reviews) => {
     if (!reviews || reviews.length === 0) return 0;
-    
+
     const sum = reviews.reduce((acc, review) => acc + review.rating, 0);
     return sum / reviews.length;
   };
-
 
   /**
    * adds the series to the user's watchlist
@@ -297,7 +299,7 @@ const SeriesDetail = () => {
         setSubmitting(false);
 
         loadReviews();
-      }) 
+      })
       .catch((err) => {
         console.error(err);
         setSubmitting(false);
@@ -411,7 +413,8 @@ const SeriesDetail = () => {
             </div>
 
             <p className="text-muted mb-2">
-              <strong>Bewertung:</strong> <span className="d-inline-flex align-items-center">
+              <strong>Bewertung:</strong>{" "}
+              <span className="d-inline-flex align-items-center">
                 {renderStars(averageRating)}
                 <span className="ms-2">({averageRating.toFixed(1)}/5)</span>
               </span>
@@ -676,6 +679,7 @@ const SeriesDetail = () => {
         </div>
       )}
 
+      {/* Review edit modal */}
       {showEditModal && (
         <div
           className="modal fade show d-block"
@@ -764,7 +768,6 @@ const SeriesDetail = () => {
           </div>
         </div>
       )}
-
     </div>
   );
 };

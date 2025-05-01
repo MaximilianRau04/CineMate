@@ -30,7 +30,7 @@ const UserProfile = () => {
   if (error)
     return <p className="text-center text-danger mt-5">❌ Fehler: {error}</p>;
 
-  const { id, username, email, bio, avatarUrl, joinedAt } = user;
+  const { username, email, bio, avatarUrl, joinedAt } = user;
   const fallbackAvatar = "https://via.placeholder.com/150?text=Kein+Bild";
 
   const formattedDate = new Date(joinedAt).toLocaleDateString("de-DE", {
@@ -68,9 +68,6 @@ const UserProfile = () => {
             )}
             <p className="text-muted mb-0">
               <strong>Beigetreten:</strong> {formattedDate}
-            </p>
-            <p className="text-muted">
-              <strong>User ID:</strong> {id}
             </p>
           </div>
         </div>

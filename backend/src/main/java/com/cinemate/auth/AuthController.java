@@ -26,6 +26,9 @@ public class AuthController {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     /**
      * registers an user
      * @param user
@@ -41,13 +44,11 @@ public class AuthController {
             return ResponseEntity.badRequest().body("Email already in use");
         }
 
-        user.setJoinedAt(new Date());
-        PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setJoinedAt(new Date());
         userRepository.save(user);
         return ResponseEntity.ok("User registered successfully");
     }
-
     /**
      * user login via username and password
      * @param user
@@ -57,7 +58,8 @@ public class AuthController {
     public ResponseEntity<?> loginUser(@RequestBody User user) {
         Optional<User> existingUser = userRepository.findByUsername(user.getUsername());
 
-        if (existingUser.isEmpty() || !existingUser.get().getPassword().equals(user.getPassword())) {
+        if (existingUser.isEmpty() ||
+                !passwordEncoder.matches(user.getPassword(), existingUser.get().getPassword())) {
             return ResponseEntity.status(401).body("Invalid credentials");
         }
 

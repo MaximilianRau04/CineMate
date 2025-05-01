@@ -1,5 +1,6 @@
 package com.cinemate.movie;
 
+import jakarta.validation.constraints.NotNull;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -10,6 +11,7 @@ public class Movie {
 
     @Id
     private String id;
+    @NotNull
     private String title;
     private String description;
     private String genre;

@@ -2,8 +2,8 @@ POST http://localhost:8080/api/auth/login
 Content-Type: application/json
 
 {
-  "username": "hallo2",
-  "password": "hallo2"
+  "username": "maxi",
+  "password": "1234567"
 }
 
 ###
@@ -11,9 +11,17 @@ POST http://localhost:8080/api/auth/register
 Content-Type: application/json
 
 {
-"username": "hallo4",
-"password": "hallo4",
-  "email": "hallo4@gmail.com"
+"username": "maxi",
+"password": "1234567",
+  "email": "maxi@gmail.com",
+  "bio": "Wuzz up"
+}
+###
+PUT http://localhost:8080/api/users/6813a9c6a70428033d933986
+Content-Type: application/json
+
+{
+  "avatarUrl": "https://api.dicebear.com/7.x/bottts/svg?seed=USERNAME"
 }
 
 ###
@@ -24,7 +32,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYXhpIiwiZXhwIjoxNzQ1MDQyN
 GET http://localhost:8080/api/users
 ###
 
-DELETE http://localhost:8080/api/users/68126fcd517c4310fdd375f8
+DELETE http://localhost:8080/api/users/6813a8eaf4f96f556a24061b
 
 ###
 POST http://localhost:8080/api/movies
@@ -107,18 +115,18 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:8080/api/users/67fd70fdf86b765965cfa2cb/watchlist/movies
+GET http://localhost:8080/api/users/680e7be823c0b14c9c4811c0/watchlist/movies
 
 ###
-PUT http://localhost:8080/api/users/67fd70fdf86b765965cfa2cb/watchlist/movies/67fd703bf86b765965cfa2c5
+PUT http://localhost:8080/api/users/6813a9c6a70428033d933986/watchlist/movies/680e7b0923c0b14c9c4811b9
 Content-Type: application/json
 
 ###
-PUT http://localhost:8080/api/users/67fd70fdf86b765965cfa2cb/watchlist/series/680bdb533ee10e7e79fa82b3
+PUT http://localhost:8080/api/users/6813a9c6a70428033d933986/watchlist/series/680bdb533ee10e7e79fa82b3
 Content-Type: application/json
 
 ###
-GET http://localhost:8080/api/users/67fd70fdf86b765965cfa2cb/watchlist/series
+GET http://localhost:8080/api/users/6813a9c6a70428033d933986/watchlist/series
 
 ###
 DELETE http://localhost:8080/api/users/67fd70fdf86b765965cfa2cb/watchlist/67fd703bf86b765965cfa2c5
