@@ -6,13 +6,21 @@ import com.cinemate.review.Review;
 import com.cinemate.series.Series;
 import com.cinemate.series.SeriesRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -121,18 +129,31 @@ public class UserService {
      * @param updatedUser
      * @return User
      */
-    public ResponseEntity<User> updateUser(String id, User updatedUser) {
+    public ResponseEntity<User> updateUser(String id, User updatedUser, MultipartFile avatar) {
         Optional<User> optionalUser = userRepository.findById(id);
         if (optionalUser.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
+
         User existingUser = optionalUser.get();
 
         if (updatedUser.getUsername() != null) existingUser.setUsername(updatedUser.getUsername());
         if (updatedUser.getPassword() != null) existingUser.setPassword(updatedUser.getPassword());
         if (updatedUser.getEmail() != null) existingUser.setEmail(updatedUser.getEmail());
         if (updatedUser.getBio() != null) existingUser.setBio(updatedUser.getBio());
-        if (updatedUser.getAvatarUrl() != null) existingUser.setAvatarUrl(updatedUser.getAvatarUrl());
+
+        if (avatar != null && !avatar.isEmpty()) {
+            try {
+                String filename = UUID.randomUUID() + "_" + avatar.getOriginalFilename();
+                Path path = Paths.get("uploads").resolve(filename);
+                Files.createDirectories(path.getParent());
+                Files.copy(avatar.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+
+                existingUser.setAvatarUrl("/uploads/" + filename);
+            } catch (IOException e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
+        }
 
         return ResponseEntity.ok(userRepository.save(existingUser));
     }

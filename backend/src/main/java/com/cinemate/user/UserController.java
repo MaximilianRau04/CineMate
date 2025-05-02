@@ -7,9 +7,11 @@ import com.cinemate.review.ReviewService;
 import com.cinemate.series.Series;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -77,9 +79,13 @@ public class UserController {
         return userService.createUser(user);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable String id, @RequestBody User user) {
-        return userService.updateUser(id, user);
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<User> updateUser(
+            @PathVariable String id,
+            @RequestPart("user") User updatedUser,
+            @RequestPart(value = "avatar", required = false) MultipartFile avatar
+    ) {
+        return userService.updateUser(id, updatedUser, avatar);
     }
 
     /**
