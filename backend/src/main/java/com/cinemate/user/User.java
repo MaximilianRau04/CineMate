@@ -45,8 +45,8 @@ public class User {
         this.bio = bio;
         this.avatarUrl = avatarUrl;
         this.joinedAt = joinedAt;
-        this.movieWatchlist = new ArrayList<>();;
-        this.seriesWatchlist = new ArrayList<>();;
+        this.movieWatchlist = movieWatchlist;
+        this.seriesWatchlist = seriesWatchlist;
     }
 
     public String getId() {

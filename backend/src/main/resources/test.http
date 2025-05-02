@@ -115,7 +115,7 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:8080/api/users/680e7be823c0b14c9c4811c0/watchlist/movies
+GET http://localhost:8080/api/users/6813a9c6a70428033d933986/watchlist/movies
 
 ###
 PUT http://localhost:8080/api/users/6813a9c6a70428033d933986/watchlist/movies/680e7b0923c0b14c9c4811b9
@@ -132,7 +132,7 @@ GET http://localhost:8080/api/users/6813a9c6a70428033d933986/watchlist/series
 DELETE http://localhost:8080/api/users/67fd70fdf86b765965cfa2cb/watchlist/67fd703bf86b765965cfa2c5
 
 ###
-GET http://localhost:8080/api/series
+GET http://localhost:8080/api/users
 
 ###
 POST http://localhost:8080/api/series
