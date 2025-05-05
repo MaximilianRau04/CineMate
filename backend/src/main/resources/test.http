@@ -100,7 +100,10 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:8080/api/movies
+GET http://localhost:8080/api/users
+
+###
+GET http://localhost:8080/api/reviews/user/6813a9c6a70428033d933986
 
 ###
 DELETE http://localhost:8080/api/movies/67fd6c6db9c65836190d6085

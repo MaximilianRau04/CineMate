@@ -20,12 +20,10 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
-    private final ReviewService reviewService;
 
     @Autowired
-    public UserController(UserService userService, ReviewService reviewService) {
+    public UserController(UserService userService) {
         this.userService = userService;
-        this.reviewService = reviewService;
     }
 
     /**

@@ -7,12 +7,18 @@ const UserProfile = () => {
   const [bio, setBio] = useState("");
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
-  const [saving, setSaving] = useState(false);
+  const [setSaving] = useState(false);
   const [userId, setUserId] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [modalBio, setModalBio] = useState("");
   const fileInputRef = useRef(null);
+  const [reviews, setReviews] = useState([]);
 
+  /**
+   * * Fetches the user data from the API and sets the user state.
+   * * @returns {void}
+   * * @throws {Error} If the user data cannot be fetched.
+   */
   useEffect(() => {
     fetch("http://localhost:8080/api/users/me", {
       headers: {
@@ -36,6 +42,33 @@ const UserProfile = () => {
       });
   }, []);
 
+  /**
+   * fetches the reviews of the user from the API and sets the reviews state.
+   * @returns {void}
+   * @throws {Error} If the reviews cannot be fetched.
+   */
+  useEffect(() => {
+    if (!userId) return;
+
+    fetch(`http://localhost:8080/api/reviews/user/${userId}`, {})
+      .then((res) => {
+        if (!res.ok) throw new Error("Konnte Reviews nicht laden.");
+        return res.json();
+      })
+      .then((data) => {
+        setReviews(data);
+      })
+      .catch((err) => {
+        console.error("Fehler beim Laden der Reviews:", err.message);
+      });
+  }, [userId]);
+
+  /**
+   * updates the user profile with the new bio and avatar.
+   * @param {*} e
+   * @returns {void}
+   * @throws {Error} If the profile cannot be updated.
+   */
   const handleProfileUpdate = (e) => {
     e.preventDefault();
     if (!userId) return;
@@ -208,10 +241,47 @@ const UserProfile = () => {
               <strong>Beigetreten:</strong> {formattedDate}
             </p>
             <form onSubmit={handleProfileUpdate}></form>
+            <div className="mt-4">
+              <h5>📝 Bewertungen</h5>
+              <div
+                className="review-container border rounded p-3 bg-light"
+                style={{
+                  maxHeight: "200px", 
+                  overflowY: "auto",
+                }}
+              >
+                {reviews.length > 0 ? (
+                  <ul className="list-group list-group-flush">
+                    {reviews.map((review) => (
+                      <li key={review.id} className="list-group-item">
+                        <strong>
+                        🎬 {review.movie?.title || review.series?.title}
+                        </strong>
+                        <div className="mb-1">⭐ {review.rating} / 5</div>
+                        <p className="mb-1">
+                          {review.comment || "Kein Kommentar vorhanden."}
+                        </p>
+                        <small className="text-muted">
+                          Bewertet am:{" "}
+                          {new Date(review.date).toLocaleDateString("de-DE", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })}
+                        </small>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-muted fst-italic mb-0">
+                    Noch keine Bewertungen.
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
-
       {/* Bio Edit Modal */}
       {showModal && (
         <div
