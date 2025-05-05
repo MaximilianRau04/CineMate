@@ -35,6 +35,8 @@ public class User {
     private List<Series> seriesWatchlist;
     // private List<Movie> favorites;
     // private List<Movie> watched;
+    // private List<User> followers
+    // private List<User> following;
 
 
     public User(String id, String username, String password, String email, String bio, String avatarUrl, Date joinedAt, List<Movie> movieWatchlist, List<Series> seriesWatchlist) {

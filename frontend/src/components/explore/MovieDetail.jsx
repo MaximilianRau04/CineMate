@@ -134,7 +134,7 @@ const MovieDetail = () => {
   useEffect(() => {
     if (!movieId) return;
     loadReviews();
-  }, [movieId]);
+  },);
 
   /**
    * adds the movie to the user's watchlist

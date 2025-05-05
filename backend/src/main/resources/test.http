@@ -85,6 +85,30 @@ Content-Type: application/json
   "duration": "2h 19m",
   "posterUrl": "https://image.tmdb.org/t/p/w500/bptfVGEQuv6vDTIMVCHjJ9Dz8PX.jpg"
 }
+###
+POST http://localhost:8080/api/movies
+Content-Type: application/json
+
+{
+  "title": "Avengers: Dommsday",
+  "description": "Nicht verfügbar",
+  "genre": "Action",
+  "releaseDate": "2026-05-01",
+  "duration": "2h",
+  "posterUrl": "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/6eB2oh1SplddsZYCdayrIdrIGLd.jpg"
+}
+###
+POST http://localhost:8080/api/movies
+Content-Type: application/json
+
+{
+  "title": "Avengers: Secret Wars",
+  "description": "Nicht verfügbar",
+  "genre": "Action",
+  "releaseDate": "2027-05-05",
+  "duration": "2h",
+  "posterUrl": "https://media.themoviedb.org/t/p/w300_and_h450_bestv2/f0YBuh4hyiAheXhh4JnJWoKi9g5.jpg"
+}
 
 ###
 POST http://localhost:8080/api/movies

@@ -10,6 +10,7 @@ import MovieDetail from './components/explore/MovieDetail';
 import SeriesDetail from './components/explore/SeriesDetail';
 import Watchlist from './components/profile/Watchlist';
 import UserProfile from './components/profile/UserProfile';
+import MovieCalender from './components/explore/MovieCalender';
 
 const AppContent = () => {
   const location = useLocation();
@@ -27,6 +28,7 @@ const AppContent = () => {
         <Route path="/series/:id" element={<SeriesDetail />} />
         <Route path="/watchlist" element={<Watchlist />} />
         <Route path="/profile" element={<UserProfile />} />
+        <Route path="/calendar" element={<MovieCalender />} />
 
       </Routes>
     </>
