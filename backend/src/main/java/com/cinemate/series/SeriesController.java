@@ -69,4 +69,141 @@ public class SeriesController {
         seriesService.deleteSeries(id);
         return ResponseEntity.noContent().build();
     }
+
+    /**
+     * returns all seasons from a series
+     * @param id
+     * @return ResponseEntity<List<Series.Season>>
+     */
+    @GetMapping("/{id}/seasons")
+    public ResponseEntity<List<Series.Season>> getSeasons(@PathVariable String id) {
+        return seriesService.getSeasons(id);
+    }
+
+    /**
+     * returns all seasons from a series
+     * @param id
+     * @param seasonNumber
+     * @return ResponseEntity<Series.Season>
+     */
+    @GetMapping("/{id}/seasons/{seasonNumber}")
+    public ResponseEntity<Series.Season> getSeason(
+            @PathVariable String id,
+            @PathVariable int seasonNumber) {
+        return seriesService.getSeason(id, seasonNumber);
+    }
+
+    /**
+     * adds a season to a series
+     * @param id
+     * @param season
+     * @return ResponseEntity<Series>
+     */
+    @PostMapping("/{id}/seasons")
+    public ResponseEntity<Series> addSeason(
+            @PathVariable String id,
+            @RequestBody Series.Season season) {
+        return seriesService.addSeason(id, season);
+    }
+
+    /**
+     * updates a season of a series
+     * @param id
+     * @param seasonNumber
+     * @param season
+     * @return ResponseEntity<Series>
+     */
+    @PutMapping("/{id}/seasons/{seasonNumber}")
+    public ResponseEntity<Series> updateSeason(
+            @PathVariable String id,
+            @PathVariable int seasonNumber,
+            @RequestBody Series.Season season) {
+        return seriesService.updateSeason(id, seasonNumber, season);
+    }
+
+    /**
+     * deletes a season from a series
+     * @param id
+     * @param seasonNumber
+     * @return ResponseEntity<Series>
+     */
+    @DeleteMapping("/{id}/seasons/{seasonNumber}")
+    public ResponseEntity<Series> deleteSeason(
+            @PathVariable String id,
+            @PathVariable int seasonNumber) {
+        return seriesService.deleteSeason(id, seasonNumber);
+    }
+
+    /**
+     * returns all episodes of a season from a series
+     * @param id
+     * @param seasonNumber
+     * @return ResponseEntity<List<Series.Episode>>
+     */
+    @GetMapping("/{id}/seasons/{seasonNumber}/episodes")
+    public ResponseEntity<List<Series.Episode>> getEpisodes(
+            @PathVariable String id,
+            @PathVariable int seasonNumber) {
+        return seriesService.getEpisodes(id, seasonNumber);
+    }
+
+    /**
+     * returns a specific episode of a season from a series
+     * @param id
+     * @param seasonNumber
+     * @return ResponseEntity<Series.Episode>
+     */
+    @GetMapping("/{id}/seasons/{seasonNumber}/episodes/{episodeNumber}")
+    public ResponseEntity<Series.Episode> getEpisode(
+            @PathVariable String id,
+            @PathVariable int seasonNumber,
+            @PathVariable int episodeNumber) {
+        return seriesService.getEpisode(id, seasonNumber, episodeNumber);
+    }
+
+    /**
+     * adds an episode to a season of a series
+     * @param id
+     * @param seasonNumber
+     * @return ResponseEntity<Series.Episode>
+     */
+    @PostMapping("/{id}/seasons/{seasonNumber}/episodes")
+    public ResponseEntity<Series> addEpisode(
+            @PathVariable String id,
+            @PathVariable int seasonNumber,
+            @RequestBody Series.Episode episode) {
+        return seriesService.addEpisode(id, seasonNumber, episode);
+    }
+
+    /**
+     * updates an episode of a season of a series
+     * @param id
+     * @param seasonNumber
+     * @param episodeNumber
+     * @param episode
+     * @return ResponseEntity<Series>
+     */
+    @PutMapping("/{id}/seasons/{seasonNumber}/episodes/{episodeNumber}")
+    public ResponseEntity<Series> updateEpisode(
+            @PathVariable String id,
+            @PathVariable int seasonNumber,
+            @PathVariable int episodeNumber,
+            @RequestBody Series.Episode episode) {
+        return seriesService.updateEpisode(id, seasonNumber, episodeNumber, episode);
+    }
+
+    /**
+     * delets an episode of a season from a series
+     * @param id
+     * @param seasonNumber
+     * @param episodeNumber
+     * @return ResponseEntity<Series>
+     */
+    @DeleteMapping("/{id}/seasons/{seasonNumber}/episodes/{episodeNumber}")
+    public ResponseEntity<Series> deleteEpisode(
+            @PathVariable String id,
+            @PathVariable int seasonNumber,
+            @PathVariable int episodeNumber) {
+        return seriesService.deleteEpisode(id, seasonNumber, episodeNumber);
+    }
 }

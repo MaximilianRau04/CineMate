@@ -159,7 +159,7 @@ GET http://localhost:8080/api/users/6813a9c6a70428033d933986/watchlist/series
 DELETE http://localhost:8080/api/users/67fd70fdf86b765965cfa2cb/watchlist/67fd703bf86b765965cfa2c5
 
 ###
-GET http://localhost:8080/api/users
+GET http://localhost:8080/api/series
 
 ###
 POST http://localhost:8080/api/series
@@ -204,7 +204,36 @@ Content-Type: application/json
   ]
 }
 ###
+PUT http://localhost:8080/api/series/680e7b2023c0b14c9c4811bb
+Content-Type: application/json
 
+{
+  "seasons": [
+    {
+      "seasonNumber": 5,
+      "episodes": [
+        {
+          "episodeNumber": 1,
+          "title": "Chapter One: The Beginning of the End",
+          "duration": "52m",
+          "releaseDate": "2025-11-07T00:00:00.000+00:00",
+          "description": "Die Kleinstadt Hawkins steht vor ihrer bisher größten Bedrohung.",
+          "posterUrl": "https://image.tmdb.org/t/p/original/future_episode_1.jpg"
+        },
+        {
+          "episodeNumber": 2,
+          "title": "Chapter Two: Echoes from the Upside Down",
+          "duration": "50m",
+          "releaseDate": "2025-11-14T00:00:00.000+00:00",
+          "description": "El und ihre Freunde versuchen, das Tor zur anderen Seite endgültig zu schließen.",
+          "posterUrl": "https://image.tmdb.org/t/p/original/future_episode_2.jpg"
+        }
+      ]
+    }
+  ]
+}
+
+###
 POST http://localhost:8080/api/series
 Content-Type: application/json
 
@@ -242,6 +271,17 @@ Content-Type: application/json
   "duration": "1h",
   "posterUrl": "https://image.tmdb.org/t/p/w500/7vjaCdMw15FEbXyLQTVa04URsPm.jpg"
 }
+###
+POST http://localhost:8080/api/series
+Content-Type: application/json
+
+{
+  "title": "Squid Game",
+  "description": "Verschuldete Menschen kämpfen um Leben und Tod.",
+  "genre": "Drama, Thriller",
+  "releaseDate": "2021-09-17",
+  "posterUrl": "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/f6Rq4kq0ZrXe8Vtu4kdPVX4VmLs.jpg"
+}
 
 ###
 POST http://localhost:8080/api/reviews/movie/680e7b0723c0b14c9c4811b8/680fb9bf040ad6445d9d4ef7
@@ -252,9 +292,11 @@ Content-Type: application/json
   "comment": "Ein fantastischer Film!",
   "type": "movie"
 }
+###
+DELETE http://localhost:8080/api/series/680e7b2023c0b14c9c4811bb/seasons/1/episodes/0
 
 ###
-GET http://localhost:8080/api/movies
+GET http://localhost:8080/api/series/680e7b2023c0b14c9c4811bb/seasons
 
 ###
 
