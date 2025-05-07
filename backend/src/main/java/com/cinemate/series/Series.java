@@ -1,5 +1,7 @@
 package com.cinemate.series;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -11,13 +13,16 @@ public class Series {
 
     @Id
     private String id;
+    @NotNull
     private String title;
     private String description;
     private String genre;
     private double rating;
     private int reviewCount;
+    @NotNull
     private Date releaseDate;
     private String posterUrl;
+    @JsonBackReference
     private List<Season> seasons;
 
     public Series(String id, String title, String description, String genre, double rating, int reviewCount, Date releaseDate, String posterUrl, List<Season> seasons) {

@@ -16,7 +16,8 @@ public class Movie {
     private String description;
     private String genre;
     private double rating ;
-    private int reviewCount ;
+    private int reviewCount;
+    @NotNull
     private Date releaseDate;
     private String duration;
     private String posterUrl;

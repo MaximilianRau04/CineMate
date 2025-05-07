@@ -1,5 +1,6 @@
 package com.cinemate.review;
 
+import jakarta.validation.constraints.NotNull;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -10,7 +11,9 @@ public class Review {
 
     @Id
     private java.lang.String id;
+    @NotNull
     private java.lang.String userId;
+    @NotNull
     private java.lang.String itemId;
     private double rating;
     private java.lang.String comment;

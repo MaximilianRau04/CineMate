@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FaCalendarAlt, FaArrowRight, FaSpinner, FaFilter, FaTimes } from "react-icons/fa";
+import { FaCalendarAlt, FaArrowRight, FaSpinner, FaFilter, FaTimes, FaSearch } from "react-icons/fa";
 
-const MovieCalendar = () => {
+const Calendar = () => {
   const [movies, setMovies] = useState([]);
   const [series, setSeries] = useState([]);
   const [filteredMovies, setFilteredMovies] = useState([]);
@@ -10,10 +10,9 @@ const MovieCalendar = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
-  
-  // Filter states
-  const [contentType, setContentType] = useState("all"); // "all", "movies", "series"
+  const [contentType, setContentType] = useState("all"); 
   const [selectedGenres, setSelectedGenres] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [dateRange, setDateRange] = useState({
     start: "",
     end: ""
@@ -36,7 +35,6 @@ const MovieCalendar = () => {
 
         const data = await response.json();
 
-        // Filter movies with release dates today or in the future
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
@@ -46,17 +44,23 @@ const MovieCalendar = () => {
           return releaseDate >= today;
         });
 
-        // Sort by release date (nearest first)
         upcomingMovies.sort((a, b) => {
           return new Date(a.releaseDate) - new Date(b.releaseDate);
         });
 
-        setMovies(upcomingMovies);
-        setFilteredMovies(upcomingMovies);
+        const processedMovies = upcomingMovies.map(movie => {
+          const genreArray = movie.genre ? movie.genre.split(/,\s*/) : [];
+          return { ...movie, genreArray };
+        });
+
+        setMovies(processedMovies);
+        setFilteredMovies(processedMovies);
         
-        // Extract unique genres from movies
-        const genres = [...new Set(upcomingMovies.map(movie => movie.genre).filter(Boolean))];
-        setAvailableGenres(prev => [...new Set([...prev, ...genres])]);
+        const allGenres = processedMovies
+          .flatMap(movie => movie.genreArray)
+          .filter(Boolean);
+        
+        setAvailableGenres(prev => [...new Set([...prev, ...allGenres])]);
         
         setIsLoading(false);
       } catch (err) {
@@ -70,7 +74,7 @@ const MovieCalendar = () => {
   }, []);
 
   /**
-   * Fetches series from the API and filter them to show only those with release dates today or in the future.
+   * Fetches series list from the API
    */
   useEffect(() => {
     const fetchSeries = async () => {
@@ -82,13 +86,34 @@ const MovieCalendar = () => {
           throw new Error("Serien konnten nicht geladen werden");
         }
 
-        const data = await response.json();
+        const seriesList = await response.json();
+        
+        const seriesWithSeasons = await Promise.all(
+          seriesList.map(async (seriesItem) => {
+            try {
+              const seasonsResponse = await fetch(`http://localhost:8080/api/series/${seriesItem.id}/seasons`);
+              
+              if (!seasonsResponse.ok) {
+                console.error(`Fehler beim Laden der Staffeln für Serie ${seriesItem.id}`);
+                return { ...seriesItem, seasons: [] };
+              }
+              
+              const seasons = await seasonsResponse.json();
+     
+              const genreArray = seriesItem.genre ? seriesItem.genre.split(/,\s*/) : [];
+              
+              return { ...seriesItem, seasons, genreArray };
+            } catch (error) {
+              console.error(`Fehler beim Laden der Staffeln für Serie ${seriesItem.id}:`, error);
+              return { ...seriesItem, seasons: [] };
+            }
+          })
+        );
 
-        // Filter series with release dates today or in the future
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        const upcomingSeries = data
+        const upcomingSeries = seriesWithSeasons
           .filter((series) => {
             if (!series.seasons || series.seasons.length === 0) return false;
 
@@ -112,9 +137,11 @@ const MovieCalendar = () => {
         setSeries(upcomingSeries);
         setFilteredSeries(upcomingSeries);
         
-        // Extract unique genres from series
-        const genres = [...new Set(upcomingSeries.map(series => series.genre).filter(Boolean))];
-        setAvailableGenres(prev => [...new Set([...prev, ...genres])]);
+        const allGenres = upcomingSeries
+          .flatMap(series => series.genreArray)
+          .filter(Boolean);
+        
+        setAvailableGenres(prev => [...new Set([...prev, ...allGenres])]);
         
         setIsLoading(false);
       } catch (err) {
@@ -132,28 +159,40 @@ const MovieCalendar = () => {
    */
   useEffect(() => {
     applyFilters();
-  }, );
+  }, [contentType, selectedGenres, dateRange, searchQuery, movies, series]);
 
   /**
    * Apply all active filters to the movies and series
    */
   const applyFilters = () => {
-    // Filter movies
     let tempMovies = [...movies];
     let tempSeries = [...series];
     
-    // Filter by genre if any genres are selected
-    if (selectedGenres.length > 0) {
+    if (searchQuery.trim() !== "") {
+      const query = searchQuery.toLowerCase().trim();
       tempMovies = tempMovies.filter(movie => 
-        movie.genre && selectedGenres.includes(movie.genre)
+        movie.title?.toLowerCase().includes(query) || 
+        movie.genre?.toLowerCase().includes(query) ||
+        movie.genreArray?.some(genre => genre.toLowerCase().includes(query))
       );
       
       tempSeries = tempSeries.filter(series => 
-        series.genre && selectedGenres.includes(series.genre)
+        series.title?.toLowerCase().includes(query) || 
+        series.genre?.toLowerCase().includes(query) ||
+        series.genreArray?.some(genre => genre.toLowerCase().includes(query))
       );
     }
     
-    // Filter by date range
+    if (selectedGenres.length > 0) {
+      tempMovies = tempMovies.filter(movie => 
+        movie.genreArray && movie.genreArray.some(genre => selectedGenres.includes(genre))
+      );
+      
+      tempSeries = tempSeries.filter(series => 
+        series.genreArray && series.genreArray.some(genre => selectedGenres.includes(genre))
+      );
+    }
+
     if (dateRange.start) {
       const startDate = new Date(dateRange.start);
       tempMovies = tempMovies.filter(movie => 
@@ -167,7 +206,7 @@ const MovieCalendar = () => {
     
     if (dateRange.end) {
       const endDate = new Date(dateRange.end);
-      endDate.setHours(23, 59, 59, 999); // End of the selected day
+      endDate.setHours(23, 59, 59, 999);
       
       tempMovies = tempMovies.filter(movie => 
         movie.releaseDate && new Date(movie.releaseDate) <= endDate
@@ -186,7 +225,6 @@ const MovieCalendar = () => {
       setFilteredMovies([]);
       setFilteredSeries(tempSeries);
     } else {
-      // Show both
       setFilteredMovies(tempMovies);
       setFilteredSeries(tempSeries);
     }
@@ -199,6 +237,7 @@ const MovieCalendar = () => {
     setContentType("all");
     setSelectedGenres([]);
     setDateRange({ start: "", end: "" });
+    setSearchQuery("");
     setFilteredMovies(movies);
     setFilteredSeries(series);
   };
@@ -335,13 +374,28 @@ const MovieCalendar = () => {
             <FaCalendarAlt className="me-2" />
             <h3 className="mb-0">Kommende Releases</h3>
           </div>
-          <button 
-            className="btn btn-light btn-sm" 
-            onClick={() => setShowFilters(!showFilters)}
-          >
-            <FaFilter className="me-1" />
-            {showFilters ? "Filter ausblenden" : "Filter anzeigen"}
-          </button>
+          <div className="d-flex align-items-center ">
+            <div className="input-group me-4">
+              <input
+                type="text"
+                className="form-control form-control-sm"
+                placeholder="Suchen..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                aria-label="Suche"
+              />
+              <span className="input-group-text bg-white">
+                <FaSearch className="text-muted" />
+              </span>
+            </div>
+            <button 
+              className="btn btn-light btn-sm" 
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <FaFilter className="me-1" />
+              {showFilters ? "Filter ausblenden" : "Filter anzeigen"}
+            </button>
+          </div>
         </div>
 
         {showFilters && (
@@ -400,7 +454,7 @@ const MovieCalendar = () => {
               <div className="col-md-4 d-flex flex-column">
                 <label className="form-label fw-bold">Genres</label>
                 <div className="d-flex flex-wrap gap-2" style={{ maxHeight: "100px", overflowY: "auto" }}>
-                  {availableGenres.map((genre) => (
+                  {availableGenres.sort().map((genre) => (
                     <button
                       key={genre}
                       className={`btn btn-sm ${selectedGenres.includes(genre) ? "btn-primary" : "btn-outline-primary"}`}
@@ -480,11 +534,11 @@ const MovieCalendar = () => {
                             <div>
                               <h5 className="mb-1">{movie.title}</h5>
                               <div>
-                                {movie.genre && (
-                                  <span className="badge bg-secondary me-2">
-                                    {movie.genre}
+                                {movie.genreArray && movie.genreArray.map((genre, index) => (
+                                  <span key={index} className="badge bg-secondary me-2">
+                                    {genre}
                                   </span>
-                                )}
+                                ))}
                                 {movie.duration && (
                                   <span className="badge bg-light text-dark border me-2">
                                     {movie.duration}
@@ -561,14 +615,14 @@ const MovieCalendar = () => {
                                 <div>
                                   <h5 className="mb-1">{series.title}</h5>
                                   <div>
-                                    {series.genre && (
-                                      <span className="badge bg-secondary me-2">
-                                        {series.genre}
+                                    {series.genreArray && series.genreArray.map((genre, index) => (
+                                      <span key={index} className="badge bg-secondary me-2">
+                                        {genre}
                                       </span>
-                                    )}
-                                    {series.episodes && (
+                                    ))}
+                                    {series.seasons && (
                                       <span className="badge bg-light text-dark border me-2">
-                                        {series.episodes} Episoden
+                                        {series.seasons.length} Staffel{series.seasons.length !== 1 ? 'n' : ''}
                                       </span>
                                     )}
                                     {series.releaseYear && (
@@ -599,4 +653,4 @@ const MovieCalendar = () => {
   );
 };
 
-export default MovieCalendar;
+export default Calendar;

@@ -233,7 +233,6 @@ const MovieDetail = () => {
         itemId: movieId,
         rating: rating,
         comment: comment,
-        type: "movie",
       }),
     })
       .then((res) => {

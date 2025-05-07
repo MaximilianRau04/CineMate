@@ -12,7 +12,9 @@ import {
 const SeriesDetail = () => {
   const { id: seriesId } = useParams();
   const [series, setSeries] = useState(null);
+  const [seasons, setSeasons] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [seasonsLoading, setSeasonsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [userId, setUserId] = useState(null);
   const [adding, setAdding] = useState(false);
@@ -64,6 +66,8 @@ const SeriesDetail = () => {
       .then((data) => {
         setSeries(data);
         setIsLoading(false);
+
+        fetchSeasons();
       })
       .catch((err) => {
         console.error("Fehler beim Laden der Serie:", err);
@@ -73,6 +77,26 @@ const SeriesDetail = () => {
   }, [seriesId]);
 
   /**
+   * Fetches seasons and episodes data for this series
+   * @returns {Promise<void>}
+   */
+  const fetchSeasons = async () => {
+    setSeasonsLoading(true);
+    try {
+      const response = await fetch(`http://localhost:8080/api/series/${seriesId}/seasons`);
+      if (!response.ok) {
+        throw new Error("Staffeln konnten nicht geladen werden");
+      }
+      const data = await response.json();
+      setSeasons(data);
+      setSeasonsLoading(false);
+    } catch (err) {
+      console.error("Fehler beim Laden der Staffeln:", err);
+      setSeasonsLoading(false);
+    }
+  };
+
+  /**
    * checks if the series is already in the user's watchlist
    * @returns {Promise<void>}
    * @throws {Error} if the user is not logged in or the series is not found
@@ -80,7 +104,8 @@ const SeriesDetail = () => {
   useEffect(() => {
     if (!userId || !seriesId) return;
 
-    fetch(`http://localhost:8080/api/users/${userId}/watchlist/series`, {})
+    fetch(`http://localhost:8080/api/users/${userId}/watchlist/series`, {
+    })
       .then((res) => res.json())
       .then((data) => {
         const alreadyInWatchlist = data.some(
@@ -99,7 +124,8 @@ const SeriesDetail = () => {
   useEffect(() => {
     if (!userId || !seriesId) return;
 
-    fetch(`http://localhost:8080/api/reviews/series/${seriesId}/${userId}`, {})
+    fetch(`http://localhost:8080/api/reviews/series/${seriesId}/${userId}`, {
+    })
       .then((res) => {
         if (!res.ok) {
           if (res.status === 404) return null;
@@ -125,18 +151,8 @@ const SeriesDetail = () => {
    */
   useEffect(() => {
     if (!seriesId) return;
-
-    fetch(`http://localhost:8080/api/reviews/series/${seriesId}`)
-      .then((res) => {
-        if (!res.ok)
-          throw new Error("Bewertungen konnten nicht geladen werden");
-        return res.json();
-      })
-      .then((data) => {
-        setReviews(data);
-      })
-      .catch((err) => console.error("Fehler beim Laden der Bewertungen:", err));
-  }, [seriesId]);
+    loadReviews();
+  },);
 
   /**
    * fetches all reviews of a series
@@ -165,11 +181,6 @@ const SeriesDetail = () => {
       console.error("Fehler beim Laden der Bewertungen:", error);
     }
   };
-
-  useEffect(() => {
-    if (!seriesId) return;
-    loadReviews();
-  }, [seriesId]);
 
   /**
    * Calculates the new average rating based on reviews
@@ -220,7 +231,7 @@ const SeriesDetail = () => {
   };
 
   /**
-   * adds a review to the movie
+   * adds a review to the series
    * @returns {Promise<void>}
    * @throws {Error} if the user is not logged in or the rating is 0
    */
@@ -237,7 +248,7 @@ const SeriesDetail = () => {
         userId,
         itemId: seriesId,
         rating: rating,
-        comment: "",
+        comment: comment,
         type: "series",
       }),
     })
@@ -266,7 +277,7 @@ const SeriesDetail = () => {
   };
 
   /**
-   * edits the review of the movie
+   * edits the review of the series
    * @returns {Promise<void>}
    * @throws {Error} if the review could not be edited
    */
@@ -285,7 +296,6 @@ const SeriesDetail = () => {
         itemId: seriesId,
         rating: editRating,
         comment: editComment,
-        type: "movie",
       }),
     })
       .then((res) => {
@@ -307,7 +317,7 @@ const SeriesDetail = () => {
   };
 
   /**
-   * deletes the review of the movie
+   * deletes the review of the series
    * @returns {Promise<void>}
    * @throws {Error} if the review could not be deleted
    */
@@ -520,7 +530,7 @@ const SeriesDetail = () => {
               <div className="alert alert-info mt-4">
                 <h5>⭐ Deine bisherige Bewertung</h5>
                 <p>
-                  Bewertung: {renderStars(averageRating)}
+                  Bewertung: {renderStars(rating)}
                   {comment && (
                     <>
                       <br />
@@ -566,11 +576,16 @@ const SeriesDetail = () => {
       </div>
 
       {/* seasons and episodes */}
-      {series.seasons && series.seasons.length > 0 && (
+      {seasonsLoading ? (
+        <div className="mt-5 text-center">
+          <div className="spinner-border text-primary" role="status" />
+          <p className="mt-2">Staffeln werden geladen...</p>
+        </div>
+      ) : seasons && seasons.length > 0 ? (
         <div className="mt-5">
           <h3 className="mb-4 text-light">📺 Staffeln und Episoden</h3>
           <div className="accordion" id="seasonsAccordion">
-            {series.seasons.map((season, index) => (
+            {seasons.map((season) => (
               <div
                 className="accordion-item bg-dark text-light"
                 key={season.seasonNumber}
@@ -597,7 +612,7 @@ const SeriesDetail = () => {
                   data-bs-parent="#seasonsAccordion"
                 >
                   <div className="accordion-body">
-                    {season.episodes.map((episode) => (
+                    {season.episodes && season.episodes.map((episode) => (
                       <div
                         key={episode.episodeNumber}
                         className="row mb-4 align-items-center"
@@ -637,6 +652,10 @@ const SeriesDetail = () => {
               </div>
             ))}
           </div>
+        </div>
+      ) : (
+        <div className="alert alert-info mt-5">
+          Keine Staffeln für diese Serie verfügbar.
         </div>
       )}
 

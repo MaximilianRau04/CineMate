@@ -14,7 +14,7 @@ const Header = () => {
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm sticky-top">
       <div className="container">
-        <Link className="navbar-brand fw-bold text-primary" to="/movies">
+        <Link className="navbar-brand fw-bold text-primary" to="/explore">
           🎬 CineMate
         </Link>
 
