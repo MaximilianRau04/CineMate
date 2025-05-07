@@ -51,7 +51,7 @@ mvn spring-boot:run
   - Response: JWT token on success, 401 if credentials are invalid
 
 #### **User Data**
-- `GET /api/users/{username}`: Get user details by username (protected endpoint, requires JWT)
+- `GET /api/users/me` or `GET /api/users/{id}`: Get user details of the currently logged in user with /me (protected endpoint, requires JWT) or a specific user by his id.
   - Response: User data (e.g., username, email, watchlist)
 
 ## Frontend - React
@@ -77,7 +77,12 @@ npm start
 ### Features
 - **Login**: Users can log in with their credentials and get a JWT token for further requests.
 - **Register**: Users can create a new account.
-- **Watchlist**: Users can view and manage their movie/TV show watchlist (future functionality).
+- **ExplorePage**: All movies and series currently in the database are displayed on the explore page.
+- **MovieDetail**: Each movie has a detail page with all attributes like description, releaseDate etc. Additionally reviews are displayed.
+- **MovieDetail**: Each movie has a detail page with all attributes like description, releaseDate etc. Additionally all seasons and episodes of a series and reviews are displayed.
+- **Watchlist**: Users can view and manage their movie/TV show watchlist.
+-  **UserProfile**: Users can view and manage their profile with a bio and a profile picture they can add.
+-  **Calender**: A calender where all future releases of movies and series are displayed.
 
 ## Installation
 
@@ -98,8 +103,6 @@ cd cinemate
 
 ## Future Features
 
-- **User Profiles**: Implement a feature where users can update their profile information.
-- **Watchlist Management**: Allow users to add and remove movies/TV shows from their watchlist.
 - **Movie/TV Show Recommendations**: Integrate an API to recommend movies based on user preferences.
 - **Role-based Access Control**: Introduce roles (Admin, User) with specific permissions (e.g., Admin can manage users).
 
