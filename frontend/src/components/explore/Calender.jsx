@@ -50,7 +50,8 @@ const Calendar = () => {
 
         const processedMovies = upcomingMovies.map(movie => {
           const genreArray = movie.genre ? movie.genre.split(/,\s*/) : [];
-          return { ...movie, genreArray };
+ 
+          return { ...movie, genreArray, contentType: 'movie' };
         });
 
         setMovies(processedMovies);
@@ -134,10 +135,15 @@ const Calendar = () => {
             return new Date(a.nextEpisodeDate) - new Date(b.nextEpisodeDate); 
           });
 
-        setSeries(upcomingSeries);
-        setFilteredSeries(upcomingSeries);
+        const processedSeries = upcomingSeries.map(series => ({
+          ...series,
+          contentType: 'series'
+        }));
+
+        setSeries(processedSeries);
+        setFilteredSeries(processedSeries);
         
-        const allGenres = upcomingSeries
+        const allGenres = processedSeries
           .flatMap(series => series.genreArray)
           .filter(Boolean);
         
@@ -271,44 +277,42 @@ const Calendar = () => {
   };
 
   /**
-   * groups movies by month and year based on their release date.
-   * @param {*} movies
-   * @returns {Object}
+   * Combines movies and series into a single array sorted by date
+   * @returns {Array}
    */
-  const groupMoviesByMonth = (movies) => {
-    const grouped = {};
+  const getCombinedContent = () => {
+    const combinedContent = [
+      ...filteredMovies.map(movie => ({
+        ...movie,
+        releaseItem: movie.releaseDate
+      })),
+      ...filteredSeries.map(series => ({
+        ...series,
+        releaseItem: series.nextEpisodeDate
+      }))
+    ];
 
-    movies.forEach((movie) => {
-      if (!movie.releaseDate) return;
-
-      const date = new Date(movie.releaseDate);
-      const month = date.toLocaleDateString("de-DE", {
-        month: "long",
-        year: "numeric",
-      });
-
-      if (!grouped[month]) {
-        grouped[month] = [];
-      }
-
-      grouped[month].push(movie);
+    combinedContent.sort((a, b) => {
+      return new Date(a.releaseItem) - new Date(b.releaseItem);
     });
 
-    return grouped;
+    return combinedContent;
   };
 
   /**
-   * groups series by month and year based on their release date.
-   * @param {*} series
+   * Groups content (movies and series) by month based on their release date
+   * @param {Array} content - Array of movies and series
    * @returns {Object}
    */
-  const groupSeriesByMonth = (series) => {
+  const groupContentByMonth = (content) => {
     const grouped = {};
 
-    series.forEach((series) => {
-      if (!series.nextEpisodeDate) return;
+    content.forEach((item) => {
+      const dateField = item.contentType === 'movie' ? item.releaseDate : item.nextEpisodeDate;
+      
+      if (!dateField) return;
 
-      const date = new Date(series.nextEpisodeDate);
+      const date = new Date(dateField);
       const month = date.toLocaleDateString("de-DE", {
         month: "long",
         year: "numeric",
@@ -318,7 +322,7 @@ const Calendar = () => {
         grouped[month] = [];
       }
 
-      grouped[month].push(series);
+      grouped[month].push(item);
     });
 
     return grouped;
@@ -341,8 +345,13 @@ const Calendar = () => {
     return upcoming.length > 0 ? upcoming[0].releaseDate : null;
   };
 
-  const groupedMovies = groupMoviesByMonth(filteredMovies);
-  const groupedSeries = groupSeriesByMonth(filteredSeries);
+  const combinedContent = contentType === "all" 
+    ? getCombinedContent()
+    : contentType === "movies" 
+      ? filteredMovies
+      : filteredSeries;
+
+  const groupedContent = groupContentByMonth(combinedContent);
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -365,6 +374,82 @@ const Calendar = () => {
       </div>
     );
   }
+
+  const renderContentItem = (item) => {
+    const isMovie = item.contentType === 'movie';
+    const linkPath = isMovie ? `/movies/${item.id}` : `/series/${item.id}`;
+    const releaseDate = isMovie ? item.releaseDate : item.nextEpisodeDate;
+    
+    return (
+      <Link
+        key={`${item.contentType}-${item.id}`}
+        to={linkPath}
+        className="list-group-item list-group-item-action d-flex align-items-center p-3"
+      >
+        <div className="d-flex align-items-center" style={{ width: "100%" }}>
+          <div className="me-3" style={{ minWidth: "90px" }}>
+            <span className="badge bg-info text-dark">
+              {formatDate(releaseDate)}
+            </span>
+            <span className="ms-2 badge bg-primary">
+              {isMovie ? 'Film' : 'Serie'}
+            </span>
+          </div>
+
+          <div className="d-flex align-items-center" style={{ flex: 1 }}>
+            {item.posterUrl && (
+              <img
+                src={item.posterUrl}
+                alt={item.title}
+                className="me-3 rounded shadow-sm"
+                style={{
+                  width: "50px",
+                  height: "75px",
+                  objectFit: "cover",
+                }}
+                onError={(e) => {
+                  e.target.src = "https://via.placeholder.com/50x75?text=No+Image";
+                }}
+              />
+            )}
+
+            <div>
+              <h5 className="mb-1">{item.title}</h5>
+              <div>
+                {item.genreArray && item.genreArray.map((genre, index) => (
+                  <span key={index} className="badge bg-secondary me-2">
+                    {genre}
+                  </span>
+                ))}
+                
+                {isMovie && item.duration && (
+                  <span className="badge bg-light text-dark border me-2">
+                    {item.duration}
+                  </span>
+                )}
+                
+                {!isMovie && item.seasons && (
+                  <span className="badge bg-light text-dark border me-2">
+                    {item.seasons.length} Staffel{item.seasons.length !== 1 ? 'n' : ''}
+                  </span>
+                )}
+                
+                {item.releaseYear && (
+                  <span className="badge bg-light text-dark border">
+                    {item.releaseYear}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="ms-auto">
+            <FaArrowRight className="text-muted" />
+          </div>
+        </div>
+      </Link>
+    );
+  };
 
   return (
     <div className="container py-4">
@@ -477,7 +562,7 @@ const Calendar = () => {
         )}
 
         <div className="card-body">
-          {Object.keys(groupedMovies).length === 0 && Object.keys(groupedSeries).length === 0 ? (
+          {Object.keys(groupedContent).length === 0 ? (
             <div className="text-center py-5">
               <p className="lead text-muted">Keine passenden Inhalte gefunden.</p>
               {(contentType !== "all" || selectedGenres.length > 0 || dateRange.start || dateRange.end) && (
@@ -487,165 +572,16 @@ const Calendar = () => {
               )}
             </div>
           ) : (
-            <>
-              {contentType !== "series" && Object.entries(groupedMovies).map(([month, monthMovies]) => (
-                <div key={month} className="mb-4">
-                  <h4 className="border-bottom pb-2 mb-3">
-                    {month}
-                  </h4>
-                  <div className="list-group">
-                    {monthMovies.map((movie) => (
-                      <Link
-                        key={movie.id}
-                        to={`/movies/${movie.id}`}
-                        className="list-group-item list-group-item-action d-flex align-items-center p-3"
-                      >
-                        <div
-                          className="d-flex align-items-center"
-                          style={{ width: "100%" }}
-                        >
-                          <div className="me-3" style={{ minWidth: "90px" }}>
-                            <span className="badge bg-info text-dark">
-                              {formatDate(movie.releaseDate)}
-                            </span>
-                          </div>
-
-                          <div
-                            className="d-flex align-items-center"
-                            style={{ flex: 1 }}
-                          >
-                            {movie.posterUrl && (
-                              <img
-                                src={movie.posterUrl}
-                                alt={movie.title}
-                                className="me-3 rounded shadow-sm"
-                                style={{
-                                  width: "50px",
-                                  height: "75px",
-                                  objectFit: "cover",
-                                }}
-                                onError={(e) => {
-                                  e.target.src =
-                                    "https://via.placeholder.com/50x75?text=No+Image";
-                                }}
-                              />
-                            )}
-
-                            <div>
-                              <h5 className="mb-1">{movie.title}</h5>
-                              <div>
-                                {movie.genreArray && movie.genreArray.map((genre, index) => (
-                                  <span key={index} className="badge bg-secondary me-2">
-                                    {genre}
-                                  </span>
-                                ))}
-                                {movie.duration && (
-                                  <span className="badge bg-light text-dark border me-2">
-                                    {movie.duration}
-                                  </span>
-                                )}
-                                {movie.releaseYear && (
-                                  <span className="badge bg-light text-dark border">
-                                    {movie.releaseYear}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="ms-auto">
-                            <FaArrowRight className="text-muted" />
-                          </div>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
+            Object.entries(groupedContent).map(([month, items]) => (
+              <div key={month} className="mb-4">
+                <h4 className="border-bottom pb-2 mb-3">
+                  {month}
+                </h4>
+                <div className="list-group">
+                  {items.map(item => renderContentItem(item))}
                 </div>
-              ))}
-              
-              {contentType !== "movies" && Object.keys(groupedSeries).length > 0 && (
-                <>
-                  {contentType !== "series" && Object.keys(groupedMovies).length > 0 && (
-                    <hr className="my-4" />
-                  )}
-                  
-                  {Object.entries(groupedSeries).map(([month, monthSeries]) => (
-                    <div key={month} className="mb-4">
-                      <h4 className="border-bottom pb-2 mb-3">
-                        {month}
-                      </h4>
-                      <div className="list-group">
-                        {monthSeries.map((series) => (
-                          <Link
-                            key={series.id}
-                            to={`/series/${series.id}`}
-                            className="list-group-item list-group-item-action d-flex align-items-center p-3"
-                          >
-                            <div
-                              className="d-flex align-items-center"
-                              style={{ width: "100%" }}
-                            >
-                              <div className="me-3" style={{ minWidth: "90px" }}>
-                                <span className="badge bg-info text-dark">
-                                  {formatDate(series.nextEpisodeDate)}
-                                </span>
-                              </div>
-
-                              <div
-                                className="d-flex align-items-center"
-                                style={{ flex: 1 }}
-                              >
-                                {series.posterUrl && (
-                                  <img
-                                    src={series.posterUrl}
-                                    alt={series.title}
-                                    className="me-3 rounded shadow-sm"
-                                    style={{
-                                      width: "50px",
-                                      height: "75px",
-                                      objectFit: "cover",
-                                    }}
-                                    onError={(e) => {
-                                      e.target.src =
-                                        "https://via.placeholder.com/50x75?text=No+Image";
-                                    }}
-                                  />
-                                )}
-
-                                <div>
-                                  <h5 className="mb-1">{series.title}</h5>
-                                  <div>
-                                    {series.genreArray && series.genreArray.map((genre, index) => (
-                                      <span key={index} className="badge bg-secondary me-2">
-                                        {genre}
-                                      </span>
-                                    ))}
-                                    {series.seasons && (
-                                      <span className="badge bg-light text-dark border me-2">
-                                        {series.seasons.length} Staffel{series.seasons.length !== 1 ? 'n' : ''}
-                                      </span>
-                                    )}
-                                    {series.releaseYear && (
-                                      <span className="badge bg-light text-dark border">
-                                        {series.releaseYear}
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="ms-auto">
-                                <FaArrowRight className="text-muted" />
-                              </div>
-                            </div>
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </>
-              )}
-            </>
+              </div>
+            ))
           )}
         </div>
       </div>

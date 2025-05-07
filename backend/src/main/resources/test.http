@@ -122,6 +122,17 @@ Content-Type: application/json
   "duration": "2h 16m",
   "posterUrl": "https://image.tmdb.org/t/p/w500/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg"
 }
+###
+POST http://localhost:8080/api/movies
+Content-Type: application/json
+
+{
+  "title": "Die Unfassbaren 3 - Now You See Me",
+  "description": "Der dritte Teil der Thriller-Reihe um die Magier-Gruppe „Die vier Reiter“, die mit Hilfe ihrer speziellen Fähigkeiten sehr aufwändige Heists begehen, währen die wahren Motive aller Beteiligten aber stets weitgehend im Dunkeln bleiben...",
+  "genre": "Thriller, Krimi",
+  "releaseDate": "2025-11-13",
+  "posterUrl": "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/1Aiq3YJuV96IVIZleLe6SE4i9Oo.jpg"
+}
 
 ###
 GET http://localhost:8080/api/users
