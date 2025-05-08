@@ -41,7 +41,11 @@ public class MovieService {
         if (updatedMovie.getReleaseDate() != null) existingMovie.setReleaseDate(updatedMovie.getReleaseDate());
         if (updatedMovie.getGenre() != null) existingMovie.setGenre(updatedMovie.getGenre());
         if (updatedMovie.getDuration() != null) existingMovie.setDuration(updatedMovie.getDuration());
-        if(updatedMovie.getPosterUrl() != null) existingMovie.setPosterUrl(updatedMovie.getPosterUrl());
+        if (updatedMovie.getPosterUrl() != null) existingMovie.setPosterUrl(updatedMovie.getPosterUrl());
+        if (updatedMovie.getActors() != null) existingMovie.setActors(updatedMovie.getActors());
+        if (updatedMovie.getCountry() != null) existingMovie.setCountry(updatedMovie.getCountry());
+        if (updatedMovie.getDirector() != null) existingMovie.setDirector(updatedMovie.getDirector());
+        if (updatedMovie.getTrailerUrl() != null) existingMovie.setTrailerUrl(updatedMovie.getTrailerUrl());
 
         return ResponseEntity.ok(movieRepository.save(existingMovie));
     }

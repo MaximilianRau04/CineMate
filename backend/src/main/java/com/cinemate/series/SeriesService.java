@@ -59,6 +59,9 @@ public class SeriesService {
         if (updatedSeries.getReleaseDate() != null) existingSeries.setReleaseDate(updatedSeries.getReleaseDate());
         if (updatedSeries.getGenre() != null) existingSeries.setGenre(updatedSeries.getGenre());
         if (updatedSeries.getPosterUrl() != null) existingSeries.setPosterUrl(updatedSeries.getPosterUrl());
+        if (updatedSeries.getActors() != null) existingSeries.setActors(updatedSeries.getActors());
+        if (updatedSeries.getCountry() != null) existingSeries.setCountry(updatedSeries.getCountry());
+        if (updatedSeries.getTrailerUrl() != null) existingSeries.setTrailerUrl(updatedSeries.getTrailerUrl());
 
         if (updatedSeries.getSeasons() != null) {
             mergeSeasons(existingSeries.getSeasons(), updatedSeries.getSeasons());
@@ -129,6 +132,8 @@ public class SeriesService {
             }
 
             Series.Season season = existingSeason.get();
+            if (updatedSeason.getTrailerUrl() != null) season.setTrailerUrl(updatedSeason.getTrailerUrl());
+            if (updatedSeason.getSeasonNumber() != -1) season.setSeasonNumber(updatedSeason.getSeasonNumber());
 
             if (updatedSeason.getEpisodes() != null) {
                 mergeEpisodes(season.getEpisodes(), updatedSeason.getEpisodes());
@@ -244,6 +249,7 @@ public class SeriesService {
         if (updatedEpisode.getDuration() != null) existingEpisode.setDuration(updatedEpisode.getDuration());
         if (updatedEpisode.getReleaseDate() != null) existingEpisode.setReleaseDate(updatedEpisode.getReleaseDate());
         if (updatedEpisode.getPosterUrl() != null) existingEpisode.setPosterUrl(updatedEpisode.getPosterUrl());
+        if (updatedEpisode.getActors() != null) existingEpisode.setActors(updatedEpisode.getActors());
     }
 
     /**

@@ -1,10 +1,13 @@
 package com.cinemate.movie;
 
+import com.cinemate.actor.Actor;
+import com.cinemate.director.Director;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
+import java.util.List;
 
 @Document(collection = "movies")
 public class Movie {
@@ -17,16 +20,18 @@ public class Movie {
     private String genre;
     private double rating ;
     private int reviewCount;
-    @NotNull
     private Date releaseDate;
     private String duration;
     private String posterUrl;
-    // director, actor
-    // trailer url
-    // languages, country
+    private Director director;
+    private List<Actor> actors;
+    private String country;
+    private String trailerUrl;
     // tags
 
-    public Movie(String id, String title, String description, String genre, double rating, int reviewCount, Date releaseDate, String duration, String posterUrl) {
+
+    public Movie(String id, String title, String description, String genre, double rating, int reviewCount, Date releaseDate, String duration, String posterUrl,
+                 Director director, List<Actor> actors, String country, String trailerUrl) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -36,6 +41,10 @@ public class Movie {
         this.releaseDate = releaseDate;
         this.duration = duration;
         this.posterUrl = posterUrl;
+        this.director = director;
+        this.actors = actors;
+        this.country = country;
+        this.trailerUrl = trailerUrl;
     }
 
     public String getId() { return id; }
@@ -103,7 +112,40 @@ public class Movie {
     public int getReviewCount() {
         return reviewCount;
     }
+
     public void setReviewCount(int reviewCount) {
         this.reviewCount = reviewCount;
+    }
+
+    public Director getDirector() {
+        return director;
+    }
+
+    public void setDirector(Director director) {
+        this.director = director;
+    }
+
+    public List<Actor> getActors() {
+        return actors;
+    }
+
+    public void setActors(List<Actor> actors) {
+        this.actors = actors;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public String getTrailerUrl() {
+        return trailerUrl;
+    }
+
+    public void setTrailerUrl(String trailerUrl) {
+        this.trailerUrl = trailerUrl;
     }
 }
