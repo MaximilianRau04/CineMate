@@ -29,7 +29,7 @@ GET http://localhost:8080/api/users/me
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYXhpIiwiZXhwIjoxNzQ1MDQyNDQzLCJpYXQiOjE3NDUwMDY0NDN9.60VPYsuNHIDfF5SULKNZVh-dEkq7yE444Stq0TUGyjE
 
 ###
-GET http://localhost:8080/api/users
+GET http://localhost:8080/api/series
 ###
 
 DELETE http://localhost:8080/api/users/6813a8eaf4f96f556a24061b
@@ -135,7 +135,7 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:8080/api/users
+GET http://localhost:8080/api/actors
 
 ###
 GET http://localhost:8080/api/reviews/user/6813a9c6a70428033d933986
@@ -170,7 +170,7 @@ GET http://localhost:8080/api/users/6813a9c6a70428033d933986/watchlist/series
 DELETE http://localhost:8080/api/users/67fd70fdf86b765965cfa2cb/watchlist/67fd703bf86b765965cfa2c5
 
 ###
-GET http://localhost:8080/api/series
+GET http://localhost:8080/api/series/680e7b2023c0b14c9c4811bb/seasons
 
 ###
 POST http://localhost:8080/api/series

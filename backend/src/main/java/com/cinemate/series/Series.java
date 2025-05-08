@@ -1,5 +1,7 @@
 package com.cinemate.series;
 
+import com.cinemate.actor.Actor;
+import com.cinemate.director.Director;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.annotation.Id;
@@ -24,8 +26,13 @@ public class Series {
     private String posterUrl;
     @JsonBackReference
     private List<Season> seasons;
+    private List<Actor> actors;
+    private String country;
+    private String trailerUrl;
+    // tags
 
-    public Series(String id, String title, String description, String genre, double rating, int reviewCount, Date releaseDate, String posterUrl, List<Season> seasons) {
+    public Series(String id, String title, String description, String genre, double rating, int reviewCount, Date releaseDate, String posterUrl, List<Season> seasons,
+                  String country, String trailerUrl, List<Actor> actors) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -35,6 +42,9 @@ public class Series {
         this.releaseDate = releaseDate;
         this.posterUrl = posterUrl;
         this.seasons = seasons;
+        this.country = country;
+        this.trailerUrl = trailerUrl;
+        this.actors = actors;
     }
 
     public String getId() {
@@ -109,13 +119,39 @@ public class Series {
         this.reviewCount = reviewCount;
     }
 
+    public List<Actor> getActors() {
+        return actors;
+    }
+
+    public void setActors(List<Actor> actors) {
+        this.actors = actors;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public String getTrailerUrl() {
+        return trailerUrl;
+    }
+
+    public void setTrailerUrl(String trailerUrl) {
+        this.trailerUrl = trailerUrl;
+    }
+
     public static class Season {
         private int seasonNumber;
         private List<Episode> episodes;
+        private String trailerUrl;
 
-        public Season(int seasonNumber, List<Episode> episodes) {
+        public Season(int seasonNumber, List<Episode> episodes, String trailerUrl) {
             this.seasonNumber = seasonNumber;
             this.episodes = episodes;
+            this.trailerUrl = trailerUrl;
         }
 
         public int getSeasonNumber() {
@@ -133,7 +169,16 @@ public class Series {
         public void setEpisodes(List<Episode> episodes) {
             this.episodes = episodes;
         }
+
+        public String getTrailerUrl() {
+            return trailerUrl;
+        }
+
+        public void setTrailerUrl(String trailerUrl) {
+            this.trailerUrl = trailerUrl;
+        }
     }
+
     public static class Episode {
         private String title;
         private int episodeNumber;
@@ -141,14 +186,18 @@ public class Series {
         private Date releaseDate;
         private String description;
         private String posterUrl;
+        private List<Actor> actors;
+        private Director director;
 
-        public Episode(String title, int episodeNumber, String duration, Date releaseDate, String description, String posterUrl) {
+        public Episode(String title, int episodeNumber, String duration, Date releaseDate, String description, String posterUrl, List<Actor> actors, Director director) {
             this.title = title;
             this.episodeNumber = episodeNumber;
             this.duration = duration;
             this.releaseDate = releaseDate;
             this.description = description;
             this.posterUrl = posterUrl;
+            this.actors = actors;
+            this.director = director;
         }
 
         public String getTitle() {
@@ -197,6 +246,22 @@ public class Series {
 
         public void setPosterUrl(String posterUrl) {
             this.posterUrl = posterUrl;
+        }
+
+        public List<Actor> getActors() {
+            return actors;
+        }
+
+        public void setActors(List<Actor> actors) {
+            this.actors = actors;
+        }
+
+        public Director getDirector() {
+            return director;
+        }
+
+        public void setDirector(Director director) {
+            this.director = director;
         }
     }
 }
