@@ -1,60 +1,63 @@
 package com.cinemate.director;
 
-import com.cinemate.actor.Actor;
-import com.cinemate.user.User;
+import com.cinemate.director.DTOs.DirectorRequestDTO;
+import com.cinemate.director.DTOs.DirectorResponseDTO;
+import com.cinemate.movie.DTOs.MovieResponseDTO;
+import com.cinemate.series.DTOs.SeriesResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/directors")
 public class DirectorController {
 
-    private final DirectorRepository directorRepository;
+    private final DirectorService directorService;
 
     @Autowired
-    public DirectorController(DirectorRepository directorRepository) {
-        this.directorRepository = directorRepository;
+    public DirectorController(DirectorService directorService) {
+        this.directorService = directorService;
     }
 
     @GetMapping
-    public ResponseEntity<List<Director>> getAllDirectors() {
-        return ResponseEntity.ok(directorRepository.findAll());
+    public ResponseEntity<List<DirectorResponseDTO>> getAllDirectors() {
+        return ResponseEntity.ok(directorService.getAllDirectors());
     }
 
-    @GetMapping("{id}")
-    public ResponseEntity<Optional<Director>> getDirectorById(@PathVariable String id) {
-        return ResponseEntity.ok(directorRepository.findById(id));
+    @GetMapping("/{id}")
+    public ResponseEntity<DirectorResponseDTO> getDirectorById(@PathVariable String id) {
+        return directorService.getDirectorById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<Director> createDirector(@RequestBody Director director) {
-        return ResponseEntity.ok(directorRepository.save(director));
+    public ResponseEntity<DirectorResponseDTO> createDirector(@RequestBody DirectorRequestDTO dto) {
+        return ResponseEntity.ok(directorService.createDirector(dto));
     }
 
-    @PutMapping("{id}")
-    public ResponseEntity<Director> updateDirector(@PathVariable String id, @RequestBody Director updatedDirector) {
-        Optional<Director> optionalDirector = directorRepository.findById(id);
-        if (optionalDirector.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        Director existingDirector = optionalDirector.get();
-
-        if (updatedDirector.getName() != null) existingDirector.setName(updatedDirector.getName());
-        if (updatedDirector.getBirthday() != null) existingDirector.setBirthday(updatedDirector.getBirthday());
-        if (updatedDirector.getBiography() != null) existingDirector.setBiography(updatedDirector.getBiography());
-        if (updatedDirector.getImage() != null) existingDirector.setImage(updatedDirector.getImage());
-
-        return ResponseEntity.ok(existingDirector);
+    @PutMapping("/{id}")
+    public ResponseEntity<DirectorResponseDTO> updateDirector(@PathVariable String id, @RequestBody DirectorRequestDTO dto) {
+        return directorService.updateDirector(id, dto)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    @DeleteMapping("{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDirector(@PathVariable String id) {
-        directorRepository.deleteById(id);
+        directorService.deleteDirector(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/movies")
+    public ResponseEntity<List<MovieResponseDTO>> getMoviesByDirector(@PathVariable String id) {
+        return ResponseEntity.ok(directorService.getMoviesByDirector(id));
+    }
+
+    @GetMapping("/{id}/series")
+    public ResponseEntity<List<SeriesResponseDTO>> getSeriesByDirector(@PathVariable String id) {
+        return ResponseEntity.ok(directorService.getSeriesByDirector(id));
     }
 }

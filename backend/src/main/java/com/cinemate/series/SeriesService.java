@@ -1,5 +1,14 @@
+
 package com.cinemate.series;
 
+import com.cinemate.actor.Actor;
+import com.cinemate.actor.ActorRepository;
+import com.cinemate.actor.DTOs.ActorResponseDTO;
+import com.cinemate.director.DTOs.DirectorResponseDTO;
+import com.cinemate.director.Director;
+import com.cinemate.director.DirectorRepository;
+import com.cinemate.series.DTOs.SeriesRequestDTO;
+import com.cinemate.series.DTOs.SeriesResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,64 +22,76 @@ import java.util.stream.Collectors;
 public class SeriesService {
 
     private final SeriesRepository seriesRepository;
+    private final ActorRepository actorRepository;
+    private final DirectorRepository directorRepository;
 
     @Autowired
-    public SeriesService(SeriesRepository seriesRepository) {
+    public SeriesService(SeriesRepository seriesRepository,
+                         ActorRepository actorRepository,
+                         DirectorRepository directorRepository) {
         this.seriesRepository = seriesRepository;
+        this.actorRepository = actorRepository;
+        this.directorRepository = directorRepository;
     }
 
-    /**
-     * Get all series from the repository
-     */
-    public ResponseEntity<List<Series>> getAllSeries() {
-        return ResponseEntity.ok(seriesRepository.findAll());
+    public ResponseEntity<List<SeriesResponseDTO>> getAllSeries() {
+        List<Series> seriesList = seriesRepository.findAll();
+        List<SeriesResponseDTO> seriesDTOs = seriesList.stream()
+                .map(SeriesResponseDTO::new)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(seriesDTOs);
     }
 
-    /**
-     * Get a series by its ID
-     */
-    public Optional<Series> getSeriesById(String id) {
-        return seriesRepository.findById(id);
+    public Optional<SeriesResponseDTO> getSeriesById(String id) {
+        return seriesRepository.findById(id)
+                .map(SeriesResponseDTO::new);
     }
 
-    /**
-     * Create a new series
-     */
-    public ResponseEntity<Series> createSeries(Series series) {
-        return ResponseEntity.ok(seriesRepository.save(series));
+    public ResponseEntity<SeriesResponseDTO> createSeries(SeriesRequestDTO seriesDTO) {
+        Series series = buildSeriesFromDTO(null, seriesDTO);
+        Series savedSeries = seriesRepository.save(series);
+        return ResponseEntity.ok(new SeriesResponseDTO(savedSeries));
     }
 
-    /**
-     * Update an existing series
-     */
-    public ResponseEntity<Series> updateSeries(String id, Series updatedSeries) {
-        return findAndUpdateEntity(id, existingSeries -> {
-            updateSeriesFields(existingSeries, updatedSeries);
-            return seriesRepository.save(existingSeries);
-        });
+    public ResponseEntity<SeriesResponseDTO> updateSeries(String id, SeriesRequestDTO seriesDTO) {
+        Optional<Series> optionalSeries = seriesRepository.findById(id);
+        if (optionalSeries.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Series updatedSeries = buildSeriesFromDTO(id, seriesDTO);
+        updateSeriesFields(updatedSeries, seriesDTO);
+        Series savedSeries = seriesRepository.save(updatedSeries);
+        return ResponseEntity.ok(new SeriesResponseDTO(savedSeries));
     }
 
-    /**
-     * Update fields of a series entity
-     */
-    private void updateSeriesFields(Series existingSeries, Series updatedSeries) {
-        if (updatedSeries.getTitle() != null) existingSeries.setTitle(updatedSeries.getTitle());
-        if (updatedSeries.getDescription() != null) existingSeries.setDescription(updatedSeries.getDescription());
-        if (updatedSeries.getReleaseDate() != null) existingSeries.setReleaseDate(updatedSeries.getReleaseDate());
-        if (updatedSeries.getGenre() != null) existingSeries.setGenre(updatedSeries.getGenre());
-        if (updatedSeries.getPosterUrl() != null) existingSeries.setPosterUrl(updatedSeries.getPosterUrl());
-        if (updatedSeries.getActors() != null) existingSeries.setActors(updatedSeries.getActors());
-        if (updatedSeries.getCountry() != null) existingSeries.setCountry(updatedSeries.getCountry());
-        if (updatedSeries.getTrailerUrl() != null) existingSeries.setTrailerUrl(updatedSeries.getTrailerUrl());
+    private void updateSeriesFields(Series series, SeriesRequestDTO seriesDTO) {
+        if (seriesDTO.getTitle() != null) series.setTitle(seriesDTO.getTitle());
+        if (seriesDTO.getDescription() != null) series.setDescription(seriesDTO.getDescription());
+        if (seriesDTO.getReleaseDate() != null) series.setReleaseDate(seriesDTO.getReleaseDate());
+        if (seriesDTO.getGenre() != null) series.setGenre(seriesDTO.getGenre());
+        if (seriesDTO.getPosterUrl() != null) series.setPosterUrl(seriesDTO.getPosterUrl());
+        if (seriesDTO.getCountry() != null) series.setCountry(seriesDTO.getCountry());
+        if (seriesDTO.getTrailerUrl() != null) series.setTrailerUrl(seriesDTO.getTrailerUrl());
 
-        if (updatedSeries.getSeasons() != null) {
-            mergeSeasons(existingSeries.getSeasons(), updatedSeries.getSeasons());
+        if (seriesDTO.getDirectorId() != null) {
+            directorRepository.findById(seriesDTO.getDirectorId()).ifPresent(series::setDirector);
+        }
+
+        if (seriesDTO.getActorIds() != null && !seriesDTO.getActorIds().isEmpty()) {
+            List<Actor> actors = new ArrayList<>();
+            for (String actorId : seriesDTO.getActorIds()) {
+                actorRepository.findById(actorId).ifPresent(actors::add);
+            }
+            series.setActors(actors);
+        }
+
+        if (seriesDTO.getSeasons() != null) {
+            mergeSeasons(series.getSeasons(), seriesDTO.getSeasons());
         }
     }
 
-    /**
-     * Delete a series by its ID
-     */
+
     public void deleteSeries(String id) {
         seriesRepository.deleteById(id);
     }
@@ -249,7 +270,6 @@ public class SeriesService {
         if (updatedEpisode.getDuration() != null) existingEpisode.setDuration(updatedEpisode.getDuration());
         if (updatedEpisode.getReleaseDate() != null) existingEpisode.setReleaseDate(updatedEpisode.getReleaseDate());
         if (updatedEpisode.getPosterUrl() != null) existingEpisode.setPosterUrl(updatedEpisode.getPosterUrl());
-        if (updatedEpisode.getActors() != null) existingEpisode.setActors(updatedEpisode.getActors());
     }
 
     /**
@@ -408,4 +428,36 @@ public class SeriesService {
         existingEpisodes.clear();
         existingEpisodes.addAll(mergedEpisodes);
     }
+
+    public Optional<DirectorResponseDTO> getDirectorOfSeries(String seriesId) {
+        return seriesRepository.findById(seriesId)
+                .map(series -> new DirectorResponseDTO(series.getDirector()));
+    }
+
+    public Optional<List<ActorResponseDTO>> getActorsOfSeries(String seriesId) {
+        return seriesRepository.findById(seriesId)
+                .map(series -> series.getActors().stream()
+                        .map(ActorResponseDTO::new)
+                        .collect(Collectors.toList()));
+    }
+
+
+    private Series buildSeriesFromDTO(String id, SeriesRequestDTO dto) {
+        SeriesResponseDTO responseDTO = new SeriesResponseDTO(
+                id,
+                dto.getTitle(),
+                dto.getDescription(),
+                dto.getGenre(),
+                0.0,
+                0,
+                dto.getReleaseDate(),
+                dto.getPosterUrl(),
+                dto.getSeasons(),
+                dto.getCountry(),
+                dto.getTrailerUrl()
+        );
+
+        return new Series(dto);
+    }
+
 }

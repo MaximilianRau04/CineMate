@@ -1,33 +1,18 @@
-package com.cinemate.actor;
+package com.cinemate.actor.DTOs;
 
-import com.cinemate.actor.DTOs.ActorRequestDTO;
-import com.cinemate.movie.Movie;
-import com.cinemate.series.Series;
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.persistence.ManyToMany;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import com.cinemate.actor.Actor;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
-@Document(collection = "actors")
-public class Actor {
-    @Id
+public class ActorResponseDTO {
+
     private String id;
     private String name;
     private Date birthday;
-    @ManyToMany(mappedBy = "actors")
-    @JsonBackReference
-    private List<Movie> movies;
-    @ManyToMany(mappedBy = "actors")
-    @JsonBackReference
-    private List<Series> series;
     private String image;
     private String biography;
 
-    public Actor(String id, String name, Date birthday, String image, String biography) {
+    public ActorResponseDTO(String id, String name, Date birthday, String image, String biography) {
         this.id = id;
         this.name = name;
         this.birthday = birthday;
@@ -35,15 +20,15 @@ public class Actor {
         this.biography = biography;
     }
 
-    public Actor(ActorRequestDTO actor) {
+    public ActorResponseDTO() {}
+
+    public ActorResponseDTO(Actor actor) {
         this.id = actor.getId();
         this.name = actor.getName();
         this.birthday = actor.getBirthday();
         this.image = actor.getImage();
         this.biography = actor.getBiography();
     }
-
-    public Actor() {}
 
     public String getId() {
         return id;
@@ -67,22 +52,6 @@ public class Actor {
 
     public void setBirthday(Date birthday) {
         this.birthday = birthday;
-    }
-
-    public List<Movie> getMovies() {
-        return movies;
-    }
-
-    public void setMovies(List<Movie> movies) {
-        this.movies = movies;
-    }
-
-    public List<Series> getSeries() {
-        return series;
-    }
-
-    public void setSeries(List<Series> series) {
-        this.series = series;
     }
 
     public String getImage() {

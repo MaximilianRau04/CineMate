@@ -2,7 +2,12 @@ package com.cinemate.series;
 
 import com.cinemate.actor.Actor;
 import com.cinemate.director.Director;
+import com.cinemate.series.DTOs.SeriesRequestDTO;
+import com.cinemate.series.DTOs.SeriesResponseDTO;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -21,18 +26,22 @@ public class Series {
     private String genre;
     private double rating;
     private int reviewCount;
-    @NotNull
     private Date releaseDate;
     private String posterUrl;
     @JsonBackReference
     private List<Season> seasons;
+    @ManyToMany(mappedBy = "series")
+    @JsonBackReference
     private List<Actor> actors;
+    @ManyToOne
+    @JsonBackReference
+    private Director director;
     private String country;
     private String trailerUrl;
     // tags
 
     public Series(String id, String title, String description, String genre, double rating, int reviewCount, Date releaseDate, String posterUrl, List<Season> seasons,
-                  String country, String trailerUrl, List<Actor> actors) {
+                  String country, String trailerUrl) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -44,7 +53,22 @@ public class Series {
         this.seasons = seasons;
         this.country = country;
         this.trailerUrl = trailerUrl;
-        this.actors = actors;
+    }
+
+    public Series() {}
+
+    public Series(SeriesRequestDTO series) {
+        this.id = series.getId();
+        this.title = series.getTitle();
+        this.description = series.getDescription();
+        this.genre = series.getGenre();
+        this.rating = series.getRating();
+        this.reviewCount = series.getReviewCount();
+        this.releaseDate = series.getReleaseDate();
+        this.posterUrl = series.getPosterUrl();
+        this.seasons = series.getSeasons();
+        this.country = series.getCountry();
+        this.trailerUrl = series.getTrailerUrl();
     }
 
     public String getId() {
@@ -143,6 +167,14 @@ public class Series {
         this.trailerUrl = trailerUrl;
     }
 
+    public Director getDirector() {
+        return director;
+    }
+
+    public void setDirector(Director director) {
+        this.director = director;
+    }
+
     public static class Season {
         private int seasonNumber;
         private List<Episode> episodes;
@@ -186,18 +218,15 @@ public class Series {
         private Date releaseDate;
         private String description;
         private String posterUrl;
-        private List<Actor> actors;
-        private Director director;
 
-        public Episode(String title, int episodeNumber, String duration, Date releaseDate, String description, String posterUrl, List<Actor> actors, Director director) {
+        public Episode(String title, int episodeNumber, String duration, Date releaseDate, String description, String posterUrl) {
             this.title = title;
             this.episodeNumber = episodeNumber;
             this.duration = duration;
             this.releaseDate = releaseDate;
             this.description = description;
             this.posterUrl = posterUrl;
-            this.actors = actors;
-            this.director = director;
+
         }
 
         public String getTitle() {
@@ -248,20 +277,5 @@ public class Series {
             this.posterUrl = posterUrl;
         }
 
-        public List<Actor> getActors() {
-            return actors;
-        }
-
-        public void setActors(List<Actor> actors) {
-            this.actors = actors;
-        }
-
-        public Director getDirector() {
-            return director;
-        }
-
-        public void setDirector(Director director) {
-            this.director = director;
-        }
     }
 }

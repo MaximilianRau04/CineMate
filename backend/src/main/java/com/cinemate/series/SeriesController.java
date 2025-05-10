@@ -1,5 +1,9 @@
 package com.cinemate.series;
 
+import com.cinemate.actor.DTOs.ActorResponseDTO;
+import com.cinemate.director.DTOs.DirectorResponseDTO;
+import com.cinemate.series.DTOs.SeriesRequestDTO;
+import com.cinemate.series.DTOs.SeriesResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +26,7 @@ public class SeriesController {
      * @return List<Series>
      */
     @GetMapping
-    public ResponseEntity<List<Series>> getAllSeries() {
+    public ResponseEntity<List<SeriesResponseDTO>> getAllSeries() {
         return seriesService.getAllSeries();
     }
 
@@ -32,7 +36,7 @@ public class SeriesController {
      * @return Series
      */
     @GetMapping("/{id}")
-    public ResponseEntity<Series> getSeriesById(@PathVariable String id) {
+    public ResponseEntity<SeriesResponseDTO> getSeriesById(@PathVariable String id) {
         return seriesService.getSeriesById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -44,7 +48,7 @@ public class SeriesController {
      * @return Series
      */
     @PostMapping
-    public ResponseEntity<Series> createSeries(@RequestBody Series series) {
+    public ResponseEntity<SeriesResponseDTO> createSeries(@RequestBody SeriesRequestDTO series) {
         return seriesService.createSeries(series);
     }
 
@@ -55,7 +59,7 @@ public class SeriesController {
      * @return Series
      */
     @PutMapping("/{id}")
-    public ResponseEntity<Series> updateSeries(@PathVariable String id, @RequestBody Series series) {
+    public ResponseEntity<SeriesResponseDTO> updateSeries(@PathVariable String id, @RequestBody SeriesRequestDTO series) {
         return seriesService.updateSeries(id, series);
     }
 
@@ -206,4 +210,29 @@ public class SeriesController {
             @PathVariable int episodeNumber) {
         return seriesService.deleteEpisode(id, seasonNumber, episodeNumber);
     }
+
+    /**
+     * returns the director of a series
+     * @param id
+     * @return
+     */
+    @GetMapping("/{id}/director")
+    public ResponseEntity<DirectorResponseDTO> getDirectorOfSeries(@PathVariable String id) {
+        return seriesService.getDirectorOfSeries(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    /**
+     * returns the director of a series
+     * @param id
+     * @return
+     */
+    @GetMapping("/{id}/actors")
+    public ResponseEntity<List<ActorResponseDTO>> getActorsOfSeries(@PathVariable String id) {
+        return seriesService.getActorsOfSeries(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
 }

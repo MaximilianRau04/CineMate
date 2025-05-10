@@ -1,35 +1,18 @@
-package com.cinemate.director;
+package com.cinemate.director.DTOs;
 
-import com.cinemate.director.DTOs.DirectorRequestDTO;
-import com.cinemate.movie.Movie;
-import com.cinemate.series.Series;
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.persistence.OneToMany;
-import jakarta.validation.constraints.NotNull;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import com.cinemate.director.Director;
 
 import java.util.Date;
-import java.util.List;
 
-@Document(collection = "directors")
-public class Director {
-    @Id
+public class DirectorResponseDTO {
+
     private String id;
-    @NotNull
     private String name;
-    @NotNull
     private Date birthday;
-    @OneToMany(mappedBy = "directors")
-    @JsonBackReference
-    private List<Movie> movies;
-    @OneToMany(mappedBy = "directors")
-    @JsonBackReference
-    private List<Series> series;
     private String image;
     private String biography;
 
-    public Director(String id, String name, Date birthday, String image, String biography) {
+    public DirectorResponseDTO(String id, String name, Date birthday, String image, String biography) {
         this.id = id;
         this.name = name;
         this.birthday = birthday;
@@ -37,15 +20,15 @@ public class Director {
         this.biography = biography;
     }
 
-    public Director(DirectorRequestDTO director) {
+    public DirectorResponseDTO() {}
+
+    public DirectorResponseDTO(Director director) {
         this.id = director.getId();
         this.name = director.getName();
         this.birthday = director.getBirthday();
         this.image = director.getImage();
         this.biography = director.getBiography();
     }
-
-    public Director() {}
 
     public String getId() {
         return id;
@@ -69,22 +52,6 @@ public class Director {
 
     public void setBirthday(Date birthday) {
         this.birthday = birthday;
-    }
-
-    public List<Movie> getMovies() {
-        return movies;
-    }
-
-    public void setMovies(List<Movie> movies) {
-        this.movies = movies;
-    }
-
-    public List<Series> getSeries() {
-        return series;
-    }
-
-    public void setSeries(List<Series> series) {
-        this.series = series;
     }
 
     public String getImage() {

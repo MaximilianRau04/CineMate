@@ -2,6 +2,9 @@ package com.cinemate.user;
 
 import com.cinemate.movie.Movie;
 import com.cinemate.series.Series;
+import com.cinemate.user.dtos.UserRequestDTO;
+import com.cinemate.user.dtos.UserResponseDTO;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.ManyToMany;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
@@ -12,7 +15,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 @Document(collection = "users")
 public class User {
@@ -30,8 +32,10 @@ public class User {
     private String avatarUrl;
     private Date joinedAt;
     @ManyToMany
+    @JsonBackReference
     private List<Movie> movieWatchlist;
     @ManyToMany
+    @JsonBackReference
     private List<Series> seriesWatchlist;
     // private List<Movie> favorites;
     // private List<Movie> watched;
@@ -50,6 +54,18 @@ public class User {
         this.movieWatchlist = movieWatchlist;
         this.seriesWatchlist = seriesWatchlist;
     }
+
+    public User(UserRequestDTO user) {
+        this.id = user.getId();
+        this.username = user.getUsername();
+        this.password = user.getPassword();
+        this.email = user.getEmail();
+        this.bio = user.getBio();
+        this.avatarUrl = user.getAvatarUrl();
+        this.joinedAt = user.getJoinedAt();
+    }
+
+    public User() {}
 
     public String getId() {
         return id;

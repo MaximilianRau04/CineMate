@@ -1,5 +1,9 @@
 package com.cinemate.movie;
 
+import com.cinemate.actor.DTOs.ActorResponseDTO;
+import com.cinemate.director.DTOs.DirectorResponseDTO;
+import com.cinemate.movie.DTOs.MovieRequestDTO;
+import com.cinemate.movie.DTOs.MovieResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +26,7 @@ public class MovieController {
      * @return List<Movie>
      */
     @GetMapping
-    public ResponseEntity<List<Movie>> getAllMovies() {
+    public ResponseEntity<List<MovieResponseDTO>> getAllMovies() {
         return movieService.getAllMovies();
     }
 
@@ -32,7 +36,7 @@ public class MovieController {
      * @return Movie
      */
     @GetMapping("/{id}")
-    public ResponseEntity<Movie> getMovieById(@PathVariable String id) {
+    public ResponseEntity<MovieResponseDTO> getMovieById(@PathVariable String id) {
         return movieService.getMovieById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -44,7 +48,7 @@ public class MovieController {
      * @return Movie
      */
     @PostMapping
-    public ResponseEntity<Movie> createMovie(@RequestBody Movie movie) {
+    public ResponseEntity<MovieResponseDTO> createMovie(@RequestBody MovieRequestDTO movie) {
         return movieService.createMovie(movie);
     }
 
@@ -55,7 +59,7 @@ public class MovieController {
      * @return Movie
      */
     @PutMapping("/{id}")
-    public ResponseEntity<Movie> updateMovie(@PathVariable String id, @RequestBody Movie movie) {
+    public ResponseEntity<MovieResponseDTO> updateMovie(@PathVariable String id, @RequestBody MovieRequestDTO movie) {
         return movieService.updateMovie(id, movie);
     }
 
@@ -68,5 +72,29 @@ public class MovieController {
     public ResponseEntity<Void> deleteMovie(@PathVariable String id) {
         movieService.deleteMovie(id);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * returns the director of the movie
+     * @param id
+     * @return DirectorResponseDTO
+     */
+    @GetMapping("/{id}/director")
+    public ResponseEntity<DirectorResponseDTO> getDirectorOfMovie(@PathVariable String id) {
+        return movieService.getDirectorOfMovie(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    /**
+     * returns the actors of the movie
+     * @param id
+     * @return List<ActorResponseDTO>
+     */
+    @GetMapping("/{id}/actors")
+    public ResponseEntity<List<ActorResponseDTO>> getActorsOfMovie(@PathVariable String id) {
+        return movieService.getActorsOfMovie(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 }

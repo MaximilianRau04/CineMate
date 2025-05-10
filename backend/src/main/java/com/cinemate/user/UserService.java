@@ -1,10 +1,13 @@
 package com.cinemate.user;
 
+import com.cinemate.movie.DTOs.MovieResponseDTO;
 import com.cinemate.movie.Movie;
 import com.cinemate.movie.MovieRepository;
-import com.cinemate.review.Review;
+import com.cinemate.series.DTOs.SeriesResponseDTO;
 import com.cinemate.series.Series;
 import com.cinemate.series.SeriesRepository;
+import com.cinemate.user.dtos.UserRequestDTO;
+import com.cinemate.user.dtos.UserResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,10 +20,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -39,14 +42,13 @@ public class UserService {
     /**
      * returns the currently logged in user
      * @param authentication
-     * @return user
+     * @return userResponseDTO
      */
     public ResponseEntity<?> getCurrentUser(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(401).body("Nicht eingeloggt");
         }
 
-        // Check what type of client is the principal is
         Object principal = authentication.getPrincipal();
         String username;
 
@@ -65,23 +67,29 @@ public class UserService {
         }
 
         User user = optionalUser.get();
-        user.setPassword(null);  // password is not returned
+        UserResponseDTO userResponseDTO = new UserResponseDTO(user);
 
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(userResponseDTO);
     }
 
     /**
      * returns all users
-     * @return List<User>
+     * @return List<UserResponseDTO>
      */
-    public ResponseEntity<List<User>> getAllUsers() {
-        List<User> users = userRepository.findAll();
-        users.forEach(user -> user.setPassword(null));
-        return ResponseEntity.ok(users);
+    public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
+        List<UserResponseDTO> userResponseDTOs = userRepository.findAll().stream()
+                .map(UserResponseDTO::new)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(userResponseDTOs);
     }
 
-    public Optional<User> getUserById(String id) {
-        return userRepository.findById(id);
+    /**
+     * returns the user with the given id
+     * @param id
+     * @return Optional<UserResponseDTO>
+     */
+    public Optional<UserResponseDTO> getUserById(String id) {
+        return userRepository.findById(id).map(UserResponseDTO::new);
     }
 
     /**
@@ -89,47 +97,61 @@ public class UserService {
      * @param userId
      * @return List<Movie>
      */
-    public ResponseEntity<List<Movie>> getMovieWatchlist(String userId) {
+    public ResponseEntity<List<MovieResponseDTO>> getMovieWatchlist(String userId) {
         Optional<User> userOptional = userRepository.findById(userId);
         if (userOptional.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
         User user = userOptional.get();
-        return ResponseEntity.ok(user.getMovieWatchlist());
+        List<MovieResponseDTO> movieDTOs = user.getMovieWatchlist().stream()
+                .map(MovieResponseDTO::new)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(movieDTOs);
     }
 
     /**
-     * returns the series  in the watchlist of the given user
+     * returns the series in the watchlist of the given user
      * @param userId
      * @return List<Series>
      */
-    public ResponseEntity<List<Series>> getSeriesWatchlist(String userId) {
+    public ResponseEntity<List<SeriesResponseDTO>> getSeriesWatchlist(String userId) {
         Optional<User> userOptional = userRepository.findById(userId);
         if (userOptional.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
         User user = userOptional.get();
-        return ResponseEntity.ok(user.getSeriesWatchlist());
+        List<SeriesResponseDTO> seriesDTOs = user.getSeriesWatchlist().stream()
+                .map(SeriesResponseDTO::new)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(seriesDTOs);
     }
 
     /**
      * creates an user
-     * @param user
-     * @return User
+     * @param userRequestDTO
+     * @return UserResponseDTO
      */
-    public ResponseEntity<User> createUser(User user) {
-        return ResponseEntity.ok(userRepository.save(user));
+    public ResponseEntity<UserResponseDTO> createUser(UserRequestDTO userRequestDTO) {
+        User user = new User(userRequestDTO);
+        User savedUser = userRepository.save(user);
+        UserResponseDTO userResponseDTO = new UserResponseDTO(savedUser);
+
+        return ResponseEntity.ok(userResponseDTO);
     }
+
 
     /**
      * updates an user
      * @param id
-     * @param updatedUser
-     * @return User
+     * @param userRequestDTO
+     * @param avatar
+     * @return UserResponseDTO
      */
-    public ResponseEntity<User> updateUser(String id, User updatedUser, MultipartFile avatar) {
+    public ResponseEntity<UserResponseDTO> updateUser(String id, UserRequestDTO userRequestDTO, MultipartFile avatar) {
         Optional<User> optionalUser = userRepository.findById(id);
         if (optionalUser.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -137,10 +159,10 @@ public class UserService {
 
         User existingUser = optionalUser.get();
 
-        if (updatedUser.getUsername() != null) existingUser.setUsername(updatedUser.getUsername());
-        if (updatedUser.getPassword() != null) existingUser.setPassword(updatedUser.getPassword());
-        if (updatedUser.getEmail() != null) existingUser.setEmail(updatedUser.getEmail());
-        if (updatedUser.getBio() != null) existingUser.setBio(updatedUser.getBio());
+        if (userRequestDTO.getUsername() != null) existingUser.setUsername(userRequestDTO.getUsername());
+        if (userRequestDTO.getPassword() != null) existingUser.setPassword(userRequestDTO.getPassword());
+        if (userRequestDTO.getEmail() != null) existingUser.setEmail(userRequestDTO.getEmail());
+        if (userRequestDTO.getBio() != null) existingUser.setBio(userRequestDTO.getBio());
 
         if (avatar != null && !avatar.isEmpty()) {
             try {
@@ -155,16 +177,19 @@ public class UserService {
             }
         }
 
-        return ResponseEntity.ok(userRepository.save(existingUser));
+        User updatedUser = userRepository.save(existingUser);
+        UserResponseDTO userResponseDTO = new UserResponseDTO(updatedUser);
+
+        return ResponseEntity.ok(userResponseDTO);
     }
 
     /**
      * add series with the given id to the watchlist of the given user
      * @param userId
      * @param seriesId
-     * @return User
+     * @return UserResponseDTO
      */
-    public ResponseEntity<User> addSeriesToWatchlist(String userId, String seriesId) {
+    public ResponseEntity<UserResponseDTO> addSeriesToWatchlist(String userId, String seriesId) {
         Optional<User> userOptional = userRepository.findById(userId);
         Optional<Series> seriesOptional = seriesRepository.findById(seriesId);
 
@@ -176,18 +201,19 @@ public class UserService {
         Series series = seriesOptional.get();
 
         user.addSeriesToWatchlist(series);
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        UserResponseDTO userResponseDTO = new UserResponseDTO(savedUser);
 
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(userResponseDTO);
     }
 
     /**
      * add movie with the given id to the watchlist of the given user
      * @param userId
      * @param movieId
-     * @return User
+     * @return UserResponseDTO
      */
-    public ResponseEntity<User> addMovieToWatchlist(String userId, String movieId) {
+    public ResponseEntity<UserResponseDTO> addMovieToWatchlist(String userId, String movieId) {
         Optional<User> userOptional = userRepository.findById(userId);
         Optional<Movie> movieOptional = movieRepository.findById(movieId);
 
@@ -199,11 +225,16 @@ public class UserService {
         Movie movie = movieOptional.get();
 
         user.addMovieToWatchlist(movie);
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        UserResponseDTO userResponseDTO = new UserResponseDTO(savedUser);
 
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(userResponseDTO);
     }
 
+    /**
+     * deletes the user with the given id
+     * @param id
+     */
     public void deleteUser(String id) {
         userRepository.deleteById(id);
     }
@@ -212,9 +243,9 @@ public class UserService {
      * removes the movie with the given id from the watchlist of the given user
      * @param userId
      * @param movieId
-     * @return User
+     * @return UserResponseDTO
      */
-    public ResponseEntity<User> removeMovieFromWatchlist(String userId, String movieId) {
+    public ResponseEntity<UserResponseDTO> removeMovieFromWatchlist(String userId, String movieId) {
         Optional<User> userOptional = userRepository.findById(userId);
         Optional<Movie> movieOptional = movieRepository.findById(movieId);
 
@@ -226,18 +257,19 @@ public class UserService {
         Movie movie = movieOptional.get();
 
         user.removeMovieFromWatchlist(movie);
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        UserResponseDTO userResponseDTO = new UserResponseDTO(savedUser);
 
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(userResponseDTO);
     }
 
     /**
      * removes the series with the given id from the watchlist of the given user
      * @param userId
      * @param seriesId
-     * @return User
+     * @return UserResponseDTO
      */
-    public ResponseEntity<User> removeSeriesFromWatchlist(String userId, String seriesId) {
+    public ResponseEntity<UserResponseDTO> removeSeriesFromWatchlist(String userId, String seriesId) {
         Optional<User> userOptional = userRepository.findById(userId);
         Optional<Series> seriesOptional = seriesRepository.findById(seriesId);
 
@@ -249,8 +281,9 @@ public class UserService {
         Series series = seriesOptional.get();
 
         user.removeSeriesFromWatchlist(series);
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        UserResponseDTO userResponseDTO = new UserResponseDTO(savedUser);
 
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(userResponseDTO);
     }
 }

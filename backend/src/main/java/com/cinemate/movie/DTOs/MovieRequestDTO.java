@@ -1,24 +1,12 @@
-package com.cinemate.movie;
+package com.cinemate.movie.DTOs;
 
-import com.cinemate.actor.Actor;
-import com.cinemate.director.Director;
-import com.cinemate.movie.DTOs.MovieRequestDTO;
-import com.cinemate.movie.DTOs.MovieResponseDTO;
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
 import java.util.List;
 
-@Document(collection = "movies")
-public class Movie {
+public class MovieRequestDTO {
 
-    @Id
     private String id;
     @NotNull
     private String title;
@@ -29,19 +17,13 @@ public class Movie {
     private Date releaseDate;
     private String duration;
     private String posterUrl;
-    @JsonBackReference
-    @ManyToOne
-    private Director director;
-    @JsonBackReference
-    @ManyToMany(mappedBy = "movies")
-    private List<Actor> actors;
+    private String directorId;
+    private List<String> actorIds;
     private String country;
     private String trailerUrl;
-    // tags
 
-
-    public Movie(String id, String title, String description, String genre, double rating, int reviewCount, Date releaseDate, String duration, String posterUrl,
-                 String country, String trailerUrl) {
+    public MovieRequestDTO(String id, String title, String description, String genre, double rating, int reviewCount, Date releaseDate, String duration, String posterUrl,
+                           String directorId, List<String> actorIds, String country, String trailerUrl) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -51,27 +33,17 @@ public class Movie {
         this.releaseDate = releaseDate;
         this.duration = duration;
         this.posterUrl = posterUrl;
+        this.directorId = directorId;
+        this.actorIds = actorIds;
         this.country = country;
         this.trailerUrl = trailerUrl;
     }
 
-    public Movie(MovieRequestDTO movie) {
-        this.id = movie.getId();
-        this.title = movie.getTitle();
-        this.description = movie.getDescription();
-        this.genre = movie.getGenre();
-        this.rating = movie.getRating();
-        this.reviewCount = movie.getReviewCount();
-        this.releaseDate = movie.getReleaseDate();
-        this.duration = movie.getDuration();
-        this.posterUrl = movie.getPosterUrl();
-        this.country = movie.getCountry();
-        this.trailerUrl = movie.getTrailerUrl();
+    public MovieRequestDTO() {}
+
+    public String getId() {
+        return id;
     }
-
-    public Movie() {}
-
-    public String getId() { return id; }
 
     public void setId(String id) {
         this.id = id;
@@ -109,6 +81,14 @@ public class Movie {
         this.rating = rating;
     }
 
+    public int getReviewCount() {
+        return reviewCount;
+    }
+
+    public void setReviewCount(int reviewCount) {
+        this.reviewCount = reviewCount;
+    }
+
     public Date getReleaseDate() {
         return releaseDate;
     }
@@ -133,28 +113,20 @@ public class Movie {
         this.posterUrl = posterUrl;
     }
 
-    public int getReviewCount() {
-        return reviewCount;
+    public String getDirectorId() {
+        return directorId;
     }
 
-    public void setReviewCount(int reviewCount) {
-        this.reviewCount = reviewCount;
+    public void setDirectorId(String directorId) {
+        this.directorId = directorId;
     }
 
-    public Director getDirector() {
-        return director;
+    public List<String> getActorIds() {
+        return actorIds;
     }
 
-    public void setDirector(Director director) {
-        this.director = director;
-    }
-
-    public List<Actor> getActors() {
-        return actors;
-    }
-
-    public void setActors(List<Actor> actors) {
-        this.actors = actors;
+    public void setActorIds(List<String> actorIds) {
+        this.actorIds = actorIds;
     }
 
     public String getCountry() {

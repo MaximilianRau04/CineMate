@@ -29,7 +29,7 @@ GET http://localhost:8080/api/users/me
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYXhpIiwiZXhwIjoxNzQ1MDQyNDQzLCJpYXQiOjE3NDUwMDY0NDN9.60VPYsuNHIDfF5SULKNZVh-dEkq7yE444Stq0TUGyjE
 
 ###
-GET http://localhost:8080/api/series
+GET http://localhost:8080/api/directors
 ###
 
 DELETE http://localhost:8080/api/users/6813a8eaf4f96f556a24061b

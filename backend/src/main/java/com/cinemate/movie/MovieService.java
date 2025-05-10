@@ -1,56 +1,99 @@
 package com.cinemate.movie;
 
+import com.cinemate.actor.Actor;
+import com.cinemate.actor.ActorRepository;
+import com.cinemate.actor.DTOs.ActorResponseDTO;
+import com.cinemate.director.DTOs.DirectorResponseDTO;
+import com.cinemate.director.Director;
+import com.cinemate.director.DirectorRepository;
+import com.cinemate.movie.DTOs.MovieRequestDTO;
+import com.cinemate.movie.DTOs.MovieResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class MovieService {
 
     private final MovieRepository movieRepository;
+    private final ActorRepository actorRepository;
+    private final DirectorRepository directorRepository;
 
     @Autowired
-    public MovieService(MovieRepository movieRepository) {
+    public MovieService(MovieRepository movieRepository,
+                        ActorRepository actorRepository,
+                        DirectorRepository directorRepository) {
         this.movieRepository = movieRepository;
+        this.actorRepository = actorRepository;
+        this.directorRepository = directorRepository;
     }
 
-    public ResponseEntity<List<Movie>> getAllMovies() {
-        return ResponseEntity.ok(movieRepository.findAll());
+    public ResponseEntity<List<MovieResponseDTO>> getAllMovies() {
+        List<Movie> movies = movieRepository.findAll();
+        List<MovieResponseDTO> movieDTOs = movies.stream()
+                .map(MovieResponseDTO::new)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(movieDTOs);
     }
 
-    public Optional<Movie> getMovieById(String id) {
-        return movieRepository.findById(id);
+    public Optional<MovieResponseDTO> getMovieById(String id) {
+        return movieRepository.findById(id)
+                .map(MovieResponseDTO::new);
     }
 
-    public ResponseEntity<Movie> createMovie(Movie movie) {
-        return ResponseEntity.ok(movieRepository.save(movie));
+    public ResponseEntity<MovieResponseDTO> createMovie(MovieRequestDTO movieDTO) {
+        Movie movie = buildMovieFromDTO(null, movieDTO);
+        Movie savedMovie = movieRepository.save(movie);
+        return ResponseEntity.ok(new MovieResponseDTO(savedMovie));
     }
 
-    public ResponseEntity<Movie> updateMovie(String id, Movie updatedMovie) {
+    public ResponseEntity<MovieResponseDTO> updateMovie(String id, MovieRequestDTO movieDTO) {
         Optional<Movie> optionalMovie = movieRepository.findById(id);
         if (optionalMovie.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        Movie existingMovie = optionalMovie.get();
 
-        if (updatedMovie.getTitle() != null) existingMovie.setTitle(updatedMovie.getTitle());
-        if (updatedMovie.getDescription() != null) existingMovie.setDescription(updatedMovie.getDescription());
-        if (updatedMovie.getReleaseDate() != null) existingMovie.setReleaseDate(updatedMovie.getReleaseDate());
-        if (updatedMovie.getGenre() != null) existingMovie.setGenre(updatedMovie.getGenre());
-        if (updatedMovie.getDuration() != null) existingMovie.setDuration(updatedMovie.getDuration());
-        if (updatedMovie.getPosterUrl() != null) existingMovie.setPosterUrl(updatedMovie.getPosterUrl());
-        if (updatedMovie.getActors() != null) existingMovie.setActors(updatedMovie.getActors());
-        if (updatedMovie.getCountry() != null) existingMovie.setCountry(updatedMovie.getCountry());
-        if (updatedMovie.getDirector() != null) existingMovie.setDirector(updatedMovie.getDirector());
-        if (updatedMovie.getTrailerUrl() != null) existingMovie.setTrailerUrl(updatedMovie.getTrailerUrl());
-
-        return ResponseEntity.ok(movieRepository.save(existingMovie));
+        Movie updatedMovie = buildMovieFromDTO(id, movieDTO);
+        Movie savedMovie = movieRepository.save(updatedMovie);
+        return ResponseEntity.ok(new MovieResponseDTO(savedMovie));
     }
 
     public void deleteMovie(String id) {
         movieRepository.deleteById(id);
+    }
+
+    public Optional<DirectorResponseDTO> getDirectorOfMovie(String movieId) {
+        return movieRepository.findById(movieId)
+                .map(movie -> new DirectorResponseDTO(movie.getDirector()));
+    }
+
+    public Optional<List<ActorResponseDTO>> getActorsOfMovie(String movieId) {
+        return movieRepository.findById(movieId)
+                .map(movie -> movie.getActors().stream()
+                        .map(ActorResponseDTO::new)
+                        .collect(Collectors.toList()));
+    }
+
+    private Movie buildMovieFromDTO(String id, MovieRequestDTO movieDTO) {
+        MovieResponseDTO dto = new MovieResponseDTO(
+                id,
+                movieDTO.getTitle(),
+                movieDTO.getDescription(),
+                movieDTO.getGenre(),
+                0.0,
+                0,
+                movieDTO.getReleaseDate(),
+                movieDTO.getDuration(),
+                movieDTO.getPosterUrl(),
+                movieDTO.getCountry(),
+                movieDTO.getTrailerUrl()
+        );
+
+        return new Movie(movieDTO);
     }
 }

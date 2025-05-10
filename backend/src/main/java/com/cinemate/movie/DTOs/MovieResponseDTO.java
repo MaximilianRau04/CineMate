@@ -1,26 +1,18 @@
-package com.cinemate.movie;
+package com.cinemate.movie.DTOs;
 
 import com.cinemate.actor.Actor;
 import com.cinemate.director.Director;
-import com.cinemate.movie.DTOs.MovieRequestDTO;
-import com.cinemate.movie.DTOs.MovieResponseDTO;
+import com.cinemate.movie.Movie;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
-import jakarta.validation.constraints.NotNull;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
 import java.util.List;
 
-@Document(collection = "movies")
-public class Movie {
+public class MovieResponseDTO {
 
-    @Id
     private String id;
-    @NotNull
     private String title;
     private String description;
     private String genre;
@@ -29,19 +21,11 @@ public class Movie {
     private Date releaseDate;
     private String duration;
     private String posterUrl;
-    @JsonBackReference
-    @ManyToOne
-    private Director director;
-    @JsonBackReference
-    @ManyToMany(mappedBy = "movies")
-    private List<Actor> actors;
     private String country;
     private String trailerUrl;
-    // tags
 
-
-    public Movie(String id, String title, String description, String genre, double rating, int reviewCount, Date releaseDate, String duration, String posterUrl,
-                 String country, String trailerUrl) {
+    public MovieResponseDTO(String id, String title, String description, String genre, double rating, int reviewCount, Date releaseDate, String duration,
+                            String posterUrl, String country, String trailerUrl) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -55,7 +39,9 @@ public class Movie {
         this.trailerUrl = trailerUrl;
     }
 
-    public Movie(MovieRequestDTO movie) {
+    public MovieResponseDTO() {}
+
+    public MovieResponseDTO(Movie movie) {
         this.id = movie.getId();
         this.title = movie.getTitle();
         this.description = movie.getDescription();
@@ -69,9 +55,9 @@ public class Movie {
         this.trailerUrl = movie.getTrailerUrl();
     }
 
-    public Movie() {}
-
-    public String getId() { return id; }
+    public String getId() {
+        return id;
+    }
 
     public void setId(String id) {
         this.id = id;
@@ -109,6 +95,14 @@ public class Movie {
         this.rating = rating;
     }
 
+    public int getReviewCount() {
+        return reviewCount;
+    }
+
+    public void setReviewCount(int reviewCount) {
+        this.reviewCount = reviewCount;
+    }
+
     public Date getReleaseDate() {
         return releaseDate;
     }
@@ -131,30 +125,6 @@ public class Movie {
 
     public void setPosterUrl(String posterUrl) {
         this.posterUrl = posterUrl;
-    }
-
-    public int getReviewCount() {
-        return reviewCount;
-    }
-
-    public void setReviewCount(int reviewCount) {
-        this.reviewCount = reviewCount;
-    }
-
-    public Director getDirector() {
-        return director;
-    }
-
-    public void setDirector(Director director) {
-        this.director = director;
-    }
-
-    public List<Actor> getActors() {
-        return actors;
-    }
-
-    public void setActors(List<Actor> actors) {
-        this.actors = actors;
     }
 
     public String getCountry() {
