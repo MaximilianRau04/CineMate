@@ -3,11 +3,7 @@ package com.cinemate.series;
 import com.cinemate.actor.Actor;
 import com.cinemate.director.Director;
 import com.cinemate.series.DTOs.SeriesRequestDTO;
-import com.cinemate.series.DTOs.SeriesResponseDTO;
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -28,13 +24,11 @@ public class Series {
     private int reviewCount;
     private Date releaseDate;
     private String posterUrl;
-    @JsonBackReference
+    @JsonManagedReference
     private List<Season> seasons;
-    @ManyToMany(mappedBy = "series")
-    @JsonBackReference
+    @JsonManagedReference
     private List<Actor> actors;
-    @ManyToOne
-    @JsonBackReference
+    @JsonManagedReference
     private Director director;
     private String country;
     private String trailerUrl;

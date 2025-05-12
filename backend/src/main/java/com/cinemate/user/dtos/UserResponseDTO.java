@@ -2,9 +2,10 @@ package com.cinemate.user.dtos;
 
 import com.cinemate.user.User;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class UserResponseDTO {
+public class UserResponseDTO implements Serializable {
     private String id;
     private String username;
     private String password;

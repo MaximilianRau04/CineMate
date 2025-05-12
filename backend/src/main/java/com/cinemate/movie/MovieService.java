@@ -21,16 +21,10 @@ import java.util.stream.Collectors;
 public class MovieService {
 
     private final MovieRepository movieRepository;
-    private final ActorRepository actorRepository;
-    private final DirectorRepository directorRepository;
 
     @Autowired
-    public MovieService(MovieRepository movieRepository,
-                        ActorRepository actorRepository,
-                        DirectorRepository directorRepository) {
+    public MovieService(MovieRepository movieRepository) {
         this.movieRepository = movieRepository;
-        this.actorRepository = actorRepository;
-        this.directorRepository = directorRepository;
     }
 
     public ResponseEntity<List<MovieResponseDTO>> getAllMovies() {

@@ -3,8 +3,7 @@ package com.cinemate.director;
 import com.cinemate.director.DTOs.DirectorRequestDTO;
 import com.cinemate.movie.Movie;
 import com.cinemate.series.Series;
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.persistence.OneToMany;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -20,11 +19,9 @@ public class Director {
     private String name;
     @NotNull
     private Date birthday;
-    @OneToMany(mappedBy = "directors")
-    @JsonBackReference
+    @JsonManagedReference
     private List<Movie> movies;
-    @OneToMany(mappedBy = "directors")
-    @JsonBackReference
+    @JsonManagedReference
     private List<Series> series;
     private String image;
     private String biography;

@@ -3,14 +3,13 @@ package com.cinemate.user;
 import com.cinemate.movie.Movie;
 import com.cinemate.series.Series;
 import com.cinemate.user.dtos.UserRequestDTO;
-import com.cinemate.user.dtos.UserResponseDTO;
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.persistence.ManyToMany;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -31,12 +30,10 @@ public class User {
     private String bio;
     private String avatarUrl;
     private Date joinedAt;
-    @ManyToMany
-    @JsonBackReference
-    private List<Movie> movieWatchlist;
-    @ManyToMany
-    @JsonBackReference
-    private List<Series> seriesWatchlist;
+    @JsonManagedReference
+    private List<Movie> movieWatchlist = new ArrayList<>();
+    @JsonManagedReference
+    private List<Series> seriesWatchlist = new ArrayList<>();
     // private List<Movie> favorites;
     // private List<Movie> watched;
     // private List<User> followers

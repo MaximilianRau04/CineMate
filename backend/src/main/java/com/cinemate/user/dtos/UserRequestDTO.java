@@ -6,10 +6,11 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
-public class UserRequestDTO {
+public class UserRequestDTO implements Serializable {
     private String id;
     @NotNull
     private String username;
@@ -21,8 +22,6 @@ public class UserRequestDTO {
     private String bio;
     private String avatarUrl;
     private Date joinedAt;
-    private List<Movie> movieWatchlist;
-    private List<Series> seriesWatchlist;
 
     public UserRequestDTO(String id, String username, String password, String email, String bio, String avatarUrl, Date joinedAt, List<Movie> movieWatchlist, List<Series> seriesWatchlist) {
         this.id = id;
@@ -92,19 +91,4 @@ public class UserRequestDTO {
         this.joinedAt = joinedAt;
     }
 
-    public List<Movie> getMovieWatchlist() {
-        return movieWatchlist;
-    }
-
-    public void setMovieWatchlist(List<Movie> movieWatchlist) {
-        this.movieWatchlist = movieWatchlist;
-    }
-
-    public List<Series> getSeriesWatchlist() {
-        return seriesWatchlist;
-    }
-
-    public void setSeriesWatchlist(List<Series> seriesWatchlist) {
-        this.seriesWatchlist = seriesWatchlist;
-    }
 }

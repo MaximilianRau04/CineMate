@@ -3,7 +3,7 @@ Content-Type: application/json
 
 {
   "username": "maxi",
-  "password": "1234567"
+  "password": "123456"
 }
 
 ###
@@ -12,9 +12,8 @@ Content-Type: application/json
 
 {
 "username": "maxi",
-"password": "1234567",
-  "email": "maxi@gmail.com",
-  "bio": "Wuzz up"
+"password": "123456",
+"email": "maxi@gmail.com"
 }
 ###
 PUT http://localhost:8080/api/users/6813a9c6a70428033d933986
@@ -27,9 +26,10 @@ Content-Type: application/json
 ###
 GET http://localhost:8080/api/users/me
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYXhpIiwiZXhwIjoxNzQ1MDQyNDQzLCJpYXQiOjE3NDUwMDY0NDN9.60VPYsuNHIDfF5SULKNZVh-dEkq7yE444Stq0TUGyjE
-
 ###
-GET http://localhost:8080/api/directors
+GET http://localhost:8080/api/series
+###
+GET http://localhost:8080/api/series/681a573bc5ddc7565d0e0ad2/actors
 ###
 
 DELETE http://localhost:8080/api/users/6813a8eaf4f96f556a24061b
@@ -78,7 +78,7 @@ POST http://localhost:8080/api/movies
 Content-Type: application/json
 
 {
-  "title": "Fight Club",
+  "title": "Fight Clb",
   "description": "Ein gelangweilter Büroarbeiter gründet mit einem Seifenverkäufer einen geheimen Fight Club.",
   "genre": "Drama",
   "releaseDate": "1999-10-15",
@@ -135,7 +135,9 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:8080/api/actors
+GET http://localhost:8080/api/movies
+###
+DELETE http://localhost:8080/api/movies/6820e2801efb0e4076f911d5
 
 ###
 GET http://localhost:8080/api/reviews/user/6813a9c6a70428033d933986

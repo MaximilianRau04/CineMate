@@ -3,12 +3,10 @@ package com.cinemate.actor;
 import com.cinemate.actor.DTOs.ActorRequestDTO;
 import com.cinemate.movie.Movie;
 import com.cinemate.series.Series;
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.persistence.ManyToMany;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -18,11 +16,9 @@ public class Actor {
     private String id;
     private String name;
     private Date birthday;
-    @ManyToMany(mappedBy = "actors")
-    @JsonBackReference
+    @JsonManagedReference
     private List<Movie> movies;
-    @ManyToMany(mappedBy = "actors")
-    @JsonBackReference
+    @JsonManagedReference
     private List<Series> series;
     private String image;
     private String biography;
