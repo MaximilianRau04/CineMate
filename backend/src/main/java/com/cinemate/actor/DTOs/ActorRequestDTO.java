@@ -3,6 +3,7 @@ package com.cinemate.actor.DTOs;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.Date;
+import java.util.List;
 
 public class ActorRequestDTO {
     private String id;
@@ -19,6 +20,7 @@ public class ActorRequestDTO {
         this.birthday = birthday;
         this.image = image;
         this.biography = biography;
+
     }
 
     public ActorRequestDTO() {}
@@ -62,4 +64,5 @@ public class ActorRequestDTO {
     public void setBiography(String biography) {
         this.biography = biography;
     }
+
 }

@@ -29,7 +29,7 @@ public class Series {
     @JsonManagedReference
     private List<Actor> actors;
     @JsonManagedReference
-    private Director director;
+    private List<Director> directors;
     private String country;
     private String trailerUrl;
     // tags
@@ -161,12 +161,12 @@ public class Series {
         this.trailerUrl = trailerUrl;
     }
 
-    public Director getDirector() {
-        return director;
+    public List<Director> getDirectors() {
+        return directors;
     }
 
-    public void setDirector(Director director) {
-        this.director = director;
+    public void setDirectors(List<Director> directors) {
+        this.directors = directors;
     }
 
     public static class Season {

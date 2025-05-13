@@ -3,6 +3,7 @@ package com.cinemate.director.DTOs;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.Date;
+import java.util.List;
 
 public class DirectorRequestDTO {
     private String id;
@@ -12,13 +13,17 @@ public class DirectorRequestDTO {
     private Date birthday;
     private String image;
     private String biography;
+    private List<String> movieIds;
+    private List<String> seriesIds;
 
-    public DirectorRequestDTO(String id, String name, Date birthday, String image, String biography) {
+    public DirectorRequestDTO(String id, String name, Date birthday, String image, String biography, List<String> movieIds, List<String> seriesIds) {
         this.id = id;
         this.name = name;
         this.birthday = birthday;
         this.image = image;
         this.biography = biography;
+        this.movieIds = movieIds;
+        this.seriesIds = seriesIds;
     }
     public DirectorRequestDTO() {}
 
@@ -60,5 +65,21 @@ public class DirectorRequestDTO {
 
     public void setBiography(String biography) {
         this.biography = biography;
+    }
+
+    public List<String> getMovieIds() {
+        return movieIds;
+    }
+
+    public void setMovieIds(List<String> movieIds) {
+        this.movieIds = movieIds;
+    }
+
+    public List<String> getSeriesIds() {
+        return seriesIds;
+    }
+
+    public void setSeriesIds(List<String> seriesIds) {
+        this.seriesIds = seriesIds;
     }
 }

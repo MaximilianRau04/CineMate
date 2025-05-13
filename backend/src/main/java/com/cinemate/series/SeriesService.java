@@ -59,9 +59,11 @@ public class SeriesService {
             return ResponseEntity.notFound().build();
         }
 
-        Series updatedSeries = buildSeriesFromDTO(id, seriesDTO);
-        updateSeriesFields(updatedSeries, seriesDTO);
-        Series savedSeries = seriesRepository.save(updatedSeries);
+        Series existingSeries = optionalSeries.get();
+
+        updateSeriesFields(existingSeries, seriesDTO);
+
+        Series savedSeries = seriesRepository.save(existingSeries);
         return ResponseEntity.ok(new SeriesResponseDTO(savedSeries));
     }
 
@@ -74,8 +76,12 @@ public class SeriesService {
         if (seriesDTO.getCountry() != null) series.setCountry(seriesDTO.getCountry());
         if (seriesDTO.getTrailerUrl() != null) series.setTrailerUrl(seriesDTO.getTrailerUrl());
 
-        if (seriesDTO.getDirectorId() != null) {
-            directorRepository.findById(seriesDTO.getDirectorId()).ifPresent(series::setDirector);
+        if (seriesDTO.getDirectorIds() != null && !seriesDTO.getDirectorIds().isEmpty()) {
+            List<Director> directors = new ArrayList<>();
+            for (String directorId : seriesDTO.getDirectorIds()) {
+                directorRepository.findById(directorId).ifPresent(directors::add);
+            }
+            series.setDirectors(directors);
         }
 
         if (seriesDTO.getActorIds() != null && !seriesDTO.getActorIds().isEmpty()) {
@@ -429,16 +435,32 @@ public class SeriesService {
         existingEpisodes.addAll(mergedEpisodes);
     }
 
-    public Optional<DirectorResponseDTO> getDirectorOfSeries(String seriesId) {
+    public Optional<List<DirectorResponseDTO>> getDirectorOfSeries(String seriesId) {
         return seriesRepository.findById(seriesId)
-                .map(series -> new DirectorResponseDTO(series.getDirector()));
+                .map(series -> {
+                    List<Director> directors = series.getDirectors();
+                    if (directors == null) {
+                        return Collections.<DirectorResponseDTO>emptyList();
+                    }
+                    return directors.stream()
+                            .filter(Objects::nonNull)
+                            .map(DirectorResponseDTO::new)
+                            .collect(Collectors.toList());
+                });
     }
 
     public Optional<List<ActorResponseDTO>> getActorsOfSeries(String seriesId) {
         return seriesRepository.findById(seriesId)
-                .map(series -> series.getActors().stream()
-                        .map(ActorResponseDTO::new)
-                        .collect(Collectors.toList()));
+                .map(series -> {
+                    List<Actor> actors = series.getActors();
+                    if (actors == null) {
+                        return Collections.<ActorResponseDTO>emptyList();
+                    }
+                    return actors.stream()
+                            .filter(Objects::nonNull)
+                            .map(ActorResponseDTO::new)
+                            .collect(Collectors.toList());
+                });
     }
 
 
@@ -452,7 +474,6 @@ public class SeriesService {
                 0,
                 dto.getReleaseDate(),
                 dto.getPosterUrl(),
-                dto.getSeasons(),
                 dto.getCountry(),
                 dto.getTrailerUrl()
         );

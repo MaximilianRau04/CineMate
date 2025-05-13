@@ -27,9 +27,9 @@ Content-Type: application/json
 GET http://localhost:8080/api/users/me
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYXhpIiwiZXhwIjoxNzQ1MDQyNDQzLCJpYXQiOjE3NDUwMDY0NDN9.60VPYsuNHIDfF5SULKNZVh-dEkq7yE444Stq0TUGyjE
 ###
-GET http://localhost:8080/api/series
+GET http://localhost:8080/api/movies
 ###
-GET http://localhost:8080/api/series/681a573bc5ddc7565d0e0ad2/actors
+GET http://localhost:8080/api/movies/681bb4f4ac77214519cff7fb/actors
 ###
 
 DELETE http://localhost:8080/api/users/6813a8eaf4f96f556a24061b
@@ -97,6 +97,7 @@ Content-Type: application/json
   "duration": "2h",
   "posterUrl": "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/6eB2oh1SplddsZYCdayrIdrIGLd.jpg"
 }
+
 ###
 POST http://localhost:8080/api/movies
 Content-Type: application/json
@@ -135,7 +136,15 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:8080/api/movies
+GET http://localhost:8080/api/series/682394becf80ad33eb7213dc/directors
+###
+PUT http://localhost:8080/api/series/682394becf80ad33eb7213dc
+Content-Type: application/json
+
+{
+  "directorIds": ["68239425a5d9c87af9af5417"]
+}
+
 ###
 DELETE http://localhost:8080/api/movies/6820e2801efb0e4076f911d5
 
@@ -312,7 +321,6 @@ DELETE http://localhost:8080/api/series/680e7b2023c0b14c9c4811bb/seasons/1/episo
 GET http://localhost:8080/api/series/680e7b2023c0b14c9c4811bb/seasons
 
 ###
-
 POST http://localhost:8080/api/reviews/movie/680e7b0923c0b14c9c4811b9/680fb9bf040ad6445d9d4ef7
 Content-Type: application/json
 
@@ -321,3 +329,25 @@ Content-Type: application/json
   "comment": "Ein fantastischer Film!",
   "type": "movie"
 }
+###
+POST http://localhost:8080/api/actors
+Content-Type: application/json
+
+{
+  "name": "Robert Downey Jr",
+  "birthday": "1965-04-04",
+  "biography": "Hello",
+  "image": "https://media.themoviedb.org/t/p/w300_and_h450_bestv2/5qHNjhtjMD4YWH3UP0rm4tKwxCL.jpg"
+}
+###
+POST http://localhost:8080/api/directors
+Content-Type: application/json
+
+{
+  "name": "Christopher Nolan",
+  "birthday": "1970-07-30",
+  "biography": "Hello",
+  "image": "https://media.themoviedb.org/t/p/w300_and_h450_bestv2/xuAIuYSmsUzKlUMBFGVZaWsY3DZ.jpg"
+}
+
+

@@ -216,8 +216,8 @@ public class SeriesController {
      * @param id
      * @return
      */
-    @GetMapping("/{id}/director")
-    public ResponseEntity<DirectorResponseDTO> getDirectorOfSeries(@PathVariable String id) {
+    @GetMapping("/{id}/directors")
+    public ResponseEntity<List<DirectorResponseDTO>> getDirectorOfSeries(@PathVariable String id) {
         return seriesService.getDirectorOfSeries(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
