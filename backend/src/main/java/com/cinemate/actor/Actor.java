@@ -5,6 +5,7 @@ import com.cinemate.movie.Movie;
 import com.cinemate.series.Series;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
@@ -16,9 +17,9 @@ public class Actor {
     private String id;
     private String name;
     private Date birthday;
-    @JsonManagedReference
+    @DBRef(lazy = true)
     private List<Movie> movies;
-    @JsonManagedReference
+    @DBRef(lazy = true)
     private List<Series> series;
     private String image;
     private String biography;

@@ -6,6 +6,7 @@ import com.cinemate.movie.DTOs.MovieRequestDTO;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
@@ -25,9 +26,9 @@ public class Movie {
     private Date releaseDate;
     private String duration;
     private String posterUrl;
-    @JsonManagedReference
+    @DBRef(lazy = true)
     private Director director;
-    @JsonManagedReference
+    @DBRef(lazy = true)
     private List<Actor> actors;
     private String country;
     private String trailerUrl;

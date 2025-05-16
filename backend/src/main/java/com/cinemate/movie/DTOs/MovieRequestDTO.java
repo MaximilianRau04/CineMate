@@ -17,13 +17,11 @@ public class MovieRequestDTO {
     private Date releaseDate;
     private String duration;
     private String posterUrl;
-    private String directorId;
-    private List<String> actorIds;
     private String country;
     private String trailerUrl;
 
     public MovieRequestDTO(String id, String title, String description, String genre, double rating, int reviewCount, Date releaseDate, String duration, String posterUrl,
-                           String directorId, List<String> actorIds, String country, String trailerUrl) {
+                           String country, String trailerUrl) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -33,8 +31,6 @@ public class MovieRequestDTO {
         this.releaseDate = releaseDate;
         this.duration = duration;
         this.posterUrl = posterUrl;
-        this.directorId = directorId;
-        this.actorIds = actorIds;
         this.country = country;
         this.trailerUrl = trailerUrl;
     }
@@ -111,22 +107,6 @@ public class MovieRequestDTO {
 
     public void setPosterUrl(String posterUrl) {
         this.posterUrl = posterUrl;
-    }
-
-    public String getDirectorId() {
-        return directorId;
-    }
-
-    public void setDirectorId(String directorId) {
-        this.directorId = directorId;
-    }
-
-    public List<String> getActorIds() {
-        return actorIds;
-    }
-
-    public void setActorIds(List<String> actorIds) {
-        this.actorIds = actorIds;
     }
 
     public String getCountry() {

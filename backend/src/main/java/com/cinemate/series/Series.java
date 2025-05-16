@@ -6,6 +6,7 @@ import com.cinemate.series.DTOs.SeriesRequestDTO;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
@@ -24,11 +25,11 @@ public class Series {
     private int reviewCount;
     private Date releaseDate;
     private String posterUrl;
-    @JsonManagedReference
+    @DBRef(lazy = true)
     private List<Season> seasons;
-    @JsonManagedReference
+    @DBRef(lazy = true)
     private List<Actor> actors;
-    @JsonManagedReference
+    @DBRef(lazy = true)
     private List<Director> directors;
     private String country;
     private String trailerUrl;

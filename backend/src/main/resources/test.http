@@ -134,20 +134,20 @@ Content-Type: application/json
   "releaseDate": "2025-11-13",
   "posterUrl": "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/1Aiq3YJuV96IVIZleLe6SE4i9Oo.jpg"
 }
-
+###
+GET http://localhost:8080/api/actors/6824f67084f2464081d16abb/movies
 ###
 GET http://localhost:8080/api/series/682394becf80ad33eb7213dc/directors
 ###
-PUT http://localhost:8080/api/series/682394becf80ad33eb7213dc
+POST http://localhost:8080/api/series/682394becf80ad33eb7213dc/directors/68239425a5d9c87af9af5417
 Content-Type: application/json
-
-{
-  "directorIds": ["68239425a5d9c87af9af5417"]
-}
+###
+DELETE http://localhost:8080/api/series/682394becf80ad33eb7213dc/directors/68239425a5d9c87af9af5417
 
 ###
-DELETE http://localhost:8080/api/movies/6820e2801efb0e4076f911d5
-
+DELETE http://localhost:8080/api/movies/6823951acf80ad33eb7213dd
+###
+GET http://localhost:8080/api/series
 ###
 GET http://localhost:8080/api/reviews/user/6813a9c6a70428033d933986
 

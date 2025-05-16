@@ -463,6 +463,176 @@ public class SeriesService {
                 });
     }
 
+    /**
+     * Adds an actor to a series
+     * @param seriesId
+     * @param actorId
+     * @return ResponseEntity with list of actors or not found
+     */
+    public ResponseEntity<List<ActorResponseDTO>> addActorToSeries(String seriesId, String actorId) {
+        Optional<Series> optionalSeries = seriesRepository.findById(seriesId);
+        Optional<Actor> optionalActor = actorRepository.findById(actorId);
+
+        if (optionalSeries.isEmpty() || optionalActor.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Series series = optionalSeries.get();
+        Actor actor = optionalActor.get();
+
+        if (series.getActors() == null) {
+            series.setActors(new ArrayList<>());
+        }
+
+        if (!series.getActors().contains(actor)) {
+            series.getActors().add(actor);
+
+            if (actor.getSeries() == null) {
+                actor.setSeries(new ArrayList<>());
+            }
+
+            if (!actor.getSeries().contains(series)) {
+                actor.getSeries().add(series);
+            }
+
+            actorRepository.save(actor);
+            seriesRepository.save(series);
+        }
+
+        return ResponseEntity.ok(series.getActors().stream()
+                .map(ActorResponseDTO::new)
+                .collect(Collectors.toList()));
+    }
+
+    /**
+     * Removes an actor from a series
+     * @param seriesId
+     * @param actorId
+     * @return ResponseEntity with list of remaining actors or not found
+     */
+    public ResponseEntity<List<ActorResponseDTO>> removeActorFromSeries(String seriesId, String actorId) {
+        Optional<Series> optionalSeries = seriesRepository.findById(seriesId);
+        Optional<Actor> optionalActor = actorRepository.findById(actorId);
+
+        if (optionalSeries.isEmpty() || optionalActor.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Series series = optionalSeries.get();
+        Actor actor = optionalActor.get();
+
+        if (series.getActors() != null) {
+            series.getActors().removeIf(a -> a.getId().equals(actorId));
+
+            if (actor.getSeries() != null) {
+                actor.getSeries().removeIf(m -> m.getId().equals(series));
+                actorRepository.save(actor);
+            }
+
+            seriesRepository.save(series);
+        }
+
+        List<ActorResponseDTO> actorDTOs = new ArrayList<>();
+        if (series.getActors() != null) {
+            for (Actor a : series.getActors()) {
+                ActorResponseDTO dto = new ActorResponseDTO();
+                dto.setId(a.getId());
+                dto.setName(a.getName());
+                dto.setBirthday(a.getBirthday());
+                dto.setImage(a.getImage());
+                dto.setBiography(a.getBiography());
+                actorDTOs.add(dto);
+            }
+        }
+
+        return ResponseEntity.ok(actorDTOs);
+    }
+
+    /**
+     * Sets a director to a series
+     * @param seriesId
+     * @param directorId
+     * @return ResponseEntity with updated director or not found
+     */
+    public ResponseEntity<List<DirectorResponseDTO>> addDirectorToSeries(String seriesId, String directorId) {
+        Optional<Series> optionalSeries = seriesRepository.findById(seriesId);
+        Optional<Director> optionalDirector = directorRepository.findById(directorId);
+
+        if (optionalSeries.isEmpty() || optionalDirector.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Series series = optionalSeries.get();
+        Director director = optionalDirector.get();
+
+        if (series.getDirectors() == null) {
+            series.setDirectors(new ArrayList<>());
+        }
+
+        if (!series.getDirectors().contains(director)) {
+            series.getDirectors().add(director);
+
+            if (director.getSeries() == null) {
+                director.setSeries(new ArrayList<>());
+            }
+
+            if (!director.getSeries().contains(series)) {
+                director.getSeries().add(series);
+            }
+
+            directorRepository.save(director);
+            seriesRepository.save(series);
+        }
+
+        return ResponseEntity.ok(series.getDirectors().stream()
+                .map(DirectorResponseDTO::new)
+                .collect(Collectors.toList()));
+    }
+
+    /**
+     * Removes the director from a series
+     * @param seriesId
+     * @param directorId
+     * @return ResponseEntity with null director or not found
+     */
+    public ResponseEntity<List<DirectorResponseDTO>> removeDirectorFromSeries(String seriesId, String directorId) {
+        Optional<Series> optionalSeries = seriesRepository.findById(seriesId);
+        Optional<Director> optionalDirector = directorRepository.findById(directorId);
+
+        if (optionalSeries.isEmpty() || optionalDirector.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Series series = optionalSeries.get();
+        Director director = optionalDirector.get();
+
+        if (series.getDirectors() != null) {
+            series.getDirectors().removeIf(a -> a.getId().equals(directorId));
+
+            if (director.getSeries() != null) {
+                director.getSeries().removeIf(m -> m.getId().equals(series));
+                directorRepository.save(director);
+            }
+
+            seriesRepository.save(series);
+        }
+
+        List<DirectorResponseDTO> directorDTOs = new ArrayList<>();
+        if (series.getDirectors() != null) {
+            for (Director d : series.getDirectors()) {
+                DirectorResponseDTO dto = new DirectorResponseDTO();
+                dto.setId(d.getId());
+                dto.setName(d.getName());
+                dto.setBirthday(d.getBirthday());
+                dto.setImage(d.getImage());
+                dto.setBiography(d.getBiography());
+                directorDTOs.add(dto);
+            }
+        }
+
+        return ResponseEntity.ok(directorDTOs);
+    }
+
 
     private Series buildSeriesFromDTO(String id, SeriesRequestDTO dto) {
         SeriesResponseDTO responseDTO = new SeriesResponseDTO(

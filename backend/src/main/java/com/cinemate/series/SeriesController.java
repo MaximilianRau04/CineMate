@@ -235,4 +235,56 @@ public class SeriesController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    /**
+     * adds an actor to the series
+     * @param seriesId
+     * @param actorId
+     * @return List<ActorResponseDTO>
+     */
+    @PostMapping("/{seriesId}/actors/{actorId}")
+    public ResponseEntity<List<ActorResponseDTO>> addActorToSeries(
+            @PathVariable String seriesId,
+            @PathVariable String actorId) {
+        return seriesService.addActorToSeries(seriesId, actorId);
+    }
+
+    /**
+     * removes an actor from the series
+     * @param seriesId
+     * @param actorId
+     * @return List<ActorResponseDTO>
+     */
+    @DeleteMapping("/{seriesId}/actors/{actorId}")
+    public ResponseEntity<List<ActorResponseDTO>> removeActorFromSeries(
+            @PathVariable String seriesId,
+            @PathVariable String actorId) {
+        return seriesService.removeActorFromSeries(seriesId, actorId);
+    }
+
+    /**
+     * sets the director of the series
+     * @param seriesId
+     * @param directorId
+     * @return List<DirectorResponseDTO>
+     */
+    @PostMapping("/{seriesId}/directors/{directorId}")
+    public ResponseEntity<List<DirectorResponseDTO>> addDirectorToSeries(
+            @PathVariable String seriesId,
+            @PathVariable String directorId) {
+        return seriesService.addDirectorToSeries(seriesId, directorId);
+    }
+
+    /**
+     * removes the director from the series
+     * @param seriesId
+     * @param directorId
+     * @return List<DirectorResponseDTO>
+     */
+    @DeleteMapping("/{seriesId}/directors/{directorId}")
+    public ResponseEntity<List<DirectorResponseDTO>> removeDirectorFromSeries(
+            @PathVariable String seriesId,
+            @PathVariable String directorId) {
+        return seriesService.removeDirectorFromSeries(seriesId, directorId);
+    }
+
 }

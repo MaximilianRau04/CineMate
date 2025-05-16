@@ -6,6 +6,7 @@ import com.cinemate.series.Series;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
@@ -19,9 +20,9 @@ public class Director {
     private String name;
     @NotNull
     private Date birthday;
-    @JsonManagedReference
+    @DBRef(lazy = true)
     private List<Movie> movies;
-    @JsonManagedReference
+    @DBRef(lazy = true)
     private List<Series> series;
     private String image;
     private String biography;

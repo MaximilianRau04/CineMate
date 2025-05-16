@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 
@@ -30,9 +31,9 @@ public class User {
     private String bio;
     private String avatarUrl;
     private Date joinedAt;
-    @JsonManagedReference
+    @DBRef(lazy = true)
     private List<Movie> movieWatchlist = new ArrayList<>();
-    @JsonManagedReference
+    @DBRef(lazy = true)
     private List<Series> seriesWatchlist = new ArrayList<>();
     // private List<Movie> favorites;
     // private List<Movie> watched;

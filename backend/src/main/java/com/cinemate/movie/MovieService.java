@@ -3,6 +3,7 @@ package com.cinemate.movie;
 import com.cinemate.actor.Actor;
 import com.cinemate.actor.ActorRepository;
 import com.cinemate.actor.DTOs.ActorResponseDTO;
+import com.cinemate.director.Director;
 import com.cinemate.director.DirectorRepository;
 import com.cinemate.director.DTOs.DirectorResponseDTO;
 import com.cinemate.movie.DTOs.MovieRequestDTO;
@@ -46,19 +47,6 @@ public class MovieService {
     public ResponseEntity<MovieResponseDTO> createMovie(MovieRequestDTO movieDTO) {
         Movie movie = new Movie(movieDTO);
 
-        if (movieDTO.getDirectorId() != null && !movieDTO.getDirectorId().isEmpty()) {
-            directorRepository.findById(movieDTO.getDirectorId())
-                    .ifPresent(movie::setDirector);
-        }
-
-        if (movieDTO.getActorIds() != null && !movieDTO.getActorIds().isEmpty()) {
-            List<Actor> actors = new ArrayList<>();
-            for (String actorId : movieDTO.getActorIds()) {
-                actorRepository.findById(actorId).ifPresent(actors::add);
-            }
-            movie.setActors(actors);
-        }
-
         Movie savedMovie = movieRepository.save(movie);
         return ResponseEntity.ok(new MovieResponseDTO(savedMovie));
     }
@@ -96,19 +84,6 @@ public class MovieService {
             existingMovie.setTrailerUrl(movieDTO.getTrailerUrl());
         }
 
-        if (movieDTO.getDirectorId() != null && !movieDTO.getDirectorId().isEmpty()) {
-            directorRepository.findById(movieDTO.getDirectorId())
-                    .ifPresent(existingMovie::setDirector);
-        }
-
-        if (movieDTO.getActorIds() != null && !movieDTO.getActorIds().isEmpty()) {
-            List<Actor> actors = new ArrayList<>();
-            for (String actorId : movieDTO.getActorIds()) {
-                actorRepository.findById(actorId).ifPresent(actors::add);
-            }
-            existingMovie.setActors(actors);
-        }
-
         Movie savedMovie = movieRepository.save(existingMovie);
         return ResponseEntity.ok(new MovieResponseDTO(savedMovie));
     }
@@ -138,4 +113,155 @@ public class MovieService {
                 });
     }
 
+    /**
+     * Adds an actor to a movie
+     * @param movieId
+     * @param actorId
+     * @return ResponseEntity with list of actors or not found
+     */
+    public ResponseEntity<List<ActorResponseDTO>> addActorToMovie(String movieId, String actorId) {
+        Optional<Movie> optionalMovie = movieRepository.findById(movieId);
+        Optional<Actor> optionalActor = actorRepository.findById(actorId);
+
+        if (optionalMovie.isEmpty() || optionalActor.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Movie movie = optionalMovie.get();
+        Actor actor = optionalActor.get();
+
+        if (movie.getActors() == null) {
+            movie.setActors(new ArrayList<>());
+        }
+
+        if (!movie.getActors().contains(actor)) {
+            movie.getActors().add(actor);
+
+            if (actor.getMovies() == null) {
+                actor.setMovies(new ArrayList<>());
+            }
+
+            if (!actor.getMovies().contains(movie)) {
+                actor.getMovies().add(movie);
+            }
+
+            actorRepository.save(actor);
+            movieRepository.save(movie);
+        }
+
+        return ResponseEntity.ok(movie.getActors().stream()
+                .map(ActorResponseDTO::new)
+                .collect(Collectors.toList()));
+    }
+
+    /**
+     * Removes an actor from a movie
+     * @param movieId
+     * @param actorId
+     * @return ResponseEntity with list of remaining actors or not found
+     */
+    public ResponseEntity<List<ActorResponseDTO>> removeActorFromMovie(String movieId, String actorId) {
+        Optional<Movie> optionalMovie = movieRepository.findById(movieId);
+        Optional<Actor> optionalActor = actorRepository.findById(actorId);
+
+        if (optionalMovie.isEmpty() || optionalActor.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Movie movie = optionalMovie.get();
+        Actor actor = optionalActor.get();
+
+        if (movie.getActors() != null) {
+            movie.getActors().removeIf(a -> a.getId().equals(actorId));
+
+            if (actor.getMovies() != null) {
+                actor.getMovies().removeIf(m -> m.getId().equals(movieId));
+                actorRepository.save(actor);
+            }
+
+            movieRepository.save(movie);
+        }
+
+        List<ActorResponseDTO> actorDTOs = new ArrayList<>();
+        if (movie.getActors() != null) {
+            for (Actor a : movie.getActors()) {
+                ActorResponseDTO dto = new ActorResponseDTO();
+                dto.setId(a.getId());
+                dto.setName(a.getName());
+                dto.setBirthday(a.getBirthday());
+                dto.setImage(a.getImage());
+                dto.setBiography(a.getBiography());
+                actorDTOs.add(dto);
+            }
+        }
+
+        return ResponseEntity.ok(actorDTOs);
+    }
+
+    /**
+     * Sets a director to a movie
+     * @param movieId
+     * @param directorId
+     * @return ResponseEntity with updated director or not found
+     */
+    public ResponseEntity<DirectorResponseDTO> setDirectorToMovie(String movieId, String directorId) {
+        Optional<Movie> optionalMovie = movieRepository.findById(movieId);
+        Optional<Director> optionalDirector = directorRepository.findById(directorId);
+
+        if (optionalMovie.isEmpty() || optionalDirector.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Movie movie = optionalMovie.get();
+        Director director = optionalDirector.get();
+
+        Director oldDirector = movie.getDirector();
+        if (oldDirector != null && oldDirector.getMovies() != null) {
+            oldDirector.getMovies().remove(movie);
+            directorRepository.save(oldDirector);
+        }
+
+        movie.setDirector(director);
+
+        if (director.getMovies() == null) {
+            director.setMovies(new ArrayList<>());
+        }
+
+        if (!director.getMovies().contains(movie)) {
+            director.getMovies().add(movie);
+        }
+
+        directorRepository.save(director);
+        movieRepository.save(movie);
+
+        return ResponseEntity.ok(new DirectorResponseDTO(director));
+    }
+
+    /**
+     * Removes the director from a movie
+     * @param movieId
+     * @return ResponseEntity with null director or not found
+     */
+    public ResponseEntity<DirectorResponseDTO> removeDirectorFromMovie(String movieId) {
+        Optional<Movie> optionalMovie = movieRepository.findById(movieId);
+
+        if (optionalMovie.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Movie movie = optionalMovie.get();
+        Director oldDirector = movie.getDirector();
+
+        if (oldDirector != null) {
+            if (oldDirector.getMovies() != null) {
+                oldDirector.getMovies().remove(movie);
+                directorRepository.save(oldDirector);
+            }
+
+            movie.setDirector(null);
+            movieRepository.save(movie);
+        }
+
+        return ResponseEntity.ok(null);
+    }
 }
