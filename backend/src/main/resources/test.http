@@ -90,7 +90,7 @@ POST http://localhost:8080/api/movies
 Content-Type: application/json
 
 {
-  "title": "Avengers: Dommsday",
+  "title": "Avengers: Doomsday",
   "description": "Nicht verfügbar",
   "genre": "Action",
   "releaseDate": "2026-05-01",
@@ -135,11 +135,11 @@ Content-Type: application/json
   "posterUrl": "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/1Aiq3YJuV96IVIZleLe6SE4i9Oo.jpg"
 }
 ###
-GET http://localhost:8080/api/actors/6824f67084f2464081d16abb/movies
+GET http://localhost:8080/api/actors/682a285636f2d54c872d1bbe/movies
 ###
 GET http://localhost:8080/api/series/682394becf80ad33eb7213dc/directors
 ###
-POST http://localhost:8080/api/series/682394becf80ad33eb7213dc/directors/68239425a5d9c87af9af5417
+POST http://localhost:8080/api/movies/682a27bf36f2d54c872d1bb5/actors/682a285636f2d54c872d1bbe
 Content-Type: application/json
 ###
 DELETE http://localhost:8080/api/series/682394becf80ad33eb7213dc/directors/68239425a5d9c87af9af5417
@@ -192,41 +192,10 @@ Content-Type: application/json
   "description": "Eine Gruppe von Kindern entdeckt übernatürliche Ereignisse und geheime Experimente in ihrer Kleinstadt.",
   "genre": "Mystery, Sci-Fi, Horror",
   "releaseDate": "2016-07-15",
-  "posterUrl": "https://image.tmdb.org/t/p/w500/x2LSRK2Cm7MZhjluni1msVJ3wDF.jpg",
-  "seasons": [
-    {
-      "seasonNumber": 1,
-      "episodes": [
-        {
-          "episodeNumber": 1,
-          "title": "Chapter One: The Vanishing of Will Byers",
-          "duration": "47m",
-          "releaseDate": "2016-07-15T00:00:00.000+00:00",
-          "description": "Will Byers verschwindet spurlos. Seine Freunde suchen ihn und stoßen dabei auf ein mysteriöses Mädchen.",
-          "posterUrl": "https://image.tmdb.org/t/p/original/AdwF2jXvhdODr6gUZ61bHKRkz09.jpg"
-        },
-        {
-          "episodeNumber": 2,
-          "title": "Chapter Two: The Weirdo on Maple Street",
-          "duration": "55m",
-          "releaseDate": "2016-07-15T00:00:00.000+00:00",
-          "description": "Die Jungen verstecken das Mädchen, das offenbar übernatürliche Kräfte besitzt.",
-          "posterUrl": "https://image.tmdb.org/t/p/original/8iA56ugQyHZmX81wSsNqwXjCE6F.jpg"
-        },
-        {
-          "episodeNumber": 3,
-          "title": "Chapter Three: Holly, Jolly",
-          "duration": "51m",
-          "releaseDate": "2016-07-15T00:00:00.000+00:00",
-          "description": "Joyce glaubt, dass Will ihr über Lichter Signale sendet. Nancy sucht ihre verschwundene Freundin Barb.",
-          "posterUrl": "https://image.tmdb.org/t/p/original/5snULpWQWp7aqFto7UbRcEkEyyS.jpg"
-        }
-      ]
-    }
-  ]
+  "posterUrl": "https://image.tmdb.org/t/p/w500/x2LSRK2Cm7MZhjluni1msVJ3wDF.jpg"
 }
 ###
-PUT http://localhost:8080/api/series/680e7b2023c0b14c9c4811bb
+POST http://localhost:8080/api/series/680e7b2023c0b14c9c4811bb/seasons
 Content-Type: application/json
 
 {

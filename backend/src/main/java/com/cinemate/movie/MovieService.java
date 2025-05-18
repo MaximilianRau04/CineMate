@@ -8,6 +8,7 @@ import com.cinemate.director.DirectorRepository;
 import com.cinemate.director.DTOs.DirectorResponseDTO;
 import com.cinemate.movie.DTOs.MovieRequestDTO;
 import com.cinemate.movie.DTOs.MovieResponseDTO;
+import com.cinemate.series.Series;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,10 @@ public class MovieService {
         this.directorRepository = directorRepository;
     }
 
+    /**
+     * return all movies
+     * @return List<MovieResponseDTO>
+     */
     public ResponseEntity<List<MovieResponseDTO>> getAllMovies() {
         List<Movie> movies = movieRepository.findAll();
         List<MovieResponseDTO> movieDTOs = movies.stream()
@@ -39,11 +44,21 @@ public class MovieService {
         return ResponseEntity.ok(movieDTOs);
     }
 
+    /**
+     * returns the movie with the given id
+     * @param id
+     * @return MovieResponseDTO
+     */
     public Optional<MovieResponseDTO> getMovieById(String id) {
         return movieRepository.findById(id)
                 .map(MovieResponseDTO::new);
     }
 
+    /**
+     * creates a movie
+     * @param movieDTO
+     * @return MovieResponseDTO
+     */
     public ResponseEntity<MovieResponseDTO> createMovie(MovieRequestDTO movieDTO) {
         Movie movie = new Movie(movieDTO);
 
@@ -51,6 +66,12 @@ public class MovieService {
         return ResponseEntity.ok(new MovieResponseDTO(savedMovie));
     }
 
+    /**
+     * updates the movie with the given id
+     * @param id
+     * @param movieDTO
+     * @return MovieResponseDTO
+     */
     public ResponseEntity<MovieResponseDTO> updateMovie(String id, MovieRequestDTO movieDTO) {
         Optional<Movie> optionalMovie = movieRepository.findById(id);
         if (optionalMovie.isEmpty()) {
@@ -88,10 +109,19 @@ public class MovieService {
         return ResponseEntity.ok(new MovieResponseDTO(savedMovie));
     }
 
+    /**
+     * deletes the movie with the given id
+     * @param id
+     */
     public void deleteMovie(String id) {
         movieRepository.deleteById(id);
     }
 
+    /**
+     * returns the director of the movie
+     * @param movieId
+     * @return DirectorResponseDTO
+     */
     public Optional<DirectorResponseDTO> getDirectorOfMovie(String movieId) {
         return movieRepository.findById(movieId)
                 .map(Movie::getDirector)
@@ -99,6 +129,11 @@ public class MovieService {
                 .map(DirectorResponseDTO::new);
     }
 
+    /**
+     * returns the actors of the movie
+     * @param movieId
+     * @return List<ActorResponseDTO>
+     */
     public Optional<List<ActorResponseDTO>> getActorsOfMovie(String movieId) {
         return movieRepository.findById(movieId)
                 .map(movie -> {
@@ -117,9 +152,9 @@ public class MovieService {
      * Adds an actor to a movie
      * @param movieId
      * @param actorId
-     * @return ResponseEntity with list of actors or not found
+     * @return the added actor
      */
-    public ResponseEntity<List<ActorResponseDTO>> addActorToMovie(String movieId, String actorId) {
+    public ResponseEntity<ActorResponseDTO> addActorToMovie(String movieId, String actorId) {
         Optional<Movie> optionalMovie = movieRepository.findById(movieId);
         Optional<Actor> optionalActor = actorRepository.findById(actorId);
 
@@ -149,9 +184,8 @@ public class MovieService {
             movieRepository.save(movie);
         }
 
-        return ResponseEntity.ok(movie.getActors().stream()
-                .map(ActorResponseDTO::new)
-                .collect(Collectors.toList()));
+        ActorResponseDTO addedActor = new ActorResponseDTO(actor);
+        return ResponseEntity.ok(addedActor);
     }
 
     /**
@@ -160,7 +194,7 @@ public class MovieService {
      * @param actorId
      * @return ResponseEntity with list of remaining actors or not found
      */
-    public ResponseEntity<List<ActorResponseDTO>> removeActorFromMovie(String movieId, String actorId) {
+    public ResponseEntity<Map<String, Object>> removeActorFromMovie(String movieId, String actorId) {
         Optional<Movie> optionalMovie = movieRepository.findById(movieId);
         Optional<Actor> optionalActor = actorRepository.findById(actorId);
 
@@ -171,31 +205,25 @@ public class MovieService {
         Movie movie = optionalMovie.get();
         Actor actor = optionalActor.get();
 
+        boolean removed = false;
         if (movie.getActors() != null) {
-            movie.getActors().removeIf(a -> a.getId().equals(actorId));
+            removed = movie.getActors().removeIf(a -> a.getId().equals(actorId));
 
-            if (actor.getMovies() != null) {
-                actor.getMovies().removeIf(m -> m.getId().equals(movieId));
+            if (removed && actor.getSeries() != null) {
+                actor.getSeries().removeIf(m -> m.getId().equals(movie.getId()));
                 actorRepository.save(actor);
             }
 
             movieRepository.save(movie);
         }
 
-        List<ActorResponseDTO> actorDTOs = new ArrayList<>();
-        if (movie.getActors() != null) {
-            for (Actor a : movie.getActors()) {
-                ActorResponseDTO dto = new ActorResponseDTO();
-                dto.setId(a.getId());
-                dto.setName(a.getName());
-                dto.setBirthday(a.getBirthday());
-                dto.setImage(a.getImage());
-                dto.setBiography(a.getBiography());
-                actorDTOs.add(dto);
-            }
-        }
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", removed);
+        response.put("message", removed ?
+                "Schauspieler erfolgreich von der Serie entfernt" :
+                "Schauspieler war nicht mit dieser Serie verknüpft");
 
-        return ResponseEntity.ok(actorDTOs);
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -242,7 +270,7 @@ public class MovieService {
      * @param movieId
      * @return ResponseEntity with null director or not found
      */
-    public ResponseEntity<DirectorResponseDTO> removeDirectorFromMovie(String movieId) {
+    public ResponseEntity<Map<String, Object>> removeDirectorFromMovie(String movieId) {
         Optional<Movie> optionalMovie = movieRepository.findById(movieId);
 
         if (optionalMovie.isEmpty()) {
@@ -250,18 +278,28 @@ public class MovieService {
         }
 
         Movie movie = optionalMovie.get();
-        Director oldDirector = movie.getDirector();
+        Director director = movie.getDirector();
 
-        if (oldDirector != null) {
-            if (oldDirector.getMovies() != null) {
-                oldDirector.getMovies().remove(movie);
-                directorRepository.save(oldDirector);
+        boolean removed = false;
+
+        if (director != null) {
+            movie.setDirector(null);
+            removed = true;
+
+            if (director.getMovies() != null) {
+                director.getMovies().removeIf(m -> m.getId().equals(movie.getId()));
+                directorRepository.save(director);
             }
 
-            movie.setDirector(null);
             movieRepository.save(movie);
         }
 
-        return ResponseEntity.ok(null);
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", removed);
+        response.put("message", removed ?
+                "Regisseur erfolgreich vom Film entfernt" :
+                "Kein Regisseur mit diesem Film verknüpft");
+
+        return ResponseEntity.ok(response);
     }
 }

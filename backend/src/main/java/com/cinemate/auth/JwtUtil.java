@@ -16,7 +16,7 @@ public class JwtUtil {
      * Generates a JWT token for the given username.
      * The token is available for 10 hours
      * @param username
-     * @return
+     * @return String
      */
     public String generateToken(String username) {
         Map<String, Object> claims = new HashMap<>();
@@ -32,7 +32,7 @@ public class JwtUtil {
     /**
      * Extracts the username from the JWT token.
      * @param token
-     * @return
+     * @return String
      */
     public String extractUsername(String token) {
         return Jwts.parser()
@@ -53,7 +53,7 @@ public class JwtUtil {
     /**
      * Extracts the expiration date from the JWT token.
      * @param token
-     * @return
+     * @return Date
      */
     public Date extractExpiration(String token) {
         return Jwts.parser()
@@ -67,6 +67,7 @@ public class JwtUtil {
      * Validates the token by comparing the username and checking expiration.
      * @param token
      * @param username
+     * @return boolean
      */
     public boolean validateToken(String token, String username) {
         return (username.equals(extractUsername(token)) && !isTokenExpired(token));

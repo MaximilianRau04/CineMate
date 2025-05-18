@@ -1,4 +1,3 @@
-
 package com.cinemate.series;
 
 import com.cinemate.actor.Actor;
@@ -34,6 +33,10 @@ public class SeriesService {
         this.directorRepository = directorRepository;
     }
 
+    /**
+     * returns all series
+     * @return List<SeriesResponseDTO>
+     */
     public ResponseEntity<List<SeriesResponseDTO>> getAllSeries() {
         List<Series> seriesList = seriesRepository.findAll();
         List<SeriesResponseDTO> seriesDTOs = seriesList.stream()
@@ -42,17 +45,33 @@ public class SeriesService {
         return ResponseEntity.ok(seriesDTOs);
     }
 
+    /**
+     * returns the series with the given id
+     * @param id
+     * @return SeriesResponseDTO
+     */
     public Optional<SeriesResponseDTO> getSeriesById(String id) {
         return seriesRepository.findById(id)
                 .map(SeriesResponseDTO::new);
     }
 
+    /**
+     * creates a series
+     * @param seriesDTO
+     * @return SeriesResponseDTO
+     */
     public ResponseEntity<SeriesResponseDTO> createSeries(SeriesRequestDTO seriesDTO) {
         Series series = buildSeriesFromDTO(null, seriesDTO);
         Series savedSeries = seriesRepository.save(series);
         return ResponseEntity.ok(new SeriesResponseDTO(savedSeries));
     }
 
+    /**
+     * updates the series with the given id
+     * @param id
+     * @param seriesDTO
+     * @return SeriesResponseDTO
+     */
     public ResponseEntity<SeriesResponseDTO> updateSeries(String id, SeriesRequestDTO seriesDTO) {
         Optional<Series> optionalSeries = seriesRepository.findById(id);
         if (optionalSeries.isEmpty()) {
@@ -67,6 +86,11 @@ public class SeriesService {
         return ResponseEntity.ok(new SeriesResponseDTO(savedSeries));
     }
 
+    /**
+     * updates the series fields for put request
+     * @param series
+     * @param seriesDTO
+     */
     private void updateSeriesFields(Series series, SeriesRequestDTO seriesDTO) {
         if (seriesDTO.getTitle() != null) series.setTitle(seriesDTO.getTitle());
         if (seriesDTO.getDescription() != null) series.setDescription(seriesDTO.getDescription());
@@ -97,13 +121,18 @@ public class SeriesService {
         }
     }
 
-
+    /**
+     * deletes the series with the given id
+     * @param id
+     */
     public void deleteSeries(String id) {
         seriesRepository.deleteById(id);
     }
 
     /**
      * Get all seasons of a series
+     * @param seriesId
+     * @return List<Series.Season>
      */
     public ResponseEntity<List<Series.Season>> getSeasons(String seriesId) {
         return findAndProcessEntity(seriesId, series -> series.getSeasons());
@@ -111,6 +140,8 @@ public class SeriesService {
 
     /**
      * Get a specific season from a series
+     * @param seriesId
+     * @param seasonNumber
      */
     public ResponseEntity<Series.Season> getSeason(String seriesId, int seasonNumber) {
         return findAndProcessEntity(seriesId, series ->
@@ -119,74 +150,114 @@ public class SeriesService {
 
     /**
      * Add a new season to a series
+     * @param seriesId
+     * @param newSeason
+     * @return the added season
      */
-    public ResponseEntity<Series> addSeason(String seriesId, Series.Season newSeason) {
+    public ResponseEntity<Series.Season> addSeason(String seriesId, Series.Season newSeason) {
         if (newSeason.getSeasonNumber() <= 0) {
             return ResponseEntity.badRequest().build();
         }
 
-        return findAndUpdateEntity(seriesId, series -> {
-            boolean seasonExists = series.getSeasons().stream()
-                    .anyMatch(s -> s.getSeasonNumber() == newSeason.getSeasonNumber());
+        Optional<Series> optionalSeries = seriesRepository.findById(seriesId);
+        if (optionalSeries.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
 
-            if (seasonExists) {
-                return null;
-            }
+        Series series = optionalSeries.get();
+        boolean seasonExists = series.getSeasons().stream()
+                .anyMatch(s -> s.getSeasonNumber() == newSeason.getSeasonNumber());
 
-            if (newSeason.getEpisodes() != null) {
-                List<Series.Episode> validEpisodes = validateAndSortEpisodes(newSeason.getEpisodes());
-                newSeason.setEpisodes(validEpisodes);
-            } else {
-                newSeason.setEpisodes(new ArrayList<>());
-            }
+        if (seasonExists) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
 
-            series.getSeasons().add(newSeason);
-            series.getSeasons().sort(Comparator.comparing(Series.Season::getSeasonNumber));
+        if (newSeason.getEpisodes() != null) {
+            List<Series.Episode> validEpisodes = validateAndSortEpisodes(newSeason.getEpisodes());
+            newSeason.setEpisodes(validEpisodes);
+        } else {
+            newSeason.setEpisodes(new ArrayList<>());
+        }
 
-            return seriesRepository.save(series);
-        }, HttpStatus.CREATED, HttpStatus.CONFLICT);
+        series.getSeasons().add(newSeason);
+        series.getSeasons().sort(Comparator.comparing(Series.Season::getSeasonNumber));
+
+        Series savedSeries = seriesRepository.save(series);
+
+        Optional<Series.Season> addedSeason = findSeasonByNumber(savedSeries, newSeason.getSeasonNumber());
+
+        return addedSeason
+                .map(season -> ResponseEntity.status(HttpStatus.CREATED).body(season))
+                .orElse(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
     }
 
     /**
-     * Update a specific season in a series
+     * updates the season with the given number of the series
+     * @param seriesId
+     * @param seasonNumber
+     * @param updatedSeason
+     * @return the updated season
      */
-    public ResponseEntity<Series> updateSeason(String seriesId, int seasonNumber, Series.Season updatedSeason) {
-        return findAndUpdateEntity(seriesId, series -> {
-            Optional<Series.Season> existingSeason = findSeasonByNumber(series, seasonNumber);
+    public ResponseEntity<Series.Season> updateSeason(String seriesId, int seasonNumber, Series.Season updatedSeason) {
+        Optional<Series> optionalSeries = seriesRepository.findById(seriesId);
+        if (optionalSeries.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
 
-            if (existingSeason.isEmpty()) {
-                return null;
-            }
+        Series series = optionalSeries.get();
+        Optional<Series.Season> existingSeason = findSeasonByNumber(series, seasonNumber);
 
-            Series.Season season = existingSeason.get();
-            if (updatedSeason.getTrailerUrl() != null) season.setTrailerUrl(updatedSeason.getTrailerUrl());
-            if (updatedSeason.getSeasonNumber() != -1) season.setSeasonNumber(updatedSeason.getSeasonNumber());
+        if (existingSeason.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
 
-            if (updatedSeason.getEpisodes() != null) {
-                mergeEpisodes(season.getEpisodes(), updatedSeason.getEpisodes());
-            }
+        Series.Season season = existingSeason.get();
+        if (updatedSeason.getTrailerUrl() != null) season.setTrailerUrl(updatedSeason.getTrailerUrl());
+        if (updatedSeason.getSeasonNumber() != -1) season.setSeasonNumber(updatedSeason.getSeasonNumber());
 
-            return seriesRepository.save(series);
-        });
+        if (updatedSeason.getEpisodes() != null) {
+            mergeEpisodes(season.getEpisodes(), updatedSeason.getEpisodes());
+        }
+
+        Series savedSeries = seriesRepository.save(series);
+
+        Optional<Series.Season> savedSeason = findSeasonByNumber(
+                savedSeries,
+                updatedSeason.getSeasonNumber() != -1 ? updatedSeason.getSeasonNumber() : seasonNumber
+        );
+
+        return savedSeason
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
     }
 
     /**
-     * Delete a season from a series
+     * deletes the season with the given number of the series
+     * @param seriesId
+     * @param seasonNumber
      */
-    public ResponseEntity<Series> deleteSeason(String seriesId, int seasonNumber) {
-        return findAndUpdateEntity(seriesId, series -> {
-            boolean removed = series.getSeasons().removeIf(s -> s.getSeasonNumber() == seasonNumber);
+    public ResponseEntity<Void> deleteSeason(String seriesId, int seasonNumber) {
+        Optional<Series> optionalSeries = seriesRepository.findById(seriesId);
+        if (optionalSeries.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
 
-            if (!removed) {
-                return null;
-            }
+        Series series = optionalSeries.get();
+        boolean removed = series.getSeasons().removeIf(s -> s.getSeasonNumber() == seasonNumber);
 
-            return seriesRepository.save(series);
-        });
+        if (!removed) {
+            return ResponseEntity.notFound().build();
+        }
+
+        seriesRepository.save(series);
+        return ResponseEntity.noContent().build();
     }
 
     /**
      * Get all episodes of a specific season
+     * @param seasonNumber
+     * @param seriesId
+     * @return List<Series.Episode>
      */
     public ResponseEntity<List<Series.Episode>> getEpisodes(String seriesId, int seasonNumber) {
         return findAndProcessEntity(seriesId, series -> {
@@ -197,6 +268,10 @@ public class SeriesService {
 
     /**
      * Get a specific episode from a season
+     * @param seriesId
+     * @param seasonNumber
+     * @param episodeNumber
+     * @return Series.Episode
      */
     public ResponseEntity<Series.Episode> getEpisode(String seriesId, int seasonNumber, int episodeNumber) {
         return findAndProcessEntity(seriesId, series -> {
@@ -212,59 +287,98 @@ public class SeriesService {
 
     /**
      * Add a new episode to a season
+     * @param seriesId
+     * @param seasonNumber
+     * @param newEpisode
+     * @return the added episode
      */
-    public ResponseEntity<Series> addEpisode(String seriesId, int seasonNumber, Series.Episode newEpisode) {
+    public ResponseEntity<Series.Episode> addEpisode(String seriesId, int seasonNumber, Series.Episode newEpisode) {
         if (newEpisode.getTitle() == null || newEpisode.getReleaseDate() == null || newEpisode.getEpisodeNumber() <= 0) {
             return ResponseEntity.badRequest().build();
         }
 
-        return findAndUpdateEntity(seriesId, series -> {
-            Optional<Series.Season> optionalSeason = findSeasonByNumber(series, seasonNumber);
+        Optional<Series> optionalSeries = seriesRepository.findById(seriesId);
+        if (optionalSeries.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
 
-            if (optionalSeason.isEmpty()) {
-                return null;
-            }
+        Series series = optionalSeries.get();
+        Optional<Series.Season> optionalSeason = findSeasonByNumber(series, seasonNumber);
 
-            Series.Season season = optionalSeason.get();
+        if (optionalSeason.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
 
-            boolean episodeExists = season.getEpisodes().stream()
-                    .anyMatch(e -> e.getEpisodeNumber() == newEpisode.getEpisodeNumber());
+        Series.Season season = optionalSeason.get();
 
-            if (episodeExists) {
-                return null;
-            }
+        boolean episodeExists = season.getEpisodes().stream()
+                .anyMatch(e -> e.getEpisodeNumber() == newEpisode.getEpisodeNumber());
 
-            season.getEpisodes().add(newEpisode);
-            season.getEpisodes().sort(Comparator.comparing(Series.Episode::getEpisodeNumber));
+        if (episodeExists) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
 
-            return seriesRepository.save(series);
-        }, HttpStatus.CREATED, HttpStatus.CONFLICT);
+        season.getEpisodes().add(newEpisode);
+        season.getEpisodes().sort(Comparator.comparing(Series.Episode::getEpisodeNumber));
+
+        Series savedSeries = seriesRepository.save(series);
+        Optional<Series.Season> savedSeason = findSeasonByNumber(savedSeries, seasonNumber);
+
+        if (savedSeason.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+
+        Optional<Series.Episode> addedEpisode = findEpisodeByNumber(savedSeason.get(), newEpisode.getEpisodeNumber());
+
+        return addedEpisode
+                .map(episode -> ResponseEntity.status(HttpStatus.CREATED).body(episode))
+                .orElse(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
     }
 
     /**
-     * Update a specific episode in a season
+     * Add a new episode to a season
+     * @param seriesId
+     * @param seasonNumber
+     * @param episodeNumber
+     * @param updatedEpisode
+     * @return the updated episode
      */
-    public ResponseEntity<Series> updateEpisode(String seriesId, int seasonNumber, int episodeNumber, Series.Episode updatedEpisode) {
-        return findAndUpdateEntity(seriesId, series -> {
-            Optional<Series.Season> optionalSeason = findSeasonByNumber(series, seasonNumber);
+    public ResponseEntity<Series.Episode> updateEpisode(String seriesId, int seasonNumber, int episodeNumber, Series.Episode updatedEpisode) {
+        Optional<Series> optionalSeries = seriesRepository.findById(seriesId);
+        if (optionalSeries.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
 
-            if (optionalSeason.isEmpty()) {
-                return null;
-            }
+        Series series = optionalSeries.get();
+        Optional<Series.Season> optionalSeason = findSeasonByNumber(series, seasonNumber);
 
-            Series.Season season = optionalSeason.get();
+        if (optionalSeason.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
 
-            Optional<Series.Episode> optionalEpisode = findEpisodeByNumber(season, episodeNumber);
+        Series.Season season = optionalSeason.get();
 
-            if (optionalEpisode.isEmpty()) {
-                return null;
-            }
+        Optional<Series.Episode> optionalEpisode = findEpisodeByNumber(season, episodeNumber);
 
-            Series.Episode episode = optionalEpisode.get();
-            updateEpisodeFields(episode, updatedEpisode);
+        if (optionalEpisode.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
 
-            return seriesRepository.save(series);
-        });
+        Series.Episode episode = optionalEpisode.get();
+        updateEpisodeFields(episode, updatedEpisode);
+
+        Series savedSeries = seriesRepository.save(series);
+        Optional<Series.Season> savedSeason = findSeasonByNumber(savedSeries, seasonNumber);
+
+        if (savedSeason.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+
+        Optional<Series.Episode> savedEpisode = findEpisodeByNumber(savedSeason.get(), episodeNumber);
+
+        return savedEpisode
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
     }
 
     /**
@@ -279,29 +393,40 @@ public class SeriesService {
     }
 
     /**
-     * Delete an episode from a season
+     * Deletes an episode from a season of the series
+     * @param seriesId
+     * @param seasonNumber
+     * @param episodeNumber
      */
-    public ResponseEntity<Series> deleteEpisode(String seriesId, int seasonNumber, int episodeNumber) {
-        return findAndUpdateEntity(seriesId, series -> {
-            Optional<Series.Season> optionalSeason = findSeasonByNumber(series, seasonNumber);
+    public ResponseEntity<Void> deleteEpisode(String seriesId, int seasonNumber, int episodeNumber) {
+        Optional<Series> optionalSeries = seriesRepository.findById(seriesId);
+        if (optionalSeries.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
 
-            if (optionalSeason.isEmpty()) {
-                return null;
-            }
+        Series series = optionalSeries.get();
+        Optional<Series.Season> optionalSeason = findSeasonByNumber(series, seasonNumber);
 
-            Series.Season season = optionalSeason.get();
-            boolean removed = season.getEpisodes().removeIf(e -> e.getEpisodeNumber() == episodeNumber);
+        if (optionalSeason.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
 
-            if (!removed) {
-                return null;
-            }
+        Series.Season season = optionalSeason.get();
+        boolean removed = season.getEpisodes().removeIf(e -> e.getEpisodeNumber() == episodeNumber);
 
-            return seriesRepository.save(series);
-        });
+        if (!removed) {
+            return ResponseEntity.notFound().build();
+        }
+
+        seriesRepository.save(series);
+        return ResponseEntity.noContent().build();
     }
 
     /**
      * Find a series and apply a processing function to it
+     * @param seriesId
+     * @param <T>
+     * @param processor
      */
     private <T> ResponseEntity<T> findAndProcessEntity(String seriesId, Function<Series, T> processor) {
         Optional<Series> optionalSeries = seriesRepository.findById(seriesId);
@@ -320,39 +445,10 @@ public class SeriesService {
     }
 
     /**
-     * Find a series and apply an update function to it
-     */
-    private ResponseEntity<Series> findAndUpdateEntity(
-            String seriesId,
-            Function<Series, Series> updater) {
-        return findAndUpdateEntity(seriesId, updater, HttpStatus.OK, HttpStatus.NOT_FOUND);
-    }
-
-    /**
-     * Find a series and apply an update function to it with custom status codes
-     */
-    private ResponseEntity<Series> findAndUpdateEntity(
-            String seriesId,
-            Function<Series, Series> updater,
-            HttpStatus successStatus,
-            HttpStatus failureStatus) {
-        Optional<Series> optionalSeries = seriesRepository.findById(seriesId);
-
-        if (optionalSeries.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        Series updatedEntity = updater.apply(optionalSeries.get());
-
-        if (updatedEntity == null) {
-            return ResponseEntity.status(failureStatus).build();
-        }
-
-        return ResponseEntity.status(successStatus).body(updatedEntity);
-    }
-
-    /**
      * Find a season by its number in a series
+     * @param seasonNumber
+     * @param series
+     * @return Series.Season
      */
     private Optional<Series.Season> findSeasonByNumber(Series series, int seasonNumber) {
         return series.getSeasons().stream()
@@ -362,6 +458,9 @@ public class SeriesService {
 
     /**
      * Find an episode by its number in a season
+     * @param episodeNumber
+     * @param season
+     * @return Series.Episode
      */
     private Optional<Series.Episode> findEpisodeByNumber(Series.Season season, int episodeNumber) {
         return season.getEpisodes().stream()
@@ -371,6 +470,8 @@ public class SeriesService {
 
     /**
      * Validate and sort episodes
+     * @param episodes
+     * @return Series.Episode
      */
     private List<Series.Episode> validateAndSortEpisodes(List<Series.Episode> episodes) {
         return episodes.stream()
@@ -381,6 +482,8 @@ public class SeriesService {
 
     /**
      * Merge seasons, ensuring existing seasons are not overwritten
+     * @param existingSeasons
+     * @param updatedSeasons
      */
     private void mergeSeasons(List<Series.Season> existingSeasons, List<Series.Season> updatedSeasons) {
         Map<Integer, Series.Season> updatedMap = updatedSeasons.stream()
@@ -415,6 +518,8 @@ public class SeriesService {
 
     /**
      * Merge episodes, ensuring existing episodes are not overwritten
+     * @param existingEpisodes
+     * @param updatedEpisodes
      */
     private void mergeEpisodes(List<Series.Episode> existingEpisodes, List<Series.Episode> updatedEpisodes) {
         List<Series.Episode> validUpdatedEpisodes = validateAndSortEpisodes(updatedEpisodes);
@@ -435,6 +540,11 @@ public class SeriesService {
         existingEpisodes.addAll(mergedEpisodes);
     }
 
+    /**
+     * returns the directors of the series
+     * @param seriesId
+     * @return List<DirectorResponseDTO>
+     */
     public Optional<List<DirectorResponseDTO>> getDirectorOfSeries(String seriesId) {
         return seriesRepository.findById(seriesId)
                 .map(series -> {
@@ -449,6 +559,11 @@ public class SeriesService {
                 });
     }
 
+    /**
+     * returns the actors of the series
+     * @param seriesId
+     * @return List<ActorResponseDTO>
+     */
     public Optional<List<ActorResponseDTO>> getActorsOfSeries(String seriesId) {
         return seriesRepository.findById(seriesId)
                 .map(series -> {
@@ -464,12 +579,12 @@ public class SeriesService {
     }
 
     /**
-     * Adds an actor to a series
+     * adds the actor to the series
      * @param seriesId
      * @param actorId
-     * @return ResponseEntity with list of actors or not found
+     * @return
      */
-    public ResponseEntity<List<ActorResponseDTO>> addActorToSeries(String seriesId, String actorId) {
+    public ResponseEntity<ActorResponseDTO> addActorToSeries(String seriesId, String actorId) {
         Optional<Series> optionalSeries = seriesRepository.findById(seriesId);
         Optional<Actor> optionalActor = actorRepository.findById(actorId);
 
@@ -499,18 +614,16 @@ public class SeriesService {
             seriesRepository.save(series);
         }
 
-        return ResponseEntity.ok(series.getActors().stream()
-                .map(ActorResponseDTO::new)
-                .collect(Collectors.toList()));
+        ActorResponseDTO addedActor = new ActorResponseDTO(actor);
+        return ResponseEntity.ok(addedActor);
     }
 
     /**
      * Removes an actor from a series
      * @param seriesId
      * @param actorId
-     * @return ResponseEntity with list of remaining actors or not found
      */
-    public ResponseEntity<List<ActorResponseDTO>> removeActorFromSeries(String seriesId, String actorId) {
+    public ResponseEntity<Map<String, Object>> removeActorFromSeries(String seriesId, String actorId) {
         Optional<Series> optionalSeries = seriesRepository.findById(seriesId);
         Optional<Actor> optionalActor = actorRepository.findById(actorId);
 
@@ -521,40 +634,34 @@ public class SeriesService {
         Series series = optionalSeries.get();
         Actor actor = optionalActor.get();
 
+        boolean removed = false;
         if (series.getActors() != null) {
-            series.getActors().removeIf(a -> a.getId().equals(actorId));
+            removed = series.getActors().removeIf(a -> a.getId().equals(actorId));
 
-            if (actor.getSeries() != null) {
-                actor.getSeries().removeIf(m -> m.getId().equals(series));
+            if (removed && actor.getSeries() != null) {
+                actor.getSeries().removeIf(m -> m.getId().equals(series.getId()));
                 actorRepository.save(actor);
             }
 
             seriesRepository.save(series);
         }
 
-        List<ActorResponseDTO> actorDTOs = new ArrayList<>();
-        if (series.getActors() != null) {
-            for (Actor a : series.getActors()) {
-                ActorResponseDTO dto = new ActorResponseDTO();
-                dto.setId(a.getId());
-                dto.setName(a.getName());
-                dto.setBirthday(a.getBirthday());
-                dto.setImage(a.getImage());
-                dto.setBiography(a.getBiography());
-                actorDTOs.add(dto);
-            }
-        }
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", removed);
+        response.put("message", removed ?
+                "Schauspieler erfolgreich von der Serie entfernt" :
+                "Schauspieler war nicht mit dieser Serie verknüpft");
 
-        return ResponseEntity.ok(actorDTOs);
+        return ResponseEntity.ok(response);
     }
 
     /**
      * Sets a director to a series
      * @param seriesId
      * @param directorId
-     * @return ResponseEntity with updated director or not found
+     * @return the added director
      */
-    public ResponseEntity<List<DirectorResponseDTO>> addDirectorToSeries(String seriesId, String directorId) {
+    public ResponseEntity<DirectorResponseDTO> addDirectorToSeries(String seriesId, String directorId) {
         Optional<Series> optionalSeries = seriesRepository.findById(seriesId);
         Optional<Director> optionalDirector = directorRepository.findById(directorId);
 
@@ -584,18 +691,16 @@ public class SeriesService {
             seriesRepository.save(series);
         }
 
-        return ResponseEntity.ok(series.getDirectors().stream()
-                .map(DirectorResponseDTO::new)
-                .collect(Collectors.toList()));
+        DirectorResponseDTO addedDirector = new DirectorResponseDTO(director);
+        return ResponseEntity.ok(addedDirector);
     }
 
     /**
      * Removes the director from a series
      * @param seriesId
      * @param directorId
-     * @return ResponseEntity with null director or not found
      */
-    public ResponseEntity<List<DirectorResponseDTO>> removeDirectorFromSeries(String seriesId, String directorId) {
+    public ResponseEntity<Map<String, Object>> removeDirectorFromSeries(String seriesId, String directorId) {
         Optional<Series> optionalSeries = seriesRepository.findById(seriesId);
         Optional<Director> optionalDirector = directorRepository.findById(directorId);
 
@@ -606,34 +711,33 @@ public class SeriesService {
         Series series = optionalSeries.get();
         Director director = optionalDirector.get();
 
+        boolean removed = false;
         if (series.getDirectors() != null) {
-            series.getDirectors().removeIf(a -> a.getId().equals(directorId));
+            removed = series.getDirectors().removeIf(a -> a.getId().equals(directorId));
 
-            if (director.getSeries() != null) {
-                director.getSeries().removeIf(m -> m.getId().equals(series));
+            if (removed && director.getSeries() != null) {
+                director.getSeries().removeIf(m -> m.getId().equals(series.getId()));
                 directorRepository.save(director);
             }
 
             seriesRepository.save(series);
         }
 
-        List<DirectorResponseDTO> directorDTOs = new ArrayList<>();
-        if (series.getDirectors() != null) {
-            for (Director d : series.getDirectors()) {
-                DirectorResponseDTO dto = new DirectorResponseDTO();
-                dto.setId(d.getId());
-                dto.setName(d.getName());
-                dto.setBirthday(d.getBirthday());
-                dto.setImage(d.getImage());
-                dto.setBiography(d.getBiography());
-                directorDTOs.add(dto);
-            }
-        }
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", removed);
+        response.put("message", removed ?
+                "Regisseur erfolgreich von der Serie entfernt" :
+                "Regisseur war nicht mit dieser Serie verknüpft");
 
-        return ResponseEntity.ok(directorDTOs);
+        return ResponseEntity.ok(response);
     }
 
-
+    /**
+     * convert SeriesResponseDTO to Series object
+     * @param id
+     * @param dto
+     * @return
+     */
     private Series buildSeriesFromDTO(String id, SeriesRequestDTO dto) {
         SeriesResponseDTO responseDTO = new SeriesResponseDTO(
                 id,
@@ -650,5 +754,4 @@ public class SeriesService {
 
         return new Series(dto);
     }
-
 }

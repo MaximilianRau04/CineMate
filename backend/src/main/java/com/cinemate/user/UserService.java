@@ -1,5 +1,6 @@
 package com.cinemate.user;
 
+import com.cinemate.exceptions.AlreadyInWatchlistException;
 import com.cinemate.movie.DTOs.MovieResponseDTO;
 import com.cinemate.movie.Movie;
 import com.cinemate.movie.MovieRepository;
@@ -200,6 +201,13 @@ public class UserService {
         User user = userOptional.get();
         Series series = seriesOptional.get();
 
+        if (user.getSeriesWatchlist().contains(series)) {
+            throw new AlreadyInWatchlistException(
+                    String.format("Serie mit ID '%s' ist bereits in der Watchlist von Benutzer '%s'.", seriesId, userId)
+            );
+        }
+
+
         user.addSeriesToWatchlist(series);
         User savedUser = userRepository.save(user);
         UserResponseDTO userResponseDTO = new UserResponseDTO(savedUser);
@@ -223,6 +231,12 @@ public class UserService {
 
         User user = userOptional.get();
         Movie movie = movieOptional.get();
+
+        if (user.getMovieWatchlist().contains(movie)) {
+            throw new AlreadyInWatchlistException(
+                    String.format("Serie mit ID '%s' ist bereits in der Watchlist von Benutzer '%s'.", movieId, userId));
+        }
+
 
         user.addMovieToWatchlist(movie);
         User savedUser = userRepository.save(user);

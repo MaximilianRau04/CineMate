@@ -47,26 +47,16 @@ public class ReviewService {
      */
     @Transactional
     public ReviewResponseDTO createReview(ReviewRequestDTO reviewRequestDTO) {
-        User user = userRepository.findById(reviewRequestDTO.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("User not found: " + reviewRequestDTO.getUserId()));
-
         String itemType = reviewRequestDTO.getType().toLowerCase();
         String itemId = reviewRequestDTO.getItemId();
-        Object content = getContentByTypeAndId(itemType, itemId);
         checkForExistingReview(reviewRequestDTO.getUserId(), itemId);
         validateRating(reviewRequestDTO.getRating());
-        Review review = new Review(
-                null,
-                reviewRequestDTO.getUserId(),
-                itemId,
-                reviewRequestDTO.getRating(),
-                reviewRequestDTO.getComment(),
-                new Date()
-        );
+
+        Review review = new Review(reviewRequestDTO);
 
         Review savedReview = reviewRepository.save(review);
         calculateContentRating(itemType, itemId);
-        return convertToResponseDTO(savedReview);
+        return new ReviewResponseDTO(savedReview);
     }
 
     /**
@@ -76,7 +66,7 @@ public class ReviewService {
      */
     public Optional<ReviewResponseDTO> getReviewById(String id) {
         return reviewRepository.findById(id)
-                .map(this::convertToResponseDTO);
+                .map(ReviewResponseDTO::new);
     }
 
     /**
@@ -85,7 +75,7 @@ public class ReviewService {
      */
     public List<ReviewResponseDTO> getAllReviews() {
         return reviewRepository.findAll().stream()
-                .map(this::convertToResponseDTO)
+                .map(ReviewResponseDTO::new)
                 .collect(Collectors.toList());
     }
 
@@ -97,7 +87,7 @@ public class ReviewService {
     public List<ReviewResponseDTO> getReviewsByMovie(String movieId) {
         return reviewRepository.findByItemId(movieId).stream()
                 .filter(review -> movieRepository.findById(review.getItemId()).isPresent())
-                .map(this::convertToResponseDTO)
+                .map(ReviewResponseDTO::new)
                 .collect(Collectors.toList());
     }
 
@@ -109,7 +99,7 @@ public class ReviewService {
     public List<ReviewResponseDTO> getReviewsBySeries(String seriesId) {
         return reviewRepository.findByItemId(seriesId).stream()
                 .filter(review -> seriesRepository.findById(review.getItemId()).isPresent())
-                .map(this::convertToResponseDTO)
+                .map(ReviewResponseDTO::new)
                 .collect(Collectors.toList());
     }
 
@@ -120,7 +110,7 @@ public class ReviewService {
      */
     public List<ReviewResponseDTO> getReviewsByUser(String userId) {
         return reviewRepository.findByUserId(userId).stream()
-                .map(this::convertToResponseDTO)
+                .map(ReviewResponseDTO::new)
                 .collect(Collectors.toList());
     }
 
@@ -132,7 +122,7 @@ public class ReviewService {
      */
     public ReviewResponseDTO findByMovieIdAndUserId(String movieId, String userId) {
         Review review = reviewRepository.findByItemIdAndUserId(movieId, userId);
-        return convertToResponseDTO(review);
+        return new ReviewResponseDTO(review);
     }
 
     /**
@@ -143,7 +133,7 @@ public class ReviewService {
      */
     public ReviewResponseDTO findBySeriesIdAndUserId(String seriesId, String userId) {
         Review review = reviewRepository.findByItemIdAndUserId(seriesId, userId);
-        return convertToResponseDTO(review);
+        return new ReviewResponseDTO(review);
     }
 
     /**
@@ -172,7 +162,7 @@ public class ReviewService {
                         calculateContentRating(contentType, existingReview.getItemId());
                     }
 
-                    return convertToResponseDTO(updatedReview);
+                    return new ReviewResponseDTO(updatedReview);
                 });
     }
 
@@ -210,34 +200,6 @@ public class ReviewService {
                     "Rating must be between " + MIN_RATING + " and " + MAX_RATING +
                             " and in " + RATING_STEP + " increments");
         }
-    }
-
-    /**
-     * Converts a Review object to a ReviewResponseDTO object
-     * @param review Review to convert
-     * @return ReviewResponseDTO
-     */
-    private ReviewResponseDTO convertToResponseDTO(Review review) {
-        User user = userRepository.findById(review.getUserId()).orElse(null);
-
-        Movie movie = null;
-        Series series = null;
-
-        if (movieRepository.findById(review.getItemId()).isPresent()) {
-            movie = movieRepository.findById(review.getItemId()).get();
-        } else if (seriesRepository.findById(review.getItemId()).isPresent()) {
-            series = seriesRepository.findById(review.getItemId()).get();
-        }
-
-        return new ReviewResponseDTO(
-                review.getId(),
-                user,
-                movie,
-                series,
-                review.getRating(),
-                review.getComment(),
-                review.getDate()
-        );
     }
 
     /**
@@ -294,21 +256,6 @@ public class ReviewService {
         List<Review> existingReviews = reviewRepository.findByUserIdAndItemId(userId, itemId);
         if (!existingReviews.isEmpty()) {
             throw new IllegalStateException("User has already reviewed this content");
-        }
-    }
-
-    /**
-     * Gets content (movie or series) by type and ID
-     */
-    private Object getContentByTypeAndId(String type, String id) {
-        if (TYPE_MOVIE.equalsIgnoreCase(type)) {
-            return movieRepository.findById(id)
-                    .orElseThrow(() -> new IllegalArgumentException("Movie not found: " + id));
-        } else if (TYPE_SERIES.equalsIgnoreCase(type)) {
-            return seriesRepository.findById(id)
-                    .orElseThrow(() -> new IllegalArgumentException("Series not found: " + id));
-        } else {
-            throw new IllegalArgumentException("Invalid type: Must be 'movie' or 'series', was: " + type);
         }
     }
 

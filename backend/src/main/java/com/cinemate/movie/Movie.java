@@ -32,8 +32,6 @@ public class Movie {
     private List<Actor> actors;
     private String country;
     private String trailerUrl;
-    // tags
-
 
     public Movie(String id, String title, String description, String genre, double rating, int reviewCount, Date releaseDate, String duration, String posterUrl,
                  String country, String trailerUrl) {

@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/movies")
@@ -105,7 +106,7 @@ public class MovieController {
      * @return List<ActorResponseDTO>
      */
     @PostMapping("/{movieId}/actors/{actorId}")
-    public ResponseEntity<List<ActorResponseDTO>> addActorToMovie(
+    public ResponseEntity<ActorResponseDTO> addActorToMovie(
             @PathVariable String movieId,
             @PathVariable String actorId) {
         return movieService.addActorToMovie(movieId, actorId);
@@ -118,7 +119,7 @@ public class MovieController {
      * @return List<ActorResponseDTO>
      */
     @DeleteMapping("/{movieId}/actors/{actorId}")
-    public ResponseEntity<List<ActorResponseDTO>> removeActorFromMovie(
+    public ResponseEntity<Map<String, Object>> removeActorFromMovie(
             @PathVariable String movieId,
             @PathVariable String actorId) {
         return movieService.removeActorFromMovie(movieId, actorId);
@@ -143,7 +144,7 @@ public class MovieController {
      * @return DirectorResponseDTO
      */
     @DeleteMapping("/{movieId}/director")
-    public ResponseEntity<DirectorResponseDTO> removeDirectorFromMovie(
+    public ResponseEntity<Map<String, Object>> removeDirectorFromMovie(
             @PathVariable String movieId) {
         return movieService.removeDirectorFromMovie(movieId);
     }

@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/series")
@@ -23,7 +24,7 @@ public class SeriesController {
 
     /**
      * returns all series
-     * @return List<Series>
+     * @return List<SeriesResponseDTO>
      */
     @GetMapping
     public ResponseEntity<List<SeriesResponseDTO>> getAllSeries() {
@@ -33,7 +34,7 @@ public class SeriesController {
     /**
      * returns the series with the given id
      * @param id
-     * @return Series
+     * @return SeriesResponseDTO
      */
     @GetMapping("/{id}")
     public ResponseEntity<SeriesResponseDTO> getSeriesById(@PathVariable String id) {
@@ -45,7 +46,7 @@ public class SeriesController {
     /**
      * creates a series
      * @param series
-     * @return Series
+     * @return SeriesResponseDTO
      */
     @PostMapping
     public ResponseEntity<SeriesResponseDTO> createSeries(@RequestBody SeriesRequestDTO series) {
@@ -56,7 +57,7 @@ public class SeriesController {
      * updates the series with the given id
      * @param id
      * @param series
-     * @return Series
+     * @return SeriesResponseDTO
      */
     @PutMapping("/{id}")
     public ResponseEntity<SeriesResponseDTO> updateSeries(@PathVariable String id, @RequestBody SeriesRequestDTO series) {
@@ -66,7 +67,6 @@ public class SeriesController {
     /**
      * deletes the series with the given id
      * @param id
-     * @return Series
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteSeries(@PathVariable String id) {
@@ -77,7 +77,7 @@ public class SeriesController {
     /**
      * returns all seasons from a series
      * @param id
-     * @return ResponseEntity<List<Series.Season>>
+     * @return RList<Series.Season>
      */
     @GetMapping("/{id}/seasons")
     public ResponseEntity<List<Series.Season>> getSeasons(@PathVariable String id) {
@@ -88,7 +88,7 @@ public class SeriesController {
      * returns all seasons from a series
      * @param id
      * @param seasonNumber
-     * @return ResponseEntity<Series.Season>
+     * @return eries.Season
      */
     @GetMapping("/{id}/seasons/{seasonNumber}")
     public ResponseEntity<Series.Season> getSeason(
@@ -101,10 +101,10 @@ public class SeriesController {
      * adds a season to a series
      * @param id
      * @param season
-     * @return ResponseEntity<Series>
+     * @return List<Series.Season>
      */
     @PostMapping("/{id}/seasons")
-    public ResponseEntity<Series> addSeason(
+    public ResponseEntity<Series.Season> addSeason(
             @PathVariable String id,
             @RequestBody Series.Season season) {
         return seriesService.addSeason(id, season);
@@ -115,10 +115,10 @@ public class SeriesController {
      * @param id
      * @param seasonNumber
      * @param season
-     * @return ResponseEntity<Series>
+     * @return List<Series.Season>
      */
     @PutMapping("/{id}/seasons/{seasonNumber}")
-    public ResponseEntity<Series> updateSeason(
+    public ResponseEntity<Series.Season> updateSeason(
             @PathVariable String id,
             @PathVariable int seasonNumber,
             @RequestBody Series.Season season) {
@@ -129,10 +129,10 @@ public class SeriesController {
      * deletes a season from a series
      * @param id
      * @param seasonNumber
-     * @return ResponseEntity<Series>
+     * @return List<Series.Season>
      */
     @DeleteMapping("/{id}/seasons/{seasonNumber}")
-    public ResponseEntity<Series> deleteSeason(
+    public ResponseEntity<Void> deleteSeason(
             @PathVariable String id,
             @PathVariable int seasonNumber) {
         return seriesService.deleteSeason(id, seasonNumber);
@@ -142,7 +142,7 @@ public class SeriesController {
      * returns all episodes of a season from a series
      * @param id
      * @param seasonNumber
-     * @return ResponseEntity<List<Series.Episode>>
+     * @return List<Series.Episode>
      */
     @GetMapping("/{id}/seasons/{seasonNumber}/episodes")
     public ResponseEntity<List<Series.Episode>> getEpisodes(
@@ -155,7 +155,7 @@ public class SeriesController {
      * returns a specific episode of a season from a series
      * @param id
      * @param seasonNumber
-     * @return ResponseEntity<Series.Episode>
+     * @return List<Series.Episode>
      */
     @GetMapping("/{id}/seasons/{seasonNumber}/episodes/{episodeNumber}")
     public ResponseEntity<Series.Episode> getEpisode(
@@ -169,10 +169,10 @@ public class SeriesController {
      * adds an episode to a season of a series
      * @param id
      * @param seasonNumber
-     * @return ResponseEntity<Series.Episode>
+     * @return List<Series.Episode>
      */
     @PostMapping("/{id}/seasons/{seasonNumber}/episodes")
-    public ResponseEntity<Series> addEpisode(
+    public ResponseEntity<Series.Episode> addEpisode(
             @PathVariable String id,
             @PathVariable int seasonNumber,
             @RequestBody Series.Episode episode) {
@@ -185,10 +185,10 @@ public class SeriesController {
      * @param seasonNumber
      * @param episodeNumber
      * @param episode
-     * @return ResponseEntity<Series>
+     * @return Series
      */
     @PutMapping("/{id}/seasons/{seasonNumber}/episodes/{episodeNumber}")
-    public ResponseEntity<Series> updateEpisode(
+    public ResponseEntity<Series.Episode> updateEpisode(
             @PathVariable String id,
             @PathVariable int seasonNumber,
             @PathVariable int episodeNumber,
@@ -201,10 +201,10 @@ public class SeriesController {
      * @param id
      * @param seasonNumber
      * @param episodeNumber
-     * @return ResponseEntity<Series>
+     * @return Series
      */
     @DeleteMapping("/{id}/seasons/{seasonNumber}/episodes/{episodeNumber}")
-    public ResponseEntity<Series> deleteEpisode(
+    public ResponseEntity<Void> deleteEpisode(
             @PathVariable String id,
             @PathVariable int seasonNumber,
             @PathVariable int episodeNumber) {
@@ -214,7 +214,7 @@ public class SeriesController {
     /**
      * returns the director of a series
      * @param id
-     * @return
+     * @return List<DirectorResponseDTO>
      */
     @GetMapping("/{id}/directors")
     public ResponseEntity<List<DirectorResponseDTO>> getDirectorOfSeries(@PathVariable String id) {
@@ -226,7 +226,7 @@ public class SeriesController {
     /**
      * returns the director of a series
      * @param id
-     * @return
+     * @return List<ActorResponseDTO>
      */
     @GetMapping("/{id}/actors")
     public ResponseEntity<List<ActorResponseDTO>> getActorsOfSeries(@PathVariable String id) {
@@ -242,7 +242,7 @@ public class SeriesController {
      * @return List<ActorResponseDTO>
      */
     @PostMapping("/{seriesId}/actors/{actorId}")
-    public ResponseEntity<List<ActorResponseDTO>> addActorToSeries(
+    public ResponseEntity<ActorResponseDTO> addActorToSeries(
             @PathVariable String seriesId,
             @PathVariable String actorId) {
         return seriesService.addActorToSeries(seriesId, actorId);
@@ -255,7 +255,7 @@ public class SeriesController {
      * @return List<ActorResponseDTO>
      */
     @DeleteMapping("/{seriesId}/actors/{actorId}")
-    public ResponseEntity<List<ActorResponseDTO>> removeActorFromSeries(
+    public ResponseEntity<Map<String, Object>> removeActorFromSeries(
             @PathVariable String seriesId,
             @PathVariable String actorId) {
         return seriesService.removeActorFromSeries(seriesId, actorId);
@@ -268,7 +268,7 @@ public class SeriesController {
      * @return List<DirectorResponseDTO>
      */
     @PostMapping("/{seriesId}/directors/{directorId}")
-    public ResponseEntity<List<DirectorResponseDTO>> addDirectorToSeries(
+    public ResponseEntity<DirectorResponseDTO> addDirectorToSeries(
             @PathVariable String seriesId,
             @PathVariable String directorId) {
         return seriesService.addDirectorToSeries(seriesId, directorId);
@@ -281,7 +281,7 @@ public class SeriesController {
      * @return List<DirectorResponseDTO>
      */
     @DeleteMapping("/{seriesId}/directors/{directorId}")
-    public ResponseEntity<List<DirectorResponseDTO>> removeDirectorFromSeries(
+    public ResponseEntity<Map<String, Object>> removeDirectorFromSeries(
             @PathVariable String seriesId,
             @PathVariable String directorId) {
         return seriesService.removeDirectorFromSeries(seriesId, directorId);

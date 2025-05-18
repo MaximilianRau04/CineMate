@@ -1,5 +1,6 @@
 package com.cinemate.review;
 
+import com.cinemate.review.DTOs.ReviewRequestDTO;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -26,6 +27,15 @@ public class Review {
         this.rating = rating;
         this.comment = comment;
         this.date = date;
+    }
+
+    public Review(ReviewRequestDTO review) {
+        this.id = review.getId();
+        this.userId = review.getUserId();
+        this.itemId = review.getItemId();
+        this.rating = review.getRating();
+        this.comment = review.getComment();
+        this.date = new Date();
     }
 
     public java.lang.String getId() {
