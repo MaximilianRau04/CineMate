@@ -25,11 +25,11 @@ Content-Type: application/json
 
 ###
 GET http://localhost:8080/api/users/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYXhpIiwiZXhwIjoxNzQ1MDQyNDQzLCJpYXQiOjE3NDUwMDY0NDN9.60VPYsuNHIDfF5SULKNZVh-dEkq7yE444Stq0TUGyjE
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYXhpIiwiZXhwIjoxNzQ3OTgwMzk0LCJpYXQiOjE3NDc5NDQzOTR9.QDOUjOM32YzMRxCab9pYtQn2QWQc1QdnMyB5JuzVovc
+###
+GET http://localhost:8080/api/reviews/682f8047f2bfcb4c90da6749/user
 ###
 GET http://localhost:8080/api/movies
-###
-GET http://localhost:8080/api/movies/681bb4f4ac77214519cff7fb/actors
 ###
 
 DELETE http://localhost:8080/api/users/6813a8eaf4f96f556a24061b
@@ -178,10 +178,10 @@ Content-Type: application/json
 GET http://localhost:8080/api/users/6813a9c6a70428033d933986/watchlist/series
 
 ###
-DELETE http://localhost:8080/api/users/67fd70fdf86b765965cfa2cb/watchlist/67fd703bf86b765965cfa2c5
+DELETE http://localhost:8080/api/series/682cde1ea7c01c4281e159d5
 
 ###
-GET http://localhost:8080/api/series/680e7b2023c0b14c9c4811bb/seasons
+GET http://localhost:8080/api/series/682a284236f2d54c872d1bb9/seasons
 
 ###
 POST http://localhost:8080/api/series
@@ -195,12 +195,10 @@ Content-Type: application/json
   "posterUrl": "https://image.tmdb.org/t/p/w500/x2LSRK2Cm7MZhjluni1msVJ3wDF.jpg"
 }
 ###
-POST http://localhost:8080/api/series/680e7b2023c0b14c9c4811bb/seasons
+POST http://localhost:8080/api/series/682a284236f2d54c872d1bb9/seasons
 Content-Type: application/json
 
 {
-  "seasons": [
-    {
       "seasonNumber": 5,
       "episodes": [
         {
@@ -219,10 +217,9 @@ Content-Type: application/json
           "description": "El und ihre Freunde versuchen, das Tor zur anderen Seite endgültig zu schließen.",
           "posterUrl": "https://image.tmdb.org/t/p/original/future_episode_2.jpg"
         }
-      ]
-    }
-  ]
-}
+      ],
+       "trailerUrl": "https://www.youtube.com/watch?v=h-2LIjOt0r"
+ }
 
 ###
 POST http://localhost:8080/api/series
@@ -275,7 +272,7 @@ Content-Type: application/json
 }
 
 ###
-POST http://localhost:8080/api/reviews/movie/680e7b0723c0b14c9c4811b8/680fb9bf040ad6445d9d4ef7
+POST http://localhost:8080/api/reviews/movie/680e7b0723c0b14c9c4811b8/user/680fb9bf040ad6445d9d4ef7
 Content-Type: application/json
 
 {
@@ -287,10 +284,11 @@ Content-Type: application/json
 DELETE http://localhost:8080/api/series/680e7b2023c0b14c9c4811bb/seasons/1/episodes/0
 
 ###
-GET http://localhost:8080/api/series/680e7b2023c0b14c9c4811bb/seasons
-
+GET http://localhost:8080/api/users
 ###
-POST http://localhost:8080/api/reviews/movie/680e7b0923c0b14c9c4811b9/680fb9bf040ad6445d9d4ef7
+GET http://localhost:8080/api/reviews/user/682a27ab36f2d54c872d1bb0
+###
+POST http://localhost:8080/api/reviews/movie/682a27b336f2d54c872d1b1/user/682a27ab36f2d54c872d1bb0
 Content-Type: application/json
 
 {

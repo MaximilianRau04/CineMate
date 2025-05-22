@@ -1,9 +1,6 @@
 package com.cinemate.review.DTOs;
 
-import com.cinemate.movie.DTOs.MovieResponseDTO;
 import com.cinemate.review.Review;
-import com.cinemate.series.DTOs.SeriesResponseDTO;
-import com.cinemate.user.dtos.UserResponseDTO;
 
 import java.util.Date;
 

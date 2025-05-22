@@ -135,7 +135,23 @@ public class SeriesService {
      * @return List<Series.Season>
      */
     public ResponseEntity<List<Series.Season>> getSeasons(String seriesId) {
-        return findAndProcessEntity(seriesId, series -> series.getSeasons());
+        Optional<Series> optionalSeries = seriesRepository.findById(seriesId);
+
+        if (optionalSeries.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Series series = optionalSeries.get();
+        List<Series.Season> seasons = series.getSeasons();
+
+        if (seasons == null) {
+            return ResponseEntity.ok(new ArrayList<>());
+        } else {
+            List<Series.Season> validSeasons = seasons.stream()
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(validSeasons);
+        }
     }
 
     /**
@@ -165,7 +181,13 @@ public class SeriesService {
         }
 
         Series series = optionalSeries.get();
+
+        if (series.getSeasons() == null) {
+            series.setSeasons(new ArrayList<>());
+        }
+
         boolean seasonExists = series.getSeasons().stream()
+                .filter(Objects::nonNull)
                 .anyMatch(s -> s.getSeasonNumber() == newSeason.getSeasonNumber());
 
         if (seasonExists) {
@@ -180,7 +202,11 @@ public class SeriesService {
         }
 
         series.getSeasons().add(newSeason);
-        series.getSeasons().sort(Comparator.comparing(Series.Season::getSeasonNumber));
+
+        series.setSeasons(series.getSeasons().stream()
+                .filter(Objects::nonNull)
+                .sorted(Comparator.comparing(Series.Season::getSeasonNumber))
+                .collect(Collectors.toList()));
 
         Series savedSeries = seriesRepository.save(series);
 
@@ -451,7 +477,12 @@ public class SeriesService {
      * @return Series.Season
      */
     private Optional<Series.Season> findSeasonByNumber(Series series, int seasonNumber) {
+        if (series.getSeasons() == null) {
+            return Optional.empty();
+        }
+
         return series.getSeasons().stream()
+                .filter(Objects::nonNull)
                 .filter(s -> s.getSeasonNumber() == seasonNumber)
                 .findFirst();
     }

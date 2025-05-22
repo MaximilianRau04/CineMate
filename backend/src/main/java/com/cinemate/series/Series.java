@@ -9,6 +9,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -25,15 +26,14 @@ public class Series {
     private int reviewCount;
     private Date releaseDate;
     private String posterUrl;
-    @DBRef(lazy = true)
-    private List<Season> seasons;
+    @DBRef
+    private List<Season> seasons = new ArrayList<>();;
     @DBRef(lazy = true)
     private List<Actor> actors;
     @DBRef(lazy = true)
     private List<Director> directors;
     private String country;
     private String trailerUrl;
-    // tags
 
     public Series(String id, String title, String description, String genre, double rating, int reviewCount, Date releaseDate, String posterUrl, List<Season> seasons,
                   String country, String trailerUrl) {
@@ -170,7 +170,9 @@ public class Series {
         this.directors = directors;
     }
 
+    @Document(collection = "Season")
     public static class Season {
+        @Id
         private int seasonNumber;
         private List<Episode> episodes;
         private String trailerUrl;
@@ -206,8 +208,10 @@ public class Series {
         }
     }
 
+    @Document(collection = "episode")
     public static class Episode {
         private String title;
+        @Id
         private int episodeNumber;
         private String duration;
         private Date releaseDate;

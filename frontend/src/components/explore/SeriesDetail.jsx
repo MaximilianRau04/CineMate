@@ -124,7 +124,7 @@ const SeriesDetail = () => {
   useEffect(() => {
     if (!userId || !seriesId) return;
 
-    fetch(`http://localhost:8080/api/reviews/series/${seriesId}/${userId}`, {
+    fetch(`http://localhost:8080/api/reviews/series/${seriesId}/user/${userId}`, {
     })
       .then((res) => {
         if (!res.ok) {
@@ -239,7 +239,7 @@ const SeriesDetail = () => {
     if (!userId || rating === 0) return;
 
     setSubmitting(true);
-    fetch(`http://localhost:8080/api/reviews/series/${seriesId}/${userId}`, {
+    fetch(`http://localhost:8080/api/reviews/series/${seriesId}/user/${userId}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -7,7 +7,7 @@ const UserProfile = () => {
   const [bio, setBio] = useState("");
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
-  const [setSaving] = useState(false);
+  const [saving, setSaving] = useState(false);  // Korrigiert: war [setSaving]
   const [userId, setUserId] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [modalBio, setModalBio] = useState("");
@@ -102,16 +102,11 @@ const UserProfile = () => {
       })
       .then((updatedUser) => {
         setUser(updatedUser);
-        if (avatarFile && avatarPreview) {
-        } else if (updatedUser.avatarUrl) {
-          setAvatarPreview(null);
-        }
+        // Hier wird korrekt das aktualisierte avatarUrl gesetzt
         setAvatarFile(null);
-        alert("Profil erfolgreich aktualisiert!");
       })
       .catch((err) => {
         console.error("Fehler beim Speichern:", err);
-        alert(`Fehler beim Aktualisieren: ${err.message}`);
       })
       .finally(() => {
         setSaving(false);
@@ -131,6 +126,53 @@ const UserProfile = () => {
   const handleAvatarClick = () => {
     fileInputRef.current.click();
   };
+  
+  // Automatisches Speichern, wenn ein Bild ausgewählt wurde
+  useEffect(() => {
+    if (avatarFile) {
+      // Automatisch speichern, wenn ein neues Bild ausgewählt wurde
+      const autoSave = async () => {
+        if (!userId) return;
+        
+        const formData = new FormData();
+        const userData = { bio };
+        
+        formData.append(
+          "user",
+          new Blob([JSON.stringify(userData)], { type: "application/json" })
+        );
+        
+        formData.append("avatar", avatarFile);
+        
+        setSaving(true);
+        try {
+          const response = await fetch(`http://localhost:8080/api/users/${userId}`, {
+            method: "PUT",
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+            body: formData,
+          });
+          
+          if (!response.ok) {
+            throw new Error(`Update fehlgeschlagen: ${response.status}`);
+          }
+          
+          const updatedUser = await response.json();
+          setUser(updatedUser);
+          setAvatarFile(null);
+          alert("Profilbild erfolgreich aktualisiert!");
+        } catch (err) {
+          console.error("Fehler beim Speichern:", err);
+          alert(`Fehler beim Aktualisieren: ${err.message}`);
+        } finally {
+          setSaving(false);
+        }
+      };
+      
+      autoSave();
+    }
+  }, [avatarFile, userId, bio]);
 
   if (loading)
     return <p className="text-center mt-5">🔄 Benutzer wird geladen...</p>;
@@ -155,8 +197,8 @@ const UserProfile = () => {
             >
               <img
                 src={
-                  avatarPreview ||
-                  (avatarUrl && `http://localhost:8080${avatarUrl}`)
+                  avatarPreview || 
+                  (avatarUrl ? `http://localhost:8080${avatarUrl}` : "https://via.placeholder.com/150?text=Kein+Bild")
                 }
                 alt={username}
                 className="img-fluid rounded-circle shadow-sm mb-3"
@@ -198,8 +240,10 @@ const UserProfile = () => {
               onChange={(e) => {
                 const file = e.target.files[0];
                 if (file) {
-                  setAvatarFile(file);
+                  // Erstelle eine Vorschau des Bildes
                   setAvatarPreview(URL.createObjectURL(file));
+                  // Setze das Bild für das automatische Speichern
+                  setAvatarFile(file);
                 }
               }}
               className="d-none"
@@ -240,7 +284,15 @@ const UserProfile = () => {
             <p className="text-muted">
               <strong>Beigetreten:</strong> {formattedDate}
             </p>
-            <form onSubmit={handleProfileUpdate}></form>
+            
+            {/* Der Submit-Button wird nicht mehr benötigt, da automatisch gespeichert wird */}
+            {saving && (
+              <div className="mt-3 text-center">
+                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                <span>Bild wird gespeichert...</span>
+              </div>
+            )}
+            
             <div className="mt-4">
               <h5>📝 Bewertungen</h5>
               <div
@@ -308,6 +360,13 @@ const UserProfile = () => {
                 ></textarea>
               </div>
               <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowModal(false)}
+                >
+                  Abbrechen
+                </button>
                 <button
                   type="button"
                   className="btn btn-primary"

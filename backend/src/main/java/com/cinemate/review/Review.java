@@ -11,16 +11,16 @@ import java.util.Date;
 public class Review {
 
     @Id
-    private java.lang.String id;
+    private String id;
     @NotNull
-    private java.lang.String userId;
+    private String userId;
     @NotNull
-    private java.lang.String itemId;
+    private String itemId;
     private double rating;
-    private java.lang.String comment;
+    private String comment;
     private Date date;
 
-    public Review(java.lang.String id, java.lang.String userId, java.lang.String itemId, double rating, java.lang.String comment, Date date) {
+    public Review(String id, String userId, String itemId, double rating, String comment, Date date) {
         this.id = id;
         this.userId = userId;
         this.itemId = itemId;
@@ -38,27 +38,29 @@ public class Review {
         this.date = new Date();
     }
 
-    public java.lang.String getId() {
+    public Review() {}
+
+    public String getId() {
         return id;
     }
 
-    public void setId(java.lang.String id) {
+    public void setId(String id) {
         this.id = id;
     }
 
-    public java.lang.String getUserId() {
+    public String getUserId() {
         return userId;
     }
 
-    public void setUserId(java.lang.String userId) {
+    public void setUserId(String userId) {
         this.userId = userId;
     }
 
-    public java.lang.String getItemId() {
+    public String getItemId() {
         return itemId;
     }
 
-    public void setItemId(java.lang.String itemId) {
+    public void setItemId(String itemId) {
         this.itemId = itemId;
     }
 
@@ -70,11 +72,11 @@ public class Review {
         this.rating = rating;
     }
 
-    public java.lang.String getComment() {
+    public String getComment() {
         return comment;
     }
 
-    public void setComment(java.lang.String comment) {
+    public void setComment(String comment) {
         this.comment = comment;
     }
 

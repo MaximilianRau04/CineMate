@@ -1,9 +1,13 @@
 package com.cinemate.review.DTOs;
 
 
+import jakarta.validation.constraints.NotNull;
+
 public class ReviewRequestDTO {
     private String id;
+    @NotNull
     private String userId;
+    @NotNull
     private String itemId;
     private double rating;
     private String comment;

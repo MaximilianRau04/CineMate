@@ -15,6 +15,7 @@ const MovieDetail = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [userId, setUserId] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null); // Store complete user object
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
   const [rating, setRating] = useState(0);
@@ -30,6 +31,7 @@ const MovieDetail = () => {
   const [editHover, setEditHover] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [averageRating, setAverageRating] = useState(0);
+  const [reviewUsers, setReviewUsers] = useState({}); // Cache für Benutzerdaten
 
   /**
    * fetches the currently logged in user from the API
@@ -37,14 +39,28 @@ const MovieDetail = () => {
    * @throws {Error} if the user could not be loaded
    */
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.warn("Kein Token gefunden, Benutzer nicht eingeloggt");
+      return;
+    }
+
     fetch("http://localhost:8080/api/users/me", {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        Authorization: `Bearer ${token}`,
       },
     })
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`HTTP Error: ${res.status}`);
+        }
+        return res.json();
+      })
       .then((data) => {
-        if (data?.id) setUserId(data.id);
+        if (data?.id) {
+          setUserId(data.id);
+          setCurrentUser(data); // Store complete user object
+        }
       })
       .catch((err) => console.error("Fehler beim Laden des Users:", err));
   }, []);
@@ -55,15 +71,24 @@ const MovieDetail = () => {
    * @throws {Error} if the movie could not be loaded
    */
   useEffect(() => {
+    if (!movieId) return;
+
     setIsLoading(true);
+    setError(null);
+
     fetch(`http://localhost:8080/api/movies/${movieId}`)
       .then((res) => {
-        if (!res.ok) throw new Error("Film konnte nicht geladen werden");
+        if (!res.ok) {
+          if (res.status === 404) {
+            throw new Error("Film wurde nicht gefunden");
+          }
+          throw new Error(`Film konnte nicht geladen werden (${res.status})`);
+        }
         return res.json();
       })
       .then((data) => {
         setMovie(data);
-        setAverageRating(data.rating);
+        setAverageRating(data.rating || 0);
         setIsLoading(false);
       })
       .catch((err) => {
@@ -81,8 +106,7 @@ const MovieDetail = () => {
   useEffect(() => {
     if (!userId || !movieId) return;
 
-    fetch(`http://localhost:8080/api/users/${userId}/watchlist/movies`, {
-    })
+    fetch(`http://localhost:8080/api/users/${userId}/watchlist/movies`)
       .then((res) => {
         if (!res.ok) {
           throw new Error(`HTTP-Error: ${res.status}`);
@@ -106,12 +130,11 @@ const MovieDetail = () => {
   useEffect(() => {
     if (!userId || !movieId) return;
 
-    fetch(`http://localhost:8080/api/reviews/movie/${movieId}/${userId}`, {
-    })
+    fetch(`http://localhost:8080/api/reviews/movie/${movieId}/user/${userId}`)
       .then((res) => {
         if (!res.ok) {
           if (res.status === 404) return null;
-          throw new Error("Fehler beim Laden der Bewertung");
+          throw new Error(`Fehler beim Laden der Bewertung (${res.status})`);
         }
         return res.json();
       })
@@ -134,7 +157,26 @@ const MovieDetail = () => {
   useEffect(() => {
     if (!movieId) return;
     loadReviews();
-  },);
+  }, [movieId]); // Fixed: Added dependency array
+
+  /**
+   * Fetches user data for a specific review
+   * @param {number} reviewId - The review ID
+   * @returns {Promise<Object|null>} User data or null if not found
+   */
+  const fetchReviewUser = async (reviewId) => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/reviews/${reviewId}/user`);
+      if (!response.ok) {
+        if (response.status === 404) return null;
+        throw new Error(`Fehler beim Laden der Benutzerdaten (${response.status})`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error(`Fehler beim Laden des Benutzers für Review ${reviewId}:`, error);
+      return null;
+    }
+  };
 
   /**
    * adds the movie to the user's watchlist
@@ -165,7 +207,7 @@ const MovieDetail = () => {
         setAdding(false);
       })
       .catch((err) => {
-        console.error(err);
+        console.error("Fehler beim Hinzufügen zur Watchlist:", err);
         setAdding(false);
       });
   };
@@ -195,22 +237,49 @@ const MovieDetail = () => {
       const response = await fetch(
         `http://localhost:8080/api/reviews/movie/${movieId}`
       );
-      if (!response.ok)
-        throw new Error("Bewertungen konnten nicht geladen werden");
+      if (!response.ok) {
+        if (response.status === 404) {
+          setReviews([]);
+          setAverageRating(0);
+          return;
+        }
+        throw new Error(`Bewertungen konnten nicht geladen werden (${response.status})`);
+      }
       const data = await response.json();
       setReviews(data);
+
+      // Lade Benutzerdaten für alle Reviews
+      const userPromises = data.map(async (review) => {
+        if (!reviewUsers[review.id]) {
+          const userData = await fetchReviewUser(review.id);
+          return { reviewId: review.id, userData };
+        }
+        return null;
+      });
+
+      const userResults = await Promise.all(userPromises);
+      const newReviewUsers = { ...reviewUsers };
+      
+      userResults.forEach((result) => {
+        if (result && result.userData) {
+          newReviewUsers[result.reviewId] = result.userData;
+        }
+      });
+
+      setReviewUsers(newReviewUsers);
 
       const newAverageRating = calculateAverageRating(data);
       setAverageRating(newAverageRating);
 
       if (movie) {
-        setMovie({
-          ...movie,
+        setMovie(prevMovie => ({
+          ...prevMovie,
           rating: newAverageRating,
-        });
+        }));
       }
     } catch (error) {
       console.error("Fehler beim Laden der Bewertungen:", error);
+      setReviews([]);
     }
   };
 
@@ -219,40 +288,47 @@ const MovieDetail = () => {
    * @returns {Promise<void>}
    * @throws {Error} if the review could not be added
    */
-  const handleSubmitReview = () => {
+  const handleSubmitReview = async () => {
     if (!userId || rating === 0) return;
 
     setSubmitting(true);
-    fetch(`http://localhost:8080/api/reviews/movie/${movieId}/${userId}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        userId,
-        itemId: movieId,
-        rating: rating,
-        comment: comment,
-      }),
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Fehler beim Speichern der Bewertung");
-        return res.json();
-      })
-      .then((data) => {
-        setReviewed(true);
-        setSubmitting(false);
-        setSubmitSuccess(true);
-        if (data && data.id) {
-          setReviewId(data.id);
-        }
+    setSubmitSuccess(false);
 
-        loadReviews();
-      })
-      .catch((err) => {
-        console.error(err);
-        setSubmitting(false);
+    try {
+      const response = await fetch(`http://localhost:8080/api/reviews/movie/${movieId}/user/${userId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId,
+          itemId: movieId,
+          rating: rating,
+          comment: comment,
+          type: "movie", 
+        }),
       });
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(`Fehler beim Speichern der Bewertung: ${errorData}`);
+      }
+
+      const data = await response.json();
+      setReviewed(true);
+      setSubmitSuccess(true);
+      
+      if (data && data.id) {
+        setReviewId(data.id);
+      }
+
+      await loadReviews();
+    } catch (error) {
+      console.error("Fehler beim Speichern der Bewertung:", error);
+      alert(`Fehler: ${error.message}`); 
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   // Initialize edit values when opening the modal
@@ -267,40 +343,42 @@ const MovieDetail = () => {
    * @returns {Promise<void>}
    * @throws {Error} if the review could not be edited
    */
-  const handleEditReview = () => {
-    if (!userId || !reviewId) return;
+  const handleEditReview = async () => {
+    if (!userId || !reviewId || editRating === 0) return;
 
     setSubmitting(true);
 
-    fetch(`http://localhost:8080/api/reviews/${reviewId}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        userId,
-        itemId: movieId,
-        rating: editRating,
-        comment: editComment,
-        type: "movie",
-      }),
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Fehler beim Bearbeiten der Bewertung");
-        return res.json();
-      })
-      .then(() => {
-        setRating(editRating);
-        setComment(editComment);
-        setShowEditModal(false);
-        setSubmitting(false);
-
-        loadReviews();
-      })
-      .catch((err) => {
-        console.error(err);
-        setSubmitting(false);
+    try {
+      const response = await fetch(`http://localhost:8080/api/reviews/${reviewId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId,
+          itemId: movieId,
+          rating: editRating,
+          comment: editComment,
+          type: "movie",
+        }),
       });
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(`Fehler beim Bearbeiten der Bewertung: ${errorData}`);
+      }
+
+      setRating(editRating);
+      setComment(editComment);
+      setShowEditModal(false);
+      
+      await loadReviews();
+    } catch (error) {
+      console.error("Fehler beim Bearbeiten der Bewertung:", error);
+      alert(`Fehler: ${error.message}`); 
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   /**
@@ -308,34 +386,38 @@ const MovieDetail = () => {
    * @returns {Promise<void>}
    * @throws {Error} if the review could not be deleted
    */
-  const handleDeleteReview = () => {
+  const handleDeleteReview = async () => {
     const confirmDelete = window.confirm(
       "Möchtest du deine Bewertung wirklich löschen?"
     );
     if (!confirmDelete) return;
 
-    fetch(`http://localhost:8080/api/reviews/${reviewId}`, {
-      method: "DELETE",
-      headers: {
-        "Authorization": `Bearer ${localStorage.getItem("token")}`,
-      }
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Fehler beim Löschen der Bewertung");
-        setReviewed(false);
-        setRating(0);
-        setComment("");
-        setReviewId(null);
+    try {
+      const response = await fetch(`http://localhost:8080/api/reviews/${reviewId}`, {
+        method: "DELETE",
+      });
 
-        loadReviews();
-      })
-      .catch((err) => console.error("Fehler beim Löschen:", err));
+      if (!response.ok) {
+        throw new Error(`Fehler beim Löschen der Bewertung (${response.status})`);
+      }
+
+      setReviewed(false);
+      setRating(0);
+      setComment("");
+      setReviewId(null);
+      setSubmitSuccess(false);
+
+      await loadReviews();
+    } catch (error) {
+      console.error("Fehler beim Löschen:", error);
+      alert(`Fehler: ${error.message}`); 
+    }
   };
 
   /**
    * render star rating for movie
-   * @param {*} rating
-   * @returns {JSX.Element}
+   * @param {number} rating
+   * @returns {JSX.Element[]}
    */
   const renderStars = (rating) => {
     const stars = [];
@@ -353,6 +435,30 @@ const MovieDetail = () => {
     }
 
     return stars;
+  };
+
+  /**
+   * Get username for a review based on cached user data
+   * @param {Object} review - Review object
+   * @returns {string} - Username to display
+   */
+  const getReviewUsername = (review) => {
+    const reviewUserId = review.userId || review.user_id || review.authorId || review.author_id;
+    
+    if (currentUser && reviewUserId === currentUser.id) {
+      return currentUser.username || "Du";
+    }
+
+    const userData = reviewUsers[review.id];
+    if (userData && userData.username) {
+      return userData.username;
+    }
+
+    if (reviewUserId) {
+      return `Nutzer ${reviewUserId}`;
+    }
+    
+    return "Unbekannter Nutzer";
   };
 
   if (isLoading) {
@@ -423,6 +529,11 @@ const MovieDetail = () => {
               <span className="d-inline-flex align-items-center">
                 {renderStars(averageRating)}
                 <span className="ms-2">({averageRating.toFixed(1)}/5)</span>
+                {reviews.length > 0 && (
+                  <span className="ms-2 text-muted">
+                    ({reviews.length} Bewertung{reviews.length !== 1 ? 'en' : ''})
+                  </span>
+                )}
               </span>
             </p>
 
@@ -522,11 +633,12 @@ const MovieDetail = () => {
                 </button>
               </div>
             )}
+
             {reviewed && (
               <div className="alert alert-info mt-4">
                 <h5>⭐ Deine bisherige Bewertung</h5>
                 <p>
-                  Bewertung: {renderStars(rating)}
+                  Bewertung: {renderStars(rating)} ({rating}/5)
                   {comment && (
                     <>
                       <br />
@@ -575,14 +687,14 @@ const MovieDetail = () => {
       {reviews && reviews.length > 0 && (
         <div className="card mt-4 shadow-sm">
           <div className="card-header bg-light">
-            <h4 className="mb-0">📢 Nutzerbewertungen</h4>
+            <h4 className="mb-0">📢 Nutzerbewertungen ({reviews.length})</h4>
           </div>
           <div className="card-body">
             {reviews.map((review) => (
               <div key={review.id} className="border rounded p-3 mb-3">
                 <div className="d-flex justify-content-between align-items-center mb-2">
                   <strong>
-                    {review.user?.username || "Unbekannter Nutzer"}
+                    {getReviewUsername(review)}
                   </strong>
                   <span className="text-muted" style={{ fontSize: "0.9em" }}>
                     {review.date
@@ -591,16 +703,19 @@ const MovieDetail = () => {
                           month: "2-digit",
                           year: "numeric",
                         })
-                      : new Date(review.createdAt).toLocaleDateString("de-DE", {
+                      : review.createdAt
+                      ? new Date(review.createdAt).toLocaleDateString("de-DE", {
                           day: "2-digit",
                           month: "2-digit",
                           year: "numeric",
-                        })}
+                        })
+                      : "Unbekanntes Datum"}
                   </span>
                 </div>
                 <div className="mb-2">
                   <div className="d-flex align-items-center">
                     {renderStars(review.rating)}
+                    <span className="ms-2">({review.rating}/5)</span>
                   </div>
                 </div>
                 {review.comment && <p className="mb-0">{review.comment}</p>}
@@ -610,7 +725,7 @@ const MovieDetail = () => {
         </div>
       )}
 
-      {reviews && reviews.length === 0 && (
+      {(!reviews || reviews.length === 0) && (
         <div className="card mt-4 shadow-sm">
           <div className="card-body text-center py-4">
             <p className="text-muted mb-0">
@@ -620,6 +735,7 @@ const MovieDetail = () => {
         </div>
       )}
 
+      {/* Edit Modal */}
       {showEditModal && (
         <div
           className="modal fade show d-block"
@@ -699,7 +815,7 @@ const MovieDetail = () => {
                 <button
                   className="btn btn-primary"
                   onClick={handleEditReview}
-                  disabled={submitting}
+                  disabled={submitting || editRating === 0}
                 >
                   {submitting ? "Speichern..." : "Speichern"}
                 </button>

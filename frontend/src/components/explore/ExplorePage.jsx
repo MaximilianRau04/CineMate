@@ -183,6 +183,22 @@ const ExplorePage = () => {
     }
   };
 
+  /**
+   * Format rating for display
+   */
+  const formatRating = (rating) => {
+    if (rating === null || rating === undefined) return "N/A";
+    
+    // Ensure rating is treated as a number
+    const numRating = Number(rating);
+    
+    // Check if conversion resulted in a valid number
+    if (isNaN(numRating)) return "N/A";
+    
+    // Format with one decimal place
+    return numRating.toFixed(1);
+  };
+
   if (isLoading) {
     return (
       <div className="container text-center py-5">
@@ -375,7 +391,7 @@ const ExplorePage = () => {
                             ))}
                           </div>
                           <p className="card-text mb-1">
-                            ⭐ <strong>{movie.rating?.toFixed(1) || "N/A"}</strong>
+                            ⭐ <strong>{formatRating(movie.rating)}</strong>
                           </p>
                           <p className="card-text mb-1">
                             📅{" "}
@@ -434,7 +450,7 @@ const ExplorePage = () => {
                             ))}
                           </div>
                           <p className="card-text mb-1">
-                            ⭐ <strong>{serie.rating?.toFixed(1) || "N/A"}</strong>
+                            ⭐ <strong>{formatRating(serie.rating)}</strong>
                           </p>
                           <p className="card-text mb-1">
                             📅{" "}

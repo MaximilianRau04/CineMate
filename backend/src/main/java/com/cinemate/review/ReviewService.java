@@ -1,13 +1,16 @@
 package com.cinemate.review;
 
+import com.cinemate.movie.DTOs.MovieResponseDTO;
 import com.cinemate.movie.Movie;
 import com.cinemate.movie.MovieRepository;
 import com.cinemate.review.DTOs.ReviewRequestDTO;
 import com.cinemate.review.DTOs.ReviewResponseDTO;
+import com.cinemate.series.DTOs.SeriesResponseDTO;
 import com.cinemate.series.Series;
 import com.cinemate.series.SeriesRepository;
 import com.cinemate.user.User;
 import com.cinemate.user.UserRepository;
+import com.cinemate.user.dtos.UserResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,7 +52,14 @@ public class ReviewService {
     public ReviewResponseDTO createReview(ReviewRequestDTO reviewRequestDTO) {
         String itemType = reviewRequestDTO.getType().toLowerCase();
         String itemId = reviewRequestDTO.getItemId();
-        checkForExistingReview(reviewRequestDTO.getUserId(), itemId);
+        String userId = reviewRequestDTO.getUserId();
+
+        validateUserExists(userId);
+
+        validateContentExists(itemType, itemId);
+
+        checkForExistingReview(userId, itemId);
+
         validateRating(reviewRequestDTO.getRating());
 
         Review review = new Review(reviewRequestDTO);
@@ -85,6 +95,8 @@ public class ReviewService {
      * @return List of ReviewResponseDTO
      */
     public List<ReviewResponseDTO> getReviewsByMovie(String movieId) {
+        validateMovieExists(movieId);
+
         return reviewRepository.findByItemId(movieId).stream()
                 .filter(review -> movieRepository.findById(review.getItemId()).isPresent())
                 .map(ReviewResponseDTO::new)
@@ -97,6 +109,8 @@ public class ReviewService {
      * @return List of ReviewResponseDTO
      */
     public List<ReviewResponseDTO> getReviewsBySeries(String seriesId) {
+        validateSeriesExists(seriesId);
+
         return reviewRepository.findByItemId(seriesId).stream()
                 .filter(review -> seriesRepository.findById(review.getItemId()).isPresent())
                 .map(ReviewResponseDTO::new)
@@ -109,6 +123,8 @@ public class ReviewService {
      * @return List of ReviewResponseDTO
      */
     public List<ReviewResponseDTO> getReviewsByUser(String userId) {
+        validateUserExists(userId);
+
         return reviewRepository.findByUserId(userId).stream()
                 .map(ReviewResponseDTO::new)
                 .collect(Collectors.toList());
@@ -121,8 +137,11 @@ public class ReviewService {
      * @return ReviewResponseDTO
      */
     public ReviewResponseDTO findByMovieIdAndUserId(String movieId, String userId) {
+        validateMovieExists(movieId);
+        validateUserExists(userId);
+
         Review review = reviewRepository.findByItemIdAndUserId(movieId, userId);
-        return new ReviewResponseDTO(review);
+        return review != null ? new ReviewResponseDTO(review) : null;
     }
 
     /**
@@ -132,8 +151,68 @@ public class ReviewService {
      * @return ReviewResponseDTO
      */
     public ReviewResponseDTO findBySeriesIdAndUserId(String seriesId, String userId) {
+        validateSeriesExists(seriesId);
+        validateUserExists(userId);
+
         Review review = reviewRepository.findByItemIdAndUserId(seriesId, userId);
-        return new ReviewResponseDTO(review);
+        return review != null ? new ReviewResponseDTO(review) : null;
+    }
+
+    /**
+     * Returns the user of a review by review id
+     * @param reviewId
+     * @return UserResponseDTO or null if review not found
+     */
+    public UserResponseDTO getUserByReviewId(String reviewId) {
+        Optional<Review> reviewOpt = reviewRepository.findById(reviewId);
+        if (reviewOpt.isPresent()) {
+            Review review = reviewOpt.get();
+            String userId = review.getUserId();
+
+            Optional<User> userOpt = userRepository.findById(userId);
+            if (userOpt.isPresent()) {
+                return new UserResponseDTO(userOpt.get());
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the movie of a review by review id
+     * @param reviewId
+     * @return MovieResponseDTO or null if review not found or not a movie review
+     */
+    public MovieResponseDTO getMovieByReviewId(String reviewId) {
+        Optional<Review> reviewOpt = reviewRepository.findById(reviewId);
+        if (reviewOpt.isPresent()) {
+            Review review = reviewOpt.get();
+            String itemId = review.getItemId();
+
+            Optional<Movie> movieOpt = movieRepository.findById(itemId);
+            if (movieOpt.isPresent()) {
+                return new MovieResponseDTO(movieOpt.get());
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the series of a review by review id
+     * @param reviewId
+     * @return SeriesResponseDTO or null if review not found or not a series review
+     */
+    public SeriesResponseDTO getSeriesByReviewId(String reviewId) {
+        Optional<Review> reviewOpt = reviewRepository.findById(reviewId);
+        if (reviewOpt.isPresent()) {
+            Review review = reviewOpt.get();
+            String itemId = review.getItemId();
+
+            Optional<Series> seriesOpt = seriesRepository.findById(itemId);
+            if (seriesOpt.isPresent()) {
+                return new SeriesResponseDTO(seriesOpt.get());
+            }
+        }
+        return null;
     }
 
     /**
@@ -199,6 +278,51 @@ public class ReviewService {
             throw new IllegalArgumentException(
                     "Rating must be between " + MIN_RATING + " and " + MAX_RATING +
                             " and in " + RATING_STEP + " increments");
+        }
+    }
+
+    /**
+     * Validates that a user exists
+     * @param userId User ID to validate
+     */
+    private void validateUserExists(String userId) {
+        if (!userRepository.findById(userId).isPresent()) {
+            throw new IllegalArgumentException("User with ID " + userId + " does not exist");
+        }
+    }
+
+    /**
+     * Validates that a movie exists
+     * @param movieId Movie ID to validate
+     */
+    private void validateMovieExists(String movieId) {
+        if (!movieRepository.findById(movieId).isPresent()) {
+            throw new IllegalArgumentException("Movie with ID " + movieId + " does not exist");
+        }
+    }
+
+    /**
+     * Validates that a series exists
+     * @param seriesId Series ID to validate
+     */
+    private void validateSeriesExists(String seriesId) {
+        if (!seriesRepository.findById(seriesId).isPresent()) {
+            throw new IllegalArgumentException("Series with ID " + seriesId + " does not exist");
+        }
+    }
+
+    /**
+     * Validates that content (movie or series) exists based on type
+     * @param contentType Type of content ("movie" or "series")
+     * @param contentId ID of the content
+     */
+    private void validateContentExists(String contentType, String contentId) {
+        if (TYPE_MOVIE.equalsIgnoreCase(contentType)) {
+            validateMovieExists(contentId);
+        } else if (TYPE_SERIES.equalsIgnoreCase(contentType)) {
+            validateSeriesExists(contentId);
+        } else {
+            throw new IllegalArgumentException("Invalid content type: " + contentType);
         }
     }
 
