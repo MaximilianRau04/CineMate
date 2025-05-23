@@ -80,7 +80,7 @@ public class SeriesController {
      * @return RList<Series.Season>
      */
     @GetMapping("/{id}/seasons")
-    public ResponseEntity<List<Series.Season>> getSeasons(@PathVariable String id) {
+    public ResponseEntity<List<Season>> getSeasons(@PathVariable String id) {
         return seriesService.getSeasons(id);
     }
 
@@ -91,7 +91,7 @@ public class SeriesController {
      * @return eries.Season
      */
     @GetMapping("/{id}/seasons/{seasonNumber}")
-    public ResponseEntity<Series.Season> getSeason(
+    public ResponseEntity<Season> getSeason(
             @PathVariable String id,
             @PathVariable int seasonNumber) {
         return seriesService.getSeason(id, seasonNumber);
@@ -104,9 +104,9 @@ public class SeriesController {
      * @return List<Series.Season>
      */
     @PostMapping("/{id}/seasons")
-    public ResponseEntity<Series.Season> addSeason(
+    public ResponseEntity<Season> addSeason(
             @PathVariable String id,
-            @RequestBody Series.Season season) {
+            @RequestBody Season season) {
         return seriesService.addSeason(id, season);
     }
 
@@ -118,10 +118,10 @@ public class SeriesController {
      * @return List<Series.Season>
      */
     @PutMapping("/{id}/seasons/{seasonNumber}")
-    public ResponseEntity<Series.Season> updateSeason(
+    public ResponseEntity<Season> updateSeason(
             @PathVariable String id,
             @PathVariable int seasonNumber,
-            @RequestBody Series.Season season) {
+            @RequestBody Season season) {
         return seriesService.updateSeason(id, seasonNumber, season);
     }
 
@@ -145,7 +145,7 @@ public class SeriesController {
      * @return List<Series.Episode>
      */
     @GetMapping("/{id}/seasons/{seasonNumber}/episodes")
-    public ResponseEntity<List<Series.Episode>> getEpisodes(
+    public ResponseEntity<List<Episode>> getEpisodes(
             @PathVariable String id,
             @PathVariable int seasonNumber) {
         return seriesService.getEpisodes(id, seasonNumber);
@@ -158,7 +158,7 @@ public class SeriesController {
      * @return List<Series.Episode>
      */
     @GetMapping("/{id}/seasons/{seasonNumber}/episodes/{episodeNumber}")
-    public ResponseEntity<Series.Episode> getEpisode(
+    public ResponseEntity<Episode> getEpisode(
             @PathVariable String id,
             @PathVariable int seasonNumber,
             @PathVariable int episodeNumber) {
@@ -172,10 +172,10 @@ public class SeriesController {
      * @return List<Series.Episode>
      */
     @PostMapping("/{id}/seasons/{seasonNumber}/episodes")
-    public ResponseEntity<Series.Episode> addEpisode(
+    public ResponseEntity<Episode> addEpisode(
             @PathVariable String id,
             @PathVariable int seasonNumber,
-            @RequestBody Series.Episode episode) {
+            @RequestBody Episode episode) {
         return seriesService.addEpisode(id, seasonNumber, episode);
     }
 
@@ -188,11 +188,11 @@ public class SeriesController {
      * @return Series
      */
     @PutMapping("/{id}/seasons/{seasonNumber}/episodes/{episodeNumber}")
-    public ResponseEntity<Series.Episode> updateEpisode(
+    public ResponseEntity<Episode> updateEpisode(
             @PathVariable String id,
             @PathVariable int seasonNumber,
             @PathVariable int episodeNumber,
-            @RequestBody Series.Episode episode) {
+            @RequestBody Episode episode) {
         return seriesService.updateEpisode(id, seasonNumber, episodeNumber, episode);
     }
 

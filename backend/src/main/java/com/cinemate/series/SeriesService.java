@@ -99,26 +99,6 @@ public class SeriesService {
         if (seriesDTO.getPosterUrl() != null) series.setPosterUrl(seriesDTO.getPosterUrl());
         if (seriesDTO.getCountry() != null) series.setCountry(seriesDTO.getCountry());
         if (seriesDTO.getTrailerUrl() != null) series.setTrailerUrl(seriesDTO.getTrailerUrl());
-
-        if (seriesDTO.getDirectorIds() != null && !seriesDTO.getDirectorIds().isEmpty()) {
-            List<Director> directors = new ArrayList<>();
-            for (String directorId : seriesDTO.getDirectorIds()) {
-                directorRepository.findById(directorId).ifPresent(directors::add);
-            }
-            series.setDirectors(directors);
-        }
-
-        if (seriesDTO.getActorIds() != null && !seriesDTO.getActorIds().isEmpty()) {
-            List<Actor> actors = new ArrayList<>();
-            for (String actorId : seriesDTO.getActorIds()) {
-                actorRepository.findById(actorId).ifPresent(actors::add);
-            }
-            series.setActors(actors);
-        }
-
-        if (seriesDTO.getSeasons() != null) {
-            mergeSeasons(series.getSeasons(), seriesDTO.getSeasons());
-        }
     }
 
     /**
@@ -134,7 +114,7 @@ public class SeriesService {
      * @param seriesId
      * @return List<Series.Season>
      */
-    public ResponseEntity<List<Series.Season>> getSeasons(String seriesId) {
+    public ResponseEntity<List<Season>> getSeasons(String seriesId) {
         Optional<Series> optionalSeries = seriesRepository.findById(seriesId);
 
         if (optionalSeries.isEmpty()) {
@@ -142,12 +122,12 @@ public class SeriesService {
         }
 
         Series series = optionalSeries.get();
-        List<Series.Season> seasons = series.getSeasons();
+        List<Season> seasons = series.getSeasons();
 
         if (seasons == null) {
             return ResponseEntity.ok(new ArrayList<>());
         } else {
-            List<Series.Season> validSeasons = seasons.stream()
+            List<Season> validSeasons = seasons.stream()
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
             return ResponseEntity.ok(validSeasons);
@@ -159,7 +139,7 @@ public class SeriesService {
      * @param seriesId
      * @param seasonNumber
      */
-    public ResponseEntity<Series.Season> getSeason(String seriesId, int seasonNumber) {
+    public ResponseEntity<Season> getSeason(String seriesId, int seasonNumber) {
         return findAndProcessEntity(seriesId, series ->
                 findSeasonByNumber(series, seasonNumber).orElse(null));
     }
@@ -170,7 +150,7 @@ public class SeriesService {
      * @param newSeason
      * @return the added season
      */
-    public ResponseEntity<Series.Season> addSeason(String seriesId, Series.Season newSeason) {
+    public ResponseEntity<Season> addSeason(String seriesId, Season newSeason) {
         if (newSeason.getSeasonNumber() <= 0) {
             return ResponseEntity.badRequest().build();
         }
@@ -195,7 +175,7 @@ public class SeriesService {
         }
 
         if (newSeason.getEpisodes() != null) {
-            List<Series.Episode> validEpisodes = validateAndSortEpisodes(newSeason.getEpisodes());
+            List<Episode> validEpisodes = validateAndSortEpisodes(newSeason.getEpisodes());
             newSeason.setEpisodes(validEpisodes);
         } else {
             newSeason.setEpisodes(new ArrayList<>());
@@ -205,12 +185,12 @@ public class SeriesService {
 
         series.setSeasons(series.getSeasons().stream()
                 .filter(Objects::nonNull)
-                .sorted(Comparator.comparing(Series.Season::getSeasonNumber))
+                .sorted(Comparator.comparing(Season::getSeasonNumber))
                 .collect(Collectors.toList()));
 
         Series savedSeries = seriesRepository.save(series);
 
-        Optional<Series.Season> addedSeason = findSeasonByNumber(savedSeries, newSeason.getSeasonNumber());
+        Optional<Season> addedSeason = findSeasonByNumber(savedSeries, newSeason.getSeasonNumber());
 
         return addedSeason
                 .map(season -> ResponseEntity.status(HttpStatus.CREATED).body(season))
@@ -224,20 +204,20 @@ public class SeriesService {
      * @param updatedSeason
      * @return the updated season
      */
-    public ResponseEntity<Series.Season> updateSeason(String seriesId, int seasonNumber, Series.Season updatedSeason) {
+    public ResponseEntity<Season> updateSeason(String seriesId, int seasonNumber, Season updatedSeason) {
         Optional<Series> optionalSeries = seriesRepository.findById(seriesId);
         if (optionalSeries.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
         Series series = optionalSeries.get();
-        Optional<Series.Season> existingSeason = findSeasonByNumber(series, seasonNumber);
+        Optional<Season> existingSeason = findSeasonByNumber(series, seasonNumber);
 
         if (existingSeason.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
-        Series.Season season = existingSeason.get();
+        Season season = existingSeason.get();
         if (updatedSeason.getTrailerUrl() != null) season.setTrailerUrl(updatedSeason.getTrailerUrl());
         if (updatedSeason.getSeasonNumber() != -1) season.setSeasonNumber(updatedSeason.getSeasonNumber());
 
@@ -247,7 +227,7 @@ public class SeriesService {
 
         Series savedSeries = seriesRepository.save(series);
 
-        Optional<Series.Season> savedSeason = findSeasonByNumber(
+        Optional<Season> savedSeason = findSeasonByNumber(
                 savedSeries,
                 updatedSeason.getSeasonNumber() != -1 ? updatedSeason.getSeasonNumber() : seasonNumber
         );
@@ -285,10 +265,10 @@ public class SeriesService {
      * @param seriesId
      * @return List<Series.Episode>
      */
-    public ResponseEntity<List<Series.Episode>> getEpisodes(String seriesId, int seasonNumber) {
+    public ResponseEntity<List<Episode>> getEpisodes(String seriesId, int seasonNumber) {
         return findAndProcessEntity(seriesId, series -> {
-            Optional<Series.Season> season = findSeasonByNumber(series, seasonNumber);
-            return season.map(Series.Season::getEpisodes).orElse(null);
+            Optional<Season> season = findSeasonByNumber(series, seasonNumber);
+            return season.map(Season::getEpisodes).orElse(null);
         });
     }
 
@@ -299,9 +279,9 @@ public class SeriesService {
      * @param episodeNumber
      * @return Series.Episode
      */
-    public ResponseEntity<Series.Episode> getEpisode(String seriesId, int seasonNumber, int episodeNumber) {
+    public ResponseEntity<Episode> getEpisode(String seriesId, int seasonNumber, int episodeNumber) {
         return findAndProcessEntity(seriesId, series -> {
-            Optional<Series.Season> season = findSeasonByNumber(series, seasonNumber);
+            Optional<Season> season = findSeasonByNumber(series, seasonNumber);
 
             if (season.isEmpty()) {
                 return null;
@@ -318,7 +298,7 @@ public class SeriesService {
      * @param newEpisode
      * @return the added episode
      */
-    public ResponseEntity<Series.Episode> addEpisode(String seriesId, int seasonNumber, Series.Episode newEpisode) {
+    public ResponseEntity<Episode> addEpisode(String seriesId, int seasonNumber, Episode newEpisode) {
         if (newEpisode.getTitle() == null || newEpisode.getReleaseDate() == null || newEpisode.getEpisodeNumber() <= 0) {
             return ResponseEntity.badRequest().build();
         }
@@ -329,13 +309,13 @@ public class SeriesService {
         }
 
         Series series = optionalSeries.get();
-        Optional<Series.Season> optionalSeason = findSeasonByNumber(series, seasonNumber);
+        Optional<Season> optionalSeason = findSeasonByNumber(series, seasonNumber);
 
         if (optionalSeason.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
-        Series.Season season = optionalSeason.get();
+        Season season = optionalSeason.get();
 
         boolean episodeExists = season.getEpisodes().stream()
                 .anyMatch(e -> e.getEpisodeNumber() == newEpisode.getEpisodeNumber());
@@ -345,16 +325,16 @@ public class SeriesService {
         }
 
         season.getEpisodes().add(newEpisode);
-        season.getEpisodes().sort(Comparator.comparing(Series.Episode::getEpisodeNumber));
+        season.getEpisodes().sort(Comparator.comparing(Episode::getEpisodeNumber));
 
         Series savedSeries = seriesRepository.save(series);
-        Optional<Series.Season> savedSeason = findSeasonByNumber(savedSeries, seasonNumber);
+        Optional<Season> savedSeason = findSeasonByNumber(savedSeries, seasonNumber);
 
         if (savedSeason.isEmpty()) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
 
-        Optional<Series.Episode> addedEpisode = findEpisodeByNumber(savedSeason.get(), newEpisode.getEpisodeNumber());
+        Optional<Episode> addedEpisode = findEpisodeByNumber(savedSeason.get(), newEpisode.getEpisodeNumber());
 
         return addedEpisode
                 .map(episode -> ResponseEntity.status(HttpStatus.CREATED).body(episode))
@@ -369,38 +349,38 @@ public class SeriesService {
      * @param updatedEpisode
      * @return the updated episode
      */
-    public ResponseEntity<Series.Episode> updateEpisode(String seriesId, int seasonNumber, int episodeNumber, Series.Episode updatedEpisode) {
+    public ResponseEntity<Episode> updateEpisode(String seriesId, int seasonNumber, int episodeNumber, Episode updatedEpisode) {
         Optional<Series> optionalSeries = seriesRepository.findById(seriesId);
         if (optionalSeries.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
         Series series = optionalSeries.get();
-        Optional<Series.Season> optionalSeason = findSeasonByNumber(series, seasonNumber);
+        Optional<Season> optionalSeason = findSeasonByNumber(series, seasonNumber);
 
         if (optionalSeason.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
-        Series.Season season = optionalSeason.get();
+        Season season = optionalSeason.get();
 
-        Optional<Series.Episode> optionalEpisode = findEpisodeByNumber(season, episodeNumber);
+        Optional<Episode> optionalEpisode = findEpisodeByNumber(season, episodeNumber);
 
         if (optionalEpisode.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
-        Series.Episode episode = optionalEpisode.get();
+        Episode episode = optionalEpisode.get();
         updateEpisodeFields(episode, updatedEpisode);
 
         Series savedSeries = seriesRepository.save(series);
-        Optional<Series.Season> savedSeason = findSeasonByNumber(savedSeries, seasonNumber);
+        Optional<Season> savedSeason = findSeasonByNumber(savedSeries, seasonNumber);
 
         if (savedSeason.isEmpty()) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
 
-        Optional<Series.Episode> savedEpisode = findEpisodeByNumber(savedSeason.get(), episodeNumber);
+        Optional<Episode> savedEpisode = findEpisodeByNumber(savedSeason.get(), episodeNumber);
 
         return savedEpisode
                 .map(ResponseEntity::ok)
@@ -410,7 +390,7 @@ public class SeriesService {
     /**
      * Update fields of an episode entity
      */
-    private void updateEpisodeFields(Series.Episode existingEpisode, Series.Episode updatedEpisode) {
+    private void updateEpisodeFields(Episode existingEpisode, Episode updatedEpisode) {
         if (updatedEpisode.getTitle() != null) existingEpisode.setTitle(updatedEpisode.getTitle());
         if (updatedEpisode.getDescription() != null) existingEpisode.setDescription(updatedEpisode.getDescription());
         if (updatedEpisode.getDuration() != null) existingEpisode.setDuration(updatedEpisode.getDuration());
@@ -431,13 +411,13 @@ public class SeriesService {
         }
 
         Series series = optionalSeries.get();
-        Optional<Series.Season> optionalSeason = findSeasonByNumber(series, seasonNumber);
+        Optional<Season> optionalSeason = findSeasonByNumber(series, seasonNumber);
 
         if (optionalSeason.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
-        Series.Season season = optionalSeason.get();
+        Season season = optionalSeason.get();
         boolean removed = season.getEpisodes().removeIf(e -> e.getEpisodeNumber() == episodeNumber);
 
         if (!removed) {
@@ -476,7 +456,7 @@ public class SeriesService {
      * @param series
      * @return Series.Season
      */
-    private Optional<Series.Season> findSeasonByNumber(Series series, int seasonNumber) {
+    private Optional<Season> findSeasonByNumber(Series series, int seasonNumber) {
         if (series.getSeasons() == null) {
             return Optional.empty();
         }
@@ -493,7 +473,7 @@ public class SeriesService {
      * @param season
      * @return Series.Episode
      */
-    private Optional<Series.Episode> findEpisodeByNumber(Series.Season season, int episodeNumber) {
+    private Optional<Episode> findEpisodeByNumber(Season season, int episodeNumber) {
         return season.getEpisodes().stream()
                 .filter(e -> e.getEpisodeNumber() == episodeNumber)
                 .findFirst();
@@ -504,10 +484,10 @@ public class SeriesService {
      * @param episodes
      * @return Series.Episode
      */
-    private List<Series.Episode> validateAndSortEpisodes(List<Series.Episode> episodes) {
+    private List<Episode> validateAndSortEpisodes(List<Episode> episodes) {
         return episodes.stream()
                 .filter(e -> e.getTitle() != null && e.getReleaseDate() != null && e.getEpisodeNumber() > 0)
-                .sorted(Comparator.comparing(Series.Episode::getEpisodeNumber))
+                .sorted(Comparator.comparing(Episode::getEpisodeNumber))
                 .collect(Collectors.toList());
     }
 
@@ -516,15 +496,15 @@ public class SeriesService {
      * @param existingSeasons
      * @param updatedSeasons
      */
-    private void mergeSeasons(List<Series.Season> existingSeasons, List<Series.Season> updatedSeasons) {
-        Map<Integer, Series.Season> updatedMap = updatedSeasons.stream()
-                .collect(Collectors.toMap(Series.Season::getSeasonNumber, s -> s, (s1, s2) -> s1));
+    private void mergeSeasons(List<Season> existingSeasons, List<Season> updatedSeasons) {
+        Map<Integer, Season> updatedMap = updatedSeasons.stream()
+                .collect(Collectors.toMap(Season::getSeasonNumber, s -> s, (s1, s2) -> s1));
 
-        Iterator<Series.Season> iterator = existingSeasons.iterator();
+        Iterator<Season> iterator = existingSeasons.iterator();
         while (iterator.hasNext()) {
-            Series.Season existingSeason = iterator.next();
+            Season existingSeason = iterator.next();
             if (updatedMap.containsKey(existingSeason.getSeasonNumber())) {
-                Series.Season updatedSeason = updatedMap.get(existingSeason.getSeasonNumber());
+                Season updatedSeason = updatedMap.get(existingSeason.getSeasonNumber());
 
                 if (updatedSeason.getEpisodes() != null) {
                     mergeEpisodes(existingSeason.getEpisodes(), updatedSeason.getEpisodes());
@@ -534,9 +514,9 @@ public class SeriesService {
             }
         }
 
-        for (Series.Season newSeason : updatedMap.values()) {
+        for (Season newSeason : updatedMap.values()) {
             if (newSeason.getEpisodes() != null) {
-                List<Series.Episode> validEpisodes = validateAndSortEpisodes(newSeason.getEpisodes());
+                List<Episode> validEpisodes = validateAndSortEpisodes(newSeason.getEpisodes());
                 newSeason.setEpisodes(validEpisodes);
             } else {
                 newSeason.setEpisodes(new ArrayList<>());
@@ -544,7 +524,7 @@ public class SeriesService {
             existingSeasons.add(newSeason);
         }
 
-        existingSeasons.sort(Comparator.comparing(Series.Season::getSeasonNumber));
+        existingSeasons.sort(Comparator.comparing(Season::getSeasonNumber));
     }
 
     /**
@@ -552,20 +532,20 @@ public class SeriesService {
      * @param existingEpisodes
      * @param updatedEpisodes
      */
-    private void mergeEpisodes(List<Series.Episode> existingEpisodes, List<Series.Episode> updatedEpisodes) {
-        List<Series.Episode> validUpdatedEpisodes = validateAndSortEpisodes(updatedEpisodes);
+    private void mergeEpisodes(List<Episode> existingEpisodes, List<Episode> updatedEpisodes) {
+        List<Episode> validUpdatedEpisodes = validateAndSortEpisodes(updatedEpisodes);
 
-        Map<Integer, Series.Episode> existingEpisodesMap = existingEpisodes.stream()
+        Map<Integer, Episode> existingEpisodesMap = existingEpisodes.stream()
                 .filter(e -> e.getEpisodeNumber() > 0)
-                .collect(Collectors.toMap(Series.Episode::getEpisodeNumber, e -> e, (e1, e2) -> e1));
+                .collect(Collectors.toMap(Episode::getEpisodeNumber, e -> e, (e1, e2) -> e1));
 
-        Map<Integer, Series.Episode> updatedEpisodesMap = validUpdatedEpisodes.stream()
-                .collect(Collectors.toMap(Series.Episode::getEpisodeNumber, e -> e, (e1, e2) -> e2));
+        Map<Integer, Episode> updatedEpisodesMap = validUpdatedEpisodes.stream()
+                .collect(Collectors.toMap(Episode::getEpisodeNumber, e -> e, (e1, e2) -> e2));
 
         updatedEpisodesMap.forEach(existingEpisodesMap::put);
 
-        List<Series.Episode> mergedEpisodes = new ArrayList<>(existingEpisodesMap.values());
-        mergedEpisodes.sort(Comparator.comparing(Series.Episode::getEpisodeNumber));
+        List<Episode> mergedEpisodes = new ArrayList<>(existingEpisodesMap.values());
+        mergedEpisodes.sort(Comparator.comparing(Episode::getEpisodeNumber));
 
         existingEpisodes.clear();
         existingEpisodes.addAll(mergedEpisodes);

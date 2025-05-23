@@ -1,6 +1,5 @@
 package com.cinemate.series.DTOs;
 
-import com.cinemate.series.Series;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.Date;
@@ -17,14 +16,11 @@ public class SeriesRequestDTO {
     private int reviewCount;
     private Date releaseDate;
     private String posterUrl;
-    private List<Series.Season> seasons;
-    private List<String> actorIds;
-    private List<String> directorIds;
     private String country;
     private String trailerUrl;
 
     public SeriesRequestDTO(String id, String title, String description, String genre, double rating, int reviewCount, Date releaseDate, String posterUrl,
-                            List<Series.Season> seasons, List<String> actorIds, List<String> directorIds, String country, String trailerUrl) {
+                            String country, String trailerUrl) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -33,9 +29,6 @@ public class SeriesRequestDTO {
         this.reviewCount = reviewCount;
         this.releaseDate = releaseDate;
         this.posterUrl = posterUrl;
-        this.seasons = seasons;
-        this.actorIds = actorIds;
-        this.directorIds = directorIds;
         this.country = country;
         this.trailerUrl = trailerUrl;
     }
@@ -104,30 +97,6 @@ public class SeriesRequestDTO {
 
     public void setPosterUrl(String posterUrl) {
         this.posterUrl = posterUrl;
-    }
-
-    public List<Series.Season> getSeasons() {
-        return seasons;
-    }
-
-    public void setSeasons(List<Series.Season> seasons) {
-        this.seasons = seasons;
-    }
-
-    public List<String> getActorIds() {
-        return actorIds;
-    }
-
-    public void setActorIds(List<String> actorIds) {
-        this.actorIds = actorIds;
-    }
-
-    public List<String> getDirectorIds() {
-        return directorIds;
-    }
-
-    public void setDirectorIds(List<String> directorIds) {
-        this.directorIds = directorIds;
     }
 
     public String getCountry() {

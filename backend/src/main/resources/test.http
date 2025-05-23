@@ -178,7 +178,7 @@ Content-Type: application/json
 GET http://localhost:8080/api/users/6813a9c6a70428033d933986/watchlist/series
 
 ###
-DELETE http://localhost:8080/api/series/682cde1ea7c01c4281e159d5
+GET http://localhost:8080/api/series
 
 ###
 GET http://localhost:8080/api/series/682a284236f2d54c872d1bb9/seasons

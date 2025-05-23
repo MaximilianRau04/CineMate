@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -26,8 +27,8 @@ public class Series {
     private int reviewCount;
     private Date releaseDate;
     private String posterUrl;
-    @DBRef
-    private List<Season> seasons = new ArrayList<>();;
+    @Field("seasons")
+    private List<Season> seasons = new ArrayList<>();
     @DBRef(lazy = true)
     private List<Actor> actors;
     @DBRef(lazy = true)
@@ -50,7 +51,8 @@ public class Series {
         this.trailerUrl = trailerUrl;
     }
 
-    public Series() {}
+    public Series() {
+    }
 
     public Series(SeriesRequestDTO series) {
         this.id = series.getId();
@@ -61,7 +63,6 @@ public class Series {
         this.reviewCount = series.getReviewCount();
         this.releaseDate = series.getReleaseDate();
         this.posterUrl = series.getPosterUrl();
-        this.seasons = series.getSeasons();
         this.country = series.getCountry();
         this.trailerUrl = series.getTrailerUrl();
     }
@@ -170,111 +171,6 @@ public class Series {
         this.directors = directors;
     }
 
-    @Document(collection = "Season")
-    public static class Season {
-        @Id
-        private int seasonNumber;
-        private List<Episode> episodes;
-        private String trailerUrl;
-
-        public Season(int seasonNumber, List<Episode> episodes, String trailerUrl) {
-            this.seasonNumber = seasonNumber;
-            this.episodes = episodes;
-            this.trailerUrl = trailerUrl;
-        }
-
-        public int getSeasonNumber() {
-            return seasonNumber;
-        }
-
-        public void setSeasonNumber(int seasonNumber) {
-            this.seasonNumber = seasonNumber;
-        }
-
-        public List<Episode> getEpisodes() {
-            return episodes;
-        }
-
-        public void setEpisodes(List<Episode> episodes) {
-            this.episodes = episodes;
-        }
-
-        public String getTrailerUrl() {
-            return trailerUrl;
-        }
-
-        public void setTrailerUrl(String trailerUrl) {
-            this.trailerUrl = trailerUrl;
-        }
-    }
-
-    @Document(collection = "episode")
-    public static class Episode {
-        private String title;
-        @Id
-        private int episodeNumber;
-        private String duration;
-        private Date releaseDate;
-        private String description;
-        private String posterUrl;
-
-        public Episode(String title, int episodeNumber, String duration, Date releaseDate, String description, String posterUrl) {
-            this.title = title;
-            this.episodeNumber = episodeNumber;
-            this.duration = duration;
-            this.releaseDate = releaseDate;
-            this.description = description;
-            this.posterUrl = posterUrl;
-
-        }
-
-        public String getTitle() {
-            return title;
-        }
-
-        public void setTitle(String title) {
-            this.title = title;
-        }
-
-        public int getEpisodeNumber() {
-            return episodeNumber;
-        }
-
-        public void setEpisodeNumber(int episodeNumber) {
-            this.episodeNumber = episodeNumber;
-        }
-
-        public String getDuration() {
-            return duration;
-        }
-
-        public void setDuration(String duration) {
-            this.duration = duration;
-        }
-
-        public Date getReleaseDate() {
-            return releaseDate;
-        }
-
-        public void setReleaseDate(Date releaseDate) {
-            this.releaseDate = releaseDate;
-        }
-
-        public String getDescription() {
-            return description;
-        }
-
-        public void setDescription(String description) {
-            this.description = description;
-        }
-
-        public String getPosterUrl() {
-            return posterUrl;
-        }
-
-        public void setPosterUrl(String posterUrl) {
-            this.posterUrl = posterUrl;
-        }
-
-    }
 }
+
+
