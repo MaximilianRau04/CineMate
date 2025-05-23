@@ -135,11 +135,11 @@ Content-Type: application/json
   "posterUrl": "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/1Aiq3YJuV96IVIZleLe6SE4i9Oo.jpg"
 }
 ###
-GET http://localhost:8080/api/actors/682a285636f2d54c872d1bbe/movies
+GET http://localhost:8080/api/directors
 ###
 GET http://localhost:8080/api/series/682394becf80ad33eb7213dc/directors
 ###
-POST http://localhost:8080/api/movies/682a27bf36f2d54c872d1bb5/actors/682a285636f2d54c872d1bbe
+POST http://localhost:8080/api/movies/682a27bf36f2d54c872d1bb5/director/682a285836f2d54c872d1bbf
 Content-Type: application/json
 ###
 DELETE http://localhost:8080/api/series/682394becf80ad33eb7213dc/directors/68239425a5d9c87af9af5417
@@ -178,7 +178,7 @@ Content-Type: application/json
 GET http://localhost:8080/api/users/6813a9c6a70428033d933986/watchlist/series
 
 ###
-GET http://localhost:8080/api/series
+GET http://localhost:8080/api/actors
 
 ###
 GET http://localhost:8080/api/series/682a284236f2d54c872d1bb9/seasons

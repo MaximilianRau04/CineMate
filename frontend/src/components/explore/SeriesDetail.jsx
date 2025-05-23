@@ -16,6 +16,7 @@ const SeriesDetail = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [seasonsLoading, setSeasonsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null); 
   const [userId, setUserId] = useState(null);
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
@@ -32,6 +33,10 @@ const SeriesDetail = () => {
   const [editHover, setEditHover] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [averageRating, setAverageRating] = useState(0);
+  const [reviewUsers, setReviewUsers] = useState({}); 
+  const [actors, setActors] = useState([]);
+  const [directors, setDirectors] = useState(null);
+  const [castLoading, setCastLoading] = useState(true);
 
   /**
    * fetches the currently logged in user from the API
@@ -95,6 +100,50 @@ const SeriesDetail = () => {
       setSeasonsLoading(false);
     }
   };
+
+  /**
+   * fetches actors and director information for the series
+   * @returns {Promise<void>}
+   */
+  useEffect(() => {
+    if (!seriesId) return;
+
+    setCastLoading(true);
+
+    const fetchActors = fetch(`http://localhost:8080/api/series/${seriesId}/actors`)
+      .then((res) => {
+        if (!res.ok) {
+          if (res.status === 404) return [];
+          throw new Error(`Schauspieler konnten nicht geladen werden (${res.status})`);
+        }
+        return res.json();
+      })
+      .catch((err) => {
+        console.error("Fehler beim Laden der Schauspieler:", err);
+        return [];
+      });
+
+    const fetchDirector = fetch(`http://localhost:8080/api/series/${seriesId}/directors`)
+      .then((res) => {
+        if (!res.ok) {
+          if (res.status === 404) return null;
+          throw new Error(`Regisseur konnte nicht geladen werden (${res.status})`);
+        }
+        return res.json();
+      })
+      .catch((err) => {
+        console.error("Fehler beim Laden des Regisseurs:", err);
+        return null;
+      });
+
+    // Wait for both requests to complete
+    Promise.all([fetchActors, fetchDirector])
+      .then(([actorsData, directorData]) => {
+        setActors(actorsData || []);
+        setDirectors(directorData);
+        setCastLoading(false);
+      });
+  }, [seriesId]);
 
   /**
    * checks if the series is already in the user's watchlist
@@ -163,22 +212,48 @@ const SeriesDetail = () => {
       const response = await fetch(
         `http://localhost:8080/api/reviews/series/${seriesId}`
       );
-      if (!response.ok)
-        throw new Error("Bewertungen konnten nicht geladen werden");
+      if (!response.ok) {
+        if (response.status === 404) {
+          setReviews([]);
+          setAverageRating(0);
+          return;
+        }
+        throw new Error(`Bewertungen konnten nicht geladen werden (${response.status})`);
+      }
       const data = await response.json();
       setReviews(data);
+
+      const userPromises = data.map(async (review) => {
+        if (!reviewUsers[review.id]) {
+          const userData = await fetchReviewUser(review.id);
+          return { reviewId: review.id, userData };
+        }
+        return null;
+      });
+
+      const userResults = await Promise.all(userPromises);
+      const newReviewUsers = { ...reviewUsers };
+
+      userResults.forEach((result) => {
+        if (result && result.userData) {
+          newReviewUsers[result.reviewId] = result.userData;
+        }
+      });
+
+      setReviewUsers(newReviewUsers);
 
       const newAverageRating = calculateAverageRating(data);
       setAverageRating(newAverageRating);
 
       if (series) {
-        setSeries({
-          ...series,
+        setSeries(prevSeries => ({
+          ...prevSeries,
           rating: newAverageRating,
-        });
+        }));
       }
     } catch (error) {
       console.error("Fehler beim Laden der Bewertungen:", error);
+      setReviews([]);
     }
   };
 
@@ -226,6 +301,25 @@ const SeriesDetail = () => {
       });
   };
 
+  /**
+   * Fetches user data for a specific review
+   * @param {number} reviewId - The review ID
+   * @returns {Promise<Object|null>} User data or null if not found
+   */
+  const fetchReviewUser = async (reviewId) => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/reviews/${reviewId}/user`);
+      if (!response.ok) {
+        if (response.status === 404) return null;
+        throw new Error(`Fehler beim Laden der Benutzerdaten (${response.status})`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error(`Fehler beim Laden des Benutzers für Review ${reviewId}:`, error);
+      return null;
+    }
+  };
+
   const handleRating = (newRating) => {
     setRating(newRating);
   };
@@ -235,38 +329,47 @@ const SeriesDetail = () => {
    * @returns {Promise<void>}
    * @throws {Error} if the user is not logged in or the rating is 0
    */
-  const handleSubmitReview = () => {
+  const handleSubmitReview = async () => {
     if (!userId || rating === 0) return;
 
     setSubmitting(true);
-    fetch(`http://localhost:8080/api/reviews/series/${seriesId}/user/${userId}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        userId,
-        itemId: seriesId,
-        rating: rating,
-        comment: comment,
-        type: "series",
-      }),
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Fehler beim Speichern der Bewertung");
-        return res.json();
-      })
-      .then(() => {
-        setReviewed(true);
-        setSubmitting(false);
-        setSubmitSuccess(true);
+    setSubmitSuccess(false);
 
-        loadReviews();
-      })
-      .catch((err) => {
-        console.error(err);
-        setSubmitting(false);
+    try {
+      const response = await fetch(`http://localhost:8080/api/reviews/series/${seriesId}/user/${userId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId,
+          itemId: seriesId,
+          rating: rating,
+          comment: comment,
+          type: "movie",
+        }),
       });
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(`Fehler beim Speichern der Bewertung: ${errorData}`);
+      }
+
+      const data = await response.json();
+      setReviewed(true);
+      setSubmitSuccess(true);
+
+      if (data && data.id) {
+        setReviewId(data.id);
+      }
+
+      await loadReviews();
+    } catch (error) {
+      console.error("Fehler beim Speichern der Bewertung:", error);
+      alert(`Fehler: ${error.message}`);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   // Initialize edit values when opening the modal
@@ -362,6 +465,49 @@ const SeriesDetail = () => {
       }
     }
     return stars;
+  };
+
+  /**
+   * formats birthday timestamp to readable date
+   * @param {number} timestamp - Birthday timestamp
+   * @returns {string} - Formatted date or empty string
+   */
+  const formatBirthday = (timestamp) => {
+    if (!timestamp) return "";
+    try {
+      const date = new Date(timestamp);
+      return date.toLocaleDateString("de-DE", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+    } catch (error) {
+      return "";
+    }
+  };
+
+  /**
+   * Get username for a review based on cached user data
+   * @param {Object} review - Review object
+   * @returns {string} - Username to display
+   */
+  const getReviewUsername = (review) => {
+    const reviewUserId = review.userId || review.user_id || review.authorId || review.author_id;
+
+    if (currentUser && reviewUserId === currentUser.id) {
+      return currentUser.username || "Du";
+    }
+
+    const userData = reviewUsers[review.id];
+    if (userData && userData.username) {
+      return userData.username;
+    }
+
+    if (reviewUserId) {
+      return `Nutzer ${reviewUserId}`;
+    }
+
+    return "Unbekannter Nutzer";
   };
 
   if (isLoading) {
@@ -659,7 +805,147 @@ const SeriesDetail = () => {
         </div>
       )}
 
-      {/* Reviews-Sektion */}
+      {/* Cast and Crew Section */}
+      <div className="mb-4 text-white">
+        <h5>🎬 Besetzung & Crew</h5>
+
+        {castLoading ? (
+          <div className="text-center py-3">
+            <div className="spinner-border spinner-border-sm text-secondary" role="status" />
+            <span className="ms-2 text-muted">Besetzung wird geladen...</span>
+          </div>
+        ) : (
+          <>
+            {/* Director Section */}
+            {directors && directors.length > 0 && (
+              <div className="mb-3">
+                <h6 className="text-primary mb-2" style={{ fontSize: "1rem" }}>🎭 regisseure ({directors.length})</h6>
+                <div className="row">
+                  {directors.slice(0, 6).map((director) => (
+                    <div key={director.id} className="col-md-6 mb-2" style={{ width: "fit-content", minWidth: "25%" }}>
+                      <div className="card border-0 shadow-sm h-100">
+                        <div className="row g-0 h-100">
+                          <div className="col-3" style={{ minWidth: "60px", maxWidth: "60px" }}>
+                            <img
+                              src={director.image}
+                              alt={director.name}
+                              className="rounded-start"
+                              style={{
+                                height: "70px",
+                                width: "60px",
+                                objectFit: "cover",
+                                flexShrink: 0
+                              }}
+                              onError={(e) => {
+                                e.target.src = "https://via.placeholder.com/60x70?text=Kein+Bild";
+                              }}
+                            />
+                          </div>
+                          <div className="col-9">
+                            <div className="card-body py-2 px-2">
+                              <h6 className="card-title mb-1" style={{ fontSize: "0.85rem" }}>
+                                {director.name}
+                              </h6>
+                              {director.birthday && (
+                                <small className="text-muted d-block" style={{ fontSize: "0.7rem" }}>
+                                  {formatBirthday(director.birthday)}
+                                </small>
+                              )}
+                              {director.biography && (
+                                <p className="card-text mt-1 mb-0" style={{ fontSize: "0.7rem", lineHeight: "1.2" }}>
+                                  {director.biography.length > 60
+                                    ? `${director.biography.substring(0, 60)}...`
+                                    : director.biography}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {directors.length > 6 && (
+                  <div className="text-center">
+                    <small className="text-muted" style={{ fontSize: "0.8rem" }}>
+                      und {directors.length - 6} weitere Regisseure..
+                    </small>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Actors Section */}
+            {actors && actors.length > 0 && (
+              <div className="mb-3">
+                <h6 className="text-primary mb-2" style={{ fontSize: "1rem" }}>🎭 Schauspieler ({actors.length})</h6>
+                <div className="row">
+                  {actors.slice(0, 6).map((actor) => (
+                    <div key={actor.id} className="col-md-6 mb-2" style={{ width: "fit-content", minWidth: "25%" }}>
+                      <div className="card border-0 shadow-sm h-100">
+                        <div className="row g-0 h-100">
+                          <div className="col-3" style={{ minWidth: "60px", maxWidth: "60px" }}>
+                            <img
+                              src={actor.image}
+                              alt={actor.name}
+                              className="rounded-start"
+                              style={{
+                                height: "70px",
+                                width: "60px",
+                                objectFit: "cover",
+                                flexShrink: 0
+                              }}
+                              onError={(e) => {
+                                e.target.src = "https://via.placeholder.com/60x70?text=Kein+Bild";
+                              }}
+                            />
+                          </div>
+                          <div className="col-9">
+                            <div className="card-body py-2 px-2">
+                              <h6 className="card-title mb-1" style={{ fontSize: "0.85rem" }}>
+                                {actor.name}
+                              </h6>
+                              {actor.birthday && (
+                                <small className="text-muted d-block" style={{ fontSize: "0.7rem" }}>
+                                  {formatBirthday(actor.birthday)}
+                                </small>
+                              )}
+                              {actor.biography && (
+                                <p className="card-text mt-1 mb-0" style={{ fontSize: "0.7rem", lineHeight: "1.2" }}>
+                                  {actor.biography.length > 60
+                                    ? `${actor.biography.substring(0, 60)}...`
+                                    : actor.biography}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {actors.length > 6 && (
+                  <div className="text-center">
+                    <small className="text-muted" style={{ fontSize: "0.8rem" }}>
+                      und {actors.length - 6} weitere Schauspieler...
+                    </small>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {(!directors || directors.length === 0) && (!actors || actors.length === 0) && (
+              <div className="py-3">
+                <p className="text mb-0" style={{ fontSize: "0.9rem" }}>
+                  Keine Informationen über Besetzung und Crew verfügbar.
+                </p>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* Reviews Section */}
       {reviews && reviews.length > 0 && (
         <div className="card mt-4 shadow-sm">
           <div className="card-header bg-light">
@@ -670,7 +956,7 @@ const SeriesDetail = () => {
               <div key={review.id} className="border rounded p-3 mb-3">
                 <div className="d-flex justify-content-between align-items-center mb-2">
                   <strong>
-                    {review.user?.username || "Unbekannter Nutzer"}
+                    {getReviewUsername(review)}
                   </strong>
                   <span className="text-muted" style={{ fontSize: "0.9em" }}>
                     {review.date

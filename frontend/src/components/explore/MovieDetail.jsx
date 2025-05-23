@@ -15,7 +15,7 @@ const MovieDetail = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [userId, setUserId] = useState(null);
-  const [currentUser, setCurrentUser] = useState(null); // Store complete user object
+  const [currentUser, setCurrentUser] = useState(null); 
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
   const [rating, setRating] = useState(0);
@@ -31,7 +31,10 @@ const MovieDetail = () => {
   const [editHover, setEditHover] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [averageRating, setAverageRating] = useState(0);
-  const [reviewUsers, setReviewUsers] = useState({}); // Cache für Benutzerdaten
+  const [reviewUsers, setReviewUsers] = useState({}); 
+  const [actors, setActors] = useState([]);
+  const [director, setDirector] = useState(null);
+  const [castLoading, setCastLoading] = useState(true);
 
   /**
    * fetches the currently logged in user from the API
@@ -59,7 +62,7 @@ const MovieDetail = () => {
       .then((data) => {
         if (data?.id) {
           setUserId(data.id);
-          setCurrentUser(data); // Store complete user object
+          setCurrentUser(data); 
         }
       })
       .catch((err) => console.error("Fehler beim Laden des Users:", err));
@@ -99,6 +102,50 @@ const MovieDetail = () => {
   }, [movieId]);
 
   /**
+   * fetches actors and director information for the movie
+   * @returns {Promise<void>}
+   */
+  useEffect(() => {
+    if (!movieId) return;
+
+    setCastLoading(true);
+
+    const fetchActors = fetch(`http://localhost:8080/api/movies/${movieId}/actors`)
+      .then((res) => {
+        if (!res.ok) {
+          if (res.status === 404) return [];
+          throw new Error(`Schauspieler konnten nicht geladen werden (${res.status})`);
+        }
+        return res.json();
+      })
+      .catch((err) => {
+        console.error("Fehler beim Laden der Schauspieler:", err);
+        return [];
+      });
+
+    const fetchDirector = fetch(`http://localhost:8080/api/movies/${movieId}/director`)
+      .then((res) => {
+        if (!res.ok) {
+          if (res.status === 404) return null;
+          throw new Error(`Regisseur konnte nicht geladen werden (${res.status})`);
+        }
+        return res.json();
+      })
+      .catch((err) => {
+        console.error("Fehler beim Laden des Regisseurs:", err);
+        return null;
+      });
+
+    // Wait for both requests to complete
+    Promise.all([fetchActors, fetchDirector])
+      .then(([actorsData, directorData]) => {
+        setActors(actorsData || []);
+        setDirector(directorData);
+        setCastLoading(false);
+      });
+  }, [movieId]);
+
+  /**
    * checks if the movie is already in the user's watchlist
    * @returns {Promise<void>}
    * @throws {Error} if the watchlist could not be loaded
@@ -111,7 +158,7 @@ const MovieDetail = () => {
         if (!res.ok) {
           throw new Error(`HTTP-Error: ${res.status}`);
         }
-        return res.json(); 
+        return res.json();
       })
       .then((data) => {
         const alreadyInWatchlist = data.some(
@@ -157,7 +204,7 @@ const MovieDetail = () => {
   useEffect(() => {
     if (!movieId) return;
     loadReviews();
-  }, [movieId]); // Fixed: Added dependency array
+  }, [movieId]); 
 
   /**
    * Fetches user data for a specific review
@@ -248,7 +295,6 @@ const MovieDetail = () => {
       const data = await response.json();
       setReviews(data);
 
-      // Lade Benutzerdaten für alle Reviews
       const userPromises = data.map(async (review) => {
         if (!reviewUsers[review.id]) {
           const userData = await fetchReviewUser(review.id);
@@ -259,7 +305,7 @@ const MovieDetail = () => {
 
       const userResults = await Promise.all(userPromises);
       const newReviewUsers = { ...reviewUsers };
-      
+
       userResults.forEach((result) => {
         if (result && result.userData) {
           newReviewUsers[result.reviewId] = result.userData;
@@ -305,7 +351,7 @@ const MovieDetail = () => {
           itemId: movieId,
           rating: rating,
           comment: comment,
-          type: "movie", 
+          type: "movie",
         }),
       });
 
@@ -317,7 +363,7 @@ const MovieDetail = () => {
       const data = await response.json();
       setReviewed(true);
       setSubmitSuccess(true);
-      
+
       if (data && data.id) {
         setReviewId(data.id);
       }
@@ -325,7 +371,7 @@ const MovieDetail = () => {
       await loadReviews();
     } catch (error) {
       console.error("Fehler beim Speichern der Bewertung:", error);
-      alert(`Fehler: ${error.message}`); 
+      alert(`Fehler: ${error.message}`);
     } finally {
       setSubmitting(false);
     }
@@ -371,11 +417,11 @@ const MovieDetail = () => {
       setRating(editRating);
       setComment(editComment);
       setShowEditModal(false);
-      
+
       await loadReviews();
     } catch (error) {
       console.error("Fehler beim Bearbeiten der Bewertung:", error);
-      alert(`Fehler: ${error.message}`); 
+      alert(`Fehler: ${error.message}`);
     } finally {
       setSubmitting(false);
     }
@@ -410,7 +456,7 @@ const MovieDetail = () => {
       await loadReviews();
     } catch (error) {
       console.error("Fehler beim Löschen:", error);
-      alert(`Fehler: ${error.message}`); 
+      alert(`Fehler: ${error.message}`);
     }
   };
 
@@ -438,13 +484,32 @@ const MovieDetail = () => {
   };
 
   /**
+   * formats birthday timestamp to readable date
+   * @param {number} timestamp - Birthday timestamp
+   * @returns {string} - Formatted date or empty string
+   */
+  const formatBirthday = (timestamp) => {
+    if (!timestamp) return "";
+    try {
+      const date = new Date(timestamp);
+      return date.toLocaleDateString("de-DE", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+    } catch (error) {
+      return "";
+    }
+  };
+
+  /**
    * Get username for a review based on cached user data
    * @param {Object} review - Review object
    * @returns {string} - Username to display
    */
   const getReviewUsername = (review) => {
     const reviewUserId = review.userId || review.user_id || review.authorId || review.author_id;
-    
+
     if (currentUser && reviewUserId === currentUser.id) {
       return currentUser.username || "Du";
     }
@@ -457,7 +522,7 @@ const MovieDetail = () => {
     if (reviewUserId) {
       return `Nutzer ${reviewUserId}`;
     }
-    
+
     return "Unbekannter Nutzer";
   };
 
@@ -628,8 +693,8 @@ const MovieDetail = () => {
                   {submitting
                     ? "Wird gespeichert..."
                     : submitSuccess
-                    ? "Bewertung gespeichert!"
-                    : "Bewertung abgeben"}
+                      ? "Bewertung gespeichert!"
+                      : "Bewertung abgeben"}
                 </button>
               </div>
             )}
@@ -683,7 +748,132 @@ const MovieDetail = () => {
         </div>
       </div>
 
-      {/* Reviews-Sektion */}
+      {/* Cast and Crew Section */}
+      <div className="mb-4 text-white">
+        <h5>🎬 Besetzung & Crew</h5>
+
+        {castLoading ? (
+          <div className="text-center py-3">
+            <div className="spinner-border spinner-border-sm text-secondary" role="status" />
+            <span className="ms-2 text-muted">Besetzung wird geladen...</span>
+          </div>
+        ) : (
+          <>
+            {/* Director Section */}
+            {director && (
+              <div className="mb-3" style={{ width: "fit-content", minWidth: "50%" }}>
+                <h6 className="text-primary mb-2" style={{ fontSize: "1rem" }}>🎯 Regisseur</h6>
+                <div className="card border-0 shadow-sm">
+                  <div className="row g-0">
+                    <div className="col-md-2" style={{ minWidth: "80px", maxWidth: "80px" }}>
+                      <img
+                        src={director.image}
+                        alt={director.name}
+                        className="rounded-start"
+                        style={{
+                          height: "80px",
+                          width: "80px",
+                          objectFit: "cover",
+                          flexShrink: 0
+                        }}
+                        onError={(e) => {
+                          e.target.src = "https://via.placeholder.com/80x80?text=Kein+Bild";
+                        }}
+                      />
+                    </div>
+                    <div className="col-md-10">
+                      <div className="card-body py-2 px-3">
+                        <h6 className="card-title mb-1" style={{ fontSize: "0.9rem" }}>{director.name}</h6>
+                        {director.birthday && (
+                          <small className="text-muted">
+                            Geboren: {formatBirthday(director.birthday)}
+                          </small>
+                        )}
+                        {director.biography && (
+                          <p className="card-text mt-1 mb-0" style={{ fontSize: "0.8rem", lineHeight: "1.3" }}>
+                            {director.biography.length > 120
+                              ? `${director.biography.substring(0, 120)}...`
+                              : director.biography}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Actors Section */}
+            {actors && actors.length > 0 && (
+              <div className="mb-3">
+                <h6 className="text-primary mb-2" style={{ fontSize: "1rem" }}>🎭 Schauspieler ({actors.length})</h6>
+                <div className="row">
+                  {actors.slice(0, 6).map((actor) => (
+                    <div key={actor.id} className="col-md-6 mb-2" style={{ width: "fit-content", minWidth: "25%" }}>
+                      <div className="card border-0 shadow-sm h-100">
+                        <div className="row g-0 h-100">
+                          <div className="col-3" style={{ minWidth: "60px", maxWidth: "60px" }}>
+                            <img
+                              src={actor.image}
+                              alt={actor.name}
+                              className="rounded-start"
+                              style={{
+                                height: "70px",
+                                width: "60px",
+                                objectFit: "cover",
+                                flexShrink: 0
+                              }}
+                              onError={(e) => {
+                                e.target.src = "https://via.placeholder.com/60x70?text=Kein+Bild";
+                              }}
+                            />
+                          </div>
+                          <div className="col-9">
+                            <div className="card-body py-2 px-2">
+                              <h6 className="card-title mb-1" style={{ fontSize: "0.85rem" }}>
+                                {actor.name}
+                              </h6>
+                              {actor.birthday && (
+                                <small className="text-muted d-block" style={{ fontSize: "0.7rem" }}>
+                                  {formatBirthday(actor.birthday)}
+                                </small>
+                              )}
+                              {actor.biography && (
+                                <p className="card-text mt-1 mb-0" style={{ fontSize: "0.7rem", lineHeight: "1.2" }}>
+                                  {actor.biography.length > 60
+                                    ? `${actor.biography.substring(0, 60)}...`
+                                    : actor.biography}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {actors.length > 6 && (
+                  <div className="text-center">
+                    <small className="text-muted" style={{ fontSize: "0.8rem" }}>
+                      und {actors.length - 6} weitere Schauspieler...
+                    </small>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {!director && (!actors || actors.length === 0) && (
+              <div className="text-center py-3">
+                <p className="text-muted mb-0" style={{ fontSize: "0.9rem" }}>
+                  Keine Informationen über Besetzung und Crew verfügbar.
+                </p>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* Reviews Section */}
       {reviews && reviews.length > 0 && (
         <div className="card mt-4 shadow-sm">
           <div className="card-header bg-light">
@@ -699,17 +889,17 @@ const MovieDetail = () => {
                   <span className="text-muted" style={{ fontSize: "0.9em" }}>
                     {review.date
                       ? new Date(review.date).toLocaleDateString("de-DE", {
-                          day: "2-digit",
-                          month: "2-digit",
-                          year: "numeric",
-                        })
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                      })
                       : review.createdAt
-                      ? new Date(review.createdAt).toLocaleDateString("de-DE", {
+                        ? new Date(review.createdAt).toLocaleDateString("de-DE", {
                           day: "2-digit",
                           month: "2-digit",
                           year: "numeric",
                         })
-                      : "Unbekanntes Datum"}
+                        : "Unbekanntes Datum"}
                   </span>
                 </div>
                 <div className="mb-2">
