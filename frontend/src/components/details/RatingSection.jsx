@@ -75,7 +75,7 @@ const RatingSection = ({
       </div>
 
       <button
-        className="btn btn-primary"
+        className="btn btn-primary mb-3"
         onClick={onSubmitReview}
         disabled={submitting || rating === 0 || submitSuccess}
       >

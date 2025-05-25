@@ -11,22 +11,40 @@ export const useReviews = (userId, mediaId, mediaType = 'movies') => {
   const [submitting, setSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
+  /**
+   * Calculates the average rating from an array of reviews.
+   * @param {*} reviews 
+   */
   const calculateAverageRating = (reviews) => {
     if (!reviews || reviews.length === 0) return 0;
     const sum = reviews.reduce((acc, review) => acc + review.rating, 0);
     return sum / reviews.length;
   };
 
+  /**
+   * fetches user data for a specific review.
+   * @param {*} reviewId 
+   */
   const fetchReviewUser = async (reviewId) => {
     try {
       const response = await fetch(`http://localhost:8080/api/reviews/${reviewId}/user`);
-      return response.ok ? await response.json() : null;
+      
+      if (!response.ok) {
+        console.error(`API Fehler für Review ${reviewId}: ${response.status}`);
+        return null;
+      }
+      
+      const userData = await response.json();
+      return userData;
     } catch (error) {
       console.error(`Fehler beim Laden des Benutzers für Review ${reviewId}:`, error);
       return null;
     }
   };
 
+  /**
+   * loads reviews for the specified media type and ID.
+   */
   const loadReviews = async () => {
     try {
       const response = await fetch(`http://localhost:8080/api/reviews/${mediaType.slice(0, -1)}/${mediaId}`);
@@ -42,24 +60,19 @@ export const useReviews = (userId, mediaId, mediaType = 'movies') => {
       const data = await response.json();
       setReviews(data);
 
-      const userPromises = data.map(async (review) => {
-        if (!reviewUsers[review.id]) {
-          const userData = await fetchReviewUser(review.id);
-          return { reviewId: review.id, userData };
-        }
-        return null;
-      });
-
-      const userResults = await Promise.all(userPromises);
       const newReviewUsers = { ...reviewUsers };
-
-      userResults.forEach((result) => {
-        if (result && result.userData) {
-          newReviewUsers[result.reviewId] = result.userData;
+      
+      for (const review of data) {
+        if (!newReviewUsers[review.id]) {
+          const userData = await fetchReviewUser(review.id);
+          if (userData) {
+            newReviewUsers[review.id] = userData;
+          }
         }
-      });
+      }
 
       setReviewUsers(newReviewUsers);
+      
       const newAverageRating = calculateAverageRating(data);
       setAverageRating(newAverageRating);
     } catch (error) {
@@ -68,7 +81,9 @@ export const useReviews = (userId, mediaId, mediaType = 'movies') => {
     }
   };
 
-  // Check if user has already reviewed
+  /**
+   * Checks if the user has already reviewed the media.
+   */
   useEffect(() => {
     if (!userId || !mediaId) return;
 
@@ -91,12 +106,15 @@ export const useReviews = (userId, mediaId, mediaType = 'movies') => {
       .catch((err) => console.error("Fehler beim Prüfen der Bewertung:", err));
   }, [userId, mediaId, mediaType]);
 
-  // Load reviews
+  // Load reviews when mediaId or mediaType changes
   useEffect(() => {
     if (!mediaId) return;
     loadReviews();
-  }, [mediaId]);
+  }, [mediaId, mediaType]); 
 
+  /**
+   * adds a review for the media.
+   */
   const handleSubmitReview = async () => {
     if (!userId || rating === 0) return;
 
@@ -132,12 +150,14 @@ export const useReviews = (userId, mediaId, mediaType = 'movies') => {
       await loadReviews();
     } catch (error) {
       console.error("Fehler beim Speichern der Bewertung:", error);
-      alert(`Fehler: ${error.message}`);
     } finally {
       setSubmitting(false);
     }
   };
 
+  /**
+   * updates a review for the media.
+   */
   const handleEditReview = async (editRating, editComment) => {
     if (!userId || !reviewId || editRating === 0) return;
 
@@ -166,12 +186,14 @@ export const useReviews = (userId, mediaId, mediaType = 'movies') => {
       await loadReviews();
     } catch (error) {
       console.error("Fehler beim Bearbeiten der Bewertung:", error);
-      alert(`Fehler: ${error.message}`);
     } finally {
       setSubmitting(false);
     }
   };
 
+  /**
+   * deletes a review for the media.
+   */
   const handleDeleteReview = async () => {
     const confirmDelete = window.confirm("Möchtest du deine Bewertung wirklich löschen?");
     if (!confirmDelete) return;
@@ -193,7 +215,6 @@ export const useReviews = (userId, mediaId, mediaType = 'movies') => {
       await loadReviews();
     } catch (error) {
       console.error("Fehler beim Löschen:", error);
-      alert(`Fehler: ${error.message}`);
     }
   };
 

@@ -1,18 +1,17 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { FaArrowLeft } from "react-icons/fa";
 import { useMediaDetail, renderStars } from "./useMediaDetail";
 import { useWatchlist } from "./useWatchlist";
 import { useReviews } from "./useReviews";
 import MediaHeader from "./MediaHeader";
 import RatingSection from "./RatingSection";
 import ExistingRatingSection from "./ExistingRatingSection";
-//import CastSection from "./CastSection";
-//import ReviewsSection from "./ReviewsSection";
-//import EditReviewModal from "./EditReviewModal";
+import CastSection from "./CastSection";
+import ReviewsSection from "./ReviewSection";
+import EditReviewModal from "./EditReviewModal";
+import SeasonSection from "./SeasonSection";
 
-const MovieDetail = () => {
-  const { mediaId, media, isLoading, error, userId, currentUser, actors, director, castLoading } = 
+const SeriesDetail = () => {
+  const { mediaId, media, isLoading, userId, currentUser, actors, director, castLoading } = 
     useMediaDetail('series');
   
   const { added, adding, handleAddToWatchlist } = useWatchlist(userId, mediaId, 'series');
@@ -42,22 +41,7 @@ const MovieDetail = () => {
     return (
       <div className="container text-center py-5">
         <div className="spinner-border text-primary" role="status" />
-        <p className="mt-3">Film wird geladen...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="container py-5">
-        <div className="alert alert-danger shadow-sm" role="alert">
-          <h4 className="alert-heading">Fehler</h4>
-          <p>{error}</p>
-          <Link to="/explore" className="btn btn-outline-secondary mt-3">
-            <FaArrowLeft className="me-2" />
-            Zurück zur Übersicht
-          </Link>
-        </div>
+        <p className="mt-3">Serie wird geladen...</p>
       </div>
     );
   }
@@ -101,15 +85,10 @@ const MovieDetail = () => {
           onEdit={handleOpenEditModal}
           onDelete={handleDeleteReview}
         />
-
-        <div className="mt-4">
-          <Link to="/explore" className="btn btn-outline-primary">
-            <FaArrowLeft className="me-2" />
-            Zurück zur Übersicht
-          </Link>
-        </div>
       </div>
-      {/* Uncomment these sections when the components are implemented 
+
+      <SeasonSection seriesId={mediaId} />
+
       <CastSection
         actors={actors}
         director={director}
@@ -132,9 +111,8 @@ const MovieDetail = () => {
         onSave={handleEditReview}
         renderStars={renderStars}
       />
-      */}
     </div>
   );
 };
 
-export default MovieDetail;
+export default SeriesDetail;

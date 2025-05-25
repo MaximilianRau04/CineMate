@@ -1,22 +1,21 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { FaArrowLeft } from "react-icons/fa";
-import { useMediaDetail, renderStars} from "./useMediaDetail";
+import { useMediaDetail, renderStars } from "./useMediaDetail";
 import { useWatchlist } from "./useWatchlist";
 import { useReviews } from "./useReviews";
 import MediaHeader from "./MediaHeader";
 import RatingSection from "./RatingSection";
 import ExistingRatingSection from "./ExistingRatingSection";
-//import CastSection from "./CastSection";
-//import ReviewSection from "./ReviewsSection";
-//import EditReviewModal from "./EditReviewModal";
+import CastSection from "./CastSection";
+import ReviewSection from "./ReviewSection";
+import EditReviewModal from "./EditReviewModal";
 
 const MovieDetail = () => {
-  const { mediaId, media, isLoading, error, userId, currentUser, actors, director, castLoading } = 
+  const { mediaId, media, isLoading, error, userId, currentUser, actors, director, castLoading } =
     useMediaDetail('movies');
-  
+
   const { added, adding, handleAddToWatchlist } = useWatchlist(userId, mediaId, 'movies');
-  
+
+  // This hook manages reviews, ratings, and user interactions
   const {
     reviews,
     averageRating,
@@ -36,6 +35,11 @@ const MovieDetail = () => {
   const [showEditModal, setShowEditModal] = useState(false);
 
   const handleOpenEditModal = () => setShowEditModal(true);
+
+  const handleEditReviewWithClose = async (rating, comment) => {
+    await handleEditReview(rating, comment);
+    setShowEditModal(false);
+  };
 
   if (isLoading) {
     return (
@@ -87,7 +91,7 @@ const MovieDetail = () => {
         />
 
       </div>
-      {/* Uncomment these sections when the components are implemented 
+
       <CastSection
         actors={actors}
         director={director}
@@ -102,15 +106,14 @@ const MovieDetail = () => {
       />
 
       <EditReviewModal
-        show={showEditModal}
+        showEditModal={showEditModal}  
         rating={rating}
         comment={comment}
         submitting={submitting}
         onClose={() => setShowEditModal(false)}
-        onSave={handleEditReview}
+        onEditReview={handleEditReviewWithClose}  
         renderStars={renderStars}
       />
-      */}
     </div>
   );
 };
