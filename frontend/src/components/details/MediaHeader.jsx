@@ -1,16 +1,35 @@
-import React from 'react';
-import { FaPlus, FaCheck, FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
+import { FaPlus, FaCheck, FaArrowLeft } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
-const MediaHeader = ({ 
-  media, 
-  averageRating, 
+const MediaHeader = ({
+  media,
+  averageRating,
   reviewCount,
   userId,
   added,
+  error,
   adding,
   onAddToWatchlist,
   renderStars
 }) => {
+
+  if (!media) return null;
+
+  if (error) {
+    return (
+      <div className="container py-5">
+        <div className="alert alert-danger shadow-sm" role="alert">
+          <h4 className="alert-heading">Fehler</h4>
+          <p>{error}</p>
+          <Link to="/explore" className="btn btn-outline-secondary mt-3">
+            <FaArrowLeft className="me-2" />
+            Zurück zur Übersicht
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="row g-0">
       <div className="col-md-4 text-center bg-dark text-white p-4">
@@ -27,8 +46,14 @@ const MediaHeader = ({
       </div>
 
       <div className="col-md-8 p-4">
-        <h2 className="mb-3">{media.title}</h2>
+        <div className="mt-4 justify-content-end d-flex">
+          <Link to="/explore" className="btn btn-outline-primary">
+            <FaArrowLeft className="me-2" />
+            Zurück zur Übersicht
+          </Link>
+        </div>
 
+        <h2 className="mb-3">{media.title}</h2>
         <div className="mb-3">
           {media.genre && (
             <span className="badge bg-primary me-2">{media.genre}</span>

@@ -61,13 +61,13 @@ const RatingSection = ({
         ))}
       </div>
 
-      <div className="mb-3">
+      <div className="mb-3" style={{ maxWidth: "500px" }}>
         <label htmlFor="comment" className="form-label text-white">
           Kommentar (optional):
         </label>
         <textarea
           id="comment"
-          className="form-control"
+          className="form-control border border-primary"
           rows="3"
           value={comment}
           onChange={(e) => onCommentChange(e.target.value)}

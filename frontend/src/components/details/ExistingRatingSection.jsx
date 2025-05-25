@@ -1,5 +1,3 @@
-import React from 'react';
-
 const ExistingRatingSection = ({
   reviewed,
   rating,
@@ -8,10 +6,11 @@ const ExistingRatingSection = ({
   onEdit,
   onDelete
 }) => {
+  
   if (!reviewed) return null;
 
   return (
-    <div className="alert alert-info mt-4">
+    <div className="alert alert-info mt-4" style={{ maxWidth: '33%' }}>
       <h5>⭐ Deine bisherige Bewertung</h5>
       <p>
         Bewertung: {renderStars(rating)} ({rating}/5)

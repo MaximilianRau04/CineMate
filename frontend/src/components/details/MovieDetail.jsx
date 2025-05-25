@@ -1,16 +1,15 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
-import { useMediaDetail } from "./useMediaDetail";
+import { useMediaDetail, renderStars} from "./useMediaDetail";
 import { useWatchlist } from "./useWatchlist";
 import { useReviews } from "./useReviews";
 import MediaHeader from "./MediaHeader";
 import RatingSection from "./RatingSection";
 import ExistingRatingSection from "./ExistingRatingSection";
 //import CastSection from "./CastSection";
-//import ReviewsSection from "./ReviewsSection";
+//import ReviewSection from "./ReviewsSection";
 //import EditReviewModal from "./EditReviewModal";
-import { renderStars } from "./startUtils";
 
 const MovieDetail = () => {
   const { mediaId, media, isLoading, error, userId, currentUser, actors, director, castLoading } = 
@@ -43,21 +42,6 @@ const MovieDetail = () => {
       <div className="container text-center py-5">
         <div className="spinner-border text-primary" role="status" />
         <p className="mt-3">Film wird geladen...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="container py-5">
-        <div className="alert alert-danger shadow-sm" role="alert">
-          <h4 className="alert-heading">Fehler</h4>
-          <p>{error}</p>
-          <Link to="/explore" className="btn btn-outline-secondary mt-3">
-            <FaArrowLeft className="me-2" />
-            Zurück zur Übersicht
-          </Link>
-        </div>
       </div>
     );
   }
@@ -102,12 +86,6 @@ const MovieDetail = () => {
           onDelete={handleDeleteReview}
         />
 
-        <div className="mt-4">
-          <Link to="/explore" className="btn btn-outline-primary">
-            <FaArrowLeft className="me-2" />
-            Zurück zur Übersicht
-          </Link>
-        </div>
       </div>
       {/* Uncomment these sections when the components are implemented 
       <CastSection
@@ -116,7 +94,7 @@ const MovieDetail = () => {
         castLoading={castLoading}
       />
 
-      <ReviewsSection
+      <ReviewSection
         reviews={reviews}
         reviewUsers={reviewUsers}
         currentUser={currentUser}

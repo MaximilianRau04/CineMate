@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
 
 export const useMediaDetail = (mediaType = 'movies') => {
   const { id: mediaId } = useParams();
@@ -12,7 +13,9 @@ export const useMediaDetail = (mediaType = 'movies') => {
   const [director, setDirector] = useState(null);
   const [castLoading, setCastLoading] = useState(true);
 
-  // Load current user
+  /**
+   * Fetches the current user from localStorage and sets userId and currentUser state.
+   */
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) return;
@@ -30,7 +33,9 @@ export const useMediaDetail = (mediaType = 'movies') => {
       .catch((err) => console.error("Fehler beim Laden des Users:", err));
   }, []);
 
-  // Load media details
+  /**
+   * Fetches media details based on mediaId and mediaType.
+   */
   useEffect(() => {
     if (!mediaId) return;
 
@@ -59,7 +64,9 @@ export const useMediaDetail = (mediaType = 'movies') => {
       });
   }, [mediaId, mediaType]);
 
-  // Load cast and crew
+  /**
+   * Fetches actors and director for the media based on mediaId and mediaType.
+   */
   useEffect(() => {
     if (!mediaId) return;
 
@@ -93,4 +100,46 @@ export const useMediaDetail = (mediaType = 'movies') => {
     director,
     castLoading
   };
+};
+
+/**
+ * renders stars based on the rating value
+ * @param {*} rating 
+ * @returns stars
+ */
+export const renderStars = (rating) => {
+  const stars = [];
+  const fullStars = Math.floor(rating);
+  const hasHalfStar = rating - fullStars >= 0.5;
+
+  for (let i = 0; i < 5; i++) {
+    if (i < fullStars) {
+      stars.push(<FaStar key={i} color="#ffc107" />);
+    } else if (i === fullStars && hasHalfStar) {
+      stars.push(<FaStarHalfAlt key={i} color="#ffc107" />);
+    } else {
+      stars.push(<FaRegStar key={i} color="#e4e5e9" />);
+    }
+  }
+
+  return stars;
+};
+
+/**
+ * formats a timestamp to a date string in the format dd.mm.yyyy
+ * @param {*} timestamp 
+ * @returns date formatted as dd.mm.yyyy or ""
+ */
+export const formatBirthday = (timestamp) => {
+  if (!timestamp) return "";
+  try {
+    const date = new Date(timestamp);
+    return date.toLocaleDateString("de-DE", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  } catch (error) {
+    return "";
+  }
 };

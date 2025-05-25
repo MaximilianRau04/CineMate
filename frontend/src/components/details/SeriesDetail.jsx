@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
-import { useMediaDetail } from "./useMediaDetail";
+import { useMediaDetail, renderStars } from "./useMediaDetail";
 import { useWatchlist } from "./useWatchlist";
 import { useReviews } from "./useReviews";
 import MediaHeader from "./MediaHeader";
@@ -10,14 +10,14 @@ import ExistingRatingSection from "./ExistingRatingSection";
 //import CastSection from "./CastSection";
 //import ReviewsSection from "./ReviewsSection";
 //import EditReviewModal from "./EditReviewModal";
-import { renderStars } from "./startUtils";
 
 const MovieDetail = () => {
   const { mediaId, media, isLoading, error, userId, currentUser, actors, director, castLoading } = 
     useMediaDetail('series');
   
   const { added, adding, handleAddToWatchlist } = useWatchlist(userId, mediaId, 'series');
-  
+
+  // This hook manages reviews, ratings, and user interactions
   const {
     reviews,
     averageRating,
