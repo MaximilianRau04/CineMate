@@ -1,13 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../../assets/login.css";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
-/**
- * LoginForm component for user authentication
- * @returns {JSX.Element}
- */
 const LoginForm = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [username, setUsername] = useState("");
@@ -16,11 +12,60 @@ const LoginForm = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [role, setRole] = useState("USER");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const [passwordError, setPasswordError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
+  const [emailError, setEmailError] = useState("");
+
+  useEffect(() => {
+    if (!isLogin && password.length > 0) {
+      if (password.length < 6) {
+        setPasswordError("Passwort muss mindestens 6 Zeichen lang sein.");
+      } else {
+        setPasswordError("");
+      }
+    } else {
+      setPasswordError("");
+    }
+  }, [password, isLogin]);
 
   /**
-   * function to handle user login
-   * @param {*} e
+   * real-time validation for confirm password input
    */
+  useEffect(() => {
+    if (!isLogin && confirmPassword.length > 0) {
+      if (password !== confirmPassword) {
+        setConfirmPasswordError("Passwörter stimmen nicht überein.");
+      } else {
+        setConfirmPasswordError("");
+      }
+    } else {
+      setConfirmPasswordError("");
+    }
+  }, [password, confirmPassword, isLogin]);
+
+  /**
+   * real-time validation for email input
+   */
+  useEffect(() => {
+    if (!isLogin && email.length > 0) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        setEmailError("Bitte geben Sie eine gültige E-Mail-Adresse ein.");
+      } else {
+        setEmailError("");
+      }
+    } else {
+      setEmailError("");
+    }
+  }, [email, isLogin]);
+
+  /**
+ * function to handle user login
+ * @param {*} e
+ */
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
@@ -32,13 +77,25 @@ const LoginForm = () => {
         {
           username,
           password,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
       );
 
       localStorage.setItem("token", response.data.token || response.data);
+
+      if (response.data.user) {
+        localStorage.setItem("user", JSON.stringify(response.data.user));
+        localStorage.setItem("userRole", response.data.user.role);
+      }
+
       setSuccess("Login erfolgreich! Weiterleitung...");
       setTimeout(() => (window.location.href = "/explore"), 1500);
     } catch (err) {
+      console.error("Login error:", err.response?.data || err.message);
       setError("Ungültige Anmeldedaten.");
     }
   };
@@ -57,16 +114,46 @@ const LoginForm = () => {
       return;
     }
 
+    if (password !== confirmPassword) {
+      setError("Passwörter stimmen nicht überein.");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError("Bitte geben Sie eine gültige E-Mail-Adresse ein.");
+      return;
+    }
+
     try {
-      await axios.post("http://localhost:8080/api/auth/register", {
-        username,
-        email,
-        password,
-      });
+      const response = await axios.post(
+        "http://localhost:8080/api/auth/register",
+        {
+          username,
+          email,
+          password,
+          role,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
       setSuccess("Registrierung erfolgreich!");
       setTimeout(() => setIsLogin(true), 2000);
     } catch (err) {
-      setError("Registrierung fehlgeschlagen.");
+      console.error("Registration error:", err.response?.data || err.message);
+
+      if (err.response?.status === 400) {
+        const errorMessage = err.response.data?.message || err.response.data?.error || "Ungültige Eingabedaten.";
+        setError(errorMessage);
+      } else if (err.response?.status === 409) {
+        setError("Benutzername oder E-Mail bereits vergeben.");
+      } else {
+        setError("Registrierung fehlgeschlagen. Bitte versuchen Sie es später erneut.");
+      }
     }
   };
 
@@ -77,6 +164,34 @@ const LoginForm = () => {
     setIsLogin(!isLogin);
     setError("");
     setSuccess("");
+    setPasswordError("");
+    setConfirmPasswordError("");
+    setEmailError("");
+    setUsername("");
+    setPassword("");
+    setConfirmPassword("");
+    setEmail("");
+  };
+
+  /**
+   * checks if the form is valid before submission
+   * @returns {boolean}
+   */
+  const isFormValid = () => {
+    if (isLogin) {
+      return username.length > 0 && password.length > 0;
+    } else {
+      return (
+        username.length > 0 &&
+        email.length > 0 &&
+        password.length >= 6 &&
+        confirmPassword.length > 0 &&
+        password === confirmPassword &&
+        !emailError &&
+        !passwordError &&
+        !confirmPasswordError
+      );
+    }
   };
 
   return (
@@ -127,6 +242,11 @@ const LoginForm = () => {
                 required
                 placeholder="E-Mail"
               />
+              {emailError && (
+                <div className="invalid-feedback d-block">
+                  {emailError}
+                </div>
+              )}
             </div>
           )}
 
@@ -135,32 +255,100 @@ const LoginForm = () => {
             <label htmlFor="password" className="form-label">
               Passwort
             </label>
-            <input
-              type={showPassword ? "text" : "password"}
-              className="form-control pe-5" 
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              placeholder="Passwort"
-            />
-            <span
-              onClick={() => setShowPassword(!showPassword)}
-              style={{
-                position: "absolute",
-                top: "70%",
-                right: "10px",
-                transform: "translateY(-50%)",
-                cursor: "pointer",
-                color: "#6c757d", 
-              }}
-            >
-              {showPassword ? <FaEyeSlash /> : <FaEye />}
-            </span>
+            <div className="position-relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                className="form-control"
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                placeholder="Passwort"
+              />
+              <span
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  right: "10px",
+                  transform: "translateY(-50%)",
+                  cursor: "pointer",
+                  color: "#6c757d",
+                }}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </span>
+            </div>
+            {!isLogin && passwordError && (
+              <div className="invalid-feedback d-block">
+                {passwordError}
+              </div>
+            )}
           </div>
 
+          {/* confirm password if registration form */}
+          {!isLogin && (
+            <div className="mb-3">
+              <label htmlFor="confirmPassword" className="form-label">
+                Passwort wiederholen
+              </label>
+              <div className="position-relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  className="form-control"
+                  id="confirmPassword"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  placeholder="Passwort wiederholen"
+                />
+                <span
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{
+                    position: "absolute",
+                    top: "50%",
+                    right: "10px",
+                    transform: "translateY(-50%)",
+                    cursor: "pointer",
+                    color: "#6c757d",
+                  }}
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </span>
+              </div>
+              {confirmPasswordError && (
+                <div className="invalid-feedback d-block">
+                  {confirmPasswordError}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* role selection if registration form */}
+          {!isLogin && (
+            <div className="mb-3">
+              <label htmlFor="role" className="form-label">
+                Rolle
+              </label>
+              <select
+                id="role"
+                className="form-control"
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                required
+              >
+                <option value="USER">User</option>
+                <option value="ADMIN">Admin</option>
+              </select>
+            </div>
+          )}
+
           {/* submit button */}
-          <button type="submit" className="btn btn-danger w-100">
+          <button
+            type="submit"
+            className="btn btn-danger w-100"
+            disabled={!isFormValid()}
+          >
             {isLogin ? "Einloggen" : "Registrieren"}
           </button>
         </form>

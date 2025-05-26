@@ -11,9 +11,10 @@ POST http://localhost:8080/api/auth/register
 Content-Type: application/json
 
 {
-"username": "maxi",
-"password": "123456",
-"email": "maxi@gmail.com"
+  "username": "max",
+  "password": "123456",
+  "email": "max@gmail.com",
+  "role": "ADMIN"
 }
 ###
 PUT http://localhost:8080/api/users/6813a9c6a70428033d933986
@@ -29,10 +30,10 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYXhpIiwiZXhwIjoxNzQ3OTgwM
 ###
 GET http://localhost:8080/api/reviews/682f8047f2bfcb4c90da6749/user
 ###
-GET http://localhost:8080/api/movies
+GET http://localhost:8080/api/users
 ###
 
-DELETE http://localhost:8080/api/users/6813a8eaf4f96f556a24061b
+DELETE http://localhost:8080/api/users/6834c350683ec83f228b6b3c
 
 ###
 POST http://localhost:8080/api/movies
@@ -220,6 +221,44 @@ Content-Type: application/json
       ],
        "trailerUrl": "https://www.youtube.com/watch?v=h-2LIjOt0r"
  }
+###
+DELETE http://localhost:8080/api/series/682a284236f2d54c872d1bb9/seasons/1
+
+###
+POST http://localhost:8080/api/series/682a284236f2d54c872d1bb9/seasons
+Content-Type: application/json
+
+{
+  "seasonNumber": 1,
+  "episodes": [
+    {
+      "episodeNumber": 1,
+      "title": "Chapter One: The Vanishing of Will Byers",
+      "duration": "47m",
+      "releaseDate": "2016-07-15T00:00:00.000+00:00",
+      "description": "Will Byers verschwindet spurlos. Seine Freunde suchen ihn und stoßen dabei auf ein mysteriöses Mädchen.",
+      "posterUrl": "https://image.tmdb.org/t/p/original/AdwF2jXvhdODr6gUZ61bHKRkz09.jpg"
+    },
+    {
+      "episodeNumber": 2,
+      "title": "Chapter Two: The Weirdo on Maple Street",
+      "duration": "55m",
+      "releaseDate": "2016-07-15T00:00:00.000+00:00",
+      "description": "Die Jungen verstecken das Mädchen, das offenbar übernatürliche Kräfte besitzt.",
+      "posterUrl": "https://image.tmdb.org/t/p/original/8iA56ugQyHZmX81wSsNqwXjCE6F.jpg"
+    },
+    {
+      "episodeNumber": 3,
+      "title": "Chapter Three: Holly, Jolly",
+      "duration": "51m",
+      "releaseDate": "2016-07-15T00:00:00.000+00:00",
+      "description": "Joyce glaubt, dass Will ihr über Lichter Signale sendet. Nancy sucht ihre verschwundene Freundin Barb.",
+      "posterUrl": "https://image.tmdb.org/t/p/original/5snULpWQWp7aqFto7UbRcEkEyyS.jpg"
+    }
+  ],
+  "trailerUrl": "https://www.youtube.com/watch?v=b9EkMc79ZSU"
+}
+
 
 ###
 POST http://localhost:8080/api/series

@@ -47,6 +47,7 @@ public class AuthController {
         User user = new User(userDTO);
         user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         user.setJoinedAt(new Date());
+        user.setRole(userDTO.getRole());
 
         User savedUser = userRepository.save(user);
         UserResponseDTO responseDTO = new UserResponseDTO(savedUser);

@@ -35,13 +35,14 @@ public class User {
     private List<Movie> movieWatchlist = new ArrayList<>();
     @DBRef(lazy = true)
     private List<Series> seriesWatchlist = new ArrayList<>();
+    private Role role;
     // private List<Movie> favorites;
     // private List<Movie> watched;
     // private List<User> followers
     // private List<User> following;
 
 
-    public User(String id, String username, String password, String email, String bio, String avatarUrl, Date joinedAt, List<Movie> movieWatchlist, List<Series> seriesWatchlist) {
+    public User(String id, String username, String password, String email, String bio, String avatarUrl, Date joinedAt, List<Movie> movieWatchlist, List<Series> seriesWatchlist, Role role) {
         this.id = id;
         this.username = username;
         this.password = password;
@@ -51,6 +52,7 @@ public class User {
         this.joinedAt = joinedAt;
         this.movieWatchlist = movieWatchlist;
         this.seriesWatchlist = seriesWatchlist;
+        this.role = role;
     }
 
     public User(UserRequestDTO user) {
@@ -61,6 +63,7 @@ public class User {
         this.bio = user.getBio();
         this.avatarUrl = user.getAvatarUrl();
         this.joinedAt = user.getJoinedAt();
+        this.role = user.getRole();
     }
 
     public User() {}
@@ -135,6 +138,14 @@ public class User {
 
     public void setJoinedAt(Date joinedAt) {
         this.joinedAt = joinedAt;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
     }
 
     public void addMovieToWatchlist(Movie movie) {

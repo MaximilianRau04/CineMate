@@ -1,5 +1,6 @@
 package com.cinemate.user.dtos;
 
+import com.cinemate.user.Role;
 import com.cinemate.user.User;
 
 import java.io.Serializable;
@@ -13,8 +14,9 @@ public class UserResponseDTO implements Serializable {
     private String bio;
     private String avatarUrl;
     private Date joinedAt;
+    private Role role;
 
-    private UserResponseDTO(String id, String username, String password, String email, String bio, String avatarUrl, Date joinedAt) {
+    private UserResponseDTO(String id, String username, String password, String email, String bio, String avatarUrl, Date joinedAt, Role role) {
         this.id = id;
         this.username = username;
         this.password = password;
@@ -22,6 +24,7 @@ public class UserResponseDTO implements Serializable {
         this.bio = bio;
         this.avatarUrl = avatarUrl;
         this.joinedAt = joinedAt;
+        this.role = role;
     }
 
     public UserResponseDTO(User user) {
@@ -32,6 +35,7 @@ public class UserResponseDTO implements Serializable {
         this.bio = user.getBio();
         this.avatarUrl = user.getAvatarUrl();
         this.joinedAt = user.getJoinedAt();
+        this.role = user.getRole();
     }
 
     public UserResponseDTO() {}
@@ -92,4 +96,11 @@ public class UserResponseDTO implements Serializable {
         this.joinedAt = joinedAt;
     }
 
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
 }

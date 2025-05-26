@@ -4,7 +4,27 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 const Header = () => {
   const navigate = useNavigate();
-  const isLoggedIn = !!localStorage.getItem("token"); 
+  const token = localStorage.getItem("token");
+  const isLoggedIn = !!token;
+
+  /**
+   * retrieves the user role from the JWT token stored in localStorage.
+   * @returns {string|null} the user role if available, otherwise null.
+   */
+  const getUserRole = () => {
+    if (!token) return null;
+    
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.role;
+    } catch (error) {
+      console.error("Error parsing token:", error);
+      return null;
+    }
+  };
+
+  const userRole = getUserRole();
+  const isAdmin = userRole === "ADMIN";
 
   const handleLogout = () => {
     localStorage.removeItem("token"); 
@@ -51,21 +71,33 @@ const Header = () => {
                   Profil
                 </Link>
               </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/admin">
-                  Admin-Panel
-                </Link>
-              </li>
+              {/* Admin Panel for admins */}
+              
+                <li className="nav-item">
+                  <Link className="nav-link text-warning" to="/admin">
+                    <i className="fas fa-shield-alt me-1"></i>
+                    Admin-Panel
+                  </Link>
+                </li>
+              
             </ul>
           )}
 
           {isLoggedIn && (
-            <button
-              className="btn btn-sm btn-outline-light"
-              onClick={handleLogout}
-            >
-              Logout
-            </button>
+            <div className="d-flex align-items-center">
+              {/* Show user role badge */}
+              {userRole && (
+                <span className={`badge me-3 ${isAdmin ? 'bg-warning text-dark' : 'bg-primary'}`}>
+                  {userRole}
+                </span>
+              )}
+              <button
+                className="btn btn-sm btn-outline-light"
+                onClick={handleLogout}
+              >
+                Logout
+              </button>
+            </div>
           )}
         </div>
       </div>

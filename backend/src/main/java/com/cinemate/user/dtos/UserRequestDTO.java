@@ -1,14 +1,12 @@
 package com.cinemate.user.dtos;
 
-import com.cinemate.movie.Movie;
-import com.cinemate.series.Series;
+import com.cinemate.user.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 
 public class UserRequestDTO implements Serializable {
     private String id;
@@ -22,8 +20,9 @@ public class UserRequestDTO implements Serializable {
     private String bio;
     private String avatarUrl;
     private Date joinedAt;
+    private Role role;
 
-    public UserRequestDTO(String id, String username, String password, String email, String bio, String avatarUrl, Date joinedAt, List<Movie> movieWatchlist, List<Series> seriesWatchlist) {
+    public UserRequestDTO(String id, String username, String password, String email, String bio, String avatarUrl, Date joinedAt, Role role) {
         this.id = id;
         this.username = username;
         this.password = password;
@@ -31,6 +30,7 @@ public class UserRequestDTO implements Serializable {
         this.bio = bio;
         this.avatarUrl = avatarUrl;
         this.joinedAt = joinedAt;
+        this.role = role;
     }
 
     public UserRequestDTO() {}
@@ -89,6 +89,14 @@ public class UserRequestDTO implements Serializable {
 
     public void setJoinedAt(Date joinedAt) {
         this.joinedAt = joinedAt;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
     }
 
 }

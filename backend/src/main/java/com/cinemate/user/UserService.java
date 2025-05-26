@@ -164,6 +164,7 @@ public class UserService {
         if (userRequestDTO.getPassword() != null) existingUser.setPassword(userRequestDTO.getPassword());
         if (userRequestDTO.getEmail() != null) existingUser.setEmail(userRequestDTO.getEmail());
         if (userRequestDTO.getBio() != null) existingUser.setBio(userRequestDTO.getBio());
+        if (userRequestDTO.getRole() != null) existingUser.setRole(userRequestDTO.getRole());
 
         if (avatar != null && !avatar.isEmpty()) {
             try {

@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './assets/App.css';
@@ -11,6 +10,7 @@ import SeriesDetail from './components/details/SeriesDetail';
 import Watchlist from './components/profile/Watchlist';
 import UserProfile from './components/profile/UserProfile';
 import Calender from './components/explore/Calender';
+import AdminPanel from './components/admin/AdminPanel';
 
 const AppContent = () => {
   const location = useLocation();
@@ -29,6 +29,7 @@ const AppContent = () => {
         <Route path="/watchlist" element={<Watchlist />} />
         <Route path="/profile" element={<UserProfile />} />
         <Route path="/calendar" element={<Calender />} />
+        <Route path="/admin" element={<AdminPanel />} />
 
       </Routes>
     </>
