@@ -7,27 +7,11 @@ const Header = () => {
   const token = localStorage.getItem("token");
   const isLoggedIn = !!token;
 
-  /**
-   * retrieves the user role from the JWT token stored in localStorage.
-   * @returns {string|null} the user role if available, otherwise null.
-   */
-  const getUserRole = () => {
-    if (!token) return null;
-    
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload.role;
-    } catch (error) {
-      console.error("Error parsing token:", error);
-      return null;
-    }
-  };
-
-  const userRole = getUserRole();
+  const userRole = localStorage.getItem("userRole");
   const isAdmin = userRole === "ADMIN";
 
   const handleLogout = () => {
-    localStorage.removeItem("token"); 
+    localStorage.removeItem("token");
     navigate("/");
   };
 
@@ -72,14 +56,14 @@ const Header = () => {
                 </Link>
               </li>
               {/* Admin Panel for admins */}
-              
+              {isAdmin && (
                 <li className="nav-item">
                   <Link className="nav-link text-warning" to="/admin">
                     <i className="fas fa-shield-alt me-1"></i>
                     Admin-Panel
                   </Link>
                 </li>
-              
+              )}
             </ul>
           )}
 

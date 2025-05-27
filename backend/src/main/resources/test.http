@@ -26,7 +26,7 @@ Content-Type: application/json
 
 ###
 GET http://localhost:8080/api/users/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYXhpIiwiZXhwIjoxNzQ3OTgwMzk0LCJpYXQiOjE3NDc5NDQzOTR9.QDOUjOM32YzMRxCab9pYtQn2QWQc1QdnMyB5JuzVovc
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYXhpIiwiZXhwIjoxNzQ4NDA1ODY2LCJpYXQiOjE3NDgzNjk4NjZ9.p78xMveabfrcCLJWAx5FmPexqVKxDnbSLT-IfA8JueQ
 ###
 GET http://localhost:8080/api/reviews/682f8047f2bfcb4c90da6749/user
 ###

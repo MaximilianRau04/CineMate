@@ -161,10 +161,8 @@ const UserProfile = () => {
           const updatedUser = await response.json();
           setUser(updatedUser);
           setAvatarFile(null);
-          alert("Profilbild erfolgreich aktualisiert!");
         } catch (err) {
           console.error("Fehler beim Speichern:", err);
-          alert(`Fehler beim Aktualisieren: ${err.message}`);
         } finally {
           setSaving(false);
         }

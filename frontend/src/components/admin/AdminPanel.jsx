@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FaUsers, FaFilm, FaTv, FaComments, FaChartBar, FaTrash, FaEdit, FaPlus, FaBan, FaCheck, FaTimes } from "react-icons/fa";
@@ -6,7 +6,7 @@ import { FaUsers, FaFilm, FaTv, FaComments, FaChartBar, FaTrash, FaEdit, FaPlus,
 const AdminPanel = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [movies, setMovies] = useState([]);
-  const [tvShows, setTvShows] = useState([]);
+  const [Series, setSeries] = useState([]);
   const [users, setUsers] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [analytics, setAnalytics] = useState({});
@@ -23,25 +23,17 @@ const AdminPanel = () => {
   });
 
   const token = localStorage.getItem("token");
-
-  const getUserRole = () => {
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload.role;
-    } catch (error) {
-      return null;
-    }
-  };
+  const userRole = localStorage.getItem("userRole");
+  const isAdmin = userRole === "ADMIN";
 
   const loadData = async () => {
     setLoading(true);
     try {
       await Promise.all([
         loadMovies(),
-        loadTvShows(),
+        loadSeries(),
         loadUsers(),
         loadReviews(),
-        loadAnalytics()
       ]);
     } catch (error) {
       console.error("Error loading data:", error);
@@ -49,10 +41,13 @@ const AdminPanel = () => {
     setLoading(false);
   };
 
+  useEffect(() => {
+    loadData();
+  }, []);
+
   const loadMovies = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/api/admin/movies", {
-        headers: { Authorization: `Bearer ${token}` }
+      const response = await axios.get("http://localhost:8080/api/movies", {
       });
       setMovies(response.data);
     } catch (error) {
@@ -60,21 +55,19 @@ const AdminPanel = () => {
     }
   };
 
-  const loadTvShows = async () => {
+  const loadSeries = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/api/admin/tvshows", {
-        headers: { Authorization: `Bearer ${token}` }
+      const response = await axios.get("http://localhost:8080/api/series", {
       });
-      setTvShows(response.data);
+      setSeries(response.data);
     } catch (error) {
-      console.error("Error loading TV shows:", error);
+      console.error("Error loading series:", error);
     }
   };
 
   const loadUsers = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/api/admin/users", {
-        headers: { Authorization: `Bearer ${token}` }
+      const response = await axios.get("http://localhost:8080/api/users", {
       });
       setUsers(response.data);
     } catch (error) {
@@ -85,7 +78,6 @@ const AdminPanel = () => {
   const loadReviews = async () => {
     try {
       const response = await axios.get("http://localhost:8080/api/admin/reviews", {
-        headers: { Authorization: `Bearer ${token}` }
       });
       setReviews(response.data);
     } catch (error) {
@@ -93,28 +85,16 @@ const AdminPanel = () => {
     }
   };
 
-  const loadAnalytics = async () => {
-    try {
-      const response = await axios.get("http://localhost:8080/api/admin/analytics", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setAnalytics(response.data);
-    } catch (error) {
-      console.error("Error loading analytics:", error);
-    }
-  };
-
   const handleAddContent = async () => {
     try {
-      const endpoint = newContent.type === "movie" ? "movies" : "tvshows";
+      const endpoint = newContent.type === "movie" ? "movies" : "series";
       await axios.post(`http://localhost:8080/api/admin/${endpoint}`, newContent, {
-        headers: { Authorization: `Bearer ${token}` }
       });
       
       if (newContent.type === "movie") {
         loadMovies();
       } else {
-        loadTvShows();
+        loadSeries();
       }
       
       setShowAddModal(false);
@@ -135,35 +115,23 @@ const AdminPanel = () => {
     if (!window.confirm("Sind Sie sicher, dass Sie diesen Inhalt löschen möchten?")) return;
     
     try {
-      const endpoint = type === "movie" ? "movies" : "tvshows";
-      await axios.delete(`http://localhost:8080/api/admin/${endpoint}/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
+      const endpoint = type === "movie" ? "movies" : "series";
+      await axios.delete(`http://localhost:8080/api/${endpoint}/${id}`, {
       });
       
       if (type === "movie") {
         loadMovies();
       } else {
-        loadTvShows();
+        loadSeries();
       }
     } catch (error) {
       console.error("Error deleting content:", error);
     }
   };
 
-  const handleBanUser = async (userId) => {
-    try {
-      await axios.put(`http://localhost:8080/api/admin/users/${userId}/ban`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      loadUsers();
-    } catch (error) {
-      console.error("Error banning user:", error);
-    }
-  };
-
   const handleDeleteReview = async (reviewId) => {
     try {
-      await axios.delete(`http://localhost:8080/api/admin/reviews/${reviewId}`, {
+      await axios.delete(`http://localhost:8080/api/reviews/${reviewId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       loadReviews();
@@ -205,8 +173,8 @@ const AdminPanel = () => {
           <div className="card-body">
             <div className="d-flex justify-content-between">
               <div>
-                <h4>{analytics.totalTvShows || 0}</h4>
-                <p>TV-Shows gesamt</p>
+                <h4>{analytics.totalSeries || 0}</h4>
+                <p>Serien gesamt</p>
               </div>
               <FaTv size={40} />
             </div>
@@ -239,10 +207,10 @@ const AdminPanel = () => {
                 <li key={index}>{movie.title} - {movie.views} Aufrufe</li>
               ))}
             </ul>
-            <h6 className="mt-3">Meistgesehene TV-Shows:</h6>
+            <h6 className="mt-3">Meistgesehene Serien:</h6>
             <ul className="list-unstyled">
-              {analytics.popularTvShows?.slice(0, 5).map((show, index) => (
-                <li key={index}>{show.title} - {show.views} Aufrufe</li>
+              {analytics.popularSeries?.slice(0, 5).map((series, index) => (
+                <li key={index}>{series.title} - {series.views} Aufrufe</li>
               ))}
             </ul>
           </div>
@@ -312,7 +280,7 @@ const AdminPanel = () => {
 
           <div className="card">
             <div className="card-header">
-              <h5>TV-Shows</h5>
+              <h5>Serien</h5>
             </div>
             <div className="card-body">
               <div className="table-responsive">
@@ -327,22 +295,22 @@ const AdminPanel = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {tvShows.map(show => (
-                      <tr key={show.id}>
-                        <td>{show.title}</td>
-                        <td>{show.genre}</td>
-                        <td>{show.releaseDate}</td>
-                        <td>{show.streamingPlatform}</td>
+                    {Series.map(series => (
+                      <tr key={series.id}>
+                        <td>{series.title}</td>
+                        <td>{series.genre}</td>
+                        <td>{series.releaseDate}</td>
+                        <td>{series.streamingPlatform}</td>
                         <td>
                           <button 
                             className="btn btn-sm btn-outline-primary me-2"
-                            onClick={() => setEditingItem(show)}
+                            onClick={() => setEditingItem(series)}
                           >
                             <FaEdit />
                           </button>
                           <button 
                             className="btn btn-sm btn-outline-danger"
-                            onClick={() => handleDeleteContent(show.id, "tvshow")}
+                            onClick={() => handleDeleteContent(series.id, "series")}
                           >
                             <FaTrash />
                           </button>
@@ -372,7 +340,6 @@ const AdminPanel = () => {
                   <th>E-Mail</th>
                   <th>Rolle</th>
                   <th>Registriert am</th>
-                  <th>Status</th>
                   <th>Aktionen</th>
                 </tr>
               </thead>
@@ -386,29 +353,7 @@ const AdminPanel = () => {
                         {user.role}
                       </span>
                     </td>
-                    <td>{new Date(user.createdAt).toLocaleDateString()}</td>
-                    <td>
-                      <span className={`badge ${user.banned ? 'bg-danger' : 'bg-success'}`}>
-                        {user.banned ? 'Gesperrt' : 'Aktiv'}
-                      </span>
-                    </td>
-                    <td>
-                      {!user.banned ? (
-                        <button 
-                          className="btn btn-sm btn-outline-danger"
-                          onClick={() => handleBanUser(user.id)}
-                        >
-                          <FaBan /> Sperren
-                        </button>
-                      ) : (
-                        <button 
-                          className="btn btn-sm btn-outline-success"
-                          onClick={() => handleBanUser(user.id)}
-                        >
-                          <FaCheck /> Entsperren
-                        </button>
-                      )}
-                    </td>
+                    <td>{new Date(user.joinedAt).toLocaleDateString()}</td>
                   </tr>
                 ))}
               </tbody>
@@ -432,7 +377,6 @@ const AdminPanel = () => {
               <thead>
                 <tr>
                   <th>Benutzer</th>
-                  <th>Inhalt</th>
                   <th>Bewertung</th>
                   <th>Kommentar</th>
                   <th>Datum</th>
@@ -454,7 +398,7 @@ const AdminPanel = () => {
                         {review.comment}
                       </div>
                     </td>
-                    <td>{new Date(review.createdAt).toLocaleDateString()}</td>
+                    <td>{new Date(review.date).toLocaleDateString()}</td>
                     <td>
                       <button 
                         className="btn btn-sm btn-outline-danger"
@@ -495,7 +439,7 @@ const AdminPanel = () => {
                   onChange={(e) => setNewContent({...newContent, type: e.target.value})}
                 >
                   <option value="movie">Film</option>
-                  <option value="tvshow">TV-Show</option>
+                  <option value="series">Serien</option>
                 </select>
               </div>
               <div className="mb-3">
