@@ -29,6 +29,7 @@ const SeasonSection = ({ seriesId }) => {
   useEffect(() => {
     fetchSeasons();
   }, [seriesId]);
+  
 
   if (seasonsLoading) {
     return (

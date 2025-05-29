@@ -11,7 +11,6 @@ const RatingSection = ({
   onRatingChange,
   onCommentChange,
   onSubmitReview,
-  renderStars
 }) => {
   const [hover, setHover] = useState(null);
 
