@@ -1,11 +1,9 @@
 const ReviewSection = ({ reviews, renderStars, reviewUsers }) => {
     const getUserName = (reviewId) => {
         const user = reviewUsers[reviewId];
-
         if (user) {
             return user.name || user.username || user.displayName || `Benutzer ${reviewId}`;
         }
-
         return "Lädt...";
     };
 
@@ -56,7 +54,7 @@ const ReviewSection = ({ reviews, renderStars, reviewUsers }) => {
         <div className="card mt-4 shadow-sm">
             <div className="card-body text-center py-4">
                 <p className="text-muted mb-0">
-                    Noch keine Bewertungen für diesen Film.
+                    Noch keine Bewertungen vorhanden... 
                 </p>
             </div>
         </div>

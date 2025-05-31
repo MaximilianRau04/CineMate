@@ -4,7 +4,6 @@ import { useWatchlist } from "./useWatchlist";
 import { useReviews } from "./useReviews";
 import MediaHeader from "./MediaHeader";
 import RatingSection from "./RatingSection";
-import ExistingRatingSection from "./ExistingRatingSection";
 import CastSection from "./CastSection";
 import ReviewSection from "./ReviewSection";
 import EditReviewModal from "./EditReviewModal";
@@ -34,11 +33,19 @@ const MovieDetail = () => {
 
   const [showEditModal, setShowEditModal] = useState(false);
 
-  const handleOpenEditModal = () => setShowEditModal(true);
-
   const handleEditReviewWithClose = async (rating, comment) => {
     await handleEditReview(rating, comment);
     setShowEditModal(false);
+  };
+
+  // Handle edit action
+  const handleEdit = () => {
+    setShowEditModal(true);
+  };
+
+  // Handle delete action - this will actually delete the review
+  const handleDelete = async () => {
+    await handleDeleteReview();
   };
 
   if (isLoading) {
@@ -78,18 +85,10 @@ const MovieDetail = () => {
           onRatingChange={setRating}
           onCommentChange={setComment}
           onSubmitReview={handleSubmitReview}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
           renderStars={renderStars}
         />
-
-        <ExistingRatingSection
-          reviewed={reviewed}
-          rating={rating}
-          comment={comment}
-          renderStars={renderStars}
-          onEdit={handleOpenEditModal}
-          onDelete={handleDeleteReview}
-        />
-
       </div>
 
       <CastSection
@@ -111,7 +110,8 @@ const MovieDetail = () => {
         comment={comment}
         submitting={submitting}
         onClose={() => setShowEditModal(false)}
-        onEditReview={handleEditReviewWithClose}  
+        onEditReview={handleEditReviewWithClose}
+        onDeleteReview={handleDeleteReview}  
         renderStars={renderStars}
       />
     </div>

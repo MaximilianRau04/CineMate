@@ -33,7 +33,7 @@ GET http://localhost:8080/api/reviews/682f8047f2bfcb4c90da6749/user
 GET http://localhost:8080/api/series/682a284236f2d54c872d1bb9/seasons
 ###
 
-DELETE http://localhost:8080/api/users/6834c350683ec83f228b6b3c
+GET http://localhost:8080/api/movies/682a27b536f2d54c872d1bb2/director
 
 ###
 POST http://localhost:8080/api/movies

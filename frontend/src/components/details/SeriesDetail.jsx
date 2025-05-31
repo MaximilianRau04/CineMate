@@ -4,7 +4,6 @@ import { useWatchlist } from "./useWatchlist";
 import { useReviews } from "./useReviews";
 import MediaHeader from "./MediaHeader";
 import RatingSection from "./RatingSection";
-import ExistingRatingSection from "./ExistingRatingSection";
 import CastSection from "./CastSection";
 import ReviewsSection from "./ReviewSection";
 import EditReviewModal from "./EditReviewModal";
@@ -77,14 +76,6 @@ const SeriesDetail = () => {
           renderStars={renderStars}
         />
 
-        <ExistingRatingSection
-          reviewed={reviewed}
-          rating={rating}
-          comment={comment}
-          renderStars={renderStars}
-          onEdit={handleOpenEditModal}
-          onDelete={handleDeleteReview}
-        />
       </div>
 
       <SeasonSection seriesId={mediaId} />

@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { FaSpinner, FaFilter, FaTimes, FaSearch } from "react-icons/fa";
+import { FaSpinner, FaFilter, FaTimes, FaSearch, FaSync } from "react-icons/fa";
 
 const ExplorePage = () => {
   const [movies, setMovies] = useState([]);
@@ -8,6 +8,7 @@ const ExplorePage = () => {
   const [filteredMovies, setFilteredMovies] = useState([]);
   const [filteredSeries, setFilteredSeries] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
   const [contentType, setContentType] = useState("all"); 
@@ -23,24 +24,31 @@ const ExplorePage = () => {
   /**
    * Fetch movies and series data from API
    */
-  useEffect(() => {
-    setIsLoading(true);
+  const fetchData = useCallback(async (showLoadingSpinner = true) => {
+    if (showLoadingSpinner) {
+      setIsLoading(true);
+    } else {
+      setIsRefreshing(true);
+    }
     
-    Promise.all([
-      fetch("http://localhost:8080/api/movies").then((res) => {
-        if (!res.ok) {
-          throw new Error("Filme konnten nicht geladen werden");
-        }
-        return res.json();
-      }),
-      fetch("http://localhost:8080/api/series").then((res) => {
-        if (!res.ok) {
-          throw new Error("Serien konnten nicht geladen werden");
-        }
-        return res.json();
-      }),
-    ])
-    .then(([moviesData, seriesData]) => {
+    try {
+      const [moviesResponse, seriesResponse] = await Promise.all([
+        fetch("http://localhost:8080/api/movies"),
+        fetch("http://localhost:8080/api/series")
+      ]);
+
+      if (!moviesResponse.ok) {
+        throw new Error("Filme konnten nicht geladen werden");
+      }
+      if (!seriesResponse.ok) {
+        throw new Error("Serien konnten nicht geladen werden");
+      }
+
+      const [moviesData, seriesData] = await Promise.all([
+        moviesResponse.json(),
+        seriesResponse.json()
+      ]);
+
       const processedMovies = moviesData.map(movie => {
         const genreArray = movie.genre ? movie.genre.split(/,\s*/) : [];
         return { ...movie, genreArray };
@@ -62,14 +70,34 @@ const ExplorePage = () => {
       ].filter(Boolean);
       
       setAvailableGenres([...new Set(allGenres)]);
-      setIsLoading(false);
-    })
-    .catch((err) => {
+      setError(null);
+    } catch (err) {
       console.error("Fehler beim Laden:", err);
       setError(err.message);
+    } finally {
       setIsLoading(false);
-    });
+      setIsRefreshing(false);
+    }
   }, []);
+
+  /**
+   * Initial data fetch
+   */
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  /**
+   * Listen for focus events to refresh data when user returns to tab
+   */
+  useEffect(() => {
+    const handleFocus = () => {
+      fetchData(false);
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [fetchData]);
 
   /**
    * Apply filters whenever filter criteria change
@@ -160,6 +188,13 @@ const ExplorePage = () => {
   };
 
   /**
+   * Manual refresh function
+   */
+  const handleRefresh = () => {
+    fetchData(false);
+  };
+
+  /**
    * Reset all filters to default values
    */
   const resetFilters = () => {
@@ -189,13 +224,10 @@ const ExplorePage = () => {
   const formatRating = (rating) => {
     if (rating === null || rating === undefined) return "N/A";
     
-    // Ensure rating is treated as a number
     const numRating = Number(rating);
     
-    // Check if conversion resulted in a valid number
     if (isNaN(numRating)) return "N/A";
     
-    // Format with one decimal place
     return numRating.toFixed(1);
   };
 
@@ -214,6 +246,9 @@ const ExplorePage = () => {
         <div className="alert alert-danger" role="alert">
           <h4 className="alert-heading">Fehler</h4>
           <p>{error}</p>
+          <button className="btn btn-outline-danger" onClick={() => fetchData()}>
+            Erneut versuchen
+          </button>
         </div>
       </div>
     );
@@ -221,9 +256,11 @@ const ExplorePage = () => {
 
   return (
     <div className="container py-4">
-      <h1 className="text-center mb-4 text-primary">
-        🎬 Entdecke Filme und Serien
-      </h1>
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h1 className="text-center text-primary mb-0">
+          🎬 Entdecke Filme und Serien
+        </h1>
+      </div>
 
       {/* Search and Filter UI */}
       <div className="card shadow-lg border-0 mb-4">
