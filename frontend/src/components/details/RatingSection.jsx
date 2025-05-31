@@ -89,3 +89,4 @@ const RatingSection = ({
 };
 
 export default RatingSection;
+

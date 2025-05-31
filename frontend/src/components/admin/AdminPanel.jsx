@@ -1,54 +1,740 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
-import "bootstrap/dist/css/bootstrap.min.css"; import { FaUsers, FaFilm, FaTv, FaComments, FaChartBar, FaTrash, FaPlus, FaEdit, FaPlayCircle, FaArrowLeft } from "react-icons/fa";
+import "bootstrap/dist/css/bootstrap.min.css";
+import {
+  FaUsers, FaFilm, FaTv, FaComments, FaChartBar,
+  FaTrash, FaPlus, FaEdit, FaPlayCircle, FaArrowLeft
+} from "react-icons/fa";
+
+/**
+ * A custom hook to handle API calls with token-based authentication.
+ * It provides methods for GET, POST, PUT, and DELETE requests.
+ * @returns 
+ */
+const useApi = () => {
+  const token = localStorage.getItem("token");
+  const baseURL = "http://localhost:8080/api";
+
+  const apiCall = async (endpoint, options = {}) => {
+    const url = `${baseURL}${endpoint}`;
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` }),
+        ...options.headers
+      },
+      ...options
+    };
+
+    const response = await fetch(url, config);
+    if (!response.ok) throw new Error(`API Error: ${response.status}`);
+
+    const text = await response.text();
+    if (!text) return null;
+
+    try {
+      return JSON.parse(text);
+    } catch {
+      return text;
+    }
+  };
+
+  return {
+    get: (endpoint) => apiCall(endpoint),
+    post: (endpoint, data) => apiCall(endpoint, {
+      method: 'POST',
+      body: JSON.stringify(data)
+    }),
+    put: (endpoint, data) => apiCall(endpoint, {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    }),
+    delete: (endpoint) => apiCall(endpoint, { method: 'DELETE' })
+  };
+};
+
+/**
+ * A custom hook to manage application data.
+ * @returns 
+ */
+const useAppData = () => {
+  const [data, setData] = useState({
+    movies: [],
+    series: [],
+    users: [],
+    reviews: [],
+    seasons: [],
+    episodes: [],
+    reviewUsers: {}
+  });
+  const [loading, setLoading] = useState(false);
+  const api = useApi();
+
+  // Load initial data from the API
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const [movies, series, users, reviews] = await Promise.all([
+        api.get('/movies'),
+        api.get('/series'),
+        api.get('/users'),
+        api.get('/reviews')
+      ]);
+
+      setData(prev => ({ ...prev, movies, series, users, reviews }));
+    } catch (error) {
+      console.error("Error loading data:", error);
+    }
+    setLoading(false);
+  };
+
+  /**
+   * fetches seasons for a given series ID.
+   * @param {*} seriesId 
+   */
+  const loadSeasons = async (seriesId) => {
+    try {
+      const seasons = await api.get(`/series/${seriesId}/seasons`);
+      setData(prev => ({ ...prev, seasons }));
+    } catch (error) {
+      console.error("Error loading seasons:", error);
+    }
+  };
+
+  /**
+   * loads episodes for a given series ID and season number.
+   * @param {*} seriesId 
+   * @param {*} seasonNumber 
+   */
+  const loadEpisodes = async (seriesId, seasonNumber) => {
+    try {
+      const episodes = await api.get(`/series/${seriesId}/seasons/${seasonNumber}/episodes`);
+      setData(prev => ({ ...prev, episodes }));
+    } catch (error) {
+      console.error("Error loading episodes:", error);
+    }
+  };
+
+  return { data, setData, loading, loadData, loadSeasons, loadEpisodes, api };
+};
+
+// Formats a timestamp to a human-readable date string
+const formatDate = (timestamp) => {
+  if (!timestamp) return "";
+  const date = new Date(parseInt(timestamp));
+  return date.toLocaleDateString('de-DE');
+};
+
+// Formats a timestamp for use in an input field
+const formatDateForInput = (timestamp) => {
+  if (!timestamp) return "";
+  const date = new Date(parseInt(timestamp));
+  return date.toISOString().split('T')[0];
+};
+
+// Dashboard component to display summary statistics
+const Dashboard = ({ data }) => (
+  <div className="row">
+    {[
+      { title: "Benutzer gesamt", count: data.users.length, color: "primary", icon: FaUsers },
+      { title: "Filme gesamt", count: data.movies.length, color: "success", icon: FaFilm },
+      { title: "Serien gesamt", count: data.series.length, color: "info", icon: FaTv },
+      { title: "Bewertungen gesamt", count: data.reviews.length, color: "warning", icon: FaComments }
+    ].map(({ title, count, color, icon: Icon }, index) => (
+      <div key={index} className="col-md-3 mb-4">
+        <div className={`card bg-${color} text-white`}>
+          <div className="card-body">
+            <div className="d-flex justify-content-between">
+              <div>
+                <h4>{count}</h4>
+                <p>{title}</p>
+              </div>
+              <Icon size={40} />
+            </div>
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
+// Table component to display content items (movies or series)
+const ContentTable = ({ items, type, onEdit, onDelete, onSeriesSeasons }) => (
+  <div className="table-responsive">
+    <table className="table">
+      <thead>
+        <tr>
+          <th>Titel</th>
+          <th>Genre</th>
+          <th>Land</th>
+          <th>Erscheinungsdatum</th>
+          <th>Aktionen</th>
+        </tr>
+      </thead>
+      <tbody>
+        {items
+          .filter(item => item && item.id)
+          .map((item, index) => (
+            <tr key={`${type}-${item.id}-${index}`}>
+              <td>{item.title}</td>
+              <td>{item.genre}</td>
+              <td>{item.country || 'N/A'}</td>
+              <td>{formatDate(item.releaseDate)}</td>
+              <td>
+                {type === "series" && (
+                  <button
+                    className="btn btn-sm btn-outline-info me-2"
+                    onClick={() => onSeriesSeasons(item)}
+                  >
+                    Staffeln
+                  </button>
+                )}
+                <button
+                  className="btn btn-sm btn-outline-primary me-2"
+                  onClick={() => onEdit(item, type)}
+                >
+                  <FaEdit />
+                </button>
+                <button
+                  className="btn btn-sm btn-outline-danger"
+                  onClick={() => onDelete(item.id, type)}
+                >
+                  <FaTrash />
+                </button>
+              </td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+);
+
+// Main content management component
+const ContentManagement = ({ data, onAdd, onEdit, onDelete, onSeriesSeasons }) => (
+  <div>
+    <div className="d-flex justify-content-between align-items-center mb-4">
+      <h4>Content Management</h4>
+      <button className="btn btn-primary" onClick={onAdd}>
+        <FaPlus /> Inhalt hinzufügen
+      </button>
+    </div>
+
+    <div className="row">
+      <div className="col-12">
+        <div className="card mb-4">
+          <div className="card-header">
+            <h5>Filme</h5>
+          </div>
+          <div className="card-body">
+            <ContentTable
+              items={data.movies}
+              type="movie"
+              onEdit={onEdit}
+              onDelete={onDelete}
+            />
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="card-header">
+            <h5>Serien</h5>
+          </div>
+          <div className="card-body">
+            <ContentTable
+              items={data.series}
+              type="series"
+              onEdit={onEdit}
+              onDelete={onDelete}
+              onSeriesSeasons={onSeriesSeasons}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+// User management component to display and manage users
+const UserManagement = ({ users }) => (
+  <div>
+    <h4 className="mb-4">Benutzerverwaltung</h4>
+    <div className="card">
+      <div className="card-body">
+        <div className="table-responsive">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Benutzername</th>
+                <th>E-Mail</th>
+                <th>Rolle</th>
+                <th>Registriert am</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.map(user => (
+                <tr key={user.id}>
+                  <td>{user.username}</td>
+                  <td>{user.email}</td>
+                  <td>
+                    <span className={`badge ${user.role === 'ADMIN' ? 'bg-danger' : 'bg-primary'}`}>
+                      {user.role}
+                    </span>
+                  </td>
+                  <td>{formatDate(user.joinedAt)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+// Moderation component to display and manage reviews
+const Moderation = ({ reviews, reviewUsers, onDeleteReview }) => (
+  <div>
+    <h4 className="mb-4">Moderation</h4>
+    <div className="card">
+      <div className="card-header">
+        <h5>Bewertungen & Kommentare</h5>
+      </div>
+      <div className="card-body">
+        <div className="table-responsive">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Benutzer</th>
+                <th>Bewertung</th>
+                <th>Kommentar</th>
+                <th>Datum</th>
+                <th>Aktionen</th>
+              </tr>
+            </thead>
+            <tbody>
+              {reviews.map(review => (
+                <tr key={review.id}>
+                  <td>{reviewUsers[review.id]?.username || "Lädt..."}</td>
+                  <td>
+                    <span className="badge bg-warning">
+                      {review.rating}/5 ⭐
+                    </span>
+                  </td>
+                  <td>
+                    <div style={{ maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {review.comment}
+                    </div>
+                  </td>
+                  <td>{formatDate(review.date)}</td>
+                  <td>
+                    <button
+                      className="btn btn-sm btn-outline-danger"
+                      onClick={() => onDeleteReview(review.id)}
+                    >
+                      <FaTrash /> Löschen
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+// Modal component for displaying forms and confirmation dialogs
+const Modal = ({ series, title, children, onClose, onSave, saveText = "Speichern" }) => {
+  if (!series) return null;
+
+  return (
+    <div className="modal series d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+      <div className="modal-dialog modal-lg">
+        <div className="modal-content">
+          <div className="modal-header">
+            <h5 className="modal-title">{title}</h5>
+            <button type="button" className="btn-close" onClick={onClose}></button>
+          </div>
+          <div className="modal-body">{children}</div>
+          <div className="modal-footer">
+            <button type="button" className="btn btn-secondary" onClick={onClose}>
+              Abbrechen
+            </button>
+            {onSave && (
+              <button type="button" className="btn btn-primary" onClick={onSave}>
+                {saveText}
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Seasons management component to display and manage seasons of a series
+const SeasonsManagement = ({ series, seasons, onAddSeason, onEditSeason, onDeleteSeason, onViewEpisodes, onBack }) => (
+  <div>
+    <div className="d-flex justify-content-between align-items-center mb-4">
+      <div className="d-flex align-items-center">
+        <button className="btn btn-outline-secondary me-3" onClick={onBack}>
+          <FaArrowLeft /> Zurück
+        </button>
+        <h4>Staffeln für "{series.title}"</h4>
+      </div>
+      <button className="btn btn-primary" onClick={onAddSeason}>
+        <FaPlus /> Staffel hinzufügen
+      </button>
+    </div>
+
+    <div className="card">
+      <div className="card-body">
+        <div className="table-responsive">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Staffel Nr.</th>
+                <th>Episoden</th>
+                <th>Trailer URL</th>
+                <th>Aktionen</th>
+              </tr>
+            </thead>
+            <tbody>
+              {seasons.map((season, index) => (
+                <tr key={`season-${season.seasonNumber}-${index}`}>
+                  <td>Staffel {season.seasonNumber}</td>
+                  <td>{season.episodes?.length || 0} Episoden</td>
+                  <td>
+                    {season.trailerUrl ? (
+                      <a href={season.trailerUrl} target="_blank" rel="noopener noreferrer">
+                        <FaPlayCircle /> Trailer
+                      </a>
+                    ) : (
+                      'Kein Trailer'
+                    )}
+                  </td>
+                  <td>
+                    <button
+                      className="btn btn-sm btn-outline-info me-2"
+                      onClick={() => onViewEpisodes(season)}
+                    >
+                      Episoden
+                    </button>
+                    <button
+                      className="btn btn-sm btn-outline-primary me-2"
+                      onClick={() => onEditSeason(season)}
+                    >
+                      <FaEdit />
+                    </button>
+                    <button
+                      className="btn btn-sm btn-outline-danger"
+                      onClick={() => onDeleteSeason(season.seasonNumber)}
+                    >
+                      <FaTrash />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+// Episodes management component to display and manage episodes of a season
+const EpisodesManagement = ({ series, season, episodes, onAddEpisode, onEditEpisode, onDeleteEpisode, onBack }) => (
+  <div>
+    <div className="d-flex justify-content-between align-items-center mb-4">
+      <div className="d-flex align-items-center">
+        <button className="btn btn-outline-secondary me-3" onClick={onBack}>
+          <FaArrowLeft /> Zurück zu Staffeln
+        </button>
+        <h4>Episoden - "{series.title}" Staffel {season.seasonNumber}</h4>
+      </div>
+      <button className="btn btn-primary" onClick={onAddEpisode}>
+        <FaPlus /> Episode hinzufügen
+      </button>
+    </div>
+
+    <div className="card">
+      <div className="card-body">
+        <div className="table-responsive">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Episode Nr.</th>
+                <th>Titel</th>
+                <th>Dauer</th>
+                <th>Erscheinungsdatum</th>
+                <th>Aktionen</th>
+              </tr>
+            </thead>
+            <tbody>
+              {episodes.map((episode, index) => (
+                <tr key={`episode-${episode.episodeNumber}-${index}`}>
+                  <td>{episode.episodeNumber}</td>
+                  <td>{episode.title}</td>
+                  <td>{episode.duration}</td>
+                  <td>{formatDate(episode.releaseDate)}</td>
+                  <td>
+                    <button
+                      className="btn btn-sm btn-outline-primary me-2"
+                      onClick={() => onEditEpisode(episode)}
+                    >
+                      <FaEdit />
+                    </button>
+                    <button
+                      className="btn btn-sm btn-outline-danger"
+                      onClick={() => onDeleteEpisode(episode.episodeNumber)}
+                    >
+                      <FaTrash />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+// Form components for adding/editing content, seasons, and episodes
+const SeasonForm = ({ season, onChange }) => (
+  <div>
+    <div className="mb-3">
+      <label className="form-label">Staffel Nummer</label>
+      <input
+        type="number"
+        className="form-control"
+        value={season.seasonNumber || ''}
+        onChange={(e) => onChange({ ...season, seasonNumber: parseInt(e.target.value) || '' })}
+        min="1"
+      />
+    </div>
+    <div className="mb-3">
+      <label className="form-label">Trailer URL</label>
+      <input
+        type="url"
+        className="form-control"
+        value={season.trailerUrl || ''}
+        onChange={(e) => onChange({ ...season, trailerUrl: e.target.value })}
+      />
+    </div>
+  </div>
+);
+
+// Episode form component for adding/editing episodes
+const EpisodeForm = ({ episode, onChange }) => (
+  <div>
+    <div className="row">
+      <div className="col-md-6 mb-3">
+        <label className="form-label">Episode Nummer</label>
+        <input
+          type="number"
+          className="form-control"
+          value={episode.episodeNumber || ''}
+          onChange={(e) => onChange({ ...episode, episodeNumber: parseInt(e.target.value) || '' })}
+          min="1"
+        />
+      </div>
+      <div className="col-md-6 mb-3">
+        <label className="form-label">Titel</label>
+        <input
+          type="text"
+          className="form-control"
+          value={episode.title || ''}
+          onChange={(e) => onChange({ ...episode, title: e.target.value })}
+        />
+      </div>
+    </div>
+
+    <div className="mb-3">
+      <label className="form-label">Beschreibung</label>
+      <textarea
+        className="form-control"
+        rows="3"
+        value={episode.description || ''}
+        onChange={(e) => onChange({ ...episode, description: e.target.value })}
+      />
+    </div>
+
+    <div className="row">
+      <div className="col-md-6 mb-3">
+        <label className="form-label">Dauer (z.B. 45m)</label>
+        <input
+          type="text"
+          className="form-control"
+          value={episode.duration || ''}
+          onChange={(e) => onChange({ ...episode, duration: e.target.value })}
+        />
+      </div>
+      <div className="col-md-6 mb-3">
+        <label className="form-label">Erscheinungsdatum</label>
+        <input
+          type="date"
+          className="form-control"
+          value={episode.releaseDate || ''}
+          onChange={(e) => onChange({ ...episode, releaseDate: e.target.value })}
+        />
+      </div>
+    </div>
+
+    <div className="mb-3">
+      <label className="form-label">Poster URL</label>
+      <input
+        type="url"
+        className="form-control"
+        value={episode.posterUrl || ''}
+        onChange={(e) => onChange({ ...episode, posterUrl: e.target.value })}
+      />
+    </div>
+  </div>
+);
+
+// Content form component for adding/editing movies or series
+const ContentForm = ({ content, onChange, genres }) => (
+  <div>
+    <div className="row">
+      <div className="col-md-6 mb-3">
+        <label className="form-label">Typ</label>
+        <select
+          className="form-control"
+          value={content.type || 'movie'}
+          onChange={(e) => onChange({ ...content, type: e.target.value })}
+        >
+          <option value="movie">Film</option>
+          <option value="series">Serie</option>
+        </select>
+      </div>
+      <div className="col-md-6 mb-3">
+        <label className="form-label">Titel</label>
+        <input
+          type="text"
+          className="form-control"
+          value={content.title || ''}
+          onChange={(e) => onChange({ ...content, title: e.target.value })}
+        />
+      </div>
+    </div>
+
+    <div className="mb-3">
+      <label className="form-label">Beschreibung</label>
+      <textarea
+        className="form-control"
+        rows="3"
+        value={content.description || ''}
+        onChange={(e) => onChange({ ...content, description: e.target.value })}
+      />
+    </div>
+
+    <div className="row">
+      <div className="col-md-6 mb-3">
+        <label className="form-label">Genre</label>
+        <select
+          className="form-control"
+          value={content.genre || ''}
+          onChange={(e) => onChange({ ...content, genre: e.target.value })}
+        >
+          <option value="">Genre auswählen</option>
+          {genres.map(genre => (
+            <option key={genre} value={genre}>{genre}</option>
+          ))}
+        </select>
+      </div>
+      <div className="col-md-6 mb-3">
+        <label className="form-label">Land</label>
+        <input
+          type="text"
+          className="form-control"
+          value={content.country || ''}
+          onChange={(e) => onChange({ ...content, country: e.target.value })}
+        />
+      </div>
+    </div>
+
+    <div className="row">
+      <div className="col-md-6 mb-3">
+        <label className="form-label">Erscheinungsdatum</label>
+        <input
+          type="date"
+          className="form-control"
+          value={content.releaseDate || ''}
+          onChange={(e) => onChange({ ...content, releaseDate: e.target.value })}
+        />
+      </div>
+      {content.type === "movie" && (
+        <div className="col-md-6 mb-3">
+          <label className="form-label">Dauer (z.B. 120m)</label>
+          <input
+            type="text"
+            className="form-control"
+            value={content.duration || ''}
+            onChange={(e) => onChange({ ...content, duration: e.target.value })}
+          />
+        </div>
+      )}
+    </div>
+
+    <div className="row">
+      <div className="col-md-6 mb-3">
+        <label className="form-label">Poster URL</label>
+        <input
+          type="url"
+          className="form-control"
+          value={content.posterUrl || ''}
+          onChange={(e) => onChange({ ...content, posterUrl: e.target.value })}
+        />
+      </div>
+      <div className="col-md-6 mb-3">
+        <label className="form-label">Trailer URL</label>
+        <input
+          type="url"
+          className="form-control"
+          value={content.trailerUrl || ''}
+          onChange={(e) => onChange({ ...content, trailerUrl: e.target.value })}
+        />
+      </div>
+    </div>
+  </div>
+);
 
 const AdminPanel = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [movies, setMovies] = useState([]);
-  const [Series, setSeries] = useState([]);
-  const [users, setUsers] = useState([]);
-  const [reviews, setReviews] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [showSeasonsModal, setShowSeasonsModal] = useState(false);
-  const [showAddSeasonModal, setShowAddSeasonModal] = useState(false);
-  const [showEditSeasonModal, setShowEditSeasonModal] = useState(false);
-  const [showAddEpisodeModal, setShowAddEpisodeModal] = useState(false);
-  const [showEditEpisodeModal, setShowEditEpisodeModal] = useState(false);
-  const [editingContent, setEditingContent] = useState(null);
-  const [editingSeason, setEditingSeason] = useState(null);
-  const [editingEpisode, setEditingEpisode] = useState(null);
-  const [selectedSeries, setSelectedSeries] = useState(null);
-  const [seasons, setSeasons] = useState([]);
-  const [selectedSeason, setSelectedSeason] = useState(null);
-  const [episodes, setEpisodes] = useState([]);
-  const [newContent, setNewContent] = useState({
-    title: "",
-    description: "",
-    genre: "",
-    releaseDate: "",
-    type: "movie",
-    duration: "",
-    posterUrl: "",
-    country: "",
-    trailerUrl: ""
-  });
-  const [newSeason, setNewSeason] = useState({
-    seasonNumber: "",
-    trailerUrl: ""
-  });
-  const [newEpisode, setNewEpisode] = useState({
-    title: "",
-    episodeNumber: "",
-    duration: "",
-    releaseDate: "",
-    description: "",
-    posterUrl: ""
+  const { data, setData, loading, loadData, loadSeasons, loadEpisodes, api } = useAppData();
+
+  // Modal states
+  const [modals, setModals] = useState({
+    add: false,
+    edit: false,
+    seasons: false,
+    addSeason: false,
+    editSeason: false,
+    episodes: false,
+    addEpisode: false,
+    editEpisode: false
   });
 
-  const token = localStorage.getItem("token");
-  const [reviewUsers, setReviewUsers] = useState({});
+  // Form states
+  const [forms, setForms] = useState({
+    newContent: {
+      title: "", description: "", genre: "", releaseDate: "",
+      type: "movie", duration: "", posterUrl: "", country: "", trailerUrl: ""
+    },
+    editingContent: null,
+    selectedSeries: null,
+    selectedSeason: null,
+    newSeason: { seasonNumber: "", trailerUrl: "" },
+    editingSeason: null,
+    newEpisode: { episodeNumber: "", title: "", description: "", duration: "", releaseDate: "", posterUrl: "" },
+    editingEpisode: null
+  });
+
+  const [viewMode, setViewMode] = useState('content'); 
 
   const genres = [
     "Action", "Adventure", "Animation", "Comedy", "Crime", "Documentary",
@@ -56,1379 +742,253 @@ const AdminPanel = () => {
     "Romance", "Science Fiction", "Thriller", "War", "Western"
   ];
 
-  const formatDate = (timestamp) => {
-    if (!timestamp) return "";
-    const date = new Date(parseInt(timestamp));
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}.${month}.${year}`;
-  };
-
-  const formatDateForInput = (timestamp) => {
-    if (!timestamp) return "";
-    const date = new Date(parseInt(timestamp));
-    return date.toISOString().split('T')[0];
-  };
-
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      await Promise.all([
-        loadMovies(),
-        loadSeries(),
-        loadUsers(),
-        loadReviews(),
-        loadSeasons(),
-        loadEpisodes(),
-        loadReviewUsers()
-      ]);
-    } catch (error) {
-      console.error("Error loading data:", error);
-    }
-    setLoading(false);
-  };
-
   useEffect(() => {
     loadData();
   }, []);
 
-  // Lade Benutzerdaten für alle Reviews
-  const loadReviewUsers = async () => {
-    const userPromises = reviews.map(async (review) => {
-      if (!reviewUsers[review.id]) {
-        const userData = await fetchReviewUser(review.id);
-        return { reviewId: review.id, userData };
-      }
-      return null;
-    });
-
-    const results = await Promise.all(userPromises);
-    const newUsers = {};
-
-    results.forEach(result => {
-      if (result && result.userData) {
-        newUsers[result.reviewId] = result.userData;
-      }
-    });
-
-    if (Object.keys(newUsers).length > 0) {
-      setReviewUsers(prev => ({ ...prev, ...newUsers }));
-    }
-
-    if (reviews.length > 0) {
-      loadReviewUsers();
-    }
-  };
-
-  const loadMovies = async () => {
-    try {
-      const response = await axios.get("http://localhost:8080/api/movies", {
-      });
-      setMovies(response.data);
-    } catch (error) {
-      console.error("Error loading movies:", error);
-    }
-  };
-
-  const loadSeries = async () => {
-    try {
-      const response = await axios.get("http://localhost:8080/api/series", {
-      });
-      setSeries(response.data);
-    } catch (error) {
-      console.error("Error loading series:", error);
-    }
-  };
-
-  const loadUsers = async () => {
-    try {
-      const response = await axios.get("http://localhost:8080/api/users", {
-      });
-      setUsers(response.data);
-    } catch (error) {
-      console.error("Error loading users:", error);
-    }
-  };
-
-  const loadReviews = async () => {
-    try {
-      const response = await axios.get("http://localhost:8080/api/reviews", {
-      });
-      setReviews(response.data);
-    } catch (error) {
-      console.error("Error loading reviews:", error);
-    }
-  };
-
-  const loadSeasons = async (seriesId) => {
-    try {
-      const response = await axios.get(`http://localhost:8080/api/series/${seriesId}/seasons`);
-      setSeasons(response.data);
-    } catch (error) {
-      console.error("Error loading seasons:", error);
-    }
-  };
-
-  const loadEpisodes = async (seriesId, seasonNumber) => {
-    try {
-      const response = await axios.get(`http://localhost:8080/api/series/${seriesId}/seasons/${seasonNumber}/episodes`);
-      setEpisodes(response.data);
-    } catch (error) {
-      console.error("Error loading episodes:", error);
-    }
-  };
-
   /**
-   * fetches user data for a specific review.
-   * @param {*} reviewId 
+   * Handles adding new content (movie or series).
    */
-  const fetchReviewUser = async (reviewId) => {
-    try {
-      const response = await fetch(`http://localhost:8080/api/reviews/${reviewId}/user`);
-
-      if (!response.ok) {
-        console.error(`API Fehler für Review ${reviewId}: ${response.status}`);
-        return null;
-      }
-
-      const userData = await response.json();
-      return userData;
-    } catch (error) {
-      console.error(`Fehler beim Laden des Benutzers für Review ${reviewId}:`, error);
-      return null;
-    }
-  };
-
   const handleAddContent = async () => {
     try {
-      const endpoint = newContent.type === "movie" ? "movies" : "series";
-      const contentData = { ...newContent };
+      const endpoint = forms.newContent.type === "movie" ? "movies" : "series";
+      const contentData = { ...forms.newContent };
 
-      // Konvertiere das Datum zu einem Timestamp wenn vorhanden
       if (contentData.releaseDate) {
         contentData.releaseDate = new Date(contentData.releaseDate).getTime();
       }
 
-      await axios.post(`http://localhost:8080/api/${endpoint}`, contentData, {
-      });
+      await api.post(`/${endpoint}`, contentData);
+      await loadData();
 
-      if (newContent.type === "movie") {
-        loadMovies();
-      } else {
-        loadSeries();
-      }
-
-      setShowAddModal(false);
-      setNewContent({
-        title: "",
-        description: "",
-        genre: "",
-        releaseDate: "",
-        type: "movie",
-        duration: "",
-        posterUrl: "",
-        country: "",
-        trailerUrl: ""
-      });
+      setModals(prev => ({ ...prev, add: false }));
+      setForms(prev => ({
+        ...prev,
+        newContent: {
+          title: "", description: "", genre: "", releaseDate: "",
+          type: "movie", duration: "", posterUrl: "", country: "", trailerUrl: ""
+        }
+      }));
     } catch (error) {
       console.error("Error adding content:", error);
     }
   };
 
+  /**
+   * Handles editing existing content (movie or series).
+   * @param {*} content 
+   * @param {*} type 
+   */
   const handleEditContent = (content, type) => {
-    setEditingContent({
-      ...content,
-      type: type,
-      releaseDate: formatDateForInput(content.releaseDate)
-    });
-    setShowEditModal(true);
+    setForms(prev => ({
+      ...prev,
+      editingContent: {
+        ...content,
+        type,
+        releaseDate: formatDateForInput(content.releaseDate)
+      }
+    }));
+    setModals(prev => ({ ...prev, edit: true }));
   };
 
+  /**
+   * Handles updating existing content (movie or series).
+   */
   const handleUpdateContent = async () => {
     try {
+      const { editingContent } = forms;
       const endpoint = editingContent.type === "movie" ? "movies" : "series";
       const contentData = { ...editingContent };
 
-      // Konvertiere das Datum zu einem Timestamp wenn vorhanden
       if (contentData.releaseDate) {
         contentData.releaseDate = new Date(contentData.releaseDate).getTime();
       }
 
-      await axios.put(`http://localhost:8080/api/${endpoint}/${editingContent.id}`, contentData, {
-      });
+      await api.put(`/${endpoint}/${editingContent.id}`, contentData);
+      await loadData();
 
-      if (editingContent.type === "movie") {
-        loadMovies();
-      } else {
-        loadSeries();
-      }
-
-      setShowEditModal(false);
-      setEditingContent(null);
+      setModals(prev => ({ ...prev, edit: false }));
+      setForms(prev => ({ ...prev, editingContent: null }));
     } catch (error) {
       console.error("Error updating content:", error);
     }
   };
 
+  /**
+   * Handles deleting content (movie or series).
+   * @param {*} id 
+   * @param {*} type 
+   */
   const handleDeleteContent = async (id, type) => {
     if (!window.confirm("Sind Sie sicher, dass Sie diesen Inhalt löschen möchten?")) return;
 
     try {
       const endpoint = type === "movie" ? "movies" : "series";
-      await axios.delete(`http://localhost:8080/api/${endpoint}/${id}`, {
-      });
-
-      if (type === "movie") {
-        loadMovies();
-      } else {
-        loadSeries();
-      }
+      await api.delete(`/${endpoint}/${id}`);
+      await loadData();
     } catch (error) {
       console.error("Error deleting content:", error);
     }
   };
 
-
-
+  /**
+   * Handles deleting a review.
+   * @param {*} reviewId 
+   */
   const handleDeleteReview = async (reviewId) => {
     try {
-      await axios.delete(`http://localhost:8080/api/reviews/${reviewId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      loadReviews();
+      await api.delete(`/reviews/${reviewId}`);
+      await loadData();
     } catch (error) {
       console.error("Error deleting review:", error);
     }
   };
 
-  const handleShowSeasons = (series) => {
-    setSelectedSeries(series);
+  /**
+   * Handles viewing seasons of a series.
+   * @param {*} series 
+   */
+  const handleSeriesSeasons = (series) => {
+    setForms(prev => ({ ...prev, selectedSeries: series }));
     loadSeasons(series.id);
-    setShowSeasonsModal(true);
+    setViewMode('seasons');
   };
 
-  const handleShowEpisodes = (season) => {
-    setSelectedSeason(season);
-    loadEpisodes(selectedSeries.id, season.seasonNumber);
-    setShowAddEpisodeModal(true);
-    setShowEditSeasonModal(false);
-  };
-
+  /**
+   * Handles adding a new season to a series.
+   */
   const handleAddSeason = async () => {
     try {
-      const seasonData = {
-        ...newSeason,
-        seasonNumber: parseInt(newSeason.seasonNumber)
-      };
+      const seasonData = { ...forms.newSeason };
+      await api.post(`/series/${forms.selectedSeries.id}/seasons`, seasonData);
+      await loadSeasons(forms.selectedSeries.id);
 
-      await axios.post(`http://localhost:8080/api/series/${selectedSeries.id}/seasons`, seasonData);
-      loadSeasons(selectedSeries.id);
-      setShowAddSeasonModal(false);
-      setNewSeason({ seasonNumber: "", trailerUrl: "" });
+      setModals(prev => ({ ...prev, addSeason: false }));
+      setForms(prev => ({ ...prev, newSeason: { seasonNumber: "", trailerUrl: "" } }));
     } catch (error) {
       console.error("Error adding season:", error);
     }
   };
 
-  const handleEditSeason = async (season) => {
+  const handleEditSeason = (season) => {
+    setForms(prev => ({ ...prev, editingSeason: { ...season } }));
+    setModals(prev => ({ ...prev, editSeason: true }));
+  };
+
+  /**
+   * Handles updating an existing season.
+   */
+  const handleUpdateSeason = async () => {
     try {
-      const seasonData = {
-        ...season,
-        seasonNumber: season.seasonNumber.toString(),
-        trailerUrl: season.trailerUrl || ""
-      };
+      const { editingSeason } = forms;
+      await api.put(`/series/${forms.selectedSeries.id}/seasons/${editingSeason.seasonNumber}`, editingSeason);
+      await loadSeasons(forms.selectedSeries.id);
 
-      await axios.put(`http://localhost:8080/api/series/${selectedSeries.id}/seasons`, seasonData);
-      loadSeasons(selectedSeries.id);
-      setShowEditSeasonModal(false);
-      setNewSeason({ seasonNumber: "", trailerUrl: "" });
+      setModals(prev => ({ ...prev, editSeason: false }));
+      setForms(prev => ({ ...prev, editingSeason: null }));
     } catch (error) {
-      console.error("Error adding season:", error);
+      console.error("Error updating season:", error);
     }
   };
 
-  const handleDeleteSeason = async (seasonId) => {
+  /**
+   * Handles deleting a season.
+   * @param {*} seasonNumber 
+   */
+  const handleDeleteSeason = async (seasonNumber) => {
     if (!window.confirm("Sind Sie sicher, dass Sie diese Staffel löschen möchten?")) return;
-    const seasonNumber = seasons.find(season => season.id === seasonId).seasonNumber;
+
     try {
-      await axios.delete(`http://localhost:8080/api/series/${selectedSeries.id}/seasons/${seasonNumber}`,);
-      loadSeasons(selectedSeries.id);
-      setSeasons(seasons.filter(season => season.id !== seasonId));
+      await api.delete(`/series/${forms.selectedSeries.id}/seasons/${seasonNumber}`);
+      await loadSeasons(forms.selectedSeries.id);
     } catch (error) {
       console.error("Error deleting season:", error);
     }
   };
 
+  /**
+   * handles viewing episodes of a season.
+   * @param {*} season 
+   */
+  const handleViewEpisodes = (season) => {
+    setForms(prev => ({ ...prev, selectedSeason: season }));
+    loadEpisodes(forms.selectedSeries.id, season.seasonNumber);
+    setViewMode('episodes');
+  };
+
+  /**
+   * Handles adding a new episode to a season.
+   */
   const handleAddEpisode = async () => {
     try {
-      const episodeData = {
-        ...newEpisode,
-        episodeNumber: parseInt(newEpisode.episodeNumber),
-        releaseDate: newEpisode.releaseDate ? new Date(newEpisode.releaseDate).getTime() : null
-      };
+      const episodeData = { ...forms.newEpisode };
+      if (episodeData.releaseDate) {
+        episodeData.releaseDate = new Date(episodeData.releaseDate).getTime();
+      }
 
-      await axios.post(`http://localhost:8080/api/series/${selectedSeries.id}/seasons/${selectedSeason.seasonNumber}/episodes/${episodeData.episodeNumber}`, episodeData);
-      loadEpisodes(selectedSeries.id, selectedSeason.seasonNumber);
-      setShowAddEpisodeModal(false);
-      setNewEpisode({
-        title: "",
-        episodeNumber: "",
-        duration: "",
-        releaseDate: "",
-        description: "",
-        posterUrl: ""
-      });
+      await api.post(`/series/${forms.selectedSeries.id}/seasons/${forms.selectedSeason.seasonNumber}/episodes`, episodeData);
+      await loadEpisodes(forms.selectedSeries.id, forms.selectedSeason.seasonNumber);
+
+      setModals(prev => ({ ...prev, addEpisode: false }));
+      setForms(prev => ({
+        ...prev,
+        newEpisode: { episodeNumber: "", title: "", description: "", duration: "", releaseDate: "", posterUrl: "" }
+      }));
     } catch (error) {
       console.error("Error adding episode:", error);
     }
   };
 
-  const handleEditEpisode = async (episode) => {
-    try {
-      const episodeData = {
+  /**
+   * Handles editing an existing episode.
+   * @param {*} episode 
+   */
+  const handleEditEpisode = (episode) => {
+    setForms(prev => ({
+      ...prev,
+      editingEpisode: {
         ...episode,
-        episodeNumber: episode.episodeNumber.toString(),
-        releaseDate: episode.releaseDate ? formatDateForInput(episode.releaseDate) : ""
-      };
-      await axios.put(`http://localhost:8080/api/series/${selectedSeries.id}/seasons/${selectedSeason.seasonNumber}/episodes/${episode.episodeNumber}`, episodeData);
-      loadEpisodes(selectedSeries.id, selectedSeason.seasonNumber);
-      setShowEditSeasonModal(false);
-      setNewEpisode({
-        title: "",
-        episodeNumber: "",
-        duration: "",
-        releaseDate: "",
-        description: "",
-        posterUrl: ""
-      });
+        releaseDate: formatDateForInput(episode.releaseDate)
+      }
+    }));
+    setModals(prev => ({ ...prev, editEpisode: true }));
+  };
+
+  /**
+   * Handles updating an existing episode.
+   */
+  const handleUpdateEpisode = async () => {
+    try {
+      const { editingEpisode } = forms;
+      const episodeData = { ...editingEpisode };
+      if (episodeData.releaseDate) {
+        episodeData.releaseDate = new Date(episodeData.releaseDate).getTime();
+      }
+
+      await api.put(`/series/${forms.selectedSeries.id}/seasons/${forms.selectedSeason.seasonNumber}/episodes/${editingEpisode.episodeNumber}`, episodeData);
+      await loadEpisodes(forms.selectedSeries.id, forms.selectedSeason.seasonNumber);
+
+      setModals(prev => ({ ...prev, editEpisode: false }));
+      setForms(prev => ({ ...prev, editingEpisode: null }));
     } catch (error) {
-      console.error("Error editing episode:", error);
+      console.error("Error updating episode:", error);
     }
   };
 
+  /**
+   * Handles deleting an episode.
+   * @param {*} episodeNumber 
+   */
   const handleDeleteEpisode = async (episodeNumber) => {
     if (!window.confirm("Sind Sie sicher, dass Sie diese Episode löschen möchten?")) return;
+
     try {
-      await axios.delete(`http://localhost:8080/api/series/${selectedSeries.id}/seasons/${selectedSeason.seasonNumber}/episodes/${episodeNumber}`,);
-      loadEpisodes(selectedSeries.id, selectedSeason.seasonNumber);
-      setEpisodes(episodes.filter(ep => ep.episodeNumber !== episodeNumber));
+      await api.delete(`/series/${forms.selectedSeries.id}/seasons/${forms.selectedSeason.seasonNumber}/episodes/${episodeNumber}`);
+      await loadEpisodes(forms.selectedSeries.id, forms.selectedSeason.seasonNumber);
     } catch (error) {
       console.error("Error deleting episode:", error);
     }
   };
-
-  const getUserName = (reviewId) => {
-    const user = reviewUsers[reviewId];
-    if (user) {
-      return user.username || user.name || `Benutzer ${reviewId}`;
-    }
-    return "Lädt...";
-  };
-
-  const renderDashboard = () => (
-    <div className="row">
-      <div className="col-md-3 mb-4">
-        <div className="card bg-primary text-white">
-          <div className="card-body">
-            <div className="d-flex justify-content-between">
-              <div>
-                <h4>{users.length}</h4>
-                <p>Benutzer gesamt</p>
-              </div>
-              <FaUsers size={40} />
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="col-md-3 mb-4">
-        <div className="card bg-success text-white">
-          <div className="card-body">
-            <div className="d-flex justify-content-between">
-              <div>
-                <h4>{movies.length}</h4>
-                <p>Filme gesamt</p>
-              </div>
-              <FaFilm size={40} />
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="col-md-3 mb-4">
-        <div className="card bg-info text-white">
-          <div className="card-body">
-            <div className="d-flex justify-content-between">
-              <div>
-                <h4>{Series.length}</h4>
-                <p>Serien gesamt</p>
-              </div>
-              <FaTv size={40} />
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="col-md-3 mb-4">
-        <div className="card bg-warning text-white">
-          <div className="card-body">
-            <div className="d-flex justify-content-between">
-              <div>
-                <h4>{reviews.length}</h4>
-                <p>Bewertungen gesamt</p>
-              </div>
-              <FaComments size={40} />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderContentManagement = () => (
-    <div>
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h4>Content Management</h4>
-        <button
-          className="btn btn-primary"
-          onClick={() => setShowAddModal(true)}
-        >
-          <FaPlus /> Inhalt hinzufügen
-        </button>
-      </div>
-
-      <div className="row">
-        <div className="col-12">
-          <div className="card mb-4">
-            <div className="card-header">
-              <h5>Filme</h5>
-            </div>
-            <div className="card-body">
-              <div className="table-responsive">
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th>Titel</th>
-                      <th>Genre</th>
-                      <th>Land</th>
-                      <th>Erscheinungsdatum</th>
-                      <th>Aktionen</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {movies.map(movie => (
-                      <tr key={movie.id}>
-                        <td>{movie.title}</td>
-                        <td>{movie.genre}</td>
-                        <td>{movie.country || 'N/A'}</td>
-                        <td>{formatDate(movie.releaseDate)}</td>
-                        <td>
-                          <button
-                            className="btn btn-sm btn-outline-primary me-2"
-                            onClick={() => handleEditContent(movie, "movie")}
-                          >
-                            <FaEdit />
-                          </button>
-                          <button
-                            className="btn btn-sm btn-outline-danger"
-                            onClick={() => handleDeleteContent(movie.id, "movie")}
-                          >
-                            <FaTrash />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          <div className="card">
-            <div className="card-header">
-              <h5>Serien</h5>
-            </div>
-            <div className="card-body">
-              <div className="table-responsive">
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th>Titel</th>
-                      <th>Genre</th>
-                      <th>Land</th>
-                      <th>Erscheinungsdatum</th>
-                      <th>Aktionen</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {Series.map(series => (
-                      <tr key={series.id}>
-                        <td>{series.title}</td>
-                        <td>{series.genre}</td>
-                        <td>{series.country || 'N/A'}</td>
-                        <td>{formatDate(series.releaseDate)}</td>
-                        <td>
-                          <button
-                            className="btn btn-sm btn-outline-info me-2"
-                            onClick={() => handleShowSeasons(series)}
-                          >
-                            Staffeln
-                          </button>
-                          <button
-                            className="btn btn-sm btn-outline-primary me-2"
-                            onClick={() => handleEditContent(series, "series")}
-                          >
-                            <FaEdit />
-                          </button>
-                          <button
-                            className="btn btn-sm btn-outline-danger"
-                            onClick={() => handleDeleteContent(series.id, "series")}
-                          >
-                            <FaTrash />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderUserManagement = () => (
-    <div>
-      <h4 className="mb-4">Benutzerverwaltung</h4>
-      <div className="card">
-        <div className="card-body">
-          <div className="table-responsive">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Benutzername</th>
-                  <th>E-Mail</th>
-                  <th>Rolle</th>
-                  <th>Registriert am</th>
-                  <th>Aktionen</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map(user => (
-                  <tr key={user.id}>
-                    <td>{user.username}</td>
-                    <td>{user.email}</td>
-                    <td>
-                      <span className={`badge ${user.role === 'ADMIN' ? 'bg-danger' : 'bg-primary'}`}>
-                        {user.role}
-                      </span>
-                    </td>
-                    <td>{formatDate(user.joinedAt)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderModeration = () => (
-    <div>
-      <h4 className="mb-4">Moderation</h4>
-      <div className="card">
-        <div className="card-header">
-          <h5>Bewertungen & Kommentare</h5>
-        </div>
-        <div className="card-body">
-          <div className="table-responsive">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Benutzer</th>
-                  <th>Bewertung</th>
-                  <th>Kommentar</th>
-                  <th>Datum</th>
-                  <th>Aktionen</th>
-                </tr>
-              </thead>
-              <tbody>
-                {reviews.map(review => (
-                  <tr key={review.id}>
-                    <td>{getUserName(review.id)}</td>
-                    <td>
-                      <span className="badge bg-warning">
-                        {review.rating}/5 ⭐
-                      </span>
-                    </td>
-                    <td>
-                      <div style={{ maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {review.comment}
-                      </div>
-                    </td>
-                    <td>{formatDate(review.date)}</td>
-                    <td>
-                      <button
-                        className="btn btn-sm btn-outline-danger"
-                        onClick={() => handleDeleteReview(review.id)}
-                      >
-                        <FaTrash /> Löschen
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderAddModal = () => (
-    <div className={`modal ${showAddModal ? 'show d-block' : ''}`} style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-      <div className="modal-dialog modal-lg">
-        <div className="modal-content">
-          <div className="modal-header">
-            <h5 className="modal-title">Neuen Inhalt hinzufügen</h5>
-            <button
-              type="button"
-              className="btn-close"
-              onClick={() => setShowAddModal(false)}
-            ></button>
-          </div>
-          <div className="modal-body">
-            <form>
-              <div className="row">
-                <div className="col-md-6 mb-3">
-                  <label className="form-label">Typ</label>
-                  <select
-                    className="form-control"
-                    value={newContent.type}
-                    onChange={(e) => setNewContent({ ...newContent, type: e.target.value })}
-                  >
-                    <option value="movie">Film</option>
-                    <option value="series">Serie</option>
-                  </select>
-                </div>
-                <div className="col-md-6 mb-3">
-                  <label className="form-label">Titel</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={newContent.title}
-                    onChange={(e) => setNewContent({ ...newContent, title: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              <div className="mb-3">
-                <label className="form-label">Beschreibung</label>
-                <textarea
-                  className="form-control"
-                  rows="3"
-                  value={newContent.description}
-                  onChange={(e) => setNewContent({ ...newContent, description: e.target.value })}
-                ></textarea>
-              </div>
-
-              <div className="row">
-                <div className="col-md-6 mb-3">
-                  <label className="form-label">Genre</label>
-                  <select
-                    className="form-control"
-                    value={newContent.genre}
-                    onChange={(e) => setNewContent({ ...newContent, genre: e.target.value })}
-                  >
-                    <option value="">Genre auswählen</option>
-                    {genres.map(genre => (
-                      <option key={genre} value={genre}>{genre}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="col-md-6 mb-3">
-                  <label className="form-label">Land</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={newContent.country}
-                    onChange={(e) => setNewContent({ ...newContent, country: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              <div className="row">
-                <div className="col-md-6 mb-3">
-                  <label className="form-label">Erscheinungsdatum</label>
-                  <input
-                    type="date"
-                    className="form-control"
-                    value={newContent.releaseDate}
-                    onChange={(e) => setNewContent({ ...newContent, releaseDate: e.target.value })}
-                  />
-                </div>
-                {newContent.type === "movie" && (
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label">Dauer (z.B. 120m)</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={newContent.duration}
-                      onChange={(e) => setNewContent({ ...newContent, duration: e.target.value })}
-                    />
-                  </div>
-                )}
-              </div>
-
-              <div className="row">
-                <div className="col-md-6 mb-3">
-                  <label className="form-label">Poster URL</label>
-                  <input
-                    type="url"
-                    className="form-control"
-                    value={newContent.posterUrl}
-                    onChange={(e) => setNewContent({ ...newContent, posterUrl: e.target.value })}
-                  />
-                </div>
-                <div className="col-md-6 mb-3">
-                  <label className="form-label">Trailer URL</label>
-                  <input
-                    type="url"
-                    className="form-control"
-                    value={newContent.trailerUrl}
-                    onChange={(e) => setNewContent({ ...newContent, trailerUrl: e.target.value })}
-                  />
-                </div>
-              </div>
-            </form>
-          </div>
-          <div className="modal-footer">
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={() => setShowAddModal(false)}
-            >
-              Abbrechen
-            </button>
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={handleAddContent}
-            >
-              Hinzufügen
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderEditModal = () => (
-    <div className={`modal ${showEditModal ? 'show d-block' : ''}`} style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-      <div className="modal-dialog modal-lg">
-        <div className="modal-content">
-          <div className="modal-header">
-            <h5 className="modal-title">
-              {editingContent?.type === "movie" ? "Film" : "Serie"} bearbeiten
-            </h5>
-            <button
-              type="button"
-              className="btn-close"
-              onClick={() => {
-                setShowEditModal(false);
-                setEditingContent(null);
-              }}
-            ></button>
-          </div>
-          <div className="modal-body">
-            {editingContent && (
-              <form>
-                <div className="row">
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label">Titel</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={editingContent.title || ""}
-                      onChange={(e) => setEditingContent({ ...editingContent, title: e.target.value })}
-                    />
-                  </div>
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label">Land</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={editingContent.country || ""}
-                      onChange={(e) => setEditingContent({ ...editingContent, country: e.target.value })}
-                    />
-                  </div>
-                </div>
-
-                <div className="mb-3">
-                  <label className="form-label">Beschreibung</label>
-                  <textarea
-                    className="form-control"
-                    rows="3"
-                    value={editingContent.description || ""}
-                    onChange={(e) => setEditingContent({ ...editingContent, description: e.target.value })}
-                  ></textarea>
-                </div>
-
-                <div className="row">
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label">Genre</label>
-                    <select
-                      className="form-control"
-                      value={editingContent.genre || ""}
-                      onChange={(e) => setEditingContent({ ...editingContent, genre: e.target.value })}
-                    >
-                      <option value="">Genre auswählen</option>
-                      {genres.map(genre => (
-                        <option key={genre} value={genre}>{genre}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label">Erscheinungsdatum</label>
-                    <input
-                      type="date"
-                      className="form-control"
-                      value={editingContent.releaseDate || ""}
-                      onChange={(e) => setEditingContent({ ...editingContent, releaseDate: e.target.value })}
-                    />
-                  </div>
-                </div>
-
-                {editingContent.type === "movie" && (
-                  <div className="mb-3">
-                    <label className="form-label">Dauer (z.B. 120m)</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={editingContent.duration || ""}
-                      onChange={(e) => setEditingContent({ ...editingContent, duration: e.target.value })}
-                    />
-                  </div>
-                )}
-
-                <div className="row">
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label">Poster URL</label>
-                    <input
-                      type="url"
-                      className="form-control"
-                      value={editingContent.posterUrl || ""}
-                      onChange={(e) => setEditingContent({ ...editingContent, posterUrl: e.target.value })}
-                    />
-                  </div>
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label">Trailer URL</label>
-                    <input
-                      type="url"
-                      className="form-control"
-                      value={editingContent.trailerUrl || ""}
-                      onChange={(e) => setEditingContent({ ...editingContent, trailerUrl: e.target.value })}
-                    />
-                  </div>
-                </div>
-              </form>
-            )}
-          </div>
-          <div className="modal-footer">
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={() => {
-                setShowEditModal(false);
-                setEditingContent(null);
-              }}
-            >
-              Abbrechen
-            </button>
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={handleUpdateContent}
-            >
-              Speichern
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderSeasonsModal = () => (
-    <div className={`modal ${showSeasonsModal ? 'show d-block' : ''}`} style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-      <div className="modal-dialog modal-lg">
-        <div className="modal-content">
-          <div className="modal-header">
-            <h5 className="modal-title">
-              Staffeln verwalten - {selectedSeries?.title}
-            </h5>
-            <button
-              type="button"
-              className="btn-close"
-              onClick={() => {
-                setShowSeasonsModal(false);
-                setSelectedSeries(null);
-                setSeasons([]);
-              }}
-            ></button>
-          </div>
-          <div className="modal-body">
-            <div className="d-flex justify-content-between align-items-center mb-3">
-              <h6>Staffeln</h6>
-              <button
-                className="btn btn-primary btn-sm"
-                onClick={() => setShowAddSeasonModal(true)}
-              >
-                <FaPlus /> Staffel hinzufügen
-              </button>
-            </div>
-
-            <div className="table-responsive">
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th>Staffel Nr.</th>
-                    <th>Episoden</th>
-                    <th>Trailer</th>
-                    <th>Aktionen</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {seasons.map(season => (
-                    <tr key={season.id}>
-                      <td>Staffel {season.seasonNumber}</td>
-                      <td>
-                        <span className="badge bg-info">
-                          {season.episodes ? season.episodes.length : 0} Episoden
-                        </span>
-                      </td>
-                      <td>
-                        {season.trailerUrl && (
-                          <a href={season.trailerUrl} target="_blank" rel="noopener noreferrer">
-                            <FaPlayCircle className="text-primary" />
-                          </a>
-                        )}
-                      </td>
-                      <td>
-                        <button
-                          className="btn btn-sm btn-outline-success me-2"
-                          onClick={() => {
-                            setSelectedSeason(season);
-                            loadEpisodes(selectedSeries.id, season.seasonNumber);
-                          }}
-                        >
-                          Episoden
-                        </button>
-                        <button
-                          className="btn btn-sm btn-outline-primary me-2"
-                          onClick={() => handleEditSeason(season)}
-                        >
-                          <FaEdit />
-                        </button>
-                        <button
-                          className="btn btn-sm btn-outline-danger"
-                          onClick={() => handleDeleteSeason(season.id)}
-                        >
-                          <FaTrash />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {selectedSeason && (
-              <div className="mt-4">
-                <div className="d-flex justify-content-between align-items-center mb-3">
-                  <h6>
-                    <FaArrowLeft
-                      className="me-2 text-primary"
-                      style={{ cursor: 'pointer' }}
-                      onClick={() => setSelectedSeason(null)}
-                    />
-                    Episoden - Staffel {selectedSeason.seasonNumber}
-                  </h6>
-                  <button
-                    className="btn btn-success btn-sm"
-                    onClick={() => setShowAddEpisodeModal(true)}
-                  >
-                    <FaPlus /> Episode hinzufügen
-                  </button>
-                </div>
-
-                <div className="table-responsive">
-                  <table className="table table-sm">
-                    <thead>
-                      <tr>
-                        <th>Episode</th>
-                        <th>Titel</th>
-                        <th>Dauer</th>
-                        <th>Erscheinungsdatum</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {episodes.map(episode => (
-                        <tr key={episode.episodeNumber}>
-                          <td>E{episode.episodeNumber}</td>
-                          <td>{episode.title}</td>
-                          <td>{episode.duration}</td>
-                          <td>{formatDate(episode.releaseDate)}</td>
-                          <td>
-                            <button
-                              className="btn btn-sm btn-outline-primary me-2"
-                              onClick={() => handleEditEpisode(episode)}
-                            >
-                              <FaEdit />
-                            </button>
-                            <button
-                              className="btn btn-sm btn-outline-danger"
-                              onClick={() => handleDeleteEpisode(episode.id)}
-                            >
-                              <FaTrash />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderAddSeasonModal = () => (
-    <div className={`modal ${showAddSeasonModal ? 'show d-block' : ''}`} style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-      <div className="modal-dialog">
-        <div className="modal-content">
-          <div className="modal-header">
-            <h5 className="modal-title">Neue Staffel hinzufügen</h5>
-            <button
-              type="button"
-              className="btn-close"
-              onClick={() => {
-                setShowAddSeasonModal(false);
-                setNewSeason({ seasonNumber: "", trailerUrl: "" });
-              }}
-            ></button>
-          </div>
-          <div className="modal-body">
-            <form>
-              <div className="mb-3">
-                <label className="form-label">Staffel Nummer</label>
-                <input
-                  type="number"
-                  className="form-control"
-                  value={newSeason.seasonNumber}
-                  onChange={(e) => setNewSeason({ ...newSeason, seasonNumber: e.target.value })}
-                  min="1"
-                />
-              </div>
-              <div className="mb-3">
-                <label className="form-label">Trailer URL (optional)</label>
-                <input
-                  type="url"
-                  className="form-control"
-                  value={newSeason.trailerUrl}
-                  onChange={(e) => setNewSeason({ ...newSeason, trailerUrl: e.target.value })}
-                />
-              </div>
-            </form>
-          </div>
-          <div className="modal-footer">
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={() => {
-                setShowAddSeasonModal(false);
-                setNewSeason({ seasonNumber: "", trailerUrl: "" });
-              }}
-            >
-              Abbrechen
-            </button>
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={handleAddSeason}
-            >
-              Hinzufügen
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderEditSeasonModal = () => (
-    <div className={`modal ${showEditSeasonModal ? 'show d-block' : ''}`} style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-      <div className="modal-dialog">
-        <div className="modal-content">
-          <div className="modal-header">
-            <h5 className="modal-title">Staffel bearbeiten</h5>
-            <button
-              type="button"
-              className="btn-close"
-              onClick={() => {
-                setShowEditSeasonModal(false);
-                setEditingSeason(null);
-              }}
-            ></button>
-          </div>
-          <div className="modal-body">
-            {editingSeason && (
-              <form>
-                <div className="mb-3">
-                  <label className="form-label">Staffel Nummer</label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    value={editingSeason.seasonNumber}
-                    onChange={(e) => setEditingSeason({ ...editingSeason, seasonNumber: e.target.value })}
-                    min="1"
-                  />
-                </div>
-                <div className="mb-3">
-                  <label className="form-label">Trailer URL (optional)</label>
-                  <input
-                    type="url"
-                    className="form-control"
-                    value={editingSeason.trailerUrl}
-                    onChange={(e) => setEditingSeason({ ...editingSeason, trailerUrl: e.target.value })}
-                  />
-                </div>
-              </form>
-            )}
-          </div>
-          <div className="modal-footer">
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={() => {
-                setShowEditSeasonModal(false);
-                setEditingSeason(null);
-              }}
-            >
-              Abbrechen
-            </button>
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={handleEditSeason}
-            >
-              Speichern
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderAddEpisodeModal = () => (
-    <div className={`modal ${showAddEpisodeModal ? 'show d-block' : ''}`} style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-      <div className="modal-dialog">
-        <div className="modal-content">
-          <div className="modal-header">
-            <h5 className="modal-title">Neue Episode hinzufügen</h5>
-            <button
-              type="button"
-              className="btn-close"
-              onClick={() => {
-                setShowAddEpisodeModal(false);
-                setNewEpisode({ episodeNumber: "", title: "", duration: "", releaseDate: "", description: "", posterUrl: ""});
-              }}
-            ></button>
-          </div>
-          <div className="modal-body">
-            <form>
-              <div className="mb-3">
-                <label className="form-label">Episoden Nummer</label>
-                <input
-                  type="number"
-                  className="form-control"
-                  value={newEpisode.episodeNumber}
-                  onChange={(e) => setNewEpisode({ ...newEpisode, episodeNumber: e.target.value })}
-                  min="1"
-                />
-              </div>
-              <div className="mb-3">
-                <label className="form-label">Titel</label>
-                <input
-                  type="url"
-                  className="form-control"
-                  value={newEpisode.title}
-                  onChange={(e) => setNewEpisode({ ...newEpisode, title: e.target.value })}
-                />
-              </div>
-              <div className="mb-3">
-                <label className="form-label">Dauer</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={newEpisode.duration}
-                  onChange={(e) => setNewEpisode({ ...newEpisode, duration: e.target.value })}
-                />
-              </div>
-              <div className="mb-3">
-                <label className="form-label">Erscheinungsdatum</label>
-                <input
-                  type="date"
-                  className="form-control"
-                  value={newEpisode.releaseDate}
-                  onChange={(e) => setNewEpisode({ ...newEpisode, releaseDate: e.target.value })}
-                />
-              </div>
-              <div className="mb-3">
-                <label className="form-label">Beschreibung</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={newEpisode.description}
-                  onChange={(e) => setNewEpisode({ ...newEpisode, description: e.target.value })}
-                />
-              </div>
-              <div className="mb-3">
-                <label className="form-label">Poster URL</label>
-                <input
-                  type="url"
-                  className="form-control"
-                  value={newEpisode.posterUrl}
-                  onChange={(e) => setNewEpisode({ ...newEpisode, posterUrl: e.target.value })}
-                />
-              </div>
-            </form>
-          </div>
-          <div className="modal-footer">
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={() => {
-                setShowAddEpisodeModal(false);
-                setNewEpisode({ episodeNumber: "", title: "", duration: "", releaseDate: "", description: "", posterUrl: ""});
-              }}
-            >
-              Abbrechen
-            </button>
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={handleAddEpisode}
-            >
-              Hinzufügen
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderEditEpisodeModal = () => (
-    <div className={`modal ${showEditEpisodeModal ? 'show d-block' : ''}`} style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-      <div className="modal-dialog">
-        <div className="modal-content">
-          <div className="modal-header">
-            <h5 className="modal-title">Staffel bearbeiten</h5>
-            <button
-              type="button"
-              className="btn-close"
-              onClick={() => {
-                showEditEpisodeModal(false);
-                setEditingEpisode(null);
-              }}
-            ></button>
-          </div>
-          <div className="modal-body">
-            {editingEpisode && (
-              <form>
-                <div className="mb-3">
-                  <label className="form-label">Episoden Nummer</label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    value={editingEpisode.episodeNumber}
-                    onChange={(e) => setEditingEpisode({ ...editingEpisode, episodeNumber: e.target.value })}
-                    min="1"
-                  />
-                </div>
-                <div className="mb-3">
-                <label className="form-label">Titel</label>
-                <input
-                  type="url"
-                  className="form-control"
-                  value={editingEpisode.title}
-                  onChange={(e) => setEditingEpisode({ ...editingEpisode, title: e.target.value })}
-                />
-              </div>
-              <div className="mb-3">
-                <label className="form-label">Dauer</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={editingEpisode.duration}
-                  onChange={(e) => setEditingEpisode({ ...editingEpisode, duration: e.target.value })}
-                />
-              </div>
-              <div className="mb-3">
-                <label className="form-label">Erscheinungsdatum</label>
-                <input
-                  type="date"
-                  className="form-control"
-                  value={editingEpisode.releaseDate}
-                  onChange={(e) => setEditingEpisode({ ...editingEpisode, releaseDate: e.target.value })}
-                />
-              </div>
-              <div className="mb-3">
-                <label className="form-label">Beschreibung</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={editingEpisode.description}
-                  onChange={(e) => setEditingEpisode({ ...editingEpisode, description: e.target.value })}
-                />
-              </div>
-              <div className="mb-3">
-                <label className="form-label">Poster URL</label>
-                <input
-                  type="url"
-                  className="form-control"
-                  value={editingEpisode.posterUrl}
-                  onChange={(e) => setEditingEpisode({ ...editingEpisode, posterUrl: e.target.value })}
-                />
-              </div>
-              </form>
-            )}
-          </div>
-          <div className="modal-footer">
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={() => {
-                setShowEditEpisodeModal(false);
-                setEditingEpisode(null);
-              }}
-            >
-              Abbrechen
-            </button>
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={handleEditEpisode}
-            >
-              Speichern
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
 
   if (loading) {
     return (
@@ -1451,53 +1011,163 @@ const AdminPanel = () => {
               <h5>Admin Panel</h5>
             </div>
             <div className="list-group list-group-flush">
-              <button
-                className={`list-group-item list-group-item-action ${activeTab === 'dashboard' ? 'active' : ''}`}
-                onClick={() => setActiveTab('dashboard')}
-              >
-                <FaChartBar className="me-2" />
-                Dashboard
-              </button>
-              <button
-                className={`list-group-item list-group-item-action ${activeTab === 'content' ? 'active' : ''}`}
-                onClick={() => setActiveTab('content')}
-              >
-                <FaFilm className="me-2" />
-                Content Management
-              </button>
-              <button
-                className={`list-group-item list-group-item-action ${activeTab === 'users' ? 'active' : ''}`}
-                onClick={() => setActiveTab('users')}
-              >
-                <FaUsers className="me-2" />
-                Benutzerverwaltung
-              </button>
-              <button
-                className={`list-group-item list-group-item-action ${activeTab === 'moderation' ? 'active' : ''}`}
-                onClick={() => setActiveTab('moderation')}
-              >
-                <FaComments className="me-2" />
-                Moderation
-              </button>
+              {[
+                { key: 'dashboard', icon: FaChartBar, label: 'Dashboard' },
+                { key: 'content', icon: FaFilm, label: 'Content Management' },
+                { key: 'users', icon: FaUsers, label: 'Benutzerverwaltung' },
+                { key: 'moderation', icon: FaComments, label: 'Moderation' }
+              ].map(({ key, icon: Icon, label }) => (
+                <button
+                  key={key}
+                  className={`list-group-item list-group-item-action ${activeTab === key ? 'active' : ''}`}
+                  onClick={() => setActiveTab(key)}
+                >
+                  <Icon className="me-2" />
+                  {label}
+                </button>
+              ))}
             </div>
           </div>
         </div>
 
         <div className="col-md-9">
-          {activeTab === 'dashboard' && renderDashboard()}
-          {activeTab === 'content' && renderContentManagement()}
-          {activeTab === 'users' && renderUserManagement()}
-          {activeTab === 'moderation' && renderModeration()}
+          {activeTab === 'dashboard' && <Dashboard data={data} />}
+          {activeTab === 'content' && viewMode === 'content' && (
+            <ContentManagement
+              data={data}
+              onAdd={() => setModals(prev => ({ ...prev, add: true }))}
+              onEdit={handleEditContent}
+              onDelete={handleDeleteContent}
+              onSeriesSeasons={handleSeriesSeasons}
+            />
+          )}
+          {activeTab === 'content' && viewMode === 'seasons' && (
+            <SeasonsManagement
+              series={forms.selectedSeries}
+              seasons={data.seasons}
+              onAddSeason={() => setModals(prev => ({ ...prev, addSeason: true }))}
+              onEditSeason={handleEditSeason}
+              onDeleteSeason={handleDeleteSeason}
+              onViewEpisodes={handleViewEpisodes}
+              onBack={() => setViewMode('content')}
+            />
+          )}
+          {activeTab === 'content' && viewMode === 'episodes' && (
+            <EpisodesManagement
+              series={forms.selectedSeries}
+              season={forms.selectedSeason}
+              episodes={data.episodes}
+              onAddEpisode={() => setModals(prev => ({ ...prev, addEpisode: true }))}
+              onEditEpisode={handleEditEpisode}
+              onDeleteEpisode={handleDeleteEpisode}
+              onBack={() => setViewMode('seasons')}
+            />
+          )}
+          {activeTab === 'users' && <UserManagement users={data.users} />}
+          {activeTab === 'moderation' && (
+            <Moderation
+              reviews={data.reviews}
+              reviewUsers={data.reviewUsers}
+              onDeleteReview={handleDeleteReview}
+            />
+          )}
         </div>
       </div>
 
-      {showAddModal && renderAddModal()}
-      {showEditModal && renderEditModal()}
-      {showSeasonsModal && renderSeasonsModal()}
-      {showAddSeasonModal && renderAddSeasonModal()}
-      {showEditSeasonModal && renderEditSeasonModal()}
-      {showAddEpisodeModal && renderAddEpisodeModal()}
-      {showEditEpisodeModal && renderEditEpisodeModal()}
+      {/* Modals for movies/series */}
+      <Modal
+        series={modals.add}
+        title="Neuen Inhalt hinzufügen"
+        onClose={() => setModals(prev => ({ ...prev, add: false }))}
+        onSave={handleAddContent}
+        saveText="Hinzufügen"
+      >
+        <ContentForm
+          content={forms.newContent}
+          onChange={(content) => setForms(prev => ({ ...prev, newContent: content }))}
+          genres={genres}
+        />
+      </Modal>
+
+      <Modal
+        series={modals.edit}
+        title={`${forms.editingContent?.type === "movie" ? "Film" : "Serie"} bearbeiten`}
+        onClose={() => {
+          setModals(prev => ({ ...prev, edit: false }));
+          setForms(prev => ({ ...prev, editingContent: null }));
+        }}
+        onSave={handleUpdateContent}
+      >
+        {forms.editingContent && (
+          <ContentForm
+            content={forms.editingContent}
+            onChange={(content) => setForms(prev => ({ ...prev, editingContent: content }))}
+            genres={genres}
+          />
+        )}
+      </Modal>
+
+      {/* Season Modals */}
+      <Modal
+        series={modals.addSeason}
+        title="Neue Staffel hinzufügen"
+        onClose={() => setModals(prev => ({ ...prev, addSeason: false }))}
+        onSave={handleAddSeason}
+        saveText="Hinzufügen"
+      >
+        <SeasonForm
+          season={forms.newSeason}
+          onChange={(season) => setForms(prev => ({ ...prev, newSeason: season }))}
+        />
+      </Modal>
+
+      <Modal
+        series={modals.editSeason}
+        title="Staffel bearbeiten"
+        onClose={() => {
+          setModals(prev => ({ ...prev, editSeason: false }));
+          setForms(prev => ({ ...prev, editingSeason: null }));
+        }}
+        onSave={handleUpdateSeason}
+      >
+        {forms.editingSeason && (
+          <SeasonForm
+            season={forms.editingSeason}
+            onChange={(season) => setForms(prev => ({ ...prev, editingSeason: season }))}
+          />
+        )}
+      </Modal>
+
+      {/* Episode Modals */}
+      <Modal
+        series={modals.addEpisode}
+        title="Neue Episode hinzufügen"
+        onClose={() => setModals(prev => ({ ...prev, addEpisode: false }))}
+        onSave={handleAddEpisode}
+        saveText="Hinzufügen"
+      >
+        <EpisodeForm
+          episode={forms.newEpisode}
+          onChange={(episode) => setForms(prev => ({ ...prev, newEpisode: episode }))}
+        />
+      </Modal>
+
+      <Modal
+        series={modals.editEpisode}
+        title="Episode bearbeiten"
+        onClose={() => {
+          setModals(prev => ({ ...prev, editEpisode: false }));
+          setForms(prev => ({ ...prev, editingEpisode: null }));
+        }}
+        onSave={handleUpdateEpisode}
+      >
+        {forms.editingEpisode && (
+          <EpisodeForm
+            episode={forms.editingEpisode}
+            onChange={(episode) => setForms(prev => ({ ...prev, editingEpisode: episode }))}
+          />
+        )}
+      </Modal>
     </div>
   );
 };
