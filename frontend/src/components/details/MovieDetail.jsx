@@ -43,7 +43,7 @@ const MovieDetail = () => {
     setShowEditModal(true);
   };
 
-  // Handle delete action - this will actually delete the review
+  // Handle delete action 
   const handleDelete = async () => {
     await handleDeleteReview();
   };
