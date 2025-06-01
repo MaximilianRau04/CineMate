@@ -5,14 +5,14 @@ import { useReviews } from "./useReviews";
 import MediaHeader from "./MediaHeader";
 import RatingSection from "./RatingSection";
 import CastSection from "./CastSection";
-import ReviewsSection from "./ReviewSection";
+import ReviewSection from "./ReviewSection";
 import EditReviewModal from "./EditReviewModal";
-import SeasonSection from "./SeasonSection";
+import SeasonSection from "./SeasonSection"; 
 
 const SeriesDetail = () => {
-  const { mediaId, media, isLoading, userId, currentUser, actors, director, castLoading } = 
+  const { mediaId, media, isLoading, error, userId, currentUser, actors, director, castLoading } =
     useMediaDetail('series');
-  
+
   const { added, adding, handleAddToWatchlist } = useWatchlist(userId, mediaId, 'series');
 
   // This hook manages reviews, ratings, and user interactions
@@ -34,13 +34,26 @@ const SeriesDetail = () => {
 
   const [showEditModal, setShowEditModal] = useState(false);
 
-  const handleOpenEditModal = () => setShowEditModal(true);
+  const handleEditReviewWithClose = async (rating, comment) => {
+    await handleEditReview(rating, comment);
+    setShowEditModal(false);
+  };
+
+  // Handle edit action
+  const handleEdit = () => {
+    setShowEditModal(true);
+  };
+
+  // Handle delete action 
+  const handleDelete = async () => {
+    await handleDeleteReview();
+  };
 
   if (isLoading) {
     return (
       <div className="container text-center py-5">
         <div className="spinner-border text-primary" role="status" />
-        <p className="mt-3">Serie wird geladen...</p>
+        <p className="mt-3">Film wird geladen...</p>
       </div>
     );
   }
@@ -73,9 +86,10 @@ const SeriesDetail = () => {
           onRatingChange={setRating}
           onCommentChange={setComment}
           onSubmitReview={handleSubmitReview}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
           renderStars={renderStars}
         />
-
       </div>
 
       <SeasonSection seriesId={mediaId} />
@@ -86,7 +100,7 @@ const SeriesDetail = () => {
         castLoading={castLoading}
       />
 
-      <ReviewsSection
+      <ReviewSection
         reviews={reviews}
         reviewUsers={reviewUsers}
         currentUser={currentUser}
@@ -94,12 +108,13 @@ const SeriesDetail = () => {
       />
 
       <EditReviewModal
-        show={showEditModal}
+        showEditModal={showEditModal}  
         rating={rating}
         comment={comment}
         submitting={submitting}
         onClose={() => setShowEditModal(false)}
-        onSave={handleEditReview}
+        onEditReview={handleEditReviewWithClose}
+        onDeleteReview={handleDeleteReview}  
         renderStars={renderStars}
       />
     </div>

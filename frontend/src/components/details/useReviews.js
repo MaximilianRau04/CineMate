@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-export const useReviews = (userId, mediaId, mediaType = 'movies') => {
+export const useReviews = (userId, mediaId, mediaType) => {
   const [reviews, setReviews] = useState([]);
   const [averageRating, setAverageRating] = useState(0);
   const [reviewUsers, setReviewUsers] = useState({});
@@ -10,6 +10,9 @@ export const useReviews = (userId, mediaId, mediaType = 'movies') => {
   const [reviewId, setReviewId] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+
+  const typeMap = { movies: 'movie', series: 'series' }; 
+  const mediaPath = typeMap[mediaType]; 
 
   /**
    * Calculates the average rating from an array of reviews.
@@ -28,12 +31,12 @@ export const useReviews = (userId, mediaId, mediaType = 'movies') => {
   const fetchReviewUser = async (reviewId) => {
     try {
       const response = await fetch(`http://localhost:8080/api/reviews/${reviewId}/user`);
-      
+
       if (!response.ok) {
         console.error(`API Fehler für Review ${reviewId}: ${response.status}`);
         return null;
       }
-      
+
       const userData = await response.json();
       return userData;
     } catch (error) {
@@ -46,38 +49,39 @@ export const useReviews = (userId, mediaId, mediaType = 'movies') => {
    * loads reviews for the specified media type and ID.
    */
   const loadReviews = async () => {
+    if (!mediaId || !mediaPath) return;
+    
     try {
-      const response = await fetch(`http://localhost:8080/api/reviews/${mediaType.slice(0, -1)}/${mediaId}`);
+      const response = await fetch(`http://localhost:8080/api/reviews/${mediaPath}/${mediaId}`);
       if (!response.ok) {
         if (response.status === 404) {
           setReviews([]);
           setAverageRating(0);
+          setReviewUsers({});
           return;
         }
         throw new Error(`Bewertungen konnten nicht geladen werden (${response.status})`);
       }
-      
+
       const data = await response.json();
       setReviews(data);
-
-      const newReviewUsers = { ...reviewUsers };
-      
-      for (const review of data) {
-        if (!newReviewUsers[review.id]) {
-          const userData = await fetchReviewUser(review.id);
-          if (userData) {
-            newReviewUsers[review.id] = userData;
-          }
-        }
-      }
-
-      setReviewUsers(newReviewUsers);
-      
       const newAverageRating = calculateAverageRating(data);
       setAverageRating(newAverageRating);
+
+      const newReviewUsers = {};
+      for (const review of data) {
+        const userData = await fetchReviewUser(review.id);
+        if (userData) {
+          newReviewUsers[review.id] = userData;
+        }
+      }
+      setReviewUsers(newReviewUsers);
+
     } catch (error) {
       console.error("Fehler beim Laden der Bewertungen:", error);
       setReviews([]);
+      setAverageRating(0);
+      setReviewUsers({});
     }
   };
 
@@ -87,7 +91,7 @@ export const useReviews = (userId, mediaId, mediaType = 'movies') => {
   useEffect(() => {
     if (!userId || !mediaId) return;
 
-    fetch(`http://localhost:8080/api/reviews/${mediaType.slice(0, -1)}/${mediaId}/user/${userId}`)
+    fetch(`http://localhost:8080/api/reviews/${mediaPath}/${mediaId}/user/${userId}`)
       .then((res) => {
         if (!res.ok) {
           if (res.status === 404) return null;
@@ -104,13 +108,13 @@ export const useReviews = (userId, mediaId, mediaType = 'movies') => {
         }
       })
       .catch((err) => console.error("Fehler beim Prüfen der Bewertung:", err));
-  }, [userId, mediaId, mediaType]);
+  }, [userId, mediaId, mediaPath]);
 
-  // Load reviews when mediaId or mediaType changes
+  // Load reviews when mediaId or mediaPath changes
   useEffect(() => {
     if (!mediaId) return;
     loadReviews();
-  }, [mediaId, mediaType]); 
+  }, [mediaId, mediaPath]);
 
   /**
    * adds a review for the media.
@@ -122,7 +126,7 @@ export const useReviews = (userId, mediaId, mediaType = 'movies') => {
     setSubmitSuccess(false);
 
     try {
-      const response = await fetch(`http://localhost:8080/api/reviews/${mediaType.slice(0, -1)}/${mediaId}/user/${userId}`, {
+      const response = await fetch(`http://localhost:8080/api/reviews/${mediaPath}/${mediaId}/user/${userId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -130,7 +134,7 @@ export const useReviews = (userId, mediaId, mediaType = 'movies') => {
           itemId: mediaId,
           rating,
           comment,
-          type: mediaType.slice(0, -1),
+          type: mediaPath,
         }),
       });
 
@@ -172,7 +176,7 @@ export const useReviews = (userId, mediaId, mediaType = 'movies') => {
           itemId: mediaId,
           rating: editRating,
           comment: editComment,
-          type: mediaType.slice(0, -1),
+          type: mediaPath,
         }),
       });
 
@@ -199,6 +203,7 @@ export const useReviews = (userId, mediaId, mediaType = 'movies') => {
     if (!confirmDelete) return;
 
     try {
+      
       const response = await fetch(`http://localhost:8080/api/reviews/${reviewId}`, {
         method: "DELETE",
       });
@@ -212,7 +217,11 @@ export const useReviews = (userId, mediaId, mediaType = 'movies') => {
       setComment("");
       setReviewId(null);
       setSubmitSuccess(false);
+      
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       await loadReviews();
+      
     } catch (error) {
       console.error("Fehler beim Löschen:", error);
     }

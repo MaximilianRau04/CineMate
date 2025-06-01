@@ -22,7 +22,29 @@ const ExplorePage = () => {
   const [sortOrder, setSortOrder] = useState("asc");
 
   /**
-   * Fetch movies and series data from API
+   * Fetch average rating for a specific item
+   */
+  const fetchAverageRating = async (itemId, type) => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/reviews/${type}/${itemId}`);
+      if (!response.ok) {
+        if (response.status === 404) return 0; 
+        return null; 
+      }
+      
+      const reviews = await response.json();
+      if (!reviews || reviews.length === 0) return 0;
+      
+      const sum = reviews.reduce((acc, review) => acc + review.rating, 0);
+      return sum / reviews.length;
+    } catch (error) {
+      console.error(`Fehler beim Laden des Ratings für ${type} ${itemId}:`, error);
+      return null;
+    }
+  };
+
+  /**
+   * Fetch movies and series data from API with current ratings
    */
   const fetchData = useCallback(async (showLoadingSpinner = true) => {
     if (showLoadingSpinner) {
@@ -49,15 +71,31 @@ const ExplorePage = () => {
         seriesResponse.json()
       ]);
 
-      const processedMovies = moviesData.map(movie => {
-        const genreArray = movie.genre ? movie.genre.split(/,\s*/) : [];
-        return { ...movie, genreArray };
-      });
+      // Process movies with genres and current ratings
+      const processedMovies = await Promise.all(
+        moviesData.map(async (movie) => {
+          const genreArray = movie.genre ? movie.genre.split(/,\s*/) : [];
+          const currentRating = await fetchAverageRating(movie.id, 'movie');
+          return { 
+            ...movie, 
+            genreArray,
+            currentRating: currentRating !== null ? currentRating : movie.rating
+          };
+        })
+      );
       
-      const processedSeries = seriesData.map(series => {
-        const genreArray = series.genre ? series.genre.split(/,\s*/) : [];
-        return { ...series, genreArray };
-      });
+      // Process series with genres and current ratings
+      const processedSeries = await Promise.all(
+        seriesData.map(async (series) => {
+          const genreArray = series.genre ? series.genre.split(/,\s*/) : [];
+          const currentRating = await fetchAverageRating(series.id, 'series');
+          return { 
+            ...series, 
+            genreArray,
+            currentRating: currentRating !== null ? currentRating : series.rating
+          };
+        })
+      );
       
       setMovies(processedMovies);
       setSeries(processedSeries);
@@ -188,13 +226,6 @@ const ExplorePage = () => {
   };
 
   /**
-   * Manual refresh function
-   */
-  const handleRefresh = () => {
-    fetchData(false);
-  };
-
-  /**
    * Reset all filters to default values
    */
   const resetFilters = () => {
@@ -219,9 +250,11 @@ const ExplorePage = () => {
   };
 
   /**
-   * Format rating for display
+   * Format rating for display 
    */
-  const formatRating = (rating) => {
+  const formatRating = (item) => {
+    const rating = item.currentRating !== undefined ? item.currentRating : item.rating;
+    
     if (rating === null || rating === undefined) return "N/A";
     
     const numRating = Number(rating);
@@ -428,7 +461,7 @@ const ExplorePage = () => {
                             ))}
                           </div>
                           <p className="card-text mb-1">
-                            ⭐ <strong>{formatRating(movie.rating)}</strong>
+                            ⭐ <strong>{formatRating(movie)}</strong>
                           </p>
                           <p className="card-text mb-1">
                             📅{" "}
@@ -487,7 +520,7 @@ const ExplorePage = () => {
                             ))}
                           </div>
                           <p className="card-text mb-1">
-                            ⭐ <strong>{formatRating(serie.rating)}</strong>
+                            ⭐ <strong>{formatRating(serie)}</strong>
                           </p>
                           <p className="card-text mb-1">
                             📅{" "}
