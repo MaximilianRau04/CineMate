@@ -71,21 +71,35 @@ const useAppData = () => {
 
   // Load initial data from the API
   const loadData = async () => {
-    setLoading(true);
-    try {
-      const [movies, series, users, reviews] = await Promise.all([
-        api.get('/movies'),
-        api.get('/series'),
-        api.get('/users'),
-        api.get('/reviews')
-      ]);
+  setLoading(true);
+  try {
+    const [movies, series, users, reviews] = await Promise.all([
+      api.get('/movies'),
+      api.get('/series'),
+      api.get('/users'),
+      api.get('/reviews')
+    ]);
 
-      setData(prev => ({ ...prev, movies, series, users, reviews }));
-    } catch (error) {
-      console.error("Error loading data:", error);
-    }
-    setLoading(false);
-  };
+    // Load review users
+    const reviewUsers = {};
+    await Promise.all(
+      reviews.map(async (review) => {
+        try {
+          const user = await api.get(`/reviews/${review.id}/user`);
+          reviewUsers[review.id] = user;
+        } catch (error) {
+          console.error(`Error loading user for review ${review.id}:`, error);
+          reviewUsers[review.id] = { username: 'Unbekannt' };
+        }
+      })
+    );
+
+    setData(prev => ({ ...prev, movies, series, users, reviews, reviewUsers }));
+  } catch (error) {
+    console.error("Error loading data:", error);
+  }
+  setLoading(false);
+};
 
   /**
    * fetches seasons for a given series ID.
@@ -836,13 +850,20 @@ const AdminPanel = () => {
    * @param {*} reviewId 
    */
   const handleDeleteReview = async (reviewId) => {
-    try {
-      await api.delete(`/reviews/${reviewId}`);
-      await loadData();
-    } catch (error) {
-      console.error("Error deleting review:", error);
-    }
-  };
+  try {
+    await api.delete(`/reviews/${reviewId}`);
+ 
+    setData(prev => {
+      const newReviewUsers = { ...prev.reviewUsers };
+      delete newReviewUsers[reviewId];
+      return { ...prev, reviewUsers: newReviewUsers };
+    });
+    
+    await loadData();
+  } catch (error) {
+    console.error("Error deleting review:", error);
+  }
+};
 
   /**
    * Handles viewing seasons of a series.
