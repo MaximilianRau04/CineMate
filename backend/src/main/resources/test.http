@@ -138,7 +138,8 @@ Content-Type: application/json
 ###
 GET http://localhost:8080/api/directors
 ###
-GET http://localhost:8080/api/series/682394becf80ad33eb7213dc/directors
+GET http://localhost:8080/api/series/682a284236f2d54c872d1bb9/seasons
+
 ###
 POST http://localhost:8080/api/movies/682a27bf36f2d54c872d1bb5/director/682a285836f2d54c872d1bbf
 Content-Type: application/json

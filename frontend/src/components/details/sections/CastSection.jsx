@@ -1,4 +1,4 @@
-import { formatBirthday } from "./useMediaDetail";
+import { formatBirthday } from "../utils/useMediaDetail";
 
 const CastSection = ({ actors, director, castLoading }) => {
   return (

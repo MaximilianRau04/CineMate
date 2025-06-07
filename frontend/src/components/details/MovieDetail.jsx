@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import { useMediaDetail, renderStars } from "./useMediaDetail";
-import { useWatchlist } from "./useWatchlist";
-import { useReviews } from "./useReviews";
+import { useMediaDetail, renderStars } from "./utils/useMediaDetail";
+import { useWatchlist } from "./utils/useWatchlist";
+import { useReviews } from "./utils/useReviews";
 import MediaHeader from "./MediaHeader";
-import RatingSection from "./RatingSection";
-import CastSection from "./CastSection";
-import ReviewSection from "./ReviewSection";
-import EditReviewModal from "./EditReviewModal";
+import RatingSection from "./sections/RatingSection";
+import CastSection from "./sections/CastSection";
+import ReviewSection from "./sections/ReviewSection";
+import EditReviewModal from "./sections/EditReviewModal";
 
 const MovieDetail = () => {
   const { mediaId, media, isLoading, error, userId, currentUser, actors, director, castLoading } =
