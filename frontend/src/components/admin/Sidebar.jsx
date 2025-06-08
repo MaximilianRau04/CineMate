@@ -1,12 +1,12 @@
-import React from 'react';
-import { FaChartBar, FaFilm, FaUsers, FaComments } from 'react-icons/fa';
+import { FaChartBar, FaFilm, FaUsers, FaComments, FaUserTie } from 'react-icons/fa';
 
 export const Sidebar = ({ activeTab, onTabChange }) => {
   const menuItems = [
     { key: 'dashboard', icon: FaChartBar, label: 'Dashboard' },
     { key: 'content', icon: FaFilm, label: 'Content Management' },
     { key: 'users', icon: FaUsers, label: 'Benutzerverwaltung' },
-    { key: 'moderation', icon: FaComments, label: 'Moderation' }
+    { key: 'moderation', icon: FaComments, label: 'Moderation' },
+    { key: 'cast', icon: FaUserTie, label: 'Schauspieler & Regisseure' },
   ];
 
   return (

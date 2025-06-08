@@ -1,4 +1,3 @@
-import React from "react";
 import { FaUsers, FaFilm, FaTv, FaComments } from "react-icons/fa";
 
 const Dashboard = ({ data }) => (

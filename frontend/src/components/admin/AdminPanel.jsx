@@ -1,27 +1,41 @@
 import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { FaChartBar, FaFilm, FaUsers, FaComments } from "react-icons/fa";
+import { FaChartBar, FaFilm, FaUsers, FaComments, FaUserTie } from "react-icons/fa";
 
 // utils
-import { useAppData } from "./utils/utils";
-import { formatDateForInput } from "./utils/utils";
-import { genres as GENRES } from "./utils/utils";
+import { useAppData, formatDateForInput, genres as GENRES } from "./utils";
 
 // Components
-import Dashboard from "./Dashboard";
-import ContentManagement from "./management/ContentManagement";
-import UserManagement from "./management/UserManagement";
-import Moderation from "./Moderation";
+import Dashboard from "./content/Dashboard";
+import Moderation from "./content/Moderation";
 import Modal from "./modals/Modal";
 
 // Management Components
-import SeasonsManagement from "./management/SeasonsManagement";
-import EpisodesManagement from "./management/EpisodesManagement";
-import { SeasonForm, EpisodeForm, ContentForm } from "./forms/ContentForms";
+import { ContentManagement, SeasonsManagement, EpisodesManagement } from "./management/ContentManagement";
+import UserManagement from "./management/UserManagement";
+import CastManagement from "./management/CastManagement";
+
+import { SeasonForm, EpisodeForm, ContentForm } from "./content/ContentForms";
 
 const AdminPanel = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
-  const { data, setData, loading, loadData, loadSeasons, loadEpisodes, api } = useAppData();
+  const {
+    data,
+    setData,
+    loading,
+    loadData,
+    loadSeasons,
+    loadEpisodes,
+    api,
+    assignActorToMovie,
+    removeActorFromMovie,
+    assignActorToSeries,
+    removeActorFromSeries,
+    assignDirectorToMovie,
+    assignDirectorToSeries,
+    removeDirectorFromSeries,
+    deleteUser
+  } = useAppData();
 
   // Modal states
   const [modals, setModals] = useState({
@@ -54,7 +68,9 @@ const AdminPanel = () => {
     loadData();
   }, []);
 
-  // Event handlers
+  /**
+   * Handles adding new content (movie or series).
+   */
   const handleAddContent = async () => {
     try {
       const endpoint = forms.newContent.type === "movie" ? "movies" : "series";
@@ -80,6 +96,11 @@ const AdminPanel = () => {
     }
   };
 
+  /**
+   * Handles editing existing content (movie or series).
+   * @param {*} content 
+   * @param {*} type 
+   */
   const handleEditContent = (content, type) => {
     setForms(prev => ({
       ...prev,
@@ -92,6 +113,9 @@ const AdminPanel = () => {
     setModals(prev => ({ ...prev, edit: true }));
   };
 
+  /**
+   * Handles updating existing content (movie or series).
+   */
   const handleUpdateContent = async () => {
     try {
       const { editingContent } = forms;
@@ -112,6 +136,12 @@ const AdminPanel = () => {
     }
   };
 
+  /**
+   * Handles deleting content (movie or series).
+   * @param {*} id 
+   * @param {*} type 
+   * @returns 
+   */
   const handleDeleteContent = async (id, type) => {
     if (!window.confirm("Sind Sie sicher, dass Sie diesen Inhalt löschen möchten?")) return;
 
@@ -124,16 +154,20 @@ const AdminPanel = () => {
     }
   };
 
+  /**
+   * Handles deleting a review.
+   * @param {*} reviewId 
+   */
   const handleDeleteReview = async (reviewId) => {
     try {
       await api.delete(`/reviews/${reviewId}`);
-      
+
       setData(prev => {
         const newReviewUsers = { ...prev.reviewUsers };
         delete newReviewUsers[reviewId];
         return { ...prev, reviewUsers: newReviewUsers };
       });
-      
+
       await loadData();
     } catch (error) {
       console.error("Error deleting review:", error);
@@ -147,6 +181,9 @@ const AdminPanel = () => {
     setViewMode('seasons');
   };
 
+  /**
+   * Handles adding a new season to a series.
+   */
   const handleAddSeason = async () => {
     try {
       const seasonData = { ...forms.newSeason };
@@ -160,11 +197,18 @@ const AdminPanel = () => {
     }
   };
 
+  /**
+   * Handles editing an existing season.
+   * @param {*} season 
+   */
   const handleEditSeason = (season) => {
     setForms(prev => ({ ...prev, editingSeason: { ...season } }));
     setModals(prev => ({ ...prev, editSeason: true }));
   };
 
+  /**
+   * Handles updating an existing season.
+   */
   const handleUpdateSeason = async () => {
     try {
       const { editingSeason } = forms;
@@ -178,6 +222,11 @@ const AdminPanel = () => {
     }
   };
 
+  /**
+   * Handles deleting a season.
+   * @param {*} seasonNumber 
+   * @returns 
+   */
   const handleDeleteSeason = async (seasonNumber) => {
     if (!window.confirm("Sind Sie sicher, dass Sie diese Staffel löschen möchten?")) return;
 
@@ -196,6 +245,9 @@ const AdminPanel = () => {
     setViewMode('episodes');
   };
 
+  /**
+   * Handles adding a new episode to a season.
+   */
   const handleAddEpisode = async () => {
     try {
       const episodeData = { ...forms.newEpisode };
@@ -216,6 +268,10 @@ const AdminPanel = () => {
     }
   };
 
+  /**
+   * Handles editing an existing episode.
+   * @param {*} episode 
+   */
   const handleEditEpisode = (episode) => {
     setForms(prev => ({
       ...prev,
@@ -227,6 +283,9 @@ const AdminPanel = () => {
     setModals(prev => ({ ...prev, editEpisode: true }));
   };
 
+  /**
+   * Handles updating an existing episode.
+   */
   const handleUpdateEpisode = async () => {
     try {
       const { editingEpisode } = forms;
@@ -245,6 +304,11 @@ const AdminPanel = () => {
     }
   };
 
+  /**
+   * Handles deleting an episode.
+   * @param {*} episodeNumber 
+   * @returns 
+   */
   const handleDeleteEpisode = async (episodeNumber) => {
     if (!window.confirm("Sind Sie sicher, dass Sie diese Episode löschen möchten?")) return;
 
@@ -254,6 +318,10 @@ const AdminPanel = () => {
     } catch (error) {
       console.error("Error deleting episode:", error);
     }
+  };
+
+  const handleDeleteUser = async (userId) => {
+    await deleteUser(userId);
   };
 
   if (loading) {
@@ -281,7 +349,8 @@ const AdminPanel = () => {
                 { key: 'dashboard', icon: FaChartBar, label: 'Dashboard' },
                 { key: 'content', icon: FaFilm, label: 'Content Management' },
                 { key: 'users', icon: FaUsers, label: 'Benutzerverwaltung' },
-                { key: 'moderation', icon: FaComments, label: 'Moderation' }
+                { key: 'moderation', icon: FaComments, label: 'Moderation' },
+                { key: 'cast', icon: FaUserTie, label: 'Schauspieler & Regisseure' }
               ].map(({ key, icon: Icon, label }) => (
                 <button
                   key={key}
@@ -298,7 +367,7 @@ const AdminPanel = () => {
 
         <div className="col-md-9">
           {activeTab === 'dashboard' && <Dashboard data={data} />}
-          
+
           {activeTab === 'content' && viewMode === 'content' && (
             <ContentManagement
               data={data}
@@ -308,7 +377,7 @@ const AdminPanel = () => {
               onSeriesSeasons={handleSeriesSeasons}
             />
           )}
-          
+
           {activeTab === 'content' && viewMode === 'seasons' && (
             <SeasonsManagement
               series={forms.selectedSeries}
@@ -320,7 +389,7 @@ const AdminPanel = () => {
               onBack={() => setViewMode('content')}
             />
           )}
-          
+
           {activeTab === 'content' && viewMode === 'episodes' && (
             <EpisodesManagement
               series={forms.selectedSeries}
@@ -332,14 +401,36 @@ const AdminPanel = () => {
               onBack={() => setViewMode('seasons')}
             />
           )}
-          
-          {activeTab === 'users' && <UserManagement users={data.users} />}
-          
+
+          {activeTab === 'users' &&
+            <UserManagement
+              users={data.users}
+              onDeleteUser={handleDeleteUser}
+            />}
+
           {activeTab === 'moderation' && (
             <Moderation
               reviews={data.reviews}
               reviewUsers={data.reviewUsers}
               onDeleteReview={handleDeleteReview}
+            />
+          )}
+
+          {activeTab === 'cast' && (
+            <CastManagement
+              actors={data.actors}
+              directors={data.directors}
+              movies={data.movies}
+              series={data.series}
+              api={api}
+              assignActorToMovie={assignActorToMovie}
+              removeActorFromMovie={removeActorFromMovie}
+              assignActorToSeries={assignActorToSeries}
+              removeActorFromSeries={removeActorFromSeries}
+              assignDirectorToMovie={assignDirectorToMovie}
+              assignDirectorToSeries={assignDirectorToSeries}
+              removeDirectorFromSeries={removeDirectorFromSeries}
+              loadData={loadData}
             />
           )}
         </div>

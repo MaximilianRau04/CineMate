@@ -1,4 +1,3 @@
-import React from "react";
 
 const Modal = ({ show, title, children, onClose, onSave, saveText = "Speichern" }) => {
   if (!show) return null;
@@ -13,9 +12,6 @@ const Modal = ({ show, title, children, onClose, onSave, saveText = "Speichern" 
           </div>
           <div className="modal-body">{children}</div>
           <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" onClick={onClose}>
-              Abbrechen
-            </button>
             {onSave && (
               <button type="button" className="btn btn-primary" onClick={onSave}>
                 {saveText}

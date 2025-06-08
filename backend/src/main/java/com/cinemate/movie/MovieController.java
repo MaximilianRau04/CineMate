@@ -80,9 +80,9 @@ public class MovieController {
      * @param id
      * @return DirectorResponseDTO
      */
-    @GetMapping("/{id}/director")
-    public ResponseEntity<DirectorResponseDTO> getDirectorOfMovie(@PathVariable String id) {
-        return movieService.getDirectorOfMovie(id)
+    @GetMapping("/{id}/directors")
+    public ResponseEntity<List<DirectorResponseDTO>> getDirectorOfMovie(@PathVariable String id) {
+        return movieService.getDirectorsOfMovie(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -131,11 +131,11 @@ public class MovieController {
      * @param directorId
      * @return DirectorResponseDTO
      */
-    @PostMapping("/{movieId}/director/{directorId}")
-    public ResponseEntity<DirectorResponseDTO> setDirectorToMovie(
+    @PostMapping("/{movieId}/directors/{directorId}")
+    public ResponseEntity<DirectorResponseDTO> addDirectorToMovie(
             @PathVariable String movieId,
             @PathVariable String directorId) {
-        return movieService.setDirectorToMovie(movieId, directorId);
+        return movieService.addDirectorToMovie(movieId, directorId);
     }
 
     /**
@@ -143,9 +143,10 @@ public class MovieController {
      * @param movieId
      * @return DirectorResponseDTO
      */
-    @DeleteMapping("/{movieId}/director")
+    @DeleteMapping("/{movieId}/directors/{directorId}")
     public ResponseEntity<Map<String, Object>> removeDirectorFromMovie(
-            @PathVariable String movieId) {
-        return movieService.removeDirectorFromMovie(movieId);
+            @PathVariable String movieId,
+            @PathVariable String directorId) {
+        return movieService.removeDirectorFromMovie(movieId, directorId);
     }
 }

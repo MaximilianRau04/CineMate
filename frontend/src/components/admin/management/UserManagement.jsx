@@ -1,40 +1,88 @@
-import React from "react";
-import { formatDate } from "../utils/utils";
+import React, { useState } from "react";
+import { FaTrash } from "react-icons/fa";
+import { formatDate } from "../utils";
 
-const UserManagement = ({ users }) => (
-  <div>
-    <h4 className="mb-4">Benutzerverwaltung</h4>
-    <div className="card">
-      <div className="card-body">
-        <div className="table-responsive">
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Benutzername</th>
-                <th>E-Mail</th>
-                <th>Rolle</th>
-                <th>Registriert am</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map(user => (
-                <tr key={user.id}>
-                  <td>{user.username}</td>
-                  <td>{user.email}</td>
-                  <td>
-                    <span className={`badge ${user.role === 'ADMIN' ? 'bg-danger' : 'bg-primary'}`}>
-                      {user.role}
-                    </span>
-                  </td>
-                  <td>{formatDate(user.joinedAt)}</td>
+const UserManagement = ({ users, onDeleteUser }) => {
+  const [filterRole, setFilterRole] = useState('all');
+  
+  const filteredUsers = filterRole === 'all'
+    ? users
+    : users.filter(user => user.role === filterRole);
+
+  return (
+    <div>
+      <h4 className="mb-4">Benutzerverwaltung</h4>
+      
+      <div className="card mb-4">
+        <div className="card-body">
+          <div className="d-flex justify-content-end mb-3">
+            <div className="btn-group">
+              <button 
+                className={`btn ${filterRole === 'all' ? 'btn-primary' : 'btn-outline-primary'}`}
+                onClick={() => setFilterRole('all')}
+              >
+                Alle
+              </button>
+              <button 
+                className={`btn ${filterRole === 'USER' ? 'btn-primary' : 'btn-outline-primary'}`}
+                onClick={() => setFilterRole('USER')}
+              >
+                User
+              </button>
+              <button 
+                className={`btn ${filterRole === 'ADMIN' ? 'btn-primary' : 'btn-outline-primary'}`}
+                onClick={() => setFilterRole('ADMIN')}
+              >
+                Admin
+              </button>
+            </div>
+          </div>
+
+          <div className="table-responsive">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Benutzername</th>
+                  <th>E-Mail</th>
+                  <th>Rolle</th>
+                  <th>Registriert am</th>
+                  <th>Aktionen</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filteredUsers.map(user => (
+                  <tr key={user.id}>
+                    <td>{user.username}</td>
+                    <td>{user.email}</td>
+                    <td>
+                      <span className={`badge ${user.role === 'ADMIN' ? 'bg-danger' : 'bg-primary'}`}>
+                        {user.role}
+                      </span>
+                    </td>
+                    <td>{formatDate(user.joinedAt)}</td>
+                    <td>
+                      {user.role !== 'ADMIN' && (
+                        <button
+                          className="btn btn-sm btn-outline-danger"
+                          onClick={() => {
+                            if (window.confirm(`Möchten Sie den Benutzer "${user.username}" wirklich löschen?`)) {
+                              onDeleteUser(user.id);
+                            }
+                          }}
+                        >
+                          <FaTrash /> Löschen
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default UserManagement;

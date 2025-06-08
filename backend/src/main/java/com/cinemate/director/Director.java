@@ -18,7 +18,6 @@ public class Director {
     private String id;
     @NotNull
     private String name;
-    @NotNull
     private Date birthday;
     @DBRef(lazy = true)
     private List<Movie> movies;

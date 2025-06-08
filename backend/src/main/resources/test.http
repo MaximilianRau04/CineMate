@@ -180,7 +180,7 @@ Content-Type: application/json
 GET http://localhost:8080/api/users/6813a9c6a70428033d933986/watchlist/series
 
 ###
-GET http://localhost:8080/api/actors
+GET http://localhost:8080/api/users
 
 ###
 GET http://localhost:8080/api/series/682a284236f2d54c872d1bb9/seasons
@@ -324,7 +324,7 @@ Content-Type: application/json
 DELETE http://localhost:8080/api/series/680e7b2023c0b14c9c4811bb/seasons/1/episodes/0
 
 ###
-GET http://localhost:8080/api/users
+GET http://localhost:8080/api/actors
 ###
 GET http://localhost:8080/api/reviews/user/682a27ab36f2d54c872d1bb0
 ###
@@ -356,5 +356,11 @@ Content-Type: application/json
   "biography": "Hello",
   "image": "https://media.themoviedb.org/t/p/w300_and_h450_bestv2/xuAIuYSmsUzKlUMBFGVZaWsY3DZ.jpg"
 }
+###
+GET http://localhost:8080/api/directors/682a285836f2d54c872d1bbf/movies
+###
+DELETE http://localhost:8080/api/movies/682a27b836f2d54c872d1bb3/director
+###
 
-
+POST http://localhost:8080/api/movies/682a27b836f2d54c872d1bb3/director/682a285836f2d54c872d1bbf
+Content-Type: application/json

@@ -1,6 +1,5 @@
-import React from "react";
 import { FaTrash, FaEdit } from "react-icons/fa";
-import { formatDate } from "./utils/utils";
+import { formatDate } from "../utils";
 
 const ContentTable = ({ items, type, onEdit, onDelete, onSeriesSeasons }) => (
   <div className="table-responsive">

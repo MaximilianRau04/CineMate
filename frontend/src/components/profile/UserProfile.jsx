@@ -7,7 +7,7 @@ const UserProfile = () => {
   const [bio, setBio] = useState("");
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
-  const [saving, setSaving] = useState(false);  // Korrigiert: war [setSaving]
+  const [saving, setSaving] = useState(false);
   const [userId, setUserId] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [modalBio, setModalBio] = useState("");
@@ -64,55 +64,44 @@ const UserProfile = () => {
   }, [userId]);
 
   /**
-   * updates the user profile with the new bio and avatar.
-   * @param {*} e
-   * @returns {void}
-   * @throws {Error} If the profile cannot be updated.
+   * removes the avatar from the user profile.
    */
-  const handleProfileUpdate = (e) => {
-    e.preventDefault();
+  const handleRemoveAvatar = async () => {
     if (!userId) return;
 
-    const formData = new FormData();
-
-    const userData = { bio };
-
-    formData.append(
-      "user",
-      new Blob([JSON.stringify(userData)], { type: "application/json" })
-    );
-
-    if (avatarFile) {
-      formData.append("avatar", avatarFile);
-    }
-
     setSaving(true);
-    fetch(`http://localhost:8080/api/users/${userId}`, {
-      method: "PUT",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-      body: formData,
-    })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error(`Update fehlgeschlagen: ${res.status}`);
-        }
-        return res.json();
-      })
-      .then((updatedUser) => {
-        setUser(updatedUser);
-        // Hier wird korrekt das aktualisierte avatarUrl gesetzt
-        setAvatarFile(null);
-      })
-      .catch((err) => {
-        console.error("Fehler beim Speichern:", err);
-      })
-      .finally(() => {
-        setSaving(false);
-      });
-  };
+    try {
+      // FormData mit speziellem Flag zum Entfernen
+      const formData = new FormData();
+      const userData = { 
+        bio: bio,
+        removeAvatar: true 
+      };
 
+      formData.append(
+        "user",
+        new Blob([JSON.stringify(userData)], { type: "application/json" })
+      );
+
+      const response = await fetch(`http://localhost:8080/api/users/${userId}`, {
+        method: "PUT",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Entfernen fehlgeschlagen: ${response.status}`);
+      }
+
+      const updatedUser = await response.json();
+      setUser(updatedUser);
+      setAvatarPreview(null);
+      setAvatarFile(null);
+    } catch (err) {
+      console.error("Fehler beim Entfernen des Avatars:", err);
+    } finally {
+      setSaving(false);
+    }
+  };
   const openModal = () => {
     setModalBio(bio);
     setShowModal(true);
@@ -127,10 +116,11 @@ const UserProfile = () => {
     fileInputRef.current.click();
   };
   
-  // Automatisches Speichern, wenn ein Bild ausgewählt wurde
+  /**
+   * automatically saves the user profile when the avatar file changes.
+   */
   useEffect(() => {
     if (avatarFile) {
-      // Automatisch speichern, wenn ein neues Bild ausgewählt wurde
       const autoSave = async () => {
         if (!userId) return;
         
@@ -161,6 +151,7 @@ const UserProfile = () => {
           const updatedUser = await response.json();
           setUser(updatedUser);
           setAvatarFile(null);
+          setAvatarPreview(null);
         } catch (err) {
           console.error("Fehler beim Speichern:", err);
         } finally {
@@ -184,6 +175,8 @@ const UserProfile = () => {
     day: "numeric",
   });
 
+  const hasAvatar = avatarPreview || avatarUrl;
+
   return (
     <div className="container py-5">
       <div className="card shadow-lg border-0">
@@ -193,42 +186,91 @@ const UserProfile = () => {
               className="avatar-container position-relative"
               style={{ cursor: "pointer" }}
             >
-              <img
-                src={
-                  avatarPreview || 
-                  (avatarUrl ? `http://localhost:8080${avatarUrl}` : "https://via.placeholder.com/150?text=Kein+Bild")
-                }
-                alt={username}
-                className="img-fluid rounded-circle shadow-sm mb-3"
-                style={{ width: "150px", height: "150px", objectFit: "cover" }}
-                onClick={handleAvatarClick}
-                onError={(e) => {
-                  console.log(
-                    "Bild konnte nicht geladen werden:",
-                    e.target.src
-                  );
-                  e.target.src =
-                    "https://via.placeholder.com/150?text=Kein+Bild";
-                }}
-              />
-              <div
-                className="avatar-overlay position-absolute rounded-circle d-flex justify-content-center align-items-center"
-                style={{
-                  top: 0,
-                  left: "50%",
-                  transform: "translateX(-50%)",
-                  width: "150px",
-                  height: "150px",
-                  background: "rgba(0,0,0,0.5)",
-                  opacity: 0,
-                  transition: "opacity 0.3s",
-                }}
-                onClick={handleAvatarClick}
-                onMouseOver={(e) => (e.currentTarget.style.opacity = 1)}
-                onMouseOut={(e) => (e.currentTarget.style.opacity = 0)}
-              >
-                <span>Datei auswählen</span>
-              </div>
+              {hasAvatar ? (
+                <>
+                  <img
+                    src={
+                      avatarPreview || 
+                      `http://localhost:8080${avatarUrl}`
+                    }
+                    alt={username}
+                    className="img-fluid rounded-circle shadow-sm mb-3"
+                    style={{ width: "150px", height: "150px", objectFit: "cover" }}
+                    onClick={handleAvatarClick}
+                    onError={(e) => {
+                      console.log("Bild konnte nicht geladen werden:", e.target.src);
+                      e.target.src = "https://via.placeholder.com/150?text=Kein+Bild";
+                    }}
+                  />
+                  {/* hover-overlay for avatar */}
+                  <div
+                    className="avatar-overlay position-absolute rounded-circle d-flex justify-content-center align-items-center"
+                    style={{
+                      top: 0,
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      width: "150px",
+                      height: "150px",
+                      background: "rgba(0,0,0,0.7)",
+                      opacity: 0,
+                      transition: "opacity 0.3s",
+                    }}
+                    onClick={handleAvatarClick}
+                    onMouseOver={(e) => (e.currentTarget.style.opacity = 1)}
+                    onMouseOut={(e) => (e.currentTarget.style.opacity = 0)}
+                  >
+                    <div className="text-center">
+                      <i className="bi bi-camera-fill" style={{ fontSize: "1.5rem" }}></i>
+                      <div style={{ fontSize: "0.8rem", marginTop: "5px" }}>Ändern</div>
+                    </div>
+                  </div>
+                  {/* Entfernen-Button */}
+                  <button
+                    className="btn btn-danger btn-sm position-absolute"
+                    style={{
+                      top: "5px",
+                      right: "5px",
+                      width: "30px",
+                      height: "30px",
+                      borderRadius: "50%",
+                      padding: "0",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center"
+                    }}
+                    onClick={handleRemoveAvatar}
+                    title="Avatar entfernen"
+                  >
+                    <i className="bi bi-x-lg"></i>
+                  </button>
+                </>
+              ) : (
+                /* Placeholder*/
+                <div
+                  className="d-flex flex-column align-items-center justify-content-center rounded-circle bg-secondary mb-3"
+                  style={{ 
+                    width: "150px", 
+                    height: "150px", 
+                    border: "3px dashed #6c757d",
+                    transition: "all 0.3s ease"
+                  }}
+                  onClick={handleAvatarClick}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.backgroundColor = "#5a6268";
+                    e.currentTarget.style.borderColor = "#adb5bd";
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.backgroundColor = "#6c757d";
+                    e.currentTarget.style.borderColor = "#6c757d";
+                  }}
+                >
+                  <i className="bi bi-camera-fill" style={{ fontSize: "2rem", marginBottom: "10px" }}></i>
+                  <div className="text-center" style={{ fontSize: "0.9rem" }}>
+                    <div>Avatar</div>
+                    <div>hinzufügen</div>
+                  </div>
+                </div>
+              )}
             </div>
 
             <input
@@ -238,17 +280,27 @@ const UserProfile = () => {
               onChange={(e) => {
                 const file = e.target.files[0];
                 if (file) {
-                  // Erstelle eine Vorschau des Bildes
                   setAvatarPreview(URL.createObjectURL(file));
-                  // Setze das Bild für das automatische Speichern
                   setAvatarFile(file);
                 }
               }}
               className="d-none"
             />
-            <small className="text-muted d-block mt-2">
-              Klicke auf das Bild, um ein neues Profilbild auszuwählen
-            </small>
+            
+            <div className="text-center">
+              <small className="text-muted d-block">
+                {hasAvatar ? 
+                  "Klicke auf das Bild zum Ändern" : 
+                  "Klicke hier, um ein Profilbild hinzuzufügen"
+                }
+              </small>
+              {hasAvatar && (
+                <small className="text-muted d-block mt-1">
+                  <i className="bi bi-x-circle me-1"></i>
+                  Oder auf das X zum Entfernen
+                </small>
+              )}
+            </div>
           </div>
 
           <div className="col-md-8 p-4">
@@ -283,11 +335,10 @@ const UserProfile = () => {
               <strong>Beigetreten:</strong> {formattedDate}
             </p>
             
-            {/* Der Submit-Button wird nicht mehr benötigt, da automatisch gespeichert wird */}
             {saving && (
               <div className="mt-3 text-center">
                 <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                <span>Bild wird gespeichert...</span>
+                <span>{avatarFile ? "Bild wird gespeichert..." : "Avatar wird entfernt..."}</span>
               </div>
             )}
             
@@ -332,6 +383,7 @@ const UserProfile = () => {
           </div>
         </div>
       </div>
+      
       {/* Bio Edit Modal */}
       {showModal && (
         <div

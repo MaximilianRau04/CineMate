@@ -1,6 +1,5 @@
-import React from "react";
 import { FaTrash } from "react-icons/fa";
-import { formatDate } from "./utils/utils";
+import { formatDate } from "../utils";
 
 const Moderation = ({ reviews, reviewUsers, onDeleteReview }) => (
   <div>

@@ -27,7 +27,7 @@ public class Movie {
     private String duration;
     private String posterUrl;
     @DBRef(lazy = true)
-    private Director director;
+    private List<Director> directors;
     @DBRef(lazy = true)
     private List<Actor> actors;
     private String country;
@@ -134,12 +134,12 @@ public class Movie {
         this.reviewCount = reviewCount;
     }
 
-    public Director getDirector() {
-        return director;
+    public List<Director> getDirectors() {
+        return directors;
     }
 
-    public void setDirector(Director director) {
-        this.director = director;
+    public void setDirectors(List<Director> directors) {
+        this.directors = directors;
     }
 
     public List<Actor> getActors() {

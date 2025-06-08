@@ -1,6 +1,5 @@
-import React from 'react';
 import { Modal } from './Modal';
-import { ContentForm, SeasonForm, EpisodeForm } from '../forms/ContentForms';
+import { ContentForm, SeasonForm, EpisodeForm } from '../content/ContentForms';
 import { genres } from "./utils/utils";
 
 export const ContentModals = ({ modals, forms, onModalClose, onFormChange, onSave }) => (
