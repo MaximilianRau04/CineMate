@@ -1,4 +1,4 @@
-import { formatDateForInput } from "../utils";
+import { formatDateForInput } from "../utils/utils";
 
 const PersonForm = ({ person, onChange }) => (
   <div>

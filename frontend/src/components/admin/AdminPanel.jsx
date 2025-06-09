@@ -3,11 +3,11 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { FaChartBar, FaFilm, FaUsers, FaComments, FaUserTie } from "react-icons/fa";
 
 // utils
-import { useAppData, formatDateForInput, genres as GENRES } from "./utils";
+import { useAppData, formatDateForInput, genres as GENRES } from "./utils/utils";
 
 // Components
-import Dashboard from "./content/Dashboard";
-import Moderation from "./content/Moderation";
+import Dashboard from "./Dashboard";
+import Moderation from "./management/Moderation";
 import Modal from "./modals/Modal";
 
 // Management Components
@@ -15,7 +15,7 @@ import { ContentManagement, SeasonsManagement, EpisodesManagement } from "./mana
 import UserManagement from "./management/UserManagement";
 import CastManagement from "./management/CastManagement";
 
-import { SeasonForm, EpisodeForm, ContentForm } from "./content/ContentForms";
+import { SeasonForm, EpisodeForm, ContentForm } from "./forms/ContentForms";
 
 const AdminPanel = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -321,7 +321,7 @@ const AdminPanel = () => {
   };
 
   const handleDeleteUser = async (userId) => {
-    await deleteUser(userId);
+    deleteUser(userId);
   };
 
   if (loading) {

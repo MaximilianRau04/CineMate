@@ -1,8 +1,10 @@
 import React, { useState } from "react";
-import { FaPlus, FaEdit, FaTrash, FaLink, FaUnlink, FaFilm, FaEye } from "react-icons/fa";
-import { formatDate } from "../utils";
-import PersonForm from "../content/PersonForm";
+import { FaPlus } from "react-icons/fa";
+import PersonForm from "../forms/PersonForm";
 import Modal from "../modals/Modal";
+import PersonList from "../tables/PersonList";
+import Filmography from "./Filmography";
+import AssignmentForm from "../forms/AssignmentForm";
 
 const CastManagement = ({
   actors,
@@ -286,7 +288,6 @@ const CastManagement = ({
         </div>
       </div>
 
-      {/* Tab Navigation */}
       <ul className="nav nav-tabs mb-4">
         <li className="nav-item">
           <button
@@ -306,170 +307,93 @@ const CastManagement = ({
         </li>
       </ul>
 
-      {/* Actor List */}
       {activeTab === 'actors' && (
-        <div className="card">
-          <div className="card-body">
-            <div className="table-responsive">
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th width="60px">Bild</th>
-                    <th>Name</th>
-                    <th>Geburtsdatum</th>
-                    <th>Biografie</th>
-                    <th>Aktionen</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {actors.map(actor => (
-                    <tr key={actor.id}>
-                      <td>
-                        {actor.image && (
-                          <img
-                            src={actor.image}
-                            alt={actor.name}
-                            style={{ width: '50px', height: '50px', objectFit: 'cover' }}
-                            className="rounded"
-                          />
-                        )}
-                      </td>
-                      <td>{actor.name}</td>
-                      <td>{formatDate(actor.birthday)}</td>
-                      <td>
-                        <div style={{ maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {actor.biography}
-                        </div>
-                      </td>
-                      <td>
-                        <button
-                          className="btn btn-sm btn-outline-secondary me-1"
-                          onClick={() => {
-                            setSelectedPerson(actor);
-                            fetchActorFilmography(actor.id);
-                            setModals(prev => ({ ...prev, viewActorMovies: true }));
-                          }}
-                          title="Filmografie anzeigen"
-                        >
-                          <FaFilm />
-                        </button>
-                        <button
-                          className="btn btn-sm btn-outline-info me-1"
-                          onClick={() => {
-                            setSelectedPerson(actor);
-                            setModals(prev => ({ ...prev, assignActor: true }));
-                          }}
-                        >
-                          <FaLink />
-                        </button>
-                        <button
-                          className="btn btn-sm btn-outline-primary me-1"
-                          onClick={() => {
-                            setSelectedPerson(actor);
-                            setModals(prev => ({ ...prev, editActor: true }));
-                          }}
-                        >
-                          <FaEdit />
-                        </button>
-                        <button
-                          className="btn btn-sm btn-outline-danger"
-                          onClick={() => handleDeleteActor(actor.id)}
-                        >
-                          <FaTrash />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+        <PersonList
+          people={actors}
+          personType="actor"
+          onShowFilmography={(actor) => {
+            setSelectedPerson(actor);
+            fetchActorFilmography(actor.id);
+            setModals(prev => ({ ...prev, viewActorMovies: true }));
+          }}
+          onAssign={(actor) => {
+            setSelectedPerson(actor);
+            setModals(prev => ({ ...prev, assignActor: true }));
+          }}
+          onEdit={(actor) => {
+            setSelectedPerson(actor);
+            setModals(prev => ({ ...prev, editActor: true }));
+          }}
+          onDelete={handleDeleteActor}
+        />
       )}
 
-      {/* Director List */}
       {activeTab === 'directors' && (
-        <div className="card">
-          <div className="card-body">
-            <div className="table-responsive">
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th width="60px">Bild</th>
-                    <th>Name</th>
-                    <th>Geburtsdatum</th>
-                    <th>Biografie</th>
-                    <th>Aktionen</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {directors.map(director => (
-                    <tr key={director.id}>
-                      <td>
-                        {director.image && (
-                          <img
-                            src={director.image}
-                            alt={director.name}
-                            style={{ width: '50px', height: '50px', objectFit: 'cover' }}
-                            className="rounded"
-                          />
-                        )}
-                      </td>
-                      <td>{director.name}</td>
-                      <td>{formatDate(director.birthday)}</td>
-                      <td>
-                        <div style={{ maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {director.biography}
-                        </div>
-                      </td>
-                      <td>
-                        <button
-                          className="btn btn-sm btn-outline-secondary me-1"
-                          onClick={() => {
-                            setSelectedPerson(director);
-                            fetchDirectorFilmography(director.id);
-                            setModals(prev => ({ ...prev, viewDirectorMovies: true }));
-                          }}
-                          title="Filmografie anzeigen"
-                        >
-                          <FaFilm />
-                        </button>
-                        <button
-                          className="btn btn-sm btn-outline-info me-1"
-                          onClick={() => {
-                            setSelectedPerson(director);
-                            setModals(prev => ({ ...prev, assignDirector: true }));
-                          }}
-                        >
-                          <FaLink />
-                        </button>
-                        <button
-                          className="btn btn-sm btn-outline-primary me-1"
-                          onClick={() => {
-                            setSelectedPerson(director);
-                            setModals(prev => ({ ...prev, editDirector: true }));
-                          }}
-                        >
-                          <FaEdit />
-                        </button>
-                        <button
-                          className="btn btn-sm btn-outline-danger"
-                          onClick={() => handleDeleteDirector(director.id)}
-                        >
-                          <FaTrash />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+        <PersonList
+          people={directors}
+          personType="director"
+          onShowFilmography={(director) => {
+            setSelectedPerson(director);
+            fetchDirectorFilmography(director.id);
+            setModals(prev => ({ ...prev, viewDirectorMovies: true }));
+          }}
+          onAssign={(director) => {
+            setSelectedPerson(director);
+            setModals(prev => ({ ...prev, assignDirector: true }));
+          }}
+          onEdit={(director) => {
+            setSelectedPerson(director);
+            setModals(prev => ({ ...prev, editDirector: true }));
+          }}
+          onDelete={handleDeleteDirector}
+        />
       )}
 
-      {/* Modals */}
-      {/* Add Actor Modal */}
+      <Modal
+        show={modals.viewActorMovies}
+        title={`Filmografie von ${selectedPerson?.name || ''}`}
+        onClose={() => {
+          setModals(prev => ({ ...prev, viewActorMovies: false }));
+          setSelectedPerson(null);
+          setActorFilmography({ movies: [], series: [] });
+        }}
+      >
+        {selectedPerson && (
+          <Filmography
+            person={selectedPerson}
+            personType="actor"
+            filmography={actorFilmography}
+            isLoading={filmographyLoading}
+            onRemove={handleRemoveActor}
+          />
+        )}
+      </Modal>
+
+      <Modal
+        show={modals.viewDirectorMovies}
+        title={`Filmografie von ${selectedPerson?.name || ''}`}
+        onClose={() => {
+          setModals(prev => ({ ...prev, viewDirectorMovies: false }));
+          setSelectedPerson(null);
+          setDirectorFilmography({ movies: [], series: [] });
+        }}
+      >
+        {selectedPerson && (
+          <Filmography
+            person={selectedPerson}
+            personType="director"
+            filmography={directorFilmography}
+            isLoading={filmographyLoading}
+            onRemove={handleRemoveDirector}
+            onChangeDirector={(movie) => {
+              setSelectedContent(movie);
+              setContentType('movie');
+              setModals(prev => ({ ...prev, viewDirectorMovies: false, assignDirector: true }));
+            }}
+          />
+        )}
+      </Modal>
+
       <Modal
         show={modals.addActor}
         title="Neuen Schauspieler hinzufügen"
@@ -479,7 +403,6 @@ const CastManagement = ({
         <PersonForm person={newActor} onChange={setNewActor} />
       </Modal>
 
-      {/* Edit Actor Modal */}
       <Modal
         show={modals.editActor}
         title="Schauspieler bearbeiten"
@@ -497,7 +420,6 @@ const CastManagement = ({
         )}
       </Modal>
 
-      {/* Add Director Modal */}
       <Modal
         show={modals.addDirector}
         title="Neuen Regisseur hinzufügen"
@@ -507,7 +429,6 @@ const CastManagement = ({
         <PersonForm person={newDirector} onChange={setNewDirector} />
       </Modal>
 
-      {/* Edit Director Modal */}
       <Modal
         show={modals.editDirector}
         title="Regisseur bearbeiten"
@@ -525,10 +446,9 @@ const CastManagement = ({
         )}
       </Modal>
 
-      {/* Assign Actor Modal */}
       <Modal
         show={modals.assignActor}
-        title="Schauspieler zuweisen"
+        title="Actor zuweisen"
         onClose={() => {
           setModals(prev => ({ ...prev, assignActor: false }));
           setSelectedPerson(null);
@@ -536,61 +456,17 @@ const CastManagement = ({
         }}
         onSave={handleAssignActor}
       >
-        <div className="mb-3">
-          <label className="form-label">Medientyp</label>
-          <div>
-            <div className="form-check form-check-inline">
-              <input
-                className="form-check-input"
-                type="radio"
-                name="contentType"
-                id="movieType"
-                value="movie"
-                checked={contentType === 'movie'}
-                onChange={() => setContentType('movie')}
-              />
-              <label className="form-check-label" htmlFor="movieType">Film</label>
-            </div>
-            <div className="form-check form-check-inline">
-              <input
-                className="form-check-input"
-                type="radio"
-                name="contentType"
-                id="seriesType"
-                value="series"
-                checked={contentType === 'series'}
-                onChange={() => setContentType('series')}
-              />
-              <label className="form-check-label" htmlFor="seriesType">Serie</label>
-            </div>
-          </div>
-        </div>
-        <div className="mb-3">
-          <label className="form-label">
-            {contentType === 'movie' ? 'Film auswählen' : 'Serie auswählen'}
-          </label>
-          <select
-            className="form-control"
-            value={selectedContent?.id || ''}
-            onChange={(e) => {
-              const id = e.target.value;
-              const content = contentType === 'movie'
-                ? movies.find(m => m.id === id)
-                : series.find(s => s.id === id);
-              setSelectedContent(content);
-            }}
-          >
-            <option value="">Bitte auswählen</option>
-            {(contentType === 'movie' ? movies : series).map(item => (
-              <option key={item.id} value={item.id}>
-                {item.title}
-              </option>
-            ))}
-          </select>
-        </div>
+        <AssignmentForm
+          contentType={contentType}
+          setContentType={setContentType}
+          selectedContent={selectedContent}
+          setSelectedContent={setSelectedContent}
+          contents={contentType === 'movie' ? movies : series}
+          person={selectedPerson}
+          personType="actor"
+        />
       </Modal>
 
-      {/* Assign Director Modal */}
       <Modal
         show={modals.assignDirector}
         title="Regisseur zuweisen"
@@ -601,253 +477,17 @@ const CastManagement = ({
         }}
         onSave={handleAssignDirector}
       >
-        <div className="mb-3">
-          <label className="form-label">Medientyp</label>
-          <div>
-            <div className="form-check form-check-inline">
-              <input
-                className="form-check-input"
-                type="radio"
-                name="contentType"
-                id="movieTypeDir"
-                value="movie"
-                checked={contentType === 'movie'}
-                onChange={() => setContentType('movie')}
-              />
-              <label className="form-check-label" htmlFor="movieTypeDir">Film</label>
-            </div>
-            <div className="form-check form-check-inline">
-              <input
-                className="form-check-input"
-                type="radio"
-                name="contentType"
-                id="seriesTypeDir"
-                value="series"
-                checked={contentType === 'series'}
-                onChange={() => setContentType('series')}
-              />
-              <label className="form-check-label" htmlFor="seriesTypeDir">Serie</label>
-            </div>
-          </div>
-        </div>
-        <div className="mb-3">
-          <label className="form-label">
-            {contentType === 'movie' ? 'Film auswählen' : 'Serie auswählen'}
-          </label>
-          <select
-            className="form-control"
-            value={selectedContent?.id || ''}
-            onChange={(e) => {
-              const id = e.target.value;
-              const content = contentType === 'movie'
-                ? movies.find(m => m.id === id)
-                : series.find(s => s.id === id);
-              setSelectedContent(content);
-            }}
-          >
-            <option value="">Bitte auswählen</option>
-            {(contentType === 'movie' ? movies : series).map(item => (
-              <option key={item.id} value={item.id}>
-                {item.title}
-              </option>
-            ))}
-          </select>
-        </div>
+        <AssignmentForm
+          contentType={contentType}
+          setContentType={setContentType}
+          selectedContent={selectedContent}
+          setSelectedContent={setSelectedContent}
+          contents={contentType === 'movie' ? movies : series}
+          person={selectedPerson}
+          personType="director"
+        />
       </Modal>
 
-      {/* Actor Filmography Modal */}
-      <Modal
-        show={modals.viewActorMovies}
-        title={`Filmografie von ${selectedPerson?.name || ''}`}
-        onClose={() => {
-          setModals(prev => ({ ...prev, viewActorMovies: false }));
-          setSelectedPerson(null);
-          setActorFilmography({ movies: [], series: [] });
-        }}
-      >
-        {selectedPerson && (
-          <div>
-            {filmographyLoading ? (
-              <div className="text-center py-3">
-                <div className="spinner-border" role="status">
-                  <span className="visually-hidden">Loading...</span>
-                </div>
-              </div>
-            ) : (
-              <>
-                <h5 className="mb-3">Filme</h5>
-                <div className="table-responsive">
-                  <table className="table table-sm">
-                    <thead>
-                      <tr>
-                        <th>Titel</th>
-                        <th>Genre</th>
-                        <th>Erscheinungsjahr</th>
-                        <th>Aktionen</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {actorFilmography.movies.map(movie => (
-                        <tr key={movie.id}>
-                          <td>{movie.title}</td>
-                          <td>{movie.genre}</td>
-                          <td>{new Date(parseInt(movie.releaseDate)).getFullYear()}</td>
-                          <td>
-                            <button
-                              className="btn btn-sm btn-outline-danger"
-                              onClick={() => handleRemoveActor(movie.id, selectedPerson.id, 'movie')}
-                            >
-                              <FaUnlink /> Entfernen
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                      {actorFilmography.movies.length === 0 && (
-                        <tr>
-                          <td colSpan="4" className="text-center">Keine Filme gefunden</td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-
-                <h5 className="mt-4 mb-3">Serien</h5>
-                <div className="table-responsive">
-                  <table className="table table-sm">
-                    <thead>
-                      <tr>
-                        <th>Titel</th>
-                        <th>Genre</th>
-                        <th>Erscheinungsjahr</th>
-                        <th>Aktionen</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {actorFilmography.series.map(serie => (
-                        <tr key={serie.id}>
-                          <td>{serie.title}</td>
-                          <td>{serie.genre}</td>
-                          <td>{new Date(parseInt(serie.releaseDate)).getFullYear()}</td>
-                          <td>
-                            <button
-                              className="btn btn-sm btn-outline-danger"
-                              onClick={() => handleRemoveActor(serie.id, selectedPerson.id, 'series')}
-                            >
-                              <FaUnlink /> Entfernen
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                      {actorFilmography.series.length === 0 && (
-                        <tr>
-                          <td colSpan="4" className="text-center">Keine Serien gefunden</td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </>
-            )}
-          </div>
-        )}
-      </Modal>
-
-      {/* Director Filmography Modal */}
-      <Modal
-        show={modals.viewDirectorMovies}
-        title={`Filmografie von ${selectedPerson?.name || ''}`}
-        onClose={() => {
-          setModals(prev => ({ ...prev, viewDirectorMovies: false }));
-          setSelectedPerson(null);
-          setDirectorFilmography({ movies: [], series: [] });
-        }}
-      >
-        {selectedPerson && (
-          <div>
-            {filmographyLoading ? (
-              <div className="text-center py-3">
-                <div className="spinner-border" role="status">
-                  <span className="visually-hidden">Loading...</span>
-                </div>
-              </div>
-            ) : (
-              <>
-                <h5 className="mb-3">Filme</h5>
-                <div className="table-responsive">
-                  <table className="table table-sm">
-                    <thead>
-                      <tr>
-                        <th>Titel</th>
-                        <th>Genre</th>
-                        <th>Erscheinungsjahr</th>
-                        <th>Aktionen</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {directorFilmography.movies.map(movie => (
-                        <tr key={movie.id}>
-                          <td>{movie.title}</td>
-                          <td>{movie.genre}</td>
-                          <td>{new Date(parseInt(movie.releaseDate)).getFullYear()}</td>
-                          <td>
-                            <button
-                              className="btn btn-sm btn-outline-danger"
-                              onClick={() => handleRemoveDirector(movie.id, selectedPerson.id, 'movie')}
-                            >
-                              <FaUnlink /> Entfernen
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                      {directorFilmography.movies.length === 0 && (
-                        <tr>
-                          <td colSpan="4" className="text-center">Keine Filme gefunden</td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-
-                <h5 className="mt-4 mb-3">Serien</h5>
-                <div className="table-responsive">
-                  <table className="table table-sm">
-                    <thead>
-                      <tr>
-                        <th>Titel</th>
-                        <th>Genre</th>
-                        <th>Erscheinungsjahr</th>
-                        <th>Aktionen</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {directorFilmography.series.map(serie => (
-                        <tr key={serie.id}>
-                          <td>{serie.title}</td>
-                          <td>{serie.genre}</td>
-                          <td>{new Date(parseInt(serie.releaseDate)).getFullYear()}</td>
-                          <td>
-                            <button
-                              className="btn btn-sm btn-outline-danger"
-                              onClick={() => handleRemoveDirector(serie.id, selectedPerson.id, 'series')}
-                            >
-                              <FaUnlink /> Entfernen
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                      {directorFilmography.series.length === 0 && (
-                        <tr>
-                          <td colSpan="4" className="text-center">Keine Serien gefunden</td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </>
-            )}
-          </div>
-        )}
-      </Modal>
     </div>
   );
 };

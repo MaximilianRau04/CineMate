@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FaTrash } from "react-icons/fa";
-import { formatDate } from "../utils";
+import { formatDate } from "../utils/utils";
 
 const UserManagement = ({ users, onDeleteUser }) => {
   const [filterRole, setFilterRole] = useState('all');

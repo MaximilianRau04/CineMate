@@ -1,8 +1,4 @@
-import React from "react";
 
-/**
- * Form component for adding/editing content
- */
 export const ContentForm = ({ content, onChange, genres }) => (
   <div>
     <div className="row">

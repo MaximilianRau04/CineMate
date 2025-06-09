@@ -1,6 +1,6 @@
 import { FaArrowLeft, FaPlus, FaEdit, FaTrash, FaPlayCircle } from "react-icons/fa";
-import { formatDate } from "../utils";
-import ContentTable from "../content/ContentTable";
+import { formatDate } from "../utils/utils";
+import ContentTable from "../tables/ContentTable";
 
 export const ContentManagement = ({ data, onAdd, onEdit, onDelete, onSeriesSeasons }) => (
   <div>
