@@ -201,7 +201,7 @@ public class MovieService {
      * @param actorId
      * @return ResponseEntity with list of remaining actors or not found
      */
-    public ResponseEntity<Map<String, Object>> removeActorFromMovie(String movieId, String actorId) {
+    public ResponseEntity<Void> removeActorFromMovie(String movieId, String actorId) {
         Optional<Movie> optionalMovie = movieRepository.findById(movieId);
         Optional<Actor> optionalActor = actorRepository.findById(actorId);
 
@@ -212,25 +212,18 @@ public class MovieService {
         Movie movie = optionalMovie.get();
         Actor actor = optionalActor.get();
 
-        boolean removed = false;
         if (movie.getActors() != null) {
-            removed = movie.getActors().removeIf(a -> a.getId().equals(actorId));
+            boolean removed = movie.getActors().removeIf(a -> a.getId().equals(actorId));
 
-            if (removed && actor.getSeries() != null) {
-                actor.getSeries().removeIf(m -> m.getId().equals(movie.getId()));
+            if (removed && actor.getMovies() != null) {
+                actor.getMovies().removeIf(m -> m.getId().equals(movieId));
                 actorRepository.save(actor);
             }
 
             movieRepository.save(movie);
         }
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", removed);
-        response.put("message", removed ?
-                "Schauspieler erfolgreich von der Serie entfernt" :
-                "Schauspieler war nicht mit dieser Serie verknüpft");
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.noContent().build();
     }
 
     /**
@@ -279,7 +272,7 @@ public class MovieService {
      * @param directorId
      * @return ResponseEntity with list of remaining directors or not found
      */
-    public ResponseEntity<Map<String, Object>> removeDirectorFromMovie(String movieId, String directorId) {
+    public ResponseEntity<Void> removeDirectorFromMovie(String movieId, String directorId) {
         Optional<Movie> optionalMovie = movieRepository.findById(movieId);
         Optional<Director> optionalDirector = directorRepository.findById(directorId);
 
@@ -290,24 +283,17 @@ public class MovieService {
         Movie movie = optionalMovie.get();
         Director director = optionalDirector.get();
 
-        boolean removed = false;
         if (movie.getDirectors() != null) {
-            removed = movie.getDirectors().removeIf(a -> a.getId().equals(directorId));
+            boolean removed = movie.getDirectors().removeIf(a -> a.getId().equals(directorId));
 
-            if (removed && director.getSeries() != null) {
-                director.getSeries().removeIf(m -> m.getId().equals(movie.getId()));
+            if (removed && director.getMovies() != null) {
+                director.getMovies().removeIf(m -> m.getId().equals(movieId));
                 directorRepository.save(director);
             }
 
             movieRepository.save(movie);
         }
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", removed);
-        response.put("message", removed ?
-                "Regisseur erfolgreich von der Serie entfernt" :
-                "Regisseur war nicht mit dieser Serie verknüpft");
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.noContent().build();
     }
 }

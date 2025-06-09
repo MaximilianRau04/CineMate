@@ -6,6 +6,7 @@ import com.cinemate.actor.DTOs.ActorResponseDTO;
 import com.cinemate.director.DTOs.DirectorResponseDTO;
 import com.cinemate.director.Director;
 import com.cinemate.director.DirectorRepository;
+import com.cinemate.movie.Movie;
 import com.cinemate.series.DTOs.SeriesRequestDTO;
 import com.cinemate.series.DTOs.SeriesResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -492,42 +493,6 @@ public class SeriesService {
     }
 
     /**
-     * Merge seasons, ensuring existing seasons are not overwritten
-     * @param existingSeasons
-     * @param updatedSeasons
-     */
-    private void mergeSeasons(List<Season> existingSeasons, List<Season> updatedSeasons) {
-        Map<Integer, Season> updatedMap = updatedSeasons.stream()
-                .collect(Collectors.toMap(Season::getSeasonNumber, s -> s, (s1, s2) -> s1));
-
-        Iterator<Season> iterator = existingSeasons.iterator();
-        while (iterator.hasNext()) {
-            Season existingSeason = iterator.next();
-            if (updatedMap.containsKey(existingSeason.getSeasonNumber())) {
-                Season updatedSeason = updatedMap.get(existingSeason.getSeasonNumber());
-
-                if (updatedSeason.getEpisodes() != null) {
-                    mergeEpisodes(existingSeason.getEpisodes(), updatedSeason.getEpisodes());
-                }
-
-                updatedMap.remove(existingSeason.getSeasonNumber());
-            }
-        }
-
-        for (Season newSeason : updatedMap.values()) {
-            if (newSeason.getEpisodes() != null) {
-                List<Episode> validEpisodes = validateAndSortEpisodes(newSeason.getEpisodes());
-                newSeason.setEpisodes(validEpisodes);
-            } else {
-                newSeason.setEpisodes(new ArrayList<>());
-            }
-            existingSeasons.add(newSeason);
-        }
-
-        existingSeasons.sort(Comparator.comparing(Season::getSeasonNumber));
-    }
-
-    /**
      * Merge episodes, ensuring existing episodes are not overwritten
      * @param existingEpisodes
      * @param updatedEpisodes
@@ -634,7 +599,7 @@ public class SeriesService {
      * @param seriesId
      * @param actorId
      */
-    public ResponseEntity<Map<String, Object>> removeActorFromSeries(String seriesId, String actorId) {
+    public ResponseEntity<Void> removeActorFromSeries(String seriesId, String actorId) {
         Optional<Series> optionalSeries = seriesRepository.findById(seriesId);
         Optional<Actor> optionalActor = actorRepository.findById(actorId);
 
@@ -645,25 +610,18 @@ public class SeriesService {
         Series series = optionalSeries.get();
         Actor actor = optionalActor.get();
 
-        boolean removed = false;
         if (series.getActors() != null) {
-            removed = series.getActors().removeIf(a -> a.getId().equals(actorId));
+            boolean removed = series.getActors().removeIf(a -> a.getId().equals(actorId));
 
             if (removed && actor.getSeries() != null) {
-                actor.getSeries().removeIf(m -> m.getId().equals(series.getId()));
+                actor.getSeries().removeIf(m -> m.getId().equals(series));
                 actorRepository.save(actor);
             }
 
             seriesRepository.save(series);
         }
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", removed);
-        response.put("message", removed ?
-                "Schauspieler erfolgreich von der Serie entfernt" :
-                "Schauspieler war nicht mit dieser Serie verknüpft");
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.noContent().build();
     }
 
     /**
@@ -711,7 +669,7 @@ public class SeriesService {
      * @param seriesId
      * @param directorId
      */
-    public ResponseEntity<Map<String, Object>> removeDirectorFromSeries(String seriesId, String directorId) {
+    public ResponseEntity<Void> removeDirectorFromSeries(String seriesId, String directorId) {
         Optional<Series> optionalSeries = seriesRepository.findById(seriesId);
         Optional<Director> optionalDirector = directorRepository.findById(directorId);
 
@@ -722,25 +680,18 @@ public class SeriesService {
         Series series = optionalSeries.get();
         Director director = optionalDirector.get();
 
-        boolean removed = false;
         if (series.getDirectors() != null) {
-            removed = series.getDirectors().removeIf(a -> a.getId().equals(directorId));
+            boolean removed = series.getDirectors().removeIf(a -> a.getId().equals(directorId));
 
             if (removed && director.getSeries() != null) {
-                director.getSeries().removeIf(m -> m.getId().equals(series.getId()));
+                director.getSeries().removeIf(m -> m.getId().equals(series));
                 directorRepository.save(director);
             }
 
             seriesRepository.save(series);
         }
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", removed);
-        response.put("message", removed ?
-                "Regisseur erfolgreich von der Serie entfernt" :
-                "Regisseur war nicht mit dieser Serie verknüpft");
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.noContent().build();
     }
 
     /**

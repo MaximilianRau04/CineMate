@@ -119,7 +119,7 @@ public class MovieController {
      * @return List<ActorResponseDTO>
      */
     @DeleteMapping("/{movieId}/actors/{actorId}")
-    public ResponseEntity<Map<String, Object>> removeActorFromMovie(
+    public ResponseEntity<Void> removeActorFromMovie(
             @PathVariable String movieId,
             @PathVariable String actorId) {
         return movieService.removeActorFromMovie(movieId, actorId);
@@ -144,7 +144,7 @@ public class MovieController {
      * @return DirectorResponseDTO
      */
     @DeleteMapping("/{movieId}/directors/{directorId}")
-    public ResponseEntity<Map<String, Object>> removeDirectorFromMovie(
+    public ResponseEntity<Void> removeDirectorFromMovie(
             @PathVariable String movieId,
             @PathVariable String directorId) {
         return movieService.removeDirectorFromMovie(movieId, directorId);

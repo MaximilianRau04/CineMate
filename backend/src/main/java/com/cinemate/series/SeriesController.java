@@ -255,7 +255,7 @@ public class SeriesController {
      * @return List<ActorResponseDTO>
      */
     @DeleteMapping("/{seriesId}/actors/{actorId}")
-    public ResponseEntity<Map<String, Object>> removeActorFromSeries(
+    public ResponseEntity<Void> removeActorFromSeries(
             @PathVariable String seriesId,
             @PathVariable String actorId) {
         return seriesService.removeActorFromSeries(seriesId, actorId);
@@ -281,10 +281,9 @@ public class SeriesController {
      * @return List<DirectorResponseDTO>
      */
     @DeleteMapping("/{seriesId}/directors/{directorId}")
-    public ResponseEntity<Map<String, Object>> removeDirectorFromSeries(
+    public ResponseEntity<Void> removeDirectorFromSeries(
             @PathVariable String seriesId,
             @PathVariable String directorId) {
         return seriesService.removeDirectorFromSeries(seriesId, directorId);
     }
-
 }
