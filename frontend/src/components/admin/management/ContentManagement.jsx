@@ -2,6 +2,7 @@ import { FaArrowLeft, FaPlus, FaEdit, FaTrash, FaPlayCircle } from "react-icons/
 import { formatDate } from "../utils/utils";
 import ContentTable from "../tables/ContentTable";
 
+{/* ContentManagement for movies and series*/}
 export const ContentManagement = ({ data, onAdd, onEdit, onDelete, onSeriesSeasons }) => (
   <div>
     <div className="d-flex justify-content-between align-items-center mb-4">
@@ -46,6 +47,7 @@ export const ContentManagement = ({ data, onAdd, onEdit, onDelete, onSeriesSeaso
   </div>
 );
 
+{/* EpisodesManagement */}
 export const EpisodesManagement = ({ series, season, episodes, onAddEpisode, onEditEpisode, onDeleteEpisode, onBack }) => (
   <div>
     <div className="d-flex justify-content-between align-items-center mb-4">
@@ -104,6 +106,7 @@ export const EpisodesManagement = ({ series, season, episodes, onAddEpisode, onE
   </div>
 );
 
+{/* SeasonManagement*/}
 export const SeasonsManagement = ({ series, seasons, onAddSeason, onEditSeason, onDeleteSeason, onViewEpisodes, onBack }) => (
   <div>
     <div className="d-flex justify-content-between align-items-center mb-4">

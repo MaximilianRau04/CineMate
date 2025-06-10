@@ -6,6 +6,7 @@ export const useWatchlist = (userId, mediaId, mediaType = 'movies') => {
 
   /**
    * Checks if the media is already in the user's watchlist.
+   * @param {string} userId 
    */
   useEffect(() => {
     if (!userId || !mediaId) return;
@@ -23,6 +24,10 @@ export const useWatchlist = (userId, mediaId, mediaType = 'movies') => {
 
   /**
    * adds the media to the user's watchlist.
+   * @param {string} userId
+   * @param {string} mediaId
+   * @param {string} mediaType
+   * @returns {void}
    */
   const handleAddToWatchlist = () => {
     if (!userId || added) return;

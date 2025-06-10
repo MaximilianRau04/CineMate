@@ -3,7 +3,7 @@ import { useState } from 'react';
 /**
  * A custom hook to handle API calls with token-based authentication.
  * It provides methods for GET, POST, PUT, and DELETE requests.
- * @returns 
+ * @returns {Object} 
  */
 export const useApi = () => {
     const token = localStorage.getItem("token");
@@ -51,6 +51,7 @@ export const useApi = () => {
  * A custom hook to manage application data.
  * It provides methods to load movies, series, users, reviews, seasons, and episodes.
  * It also handles loading states and API interactions.
+ * @returns {Object}
  */
 export const useAppData = () => {
     const [data, setData] = useState({

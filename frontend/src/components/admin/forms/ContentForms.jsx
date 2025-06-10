@@ -1,4 +1,4 @@
-
+{/* ContentForm for movies and series*/}
 export const ContentForm = ({ content, onChange, genres }) => (
   <div>
     <div className="row">
@@ -105,6 +105,7 @@ export const ContentForm = ({ content, onChange, genres }) => (
   </div>
 );
 
+{/* SeasonForm*/}
 export const SeasonForm = ({ season, onChange }) => (
   <div>
     <div className="mb-3">
@@ -129,6 +130,7 @@ export const SeasonForm = ({ season, onChange }) => (
   </div>
 );
 
+{/* EpisodeForm */}
 export const EpisodeForm = ({ episode, onChange }) => (
   <div>
     <div className="row">

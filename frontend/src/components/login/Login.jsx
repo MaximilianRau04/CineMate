@@ -65,6 +65,7 @@ const LoginForm = () => {
   /**
  * function to handle user login
  * @param {*} e
+ * @returns {Promise<void>}
  */
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -103,6 +104,7 @@ const LoginForm = () => {
   /**
    * function to handle user registration
    * @param {*} e
+   * @returns {Promise<void>}
    */
   const handleRegister = async (e) => {
     e.preventDefault();

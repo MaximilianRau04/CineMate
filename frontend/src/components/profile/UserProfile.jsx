@@ -71,7 +71,6 @@ const UserProfile = () => {
 
     setSaving(true);
     try {
-      // FormData mit speziellem Flag zum Entfernen
       const formData = new FormData();
       const userData = { 
         bio: bio,
@@ -138,9 +137,6 @@ const UserProfile = () => {
         try {
           const response = await fetch(`http://localhost:8080/api/users/${userId}`, {
             method: "PUT",
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
             body: formData,
           });
           

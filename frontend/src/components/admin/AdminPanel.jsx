@@ -2,15 +2,10 @@ import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FaChartBar, FaFilm, FaUsers, FaComments, FaUserTie } from "react-icons/fa";
 
-// utils
 import { useAppData, formatDateForInput, genres as GENRES } from "./utils/utils";
-
-// Components
 import Dashboard from "./Dashboard";
 import Moderation from "./management/Moderation";
 import Modal from "./modals/Modal";
-
-// Management Components
 import { ContentManagement, SeasonsManagement, EpisodesManagement } from "./management/ContentManagement";
 import UserManagement from "./management/UserManagement";
 import CastManagement from "./management/CastManagement";
@@ -70,6 +65,7 @@ const AdminPanel = () => {
 
   /**
    * Handles adding new content (movie or series).
+   * @returns {Promise<void>}
    */
   const handleAddContent = async () => {
     try {
@@ -100,6 +96,7 @@ const AdminPanel = () => {
    * Handles editing existing content (movie or series).
    * @param {*} content 
    * @param {*} type 
+   * @returns {void}
    */
   const handleEditContent = (content, type) => {
     setForms(prev => ({
@@ -115,6 +112,7 @@ const AdminPanel = () => {
 
   /**
    * Handles updating existing content (movie or series).
+   * @returns {Promise<void>}
    */
   const handleUpdateContent = async () => {
     try {
@@ -140,7 +138,7 @@ const AdminPanel = () => {
    * Handles deleting content (movie or series).
    * @param {*} id 
    * @param {*} type 
-   * @returns 
+   * @returns {Promise<void>}
    */
   const handleDeleteContent = async (id, type) => {
     if (!window.confirm("Sind Sie sicher, dass Sie diesen Inhalt löschen möchten?")) return;
@@ -156,7 +154,8 @@ const AdminPanel = () => {
 
   /**
    * Handles deleting a review.
-   * @param {*} reviewId 
+   * @param {*} reviewId
+   * @returns {Promise<void>} 
    */
   const handleDeleteReview = async (reviewId) => {
     try {
@@ -183,6 +182,7 @@ const AdminPanel = () => {
 
   /**
    * Handles adding a new season to a series.
+   * @return {Promise<void>}
    */
   const handleAddSeason = async () => {
     try {
@@ -200,6 +200,7 @@ const AdminPanel = () => {
   /**
    * Handles editing an existing season.
    * @param {*} season 
+   * @return {void}
    */
   const handleEditSeason = (season) => {
     setForms(prev => ({ ...prev, editingSeason: { ...season } }));
@@ -225,7 +226,7 @@ const AdminPanel = () => {
   /**
    * Handles deleting a season.
    * @param {*} seasonNumber 
-   * @returns 
+   * @returns {Promise<void>}
    */
   const handleDeleteSeason = async (seasonNumber) => {
     if (!window.confirm("Sind Sie sicher, dass Sie diese Staffel löschen möchten?")) return;
@@ -247,6 +248,7 @@ const AdminPanel = () => {
 
   /**
    * Handles adding a new episode to a season.
+   * @returns {Promise<void>}
    */
   const handleAddEpisode = async () => {
     try {
@@ -270,7 +272,8 @@ const AdminPanel = () => {
 
   /**
    * Handles editing an existing episode.
-   * @param {*} episode 
+   * @param {*} episode
+   * @returns {void} 
    */
   const handleEditEpisode = (episode) => {
     setForms(prev => ({
@@ -284,7 +287,8 @@ const AdminPanel = () => {
   };
 
   /**
-   * Handles updating an existing episode.
+   * Handles updating an existing episode
+   * @returns {Promise<void>}
    */
   const handleUpdateEpisode = async () => {
     try {
@@ -307,7 +311,7 @@ const AdminPanel = () => {
   /**
    * Handles deleting an episode.
    * @param {*} episodeNumber 
-   * @returns 
+   * @returns {Promise<void>}
    */
   const handleDeleteEpisode = async (episodeNumber) => {
     if (!window.confirm("Sind Sie sicher, dass Sie diese Episode löschen möchten?")) return;
@@ -436,7 +440,7 @@ const AdminPanel = () => {
         </div>
       </div>
 
-      {/* Modals */}
+      {/* Modals for adding/editing movies, series, seasons and episodes */}
       <Modal
         show={modals.add}
         title="Neuen Inhalt hinzufügen"

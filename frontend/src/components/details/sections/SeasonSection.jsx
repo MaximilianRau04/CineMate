@@ -83,7 +83,6 @@ const SeasonSection = ({ seriesId }) => {
                     key={episode.episodeNumber}
                     className="row mb-4 align-items-center"
                   >
-                    {/* episode poster */}
                     <div className="col-md-3 text-center">
                       <img
                         src={

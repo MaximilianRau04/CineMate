@@ -35,7 +35,7 @@ export const ContentModals = ({ modals, forms, onModalClose, onFormChange, onSav
       )}
     </Modal>
 
-    {/* Season Add Modal */}
+    {/* Modals for adding/editing seasons and episodes */}
     <Modal
       show={modals.addSeason}
       title="Neue Staffel hinzufügen"
@@ -49,7 +49,6 @@ export const ContentModals = ({ modals, forms, onModalClose, onFormChange, onSav
       />
     </Modal>
 
-    {/* Season Edit Modal */}
     <Modal
       show={modals.editSeason}
       title="Staffel bearbeiten"
@@ -64,7 +63,6 @@ export const ContentModals = ({ modals, forms, onModalClose, onFormChange, onSav
       )}
     </Modal>
 
-    {/* Episode Add Modal */}
     <Modal
       show={modals.addEpisode}
       title="Neue Episode hinzufügen"
@@ -78,7 +76,6 @@ export const ContentModals = ({ modals, forms, onModalClose, onFormChange, onSav
       />
     </Modal>
 
-    {/* Episode Edit Modal */}
     <Modal
       show={modals.editEpisode}
       title="Episode bearbeiten"

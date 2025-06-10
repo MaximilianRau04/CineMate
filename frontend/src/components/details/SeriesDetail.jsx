@@ -34,6 +34,7 @@ const SeriesDetail = () => {
 
   const [showEditModal, setShowEditModal] = useState(false);
 
+  // Handle edit review with modal close
   const handleEditReviewWithClose = async (rating, comment) => {
     await handleEditReview(rating, comment);
     setShowEditModal(false);

@@ -17,7 +17,7 @@ const RatingSection = ({
 }) => {
   const [hover, setHover] = useState(null);
 
-  // Helper function to render stars (using the one passed as prop or fallback)
+  // renderStars is a function that can be passed to customize star rendering
   const displayStars = renderStars || ((value) => (
     <span>
       {[1, 2, 3, 4, 5].map((star, i) => {
@@ -30,7 +30,7 @@ const RatingSection = ({
 
   if (!userId) return null;
 
-  // === Falls bereits bewertet ===
+  // If the user has already reviewed, show their review details
   if (reviewed) {
     return (
       <div className="alert alert-info mt-4" style={{ maxWidth: '33%' }}>
@@ -62,7 +62,7 @@ const RatingSection = ({
     );
   }
 
-  // === Bewertungsformular ===
+  // If the user hasn't reviewed yet, show the rating section
   return (
     <div className="mt-4">
       <h5 className="card-title mb-1 text-white">

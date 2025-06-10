@@ -307,6 +307,7 @@ const CastManagement = ({
         </li>
       </ul>
 
+      {/* Render actor or director list based on active tab */}
       {activeTab === 'actors' && (
         <PersonList
           people={actors}
@@ -349,6 +350,7 @@ const CastManagement = ({
         />
       )}
 
+      {/* Modals for adding/editing actors and directors, viewing filmography, and assigning */}
       <Modal
         show={modals.viewActorMovies}
         title={`Filmografie von ${selectedPerson?.name || ''}`}

@@ -10,7 +10,7 @@ const Calendar = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
-  const [contentType, setContentType] = useState("all"); 
+  const [contentType, setContentType] = useState("all");
   const [selectedGenres, setSelectedGenres] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [dateRange, setDateRange] = useState({
@@ -22,6 +22,7 @@ const Calendar = () => {
   /**
    * Fetch movies from the API and filter them to show only those with release dates today or in the future.
    * The movies are then sorted by release date (nearest first) and grouped by month.
+   * @returns {Promise<void>}
    */
   useEffect(() => {
     const fetchMovies = async () => {
@@ -50,19 +51,19 @@ const Calendar = () => {
 
         const processedMovies = upcomingMovies.map(movie => {
           const genreArray = movie.genre ? movie.genre.split(/,\s*/) : [];
- 
+
           return { ...movie, genreArray, contentType: 'movie' };
         });
 
         setMovies(processedMovies);
         setFilteredMovies(processedMovies);
-        
+
         const allGenres = processedMovies
           .flatMap(movie => movie.genreArray)
           .filter(Boolean);
-        
+
         setAvailableGenres(prev => [...new Set([...prev, ...allGenres])]);
-        
+
         setIsLoading(false);
       } catch (err) {
         console.error("Fehler beim Laden der Filme:", err);
@@ -76,6 +77,10 @@ const Calendar = () => {
 
   /**
    * Fetches series list from the API
+   * This includes fetching seasons and episodes for each series.
+   * It also filters series to show only those with upcoming episodes.
+   * The series are then sorted by the next episode date (nearest first) and grouped by month..
+   * @returns {Promise<void>}
    */
   useEffect(() => {
     const fetchSeries = async () => {
@@ -88,21 +93,21 @@ const Calendar = () => {
         }
 
         const seriesList = await response.json();
-        
+
         const seriesWithSeasons = await Promise.all(
           seriesList.map(async (seriesItem) => {
             try {
               const seasonsResponse = await fetch(`http://localhost:8080/api/series/${seriesItem.id}/seasons`);
-              
+
               if (!seasonsResponse.ok) {
                 console.error(`Fehler beim Laden der Staffeln für Serie ${seriesItem.id}`);
                 return { ...seriesItem, seasons: [] };
               }
-              
+
               const seasons = await seasonsResponse.json();
-     
+
               const genreArray = seriesItem.genre ? seriesItem.genre.split(/,\s*/) : [];
-              
+
               return { ...seriesItem, seasons, genreArray };
             } catch (error) {
               console.error(`Fehler beim Laden der Staffeln für Serie ${seriesItem.id}:`, error);
@@ -126,13 +131,13 @@ const Calendar = () => {
             );
 
             if (hasFutureEpisode) {
-              series.nextEpisodeDate = findNextEpisodeDate(series.seasons); 
+              series.nextEpisodeDate = findNextEpisodeDate(series.seasons);
             }
 
             return hasFutureEpisode;
           })
           .sort((a, b) => {
-            return new Date(a.nextEpisodeDate) - new Date(b.nextEpisodeDate); 
+            return new Date(a.nextEpisodeDate) - new Date(b.nextEpisodeDate);
           });
 
         const processedSeries = upcomingSeries.map(series => ({
@@ -142,13 +147,13 @@ const Calendar = () => {
 
         setSeries(processedSeries);
         setFilteredSeries(processedSeries);
-        
+
         const allGenres = processedSeries
           .flatMap(series => series.genreArray)
           .filter(Boolean);
-        
+
         setAvailableGenres(prev => [...new Set([...prev, ...allGenres])]);
-        
+
         setIsLoading(false);
       } catch (err) {
         console.error("Fehler beim Laden der Serien:", err);
@@ -169,60 +174,62 @@ const Calendar = () => {
 
   /**
    * Apply all active filters to the movies and series
+   * This includes filtering by search query, selected genres, and date range.
+   * @returns {void}
    */
   const applyFilters = () => {
     let tempMovies = [...movies];
     let tempSeries = [...series];
-    
+
     if (searchQuery.trim() !== "") {
       const query = searchQuery.toLowerCase().trim();
-      tempMovies = tempMovies.filter(movie => 
-        movie.title?.toLowerCase().includes(query) || 
+      tempMovies = tempMovies.filter(movie =>
+        movie.title?.toLowerCase().includes(query) ||
         movie.genre?.toLowerCase().includes(query) ||
         movie.genreArray?.some(genre => genre.toLowerCase().includes(query))
       );
-      
-      tempSeries = tempSeries.filter(series => 
-        series.title?.toLowerCase().includes(query) || 
+
+      tempSeries = tempSeries.filter(series =>
+        series.title?.toLowerCase().includes(query) ||
         series.genre?.toLowerCase().includes(query) ||
         series.genreArray?.some(genre => genre.toLowerCase().includes(query))
       );
     }
-    
+
     if (selectedGenres.length > 0) {
-      tempMovies = tempMovies.filter(movie => 
+      tempMovies = tempMovies.filter(movie =>
         movie.genreArray && movie.genreArray.some(genre => selectedGenres.includes(genre))
       );
-      
-      tempSeries = tempSeries.filter(series => 
+
+      tempSeries = tempSeries.filter(series =>
         series.genreArray && series.genreArray.some(genre => selectedGenres.includes(genre))
       );
     }
 
     if (dateRange.start) {
       const startDate = new Date(dateRange.start);
-      tempMovies = tempMovies.filter(movie => 
+      tempMovies = tempMovies.filter(movie =>
         movie.releaseDate && new Date(movie.releaseDate) >= startDate
       );
-      
-      tempSeries = tempSeries.filter(series => 
+
+      tempSeries = tempSeries.filter(series =>
         series.nextEpisodeDate && new Date(series.nextEpisodeDate) >= startDate
       );
     }
-    
+
     if (dateRange.end) {
       const endDate = new Date(dateRange.end);
       endDate.setHours(23, 59, 59, 999);
-      
-      tempMovies = tempMovies.filter(movie => 
+
+      tempMovies = tempMovies.filter(movie =>
         movie.releaseDate && new Date(movie.releaseDate) <= endDate
       );
-      
-      tempSeries = tempSeries.filter(series => 
+
+      tempSeries = tempSeries.filter(series =>
         series.nextEpisodeDate && new Date(series.nextEpisodeDate) <= endDate
       );
     }
-    
+
     // Apply content type filter
     if (contentType === "movies") {
       setFilteredSeries([]);
@@ -309,7 +316,7 @@ const Calendar = () => {
 
     content.forEach((item) => {
       const dateField = item.contentType === 'movie' ? item.releaseDate : item.nextEpisodeDate;
-      
+
       if (!dateField) return;
 
       const date = new Date(dateField);
@@ -345,9 +352,13 @@ const Calendar = () => {
     return upcoming.length > 0 ? upcoming[0].releaseDate : null;
   };
 
-  const combinedContent = contentType === "all" 
+  /**
+   * determines the combined content based on the selected content type.
+   * @returns {Array}
+   */
+  const combinedContent = contentType === "all"
     ? getCombinedContent()
-    : contentType === "movies" 
+    : contentType === "movies"
       ? filteredMovies
       : filteredSeries;
 
@@ -355,31 +366,37 @@ const Calendar = () => {
 
   const today = new Date().toISOString().split('T')[0];
 
-  if (isLoading) {
-    return (
-      <div className="container text-center py-5">
-        <FaSpinner className="fa-spin mb-3" size={30} />
-        <p>Inhalte werden geladen...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="container py-5">
-        <div className="alert alert-danger" role="alert">
-          <h4 className="alert-heading">Fehler</h4>
-          <p>{error}</p>
-        </div>
-      </div>
-    );
-  }
-
+  /**
+   * Renders a single content item (movie or series) in the list.
+   * @param {Object} item 
+   * @returns {JSX.Element}
+   */
   const renderContentItem = (item) => {
     const isMovie = item.contentType === 'movie';
     const linkPath = isMovie ? `/movies/${item.id}` : `/series/${item.id}`;
     const releaseDate = isMovie ? item.releaseDate : item.nextEpisodeDate;
+
+    if (isLoading) {
+      return (
+        <div className="container text-center py-5">
+          <FaSpinner className="fa-spin mb-3" size={30} />
+          <p>Inhalte werden geladen...</p>
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div className="container py-5">
+          <div className="alert alert-danger" role="alert">
+            <h4 className="alert-heading">Fehler</h4>
+            <p>{error}</p>
+          </div>
+        </div>
+      );
+    }
     
+    { /* Ensure releaseDate is valid before rendering */ }
     return (
       <Link
         key={`${item.contentType}-${item.id}`}
@@ -421,19 +438,19 @@ const Calendar = () => {
                     {genre}
                   </span>
                 ))}
-                
+
                 {isMovie && item.duration && (
                   <span className="badge bg-light text-dark border me-2">
                     {item.duration}
                   </span>
                 )}
-                
+
                 {!isMovie && item.seasons && (
                   <span className="badge bg-light text-dark border me-2">
                     {item.seasons.length} Staffel{item.seasons.length !== 1 ? 'n' : ''}
                   </span>
                 )}
-                
+
                 {item.releaseYear && (
                   <span className="badge bg-light text-dark border">
                     {item.releaseYear}
@@ -451,6 +468,7 @@ const Calendar = () => {
     );
   };
 
+  { /* Render the calendar component with filters and content items */ }
   return (
     <div className="container py-4">
       <div className="card shadow-lg border-0">
@@ -473,8 +491,8 @@ const Calendar = () => {
                 <FaSearch className="text-muted" />
               </span>
             </div>
-            <button 
-              className="btn btn-light btn-sm" 
+            <button
+              className="btn btn-light btn-sm"
               onClick={() => setShowFilters(!showFilters)}
             >
               <FaFilter className="me-1" />
@@ -489,53 +507,53 @@ const Calendar = () => {
               <div className="col-md-4">
                 <label className="form-label fw-bold">Inhaltstyp</label>
                 <div className="btn-group w-100">
-                  <button 
-                    className={`btn ${contentType === "all" ? "btn-primary" : "btn-outline-primary"}`} 
+                  <button
+                    className={`btn ${contentType === "all" ? "btn-primary" : "btn-outline-primary"}`}
                     onClick={() => setContentType("all")}
                   >
                     Alle
                   </button>
-                  <button 
-                    className={`btn ${contentType === "movies" ? "btn-primary" : "btn-outline-primary"}`} 
+                  <button
+                    className={`btn ${contentType === "movies" ? "btn-primary" : "btn-outline-primary"}`}
                     onClick={() => setContentType("movies")}
                   >
                     Filme
                   </button>
-                  <button 
-                    className={`btn ${contentType === "series" ? "btn-primary" : "btn-outline-primary"}`} 
+                  <button
+                    className={`btn ${contentType === "series" ? "btn-primary" : "btn-outline-primary"}`}
                     onClick={() => setContentType("series")}
                   >
                     Serien
                   </button>
                 </div>
               </div>
-              
+
               <div className="col-md-4">
                 <label className="form-label fw-bold">Zeitraum</label>
                 <div className="row g-2">
                   <div className="col-6">
-                    <input 
-                      type="date" 
-                      className="form-control" 
-                      placeholder="Von" 
+                    <input
+                      type="date"
+                      className="form-control"
+                      placeholder="Von"
                       min={today}
                       value={dateRange.start}
-                      onChange={(e) => setDateRange({...dateRange, start: e.target.value})}
+                      onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
                     />
                   </div>
                   <div className="col-6">
-                    <input 
-                      type="date" 
-                      className="form-control" 
-                      placeholder="Bis" 
+                    <input
+                      type="date"
+                      className="form-control"
+                      placeholder="Bis"
                       min={dateRange.start || today}
                       value={dateRange.end}
-                      onChange={(e) => setDateRange({...dateRange, end: e.target.value})}
+                      onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
                     />
                   </div>
                 </div>
               </div>
-              
+
               <div className="col-md-4 d-flex flex-column">
                 <label className="form-label fw-bold">Genres</label>
                 <div className="d-flex flex-wrap gap-2" style={{ maxHeight: "100px", overflowY: "auto" }}>
@@ -551,7 +569,7 @@ const Calendar = () => {
                 </div>
               </div>
             </div>
-            
+
             <div className="d-flex justify-content-end mt-3">
               <button className="btn btn-secondary" onClick={resetFilters}>
                 <FaTimes className="me-1" />

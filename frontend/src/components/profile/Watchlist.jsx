@@ -10,6 +10,7 @@ const Watchlist = () => {
 
   /**
    * fetches the currently logged in user from the API
+   * @returns {void}
    */
   useEffect(() => {
     fetch("http://localhost:8080/api/users/me", {
@@ -27,6 +28,8 @@ const Watchlist = () => {
 
   /**
    * fetches the watchlist of the user from the API
+   * @param {string} userId 
+   * @returns {void}
    */
   useEffect(() => {
     if (!userId) return;
@@ -49,7 +52,7 @@ const Watchlist = () => {
   /**
    * removes a movie from the watchlist of the user
    * @param {*} movieId 
-   * @returns 
+   * @returns {void}
    */
   const removeMovieFromWatchlist = (movieId) => {
     if (!window.confirm("Möchtest du diesen Film wirklich entfernen?")) return;
@@ -69,7 +72,7 @@ const Watchlist = () => {
   /**
    * removes a series from the watchlist of the user
    * @param {*} seriesId 
-   * @returns 
+   * @returns {void}
    */
   const removeSeriesFromWatchlist = (seriesId) => {
     if (!window.confirm("Möchtest du diese Serie wirklich entfernen?")) return;

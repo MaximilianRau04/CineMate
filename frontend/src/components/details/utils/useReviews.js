@@ -16,7 +16,8 @@ export const useReviews = (userId, mediaId, mediaType) => {
 
   /**
    * Calculates the average rating from an array of reviews.
-   * @param {*} reviews 
+   * @param {*} reviews
+   * @return {number}
    */
   const calculateAverageRating = (reviews) => {
     if (!reviews || reviews.length === 0) return 0;
@@ -27,6 +28,7 @@ export const useReviews = (userId, mediaId, mediaType) => {
   /**
    * fetches user data for a specific review.
    * @param {*} reviewId 
+   * @return {Promise<Object|null>} 
    */
   const fetchReviewUser = async (reviewId) => {
     try {
@@ -47,6 +49,7 @@ export const useReviews = (userId, mediaId, mediaType) => {
 
   /**
    * loads reviews for the specified media type and ID.
+   * @returns {Promise<void>}
    */
   const loadReviews = async () => {
     if (!mediaId || !mediaPath) return;
@@ -87,6 +90,10 @@ export const useReviews = (userId, mediaId, mediaType) => {
 
   /**
    * Checks if the user has already reviewed the media.
+   * @param {string} userId
+   * @param {string} mediaId
+   * @param {string} mediaPath
+   * @returns {Promise<void>}
    */
   useEffect(() => {
     if (!userId || !mediaId) return;
@@ -118,6 +125,9 @@ export const useReviews = (userId, mediaId, mediaType) => {
 
   /**
    * adds a review for the media.
+   * @param {number} rating 
+   * @param {string} comment 
+   * @returns {Promise<void>}
    */
   const handleSubmitReview = async () => {
     if (!userId || rating === 0) return;
@@ -161,6 +171,9 @@ export const useReviews = (userId, mediaId, mediaType) => {
 
   /**
    * updates a review for the media.
+   * @param {number} editRating
+   * @param {string} editComment
+   * @returns {Promise<void>}
    */
   const handleEditReview = async (editRating, editComment) => {
     if (!userId || !reviewId || editRating === 0) return;
@@ -197,6 +210,7 @@ export const useReviews = (userId, mediaId, mediaType) => {
 
   /**
    * deletes a review for the media.
+   * @returns {Promise<void>}
    */
   const handleDeleteReview = async () => {
     const confirmDelete = window.confirm("Möchtest du deine Bewertung wirklich löschen?");

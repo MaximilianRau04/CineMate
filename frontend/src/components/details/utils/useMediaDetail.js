@@ -15,6 +15,7 @@ export const useMediaDetail = (mediaType = 'movies') => {
 
   /**
    * Fetches the current user from localStorage and sets userId and currentUser state.
+   * @returns {void}
    */
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -35,6 +36,7 @@ export const useMediaDetail = (mediaType = 'movies') => {
 
   /**
    * Fetches media details based on mediaId and mediaType.
+   * @returns {void}
    */
   useEffect(() => {
     if (!mediaId) return;
@@ -66,6 +68,7 @@ export const useMediaDetail = (mediaType = 'movies') => {
 
   /**
    * Fetches actors and director for the media based on mediaId and mediaType.
+   * @returns {void}
    */
   useEffect(() => {
     if (!mediaId) return;

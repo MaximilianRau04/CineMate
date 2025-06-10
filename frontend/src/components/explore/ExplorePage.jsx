@@ -23,6 +23,9 @@ const ExplorePage = () => {
 
   /**
    * Fetch average rating for a specific item
+   * @param {string} itemId 
+   * @param {string} type 
+   * @returns {Promise<number|null>} 
    */
   const fetchAverageRating = async (itemId, type) => {
     try {
@@ -45,6 +48,8 @@ const ExplorePage = () => {
 
   /**
    * Fetch movies and series data from API with current ratings
+   * @param {boolean} showLoadingSpinner 
+   * @returns {Promise<void>}
    */
   const fetchData = useCallback(async (showLoadingSpinner = true) => {
     if (showLoadingSpinner) {
@@ -145,7 +150,8 @@ const ExplorePage = () => {
   }, [contentType, selectedGenres, dateRange, searchQuery, movies, series, sortOrder]);
 
   /**
-   * Apply all active filters to the movies and series
+   * This function filters the movies and series based on the search query, selected genres, date range, and sort order.
+   * @returns {void}
    */
   const applyFilters = () => {
     let tempMovies = [...movies];
@@ -251,6 +257,8 @@ const ExplorePage = () => {
 
   /**
    * Format rating for display 
+   * @param {Object} item 
+   * @returns {string} 
    */
   const formatRating = (item) => {
     const rating = item.currentRating !== undefined ? item.currentRating : item.rating;
