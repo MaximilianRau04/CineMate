@@ -36,13 +36,19 @@ public class User {
     @DBRef(lazy = true)
     private List<Series> seriesWatchlist = new ArrayList<>();
     private Role role;
-    // private List<Movie> favorites;
-    // private List<Movie> watched;
+    @DBRef(lazy = true)
+    private List<Movie> movieFavorites = new ArrayList<>();
+    @DBRef(lazy = true)
+    private List<Series> seriesFavorites = new ArrayList<>();
+    @DBRef(lazy = true)
+    private List<Movie> moviesWatched = new ArrayList<>();
+    @DBRef(lazy = true)
+    private List<Series> seriesWatched = new ArrayList<>();
     // private List<User> followers
     // private List<User> following;
 
 
-    public User(String id, String username, String password, String email, String bio, String avatarUrl, Date joinedAt, List<Movie> movieWatchlist, List<Series> seriesWatchlist, Role role) {
+    public User(String id, String username, String password, String email, String bio, String avatarUrl, Date joinedAt, Role role) {
         this.id = id;
         this.username = username;
         this.password = password;
@@ -50,8 +56,6 @@ public class User {
         this.bio = bio;
         this.avatarUrl = avatarUrl;
         this.joinedAt = joinedAt;
-        this.movieWatchlist = movieWatchlist;
-        this.seriesWatchlist = seriesWatchlist;
         this.role = role;
     }
 
@@ -148,6 +152,38 @@ public class User {
         this.role = role;
     }
 
+    public List<Movie> getMovieFavorites() {
+        return movieFavorites;
+    }
+
+    public void setMovieFavorites(List<Movie> movieFavorites) {
+        this.movieFavorites = movieFavorites;
+    }
+
+    public List<Series> getSeriesFavorites() {
+        return seriesFavorites;
+    }
+
+    public void setSeriesFavorites(List<Series> seriesFavorites) {
+        this.seriesFavorites = seriesFavorites;
+    }
+
+    public List<Movie> getMoviesWatched() {
+        return moviesWatched;
+    }
+
+    public void setMoviesWatched(List<Movie> moviesWatched) {
+        this.moviesWatched = moviesWatched;
+    }
+
+    public List<Series> getSeriesWatched() {
+        return seriesWatched;
+    }
+
+    public void setSeriesWatched(List<Series> seriesWatched) {
+        this.seriesWatched = seriesWatched;
+    }
+
     public void addMovieToWatchlist(Movie movie) {
         if (!movieWatchlist.contains(movie)) {
             movieWatchlist.add(movie);
@@ -165,6 +201,46 @@ public class User {
     }
 
     public void removeSeriesFromWatchlist(Series series) {
+        seriesWatchlist.removeIf(m -> m.getId().equals(series.getId()));
+    }
+
+    public void addMovieToFavorites(Movie movie) {
+        if (!movieFavorites.contains(movie)) {
+            movieFavorites.add(movie);
+        }
+    }
+
+    public void removeMovieFromFavorites(Movie movie) {
+        movieFavorites.removeIf(m -> m.getId().equals(movie.getId()));
+    }
+
+    public void addSeriesToFavorites(Series series) {
+        if (!seriesFavorites.contains(series)) {
+            seriesFavorites.add(series);
+        }
+    }
+
+    public void removeSeriesFromFavorites(Series series) {
+        seriesFavorites.removeIf(m -> m.getId().equals(series.getId()));
+    }
+
+    public void addMovieToWatched(Movie movie) {
+        if (!movieWatchlist.contains(movie)) {
+            movieWatchlist.add(movie);
+        }
+    }
+
+    public void removeMovieFromWatched(Movie movie) {
+        movieWatchlist.removeIf(m -> m.getId().equals(movie.getId()));
+    }
+
+    public void addSeriesToWatched(Series series) {
+        if (!seriesWatchlist.contains(series)) {
+            seriesWatchlist.add(series);
+        }
+    }
+
+    public void removeSeriesFromWatched(Series series) {
         seriesWatchlist.removeIf(m -> m.getId().equals(series.getId()));
     }
 

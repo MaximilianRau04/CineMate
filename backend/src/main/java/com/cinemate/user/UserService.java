@@ -186,43 +186,20 @@ public class UserService {
     }
 
     /**
-     * add series with the given id to the watchlist of the given user
-     * @param userId
-     * @param seriesId
-     * @return UserResponseDTO
+     * deletes the user with the given id
+     * @param id
      */
-    public ResponseEntity<UserResponseDTO> addSeriesToWatchlist(String userId, String seriesId) {
-        Optional<User> userOptional = userRepository.findById(userId);
-        Optional<Series> seriesOptional = seriesRepository.findById(seriesId);
-
-        if (userOptional.isEmpty() || seriesOptional.isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        User user = userOptional.get();
-        Series series = seriesOptional.get();
-
-        if (user.getSeriesWatchlist().contains(series)) {
-            throw new AlreadyInWatchlistException(
-                    String.format("Serie mit ID '%s' ist bereits in der Watchlist von Benutzer '%s'.", seriesId, userId)
-            );
-        }
-
-
-        user.addSeriesToWatchlist(series);
-        User savedUser = userRepository.save(user);
-        UserResponseDTO userResponseDTO = new UserResponseDTO(savedUser);
-
-        return ResponseEntity.ok(userResponseDTO);
+    public void deleteUser(String id) {
+        userRepository.deleteById(id);
     }
 
     /**
      * add movie with the given id to the watchlist of the given user
      * @param userId
      * @param movieId
-     * @return UserResponseDTO
+     * @return List<MovieResponseDTO>
      */
-    public ResponseEntity<UserResponseDTO> addMovieToWatchlist(String userId, String movieId) {
+    public ResponseEntity<List<MovieResponseDTO>> addMovieToWatchlist(String userId, String movieId) {
         Optional<User> userOptional = userRepository.findById(userId);
         Optional<Movie> movieOptional = movieRepository.findById(movieId);
 
@@ -235,56 +212,26 @@ public class UserService {
 
         if (user.getMovieWatchlist().contains(movie)) {
             throw new AlreadyInWatchlistException(
-                    String.format("Serie mit ID '%s' ist bereits in der Watchlist von Benutzer '%s'.", movieId, userId));
+                    String.format("Film mit ID '%s' ist bereits in der Watchlist von Benutzer '%s'.", movieId, userId));
         }
-
 
         user.addMovieToWatchlist(movie);
         User savedUser = userRepository.save(user);
-        UserResponseDTO userResponseDTO = new UserResponseDTO(savedUser);
 
-        return ResponseEntity.ok(userResponseDTO);
+        List<MovieResponseDTO> movieDTOs = savedUser.getMovieWatchlist().stream()
+                .map(MovieResponseDTO::new)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(movieDTOs);
     }
 
     /**
-     * deletes the user with the given id
-     * @param id
-     */
-    public void deleteUser(String id) {
-        userRepository.deleteById(id);
-    }
-
-    /**
-     * removes the movie with the given id from the watchlist of the given user
-     * @param userId
-     * @param movieId
-     * @return UserResponseDTO
-     */
-    public ResponseEntity<UserResponseDTO> removeMovieFromWatchlist(String userId, String movieId) {
-        Optional<User> userOptional = userRepository.findById(userId);
-        Optional<Movie> movieOptional = movieRepository.findById(movieId);
-
-        if (userOptional.isEmpty() || movieOptional.isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        User user = userOptional.get();
-        Movie movie = movieOptional.get();
-
-        user.removeMovieFromWatchlist(movie);
-        User savedUser = userRepository.save(user);
-        UserResponseDTO userResponseDTO = new UserResponseDTO(savedUser);
-
-        return ResponseEntity.ok(userResponseDTO);
-    }
-
-    /**
-     * removes the series with the given id from the watchlist of the given user
+     * add series with the given id to the watchlist of the given user
      * @param userId
      * @param seriesId
-     * @return UserResponseDTO
+     * @return List<SeriesResponseDTO>
      */
-    public ResponseEntity<UserResponseDTO> removeSeriesFromWatchlist(String userId, String seriesId) {
+    public ResponseEntity<List<SeriesResponseDTO>> addSeriesToWatchlist(String userId, String seriesId) {
         Optional<User> userOptional = userRepository.findById(userId);
         Optional<Series> seriesOptional = seriesRepository.findById(seriesId);
 
@@ -295,10 +242,330 @@ public class UserService {
         User user = userOptional.get();
         Series series = seriesOptional.get();
 
-        user.removeSeriesFromWatchlist(series);
-        User savedUser = userRepository.save(user);
-        UserResponseDTO userResponseDTO = new UserResponseDTO(savedUser);
+        if (user.getSeriesWatchlist().contains(series)) {
+            throw new AlreadyInWatchlistException(
+                    String.format("Serie mit ID '%s' ist bereits in der Watchlist von Benutzer '%s'.", seriesId, userId));
+        }
 
-        return ResponseEntity.ok(userResponseDTO);
+        user.addSeriesToWatchlist(series);
+        User savedUser = userRepository.save(user);
+
+        List<SeriesResponseDTO> seriesDTOs = savedUser.getSeriesWatchlist().stream()
+                .map(SeriesResponseDTO::new)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(seriesDTOs);
+    }
+
+    /**
+     * removes the movie with the given id from the watchlist of the given user
+     * @param userId
+     * @param movieId
+     */
+    public void removeMovieFromWatchlist(String userId, String movieId) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        Optional<Movie> movieOptional = movieRepository.findById(movieId);
+
+        if (userOptional.isPresent() && movieOptional.isPresent()) {
+            User user = userOptional.get();
+            Movie movie = movieOptional.get();
+
+            user.removeMovieFromWatchlist(movie);
+            userRepository.save(user);
+        }
+    }
+
+    /**
+     * removes the series with the given id from the watchlist of the given user
+     * @param userId
+     * @param seriesId
+     */
+    public void removeSeriesFromWatchlist(String userId, String seriesId) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        Optional<Series> seriesOptional = seriesRepository.findById(seriesId);
+
+        if (userOptional.isPresent() && seriesOptional.isPresent()) {
+            User user = userOptional.get();
+            Series series = seriesOptional.get();
+
+            user.removeSeriesFromWatchlist(series);
+            userRepository.save(user);
+        }
+    }
+
+    /**
+     * returns the favorite movies of the given user
+     * @param userId
+     * @return List<MovieResponseDTO>
+     */
+    public ResponseEntity<List<MovieResponseDTO>> getMovieFavorites(String userId) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        User user = userOptional.get();
+        List<MovieResponseDTO> movieDTOs = user.getMovieFavorites().stream()
+                .map(MovieResponseDTO::new)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(movieDTOs);
+    }
+
+    /**
+     * returns the favorite series of the given user
+     * @param userId
+     * @return List<SeriesResponseDTO>
+     */
+    public ResponseEntity<List<SeriesResponseDTO>> getSeriesFavorites(String userId) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        User user = userOptional.get();
+        List<SeriesResponseDTO> seriesDTOs = user.getSeriesFavorites().stream()
+                .map(SeriesResponseDTO::new)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(seriesDTOs);
+    }
+
+    /**
+     * add movie with the given id to the favorites of the given user
+     * @param userId
+     * @param movieId
+     * @return List<MovieResponseDTO>
+     */
+    public ResponseEntity<List<MovieResponseDTO>> addMovieToFavorites(String userId, String movieId) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        Optional<Movie> movieOptional = movieRepository.findById(movieId);
+
+        if (userOptional.isEmpty() || movieOptional.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        User user = userOptional.get();
+        Movie movie = movieOptional.get();
+
+        if (user.getMovieFavorites().contains(movie)) {
+            throw new AlreadyInWatchlistException(
+                    String.format("Film mit ID '%s' ist bereits in den Favoriten von Benutzer '%s'.", movieId, userId));
+        }
+
+        user.addMovieToFavorites(movie);
+        User savedUser = userRepository.save(user);
+
+        List<MovieResponseDTO> movieDTOs = savedUser.getMovieFavorites().stream()
+                .map(MovieResponseDTO::new)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(movieDTOs);
+    }
+
+    /**
+     * add series with the given id to the favorites of the given user
+     * @param userId
+     * @param seriesId
+     * @return List<SeriesResponseDTO>
+     */
+    public ResponseEntity<List<SeriesResponseDTO>> addSeriesToFavorites(String userId, String seriesId) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        Optional<Series> seriesOptional = seriesRepository.findById(seriesId);
+
+        if (userOptional.isEmpty() || seriesOptional.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        User user = userOptional.get();
+        Series series = seriesOptional.get();
+
+        if (user.getSeriesFavorites().contains(series)) {
+            throw new AlreadyInWatchlistException(
+                    String.format("Serie mit ID '%s' ist bereits in den Favoriten von Benutzer '%s'.", seriesId, userId));
+        }
+
+        user.addSeriesToFavorites(series);
+        User savedUser = userRepository.save(user);
+
+        List<SeriesResponseDTO> seriesDTOs = savedUser.getSeriesFavorites().stream()
+                .map(SeriesResponseDTO::new)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(seriesDTOs);
+    }
+
+    /**
+     * removes the movie with the given id from the favorites of the given user
+     * @param userId
+     * @param movieId
+     */
+    public void removeMovieFromFavorites(String userId, String movieId) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        Optional<Movie> movieOptional = movieRepository.findById(movieId);
+
+        if (userOptional.isPresent() && movieOptional.isPresent()) {
+            User user = userOptional.get();
+            Movie movie = movieOptional.get();
+
+            user.removeMovieFromFavorites(movie);
+            userRepository.save(user);
+        }
+    }
+
+    /**
+     * removes the series with the given id from the favorites of the given user
+     * @param userId
+     * @param seriesId
+     */
+    public void removeSeriesFromFavorites(String userId, String seriesId) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        Optional<Series> seriesOptional = seriesRepository.findById(seriesId);
+
+        if (userOptional.isPresent() && seriesOptional.isPresent()) {
+            User user = userOptional.get();
+            Series series = seriesOptional.get();
+
+            user.removeSeriesFromFavorites(series);
+            userRepository.save(user);
+        }
+    }
+
+    /**
+     * returns the watched movies of the given user
+     * @param userId
+     * @return List<MovieResponseDTO>
+     */
+    public ResponseEntity<List<MovieResponseDTO>> getMoviesWatched(String userId) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        User user = userOptional.get();
+        List<MovieResponseDTO> movieDTOs = user.getMoviesWatched().stream()
+                .map(MovieResponseDTO::new)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(movieDTOs);
+    }
+
+    /**
+     * returns the watched series of the given user
+     * @param userId
+     * @return List<SeriesResponseDTO>
+     */
+    public ResponseEntity<List<SeriesResponseDTO>> getSeriesWatched(String userId) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        User user = userOptional.get();
+        List<SeriesResponseDTO> seriesDTOs = user.getSeriesWatched().stream()
+                .map(SeriesResponseDTO::new)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(seriesDTOs);
+    }
+
+    /**
+     * add movie with the given id to the watched list of the given user
+     * @param userId
+     * @param movieId
+     * @return List<MovieResponseDTO>
+     */
+    public ResponseEntity<List<MovieResponseDTO>> addMovieToWatched(String userId, String movieId) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        Optional<Movie> movieOptional = movieRepository.findById(movieId);
+
+        if (userOptional.isEmpty() || movieOptional.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        User user = userOptional.get();
+        Movie movie = movieOptional.get();
+
+        if (user.getMoviesWatched().contains(movie)) {
+            throw new AlreadyInWatchlistException(
+                    String.format("Film mit ID '%s' ist bereits in der Watched-Liste von Benutzer '%s'.", movieId, userId));
+        }
+
+        user.addMovieToWatched(movie);
+        User savedUser = userRepository.save(user);
+
+        List<MovieResponseDTO> movieDTOs = savedUser.getMoviesWatched().stream()
+                .map(MovieResponseDTO::new)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(movieDTOs);
+    }
+
+    /**
+     * add series with the given id to the watched list of the given user
+     * @param userId
+     * @param seriesId
+     * @return List<SeriesResponseDTO>
+     */
+    public ResponseEntity<List<SeriesResponseDTO>> addSeriesToWatched(String userId, String seriesId) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        Optional<Series> seriesOptional = seriesRepository.findById(seriesId);
+
+        if (userOptional.isEmpty() || seriesOptional.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        User user = userOptional.get();
+        Series series = seriesOptional.get();
+
+        if (user.getSeriesWatched().contains(series)) {
+            throw new AlreadyInWatchlistException(
+                    String.format("Serie mit ID '%s' ist bereits in der Watched-Liste von Benutzer '%s'.", seriesId, userId));
+        }
+
+        user.addSeriesToWatched(series);
+        User savedUser = userRepository.save(user);
+
+        List<SeriesResponseDTO> seriesDTOs = savedUser.getSeriesWatched().stream()
+                .map(SeriesResponseDTO::new)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(seriesDTOs);
+    }
+
+    /**
+     * removes the movie with the given id from the watched list of the given user
+     * @param userId
+     * @param movieId
+     */
+    public void removeMovieFromWatched(String userId, String movieId) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        Optional<Movie> movieOptional = movieRepository.findById(movieId);
+
+        if (userOptional.isPresent() && movieOptional.isPresent()) {
+            User user = userOptional.get();
+            Movie movie = movieOptional.get();
+
+            user.removeMovieFromWatched(movie);
+            userRepository.save(user);
+        }
+    }
+
+    /**
+     * removes the series with the given id from the watched list of the given user
+     * @param userId
+     * @param seriesId
+     */
+    public void removeSeriesFromWatched(String userId, String seriesId) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        Optional<Series> seriesOptional = seriesRepository.findById(seriesId);
+
+        if (userOptional.isPresent() && seriesOptional.isPresent()) {
+            User user = userOptional.get();
+            Series series = seriesOptional.get();
+
+            user.removeSeriesFromWatched(series);
+            userRepository.save(user);
+        }
     }
 }
