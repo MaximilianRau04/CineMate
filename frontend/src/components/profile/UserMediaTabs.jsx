@@ -13,7 +13,10 @@ const UserMediaTabs = ({ userId }) => {
     reviews: false
   });
 
-  // Laden der Bewertungen
+  /**
+   * fetches the reviews of the user from the API
+   * @returns {void}
+   */
   useEffect(() => {
     if (!userId) return;
     
@@ -29,7 +32,10 @@ const UserMediaTabs = ({ userId }) => {
       .finally(() => setLoading(prev => ({ ...prev, reviews: false })));
   }, [userId]);
 
-  // Laden der Favoriten
+  /**
+   * fetches the user's favorites (movies and series) from the API
+   * @returns {void}
+   */
   useEffect(() => {
     if (activeTab !== "favorites" || !userId) return;
     
@@ -39,7 +45,6 @@ const UserMediaTabs = ({ userId }) => {
       fetch(`http://localhost:8080/api/users/${userId}/favorites/series`).then(res => res.ok ? res.json() : [])
     ])
       .then(([movies, series]) => {
-        // Filtern ungültiger Daten
         const validMovies = Array.isArray(movies) ? movies.filter(movie => movie && movie.id) : [];
         const validSeries = Array.isArray(series) ? series.filter(serie => serie && serie.id) : [];
         setFavorites({ movies: validMovies, series: validSeries });
@@ -48,7 +53,10 @@ const UserMediaTabs = ({ userId }) => {
       .finally(() => setLoading(prev => ({ ...prev, favorites: false })));
   }, [userId, activeTab]);
 
-  // Laden der gesehenen Medien
+  /**
+   * fetches the user's watched movies and series from the API
+   * @returns {void}
+   */
   useEffect(() => {
     if (activeTab !== "watched" || !userId) return;
     
@@ -58,7 +66,6 @@ const UserMediaTabs = ({ userId }) => {
       fetch(`http://localhost:8080/api/users/${userId}/watched/series`).then(res => res.ok ? res.json() : [])
     ])
       .then(([movies, series]) => {
-        // Filtern ungültiger Daten
         const validMovies = Array.isArray(movies) ? movies.filter(movie => movie && movie.id) : [];
         const validSeries = Array.isArray(series) ? series.filter(serie => serie && serie.id) : [];
         setWatched({ movies: validMovies, series: validSeries });

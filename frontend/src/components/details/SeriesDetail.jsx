@@ -13,6 +13,7 @@ const SeriesDetail = () => {
   const { mediaId, media, isLoading, error, userId, currentUser, actors, director, castLoading } =
     useMediaDetail('series');
 
+  // This hook manages user interactions like watchlist, watched, and favorites  
   const {
     isInWatchlist,
     addingToWatchlist,
