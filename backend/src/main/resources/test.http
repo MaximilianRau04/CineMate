@@ -28,12 +28,22 @@ Content-Type: application/json
 GET http://localhost:8080/api/users/me
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYXhpIiwiZXhwIjoxNzQ4NDA1ODY2LCJpYXQiOjE3NDgzNjk4NjZ9.p78xMveabfrcCLJWAx5FmPexqVKxDnbSLT-IfA8JueQ
 ###
-GET http://localhost:8080/api/reviews/682f8047f2bfcb4c90da6749/user
+
+GET http://localhost:8080/api/reviews
+
 ###
 GET http://localhost:8080/api/series/682a284236f2d54c872d1bb9/seasons
+
+###
+PUT http://localhost:8080/api/users/6834b935a119f372560d8668/favorites/movies/682a27c636f2d54c872d1bb8
+Content-Type: application/json
 ###
 
-GET http://localhost:8080/api/users/6834b935a119f372560d8668/favorites/series
+GET http://localhost:8080/api/users/6834b935a119f372560d8668/watched/movies
+###
+
+GET http://localhost:8080/api/users/6834b935a119f372560d8668/watched/series
+
 ###
 DELETE http://localhost:8080/api/users/6845be9ddb98a94e25df7019
 

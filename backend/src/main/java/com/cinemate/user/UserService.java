@@ -166,7 +166,18 @@ public class UserService {
         if (userRequestDTO.getBio() != null) existingUser.setBio(userRequestDTO.getBio());
         if (userRequestDTO.getRole() != null) existingUser.setRole(userRequestDTO.getRole());
 
-        if (avatar != null && !avatar.isEmpty()) {
+        if (userRequestDTO.isRemoveAvatar()) {
+            // Alten Avatar löschen, falls vorhanden
+            if (existingUser.getAvatarUrl() != null) {
+                Path oldAvatarPath = Paths.get(existingUser.getAvatarUrl().substring(1)); // Entferne den führenden "/"
+                try {
+                    Files.deleteIfExists(oldAvatarPath);
+                } catch (IOException e) {
+                    System.out.println("Fehler beim Löschen des alten Avatars: " + e.getMessage());
+                }
+            }
+            existingUser.setAvatarUrl(null);
+        } else if (avatar != null && !avatar.isEmpty()) {
             try {
                 String filename = UUID.randomUUID() + "_" + avatar.getOriginalFilename();
                 Path path = Paths.get("uploads").resolve(filename);

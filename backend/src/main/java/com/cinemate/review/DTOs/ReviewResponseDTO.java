@@ -6,12 +6,14 @@ import java.util.Date;
 
 public class ReviewResponseDTO {
     private String id;
+    private String itemId;
     private double rating;
     private String comment;
     private Date date;
 
-    public ReviewResponseDTO(String id, double rating, String comment, Date date) {
+    public ReviewResponseDTO(String id, String itemId, double rating, String comment, Date date) {
         this.id = id;
+        this.itemId = itemId;
         this.rating = rating;
         this.comment = comment;
         this.date = date;
@@ -22,6 +24,7 @@ public class ReviewResponseDTO {
     
     public ReviewResponseDTO(Review review) {
         this.id = review.getId();
+        this.itemId = review.getItemId();
         this.comment = review.getComment();
         this.rating = review.getRating();
         this.date = review.getDate();
@@ -57,5 +60,13 @@ public class ReviewResponseDTO {
 
     public void setDate(Date date) {
         this.date = date;
+    }
+
+    public String getItemId() {
+        return itemId;
+    }
+
+    public void setItemId(String itemId) {
+        this.itemId = itemId;
     }
 }

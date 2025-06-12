@@ -5,10 +5,9 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-import java.io.Serializable;
 import java.util.Date;
 
-public class UserRequestDTO implements Serializable {
+public class UserRequestDTO {
     private String id;
     @NotNull
     private String username;
@@ -19,6 +18,7 @@ public class UserRequestDTO implements Serializable {
     private String email;
     private String bio;
     private String avatarUrl;
+    private boolean removeAvatar;
     private Date joinedAt;
     private Role role;
 
@@ -97,6 +97,14 @@ public class UserRequestDTO implements Serializable {
 
     public void setRole(Role role) {
         this.role = role;
+    }
+
+    public boolean isRemoveAvatar() {
+        return removeAvatar;
+    }
+
+    public void setRemoveAvatar(boolean removeAvatar) {
+        this.removeAvatar = removeAvatar;
     }
 
 }

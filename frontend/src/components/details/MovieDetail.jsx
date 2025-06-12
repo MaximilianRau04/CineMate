@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useMediaDetail, renderStars } from "./utils/useMediaDetail";
-import { useWatchlist } from "./utils/useWatchlist";
+import { useMediaInteractions } from "./utils/useMediaInteractions";
 import { useReviews } from "./utils/useReviews";
 import MediaHeader from "./MediaHeader";
 import RatingSection from "./sections/RatingSection";
@@ -12,7 +12,18 @@ const MovieDetail = () => {
   const { mediaId, media, isLoading, error, userId, currentUser, actors, director, castLoading } =
     useMediaDetail('movies');
 
-  const { added, adding, handleAddToWatchlist } = useWatchlist(userId, mediaId, 'movies');
+  // This hook manages user interactions like watchlist, watched, and favorites  
+  const {
+    isInWatchlist,
+    addingToWatchlist,
+    addToWatchlist,
+    isWatched,
+    markingAsWatched,
+    markAsWatched,
+    isFavorite,
+    addingToFavorites,
+    addToFavorites
+  } = useMediaInteractions(userId, mediaId, 'movies');
 
   // This hook manages reviews, ratings, and user interactions
   const {
@@ -68,9 +79,16 @@ const MovieDetail = () => {
           averageRating={averageRating}
           reviewCount={reviews.length}
           userId={userId}
-          added={added}
-          adding={adding}
-          onAddToWatchlist={handleAddToWatchlist}
+          error={error}
+          added={isInWatchlist}
+          adding={addingToWatchlist}
+          onAddToWatchlist={addToWatchlist}
+          watched={isWatched}
+          watching={markingAsWatched}
+          onMarkAsWatched={markAsWatched}
+          favorite={isFavorite}
+          favoriting={addingToFavorites}
+          onAddToFavorites={addToFavorites}
           renderStars={renderStars}
         />
       </div>
@@ -106,13 +124,13 @@ const MovieDetail = () => {
       />
 
       <EditReviewModal
-        showEditModal={showEditModal}  
+        showEditModal={showEditModal}
         rating={rating}
         comment={comment}
         submitting={submitting}
         onClose={() => setShowEditModal(false)}
         onEditReview={handleEditReviewWithClose}
-        onDeleteReview={handleDeleteReview}  
+        onDeleteReview={handleDeleteReview}
         renderStars={renderStars}
       />
     </div>

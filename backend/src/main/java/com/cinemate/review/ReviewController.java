@@ -25,26 +25,6 @@ public class ReviewController {
     }
 
     /**
-     * creates a review for the given movie and the given user
-     * @param movieId
-     * @param userId
-     * @param reviewDTO
-     * @return ReviewResponseDTO
-     */
-    @PostMapping("/movie/{movieId}/user/{userId}")
-    public ResponseEntity<ReviewResponseDTO> createMovieReview(
-            @PathVariable String movieId,
-            @PathVariable String userId,
-            @RequestBody ReviewRequestDTO reviewDTO) {
-
-        reviewDTO.setItemId(movieId);
-        reviewDTO.setUserId(userId);
-
-        ReviewResponseDTO createdReview = reviewService.createReview(reviewDTO);
-        return new ResponseEntity<>(createdReview, HttpStatus.CREATED);
-    }
-
-    /**
      * returns a review by the given id
      * @param id
      * @return
@@ -133,13 +113,13 @@ public class ReviewController {
 
 
     /**
-     * returns the user of a review by review id
-     * @param reviewId
+     * returns the user of a review by the given id
+     * @param id
      * @return UserResponseDTO
      */
-    @GetMapping("/{reviewId}/user")
-    public ResponseEntity<UserResponseDTO> getUserByReview(@PathVariable String reviewId) {
-        UserResponseDTO user = reviewService.getUserByReviewId(reviewId);
+    @GetMapping("/{id}/user")
+    public ResponseEntity<UserResponseDTO> getUserByReview(@PathVariable String id) {
+        UserResponseDTO user = reviewService.getUserByReviewId(id);
         if (user != null) {
             return ResponseEntity.ok(user);
         } else {
@@ -148,13 +128,13 @@ public class ReviewController {
     }
 
     /**
-     * returns the movie of a review by review id
-     * @param reviewId
+     * returns the movie of a review by the given id
+     * @param id
      * @return MovieResponseDTO
      */
-    @GetMapping("/{reviewId}/movie")
-    public ResponseEntity<MovieResponseDTO> getMovieByReview(@PathVariable String reviewId) {
-        MovieResponseDTO movie = reviewService.getMovieByReviewId(reviewId);
+    @GetMapping("/{id}/movie")
+    public ResponseEntity<MovieResponseDTO> getMovieByReview(@PathVariable String id) {
+        MovieResponseDTO movie = reviewService.getMovieByReviewId(id);
         if (movie != null) {
             return ResponseEntity.ok(movie);
         } else {
@@ -163,18 +143,38 @@ public class ReviewController {
     }
 
     /**
-     * returns the series of a review by review id
-     * @param reviewId
+     * returns the series of a review by the given id
+     * @param id
      * @return SeriesResponseDTO
      */
-    @GetMapping("/{reviewId}/series")
-    public ResponseEntity<SeriesResponseDTO> getSeriesByReview(@PathVariable String reviewId) {
-        SeriesResponseDTO series = reviewService.getSeriesByReviewId(reviewId);
+    @GetMapping("/{id}/series")
+    public ResponseEntity<SeriesResponseDTO> getSeriesByReview(@PathVariable String id) {
+        SeriesResponseDTO series = reviewService.getSeriesByReviewId(id);
         if (series != null) {
             return ResponseEntity.ok(series);
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    /**
+     * creates a review for the given movie and the given user
+     * @param movieId
+     * @param userId
+     * @param reviewDTO
+     * @return ReviewResponseDTO
+     */
+    @PostMapping("/movie/{movieId}/user/{userId}")
+    public ResponseEntity<ReviewResponseDTO> createMovieReview(
+            @PathVariable String movieId,
+            @PathVariable String userId,
+            @RequestBody ReviewRequestDTO reviewDTO) {
+
+        reviewDTO.setItemId(movieId);
+        reviewDTO.setUserId(userId);
+
+        ReviewResponseDTO createdReview = reviewService.createReview(reviewDTO);
+        return new ResponseEntity<>(createdReview, HttpStatus.CREATED);
     }
 
     /**
@@ -196,8 +196,6 @@ public class ReviewController {
         ReviewResponseDTO createdReview = reviewService.createReview(reviewDTO);
         return new ResponseEntity<>(createdReview, HttpStatus.CREATED);
     }
-
-
 
     /**
      * updates a review

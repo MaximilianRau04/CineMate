@@ -1,4 +1,4 @@
-import { FaPlus, FaCheck, FaArrowLeft } from "react-icons/fa";
+import { FaPlus, FaCheck, FaArrowLeft, FaEye, FaStar } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 const MediaHeader = ({
@@ -7,9 +7,15 @@ const MediaHeader = ({
   reviewCount,
   userId,
   added,
+  watched,
+  favorite,
   error,
   adding,
+  watching,
+  favoriting,
   onAddToWatchlist,
+  onMarkAsWatched,
+  onAddToFavorites,
   renderStars
 }) => {
 
@@ -110,6 +116,60 @@ const MediaHeader = ({
           >
             <FaCheck className="me-2" />
             In deiner Watchlist!
+          </div>
+        )}
+
+        {userId && !favorite && (
+          <button
+            className="btn btn-warning me-2"
+            onClick={onAddToFavorites}
+            disabled={favoriting}
+          >
+            {favoriting ? (
+              "Wird hinzugefügt..."
+            ) : (
+              <>
+                <FaStar className="me-2" />
+                Zu Favoriten hinzufügen
+              </>
+            )}
+          </button>
+        )}
+
+        {favorite && (
+          <div
+            className="alert alert-warning d-inline-flex align-items-center px-3 py-2"
+            role="alert"
+          >
+            <FaStar className="me-2" />
+            In deinen Favoriten!
+          </div>
+        )}
+
+        {userId && !watched && (
+          <button
+            className="btn btn-info me-2 text-white"
+            onClick={onMarkAsWatched}
+            disabled={watching}
+          >
+            {watching ? (
+              "Wird markiert..."
+            ) : (
+              <>
+                <FaEye className="me-2" />
+                Als gesehen markieren
+              </>
+            )}
+          </button>
+        )}
+
+        {watched && (
+          <div
+            className="alert alert-info d-inline-flex align-items-center px-3 py-2 me-2"
+            role="alert"
+          >
+            <FaEye className="me-2" />
+            Als gesehen markiert
           </div>
         )}
       </div>

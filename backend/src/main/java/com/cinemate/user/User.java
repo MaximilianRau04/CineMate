@@ -225,23 +225,23 @@ public class User {
     }
 
     public void addMovieToWatched(Movie movie) {
-        if (!movieWatchlist.contains(movie)) {
-            movieWatchlist.add(movie);
+        if (!moviesWatched.contains(movie)) {
+            moviesWatched.add(movie);
         }
     }
 
     public void removeMovieFromWatched(Movie movie) {
-        movieWatchlist.removeIf(m -> m.getId().equals(movie.getId()));
+        moviesWatched.removeIf(m -> m.getId().equals(movie.getId()));
     }
 
     public void addSeriesToWatched(Series series) {
-        if (!seriesWatchlist.contains(series)) {
-            seriesWatchlist.add(series);
+        if (!seriesWatched.contains(series)) {
+            seriesWatched.add(series);
         }
     }
 
     public void removeSeriesFromWatched(Series series) {
-        seriesWatchlist.removeIf(m -> m.getId().equals(series.getId()));
+        seriesWatched.removeIf(m -> m.getId().equals(series.getId()));
     }
 
 }

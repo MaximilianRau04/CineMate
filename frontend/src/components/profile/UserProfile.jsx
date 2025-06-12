@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import UserMediaTabs from "./UserMediaTabs";
 
 const UserProfile = () => {
   const [user, setUser] = useState(null);
@@ -65,6 +66,8 @@ const UserProfile = () => {
 
   /**
    * removes the avatar from the user profile.
+   * @returns {void}
+   * @throws {Error} If the avatar cannot be removed.
    */
   const handleRemoveAvatar = async () => {
     if (!userId) return;
@@ -72,9 +75,9 @@ const UserProfile = () => {
     setSaving(true);
     try {
       const formData = new FormData();
-      const userData = { 
+      const userData = {
         bio: bio,
-        removeAvatar: true 
+        removeAvatar: true
       };
 
       formData.append(
@@ -84,7 +87,7 @@ const UserProfile = () => {
 
       const response = await fetch(`http://localhost:8080/api/users/${userId}`, {
         method: "PUT",
-        body: formData,
+        body: formData
       });
 
       if (!response.ok) {
@@ -97,15 +100,19 @@ const UserProfile = () => {
       setAvatarFile(null);
     } catch (err) {
       console.error("Fehler beim Entfernen des Avatars:", err);
+      alert("Fehler beim Entfernen des Avatars: " + err.message);
     } finally {
       setSaving(false);
     }
   };
+
+  // open the modal to edit the bio
   const openModal = () => {
     setModalBio(bio);
     setShowModal(true);
   };
 
+  // save the bio from the modal
   const saveModalBio = () => {
     setBio(modalBio);
     setShowModal(false);
@@ -114,36 +121,38 @@ const UserProfile = () => {
   const handleAvatarClick = () => {
     fileInputRef.current.click();
   };
-  
+
   /**
    * automatically saves the user profile when the avatar file changes.
+   * @returns {void}
+   * @throws {Error} If the user profile cannot be saved.
    */
   useEffect(() => {
     if (avatarFile) {
       const autoSave = async () => {
         if (!userId) return;
-        
+
         const formData = new FormData();
         const userData = { bio };
-        
+
         formData.append(
           "user",
           new Blob([JSON.stringify(userData)], { type: "application/json" })
         );
-        
+
         formData.append("avatar", avatarFile);
-        
+
         setSaving(true);
         try {
           const response = await fetch(`http://localhost:8080/api/users/${userId}`, {
             method: "PUT",
             body: formData,
           });
-          
+
           if (!response.ok) {
             throw new Error(`Update fehlgeschlagen: ${response.status}`);
           }
-          
+
           const updatedUser = await response.json();
           setUser(updatedUser);
           setAvatarFile(null);
@@ -154,7 +163,7 @@ const UserProfile = () => {
           setSaving(false);
         }
       };
-      
+
       autoSave();
     }
   }, [avatarFile, userId, bio]);
@@ -186,7 +195,7 @@ const UserProfile = () => {
                 <>
                   <img
                     src={
-                      avatarPreview || 
+                      avatarPreview ||
                       `http://localhost:8080${avatarUrl}`
                     }
                     alt={username}
@@ -220,7 +229,7 @@ const UserProfile = () => {
                       <div style={{ fontSize: "0.8rem", marginTop: "5px" }}>Ändern</div>
                     </div>
                   </div>
-                  {/* Entfernen-Button */}
+
                   <button
                     className="btn btn-danger btn-sm position-absolute"
                     style={{
@@ -236,7 +245,7 @@ const UserProfile = () => {
                     }}
                     onClick={handleRemoveAvatar}
                     title="Avatar entfernen"
-                  >
+                  > 🗙
                     <i className="bi bi-x-lg"></i>
                   </button>
                 </>
@@ -244,9 +253,9 @@ const UserProfile = () => {
                 /* Placeholder*/
                 <div
                   className="d-flex flex-column align-items-center justify-content-center rounded-circle bg-secondary mb-3"
-                  style={{ 
-                    width: "150px", 
-                    height: "150px", 
+                  style={{
+                    width: "150px",
+                    height: "150px",
                     border: "3px dashed #6c757d",
                     transition: "all 0.3s ease"
                   }}
@@ -282,21 +291,7 @@ const UserProfile = () => {
               }}
               className="d-none"
             />
-            
-            <div className="text-center">
-              <small className="text-muted d-block">
-                {hasAvatar ? 
-                  "Klicke auf das Bild zum Ändern" : 
-                  "Klicke hier, um ein Profilbild hinzuzufügen"
-                }
-              </small>
-              {hasAvatar && (
-                <small className="text-muted d-block mt-1">
-                  <i className="bi bi-x-circle me-1"></i>
-                  Oder auf das X zum Entfernen
-                </small>
-              )}
-            </div>
+
           </div>
 
           <div className="col-md-8 p-4">
@@ -330,56 +325,27 @@ const UserProfile = () => {
             <p className="text-muted">
               <strong>Beigetreten:</strong> {formattedDate}
             </p>
-            
+
             {saving && (
               <div className="mt-3 text-center">
                 <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                 <span>{avatarFile ? "Bild wird gespeichert..." : "Avatar wird entfernt..."}</span>
               </div>
             )}
-            
-            <div className="mt-4">
-              <h5>📝 Bewertungen</h5>
-              <div
-                className="review-container border rounded p-3 bg-light"
-                style={{
-                  maxHeight: "200px", 
-                  overflowY: "auto",
-                }}
-              >
-                {reviews.length > 0 ? (
-                  <ul className="list-group list-group-flush">
-                    {reviews.map((review) => (
-                      <li key={review.id} className="list-group-item">
-                        <strong>
-                        🎬 {review.movie?.title || review.series?.title}
-                        </strong>
-                        <div className="mb-1">⭐ {review.rating} / 5</div>
-                        <p className="mb-1">
-                          {review.comment || "Kein Kommentar vorhanden."}
-                        </p>
-                        <small className="text-muted">
-                          Bewertet am:{" "}
-                          {new Date(review.date).toLocaleDateString("de-DE", {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                          })}
-                        </small>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-muted fst-italic mb-0">
-                    Noch keine Bewertungen.
-                  </p>
-                )}
+
+          </div>
+
+          <div className="card shadow-lg border-0 mt-4">
+              <div className="card-header bg-white">
+                <h4 className="mb-0">Meine Medien</h4>
+              </div>
+              <div className="card-body">
+                <UserMediaTabs userId={userId} />
               </div>
             </div>
-          </div>
         </div>
       </div>
-      
+
       {/* Bio Edit Modal */}
       {showModal && (
         <div
