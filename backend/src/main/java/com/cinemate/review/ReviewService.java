@@ -15,9 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -212,6 +210,31 @@ public class ReviewService {
                 return new SeriesResponseDTO(seriesOpt.get());
             }
         }
+        return null;
+    }
+
+    /**
+     * Retrieves the media (movie or series) associated with a review
+     * @param reviewId the ID of the review
+     * @return a map containing the media type and data, or null if not found
+     */
+    public Map<String, Object> getMediaByReviewId(String reviewId) {
+        MovieResponseDTO movie = getMovieByReviewId(reviewId);
+        if (movie != null) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("type", "movie");
+            response.put("data", movie);
+            return response;
+        }
+
+        SeriesResponseDTO series = getSeriesByReviewId(reviewId);
+        if (series != null) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("type", "series");
+            response.put("data", series);
+            return response;
+        }
+
         return null;
     }
 

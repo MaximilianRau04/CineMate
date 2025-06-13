@@ -100,7 +100,6 @@ const UserProfile = () => {
       setAvatarFile(null);
     } catch (err) {
       console.error("Fehler beim Entfernen des Avatars:", err);
-      alert("Fehler beim Entfernen des Avatars: " + err.message);
     } finally {
       setSaving(false);
     }
@@ -245,7 +244,7 @@ const UserProfile = () => {
                     }}
                     onClick={handleRemoveAvatar}
                     title="Avatar entfernen"
-                  > 🗙
+                  > 
                     <i className="bi bi-x-lg"></i>
                   </button>
                 </>

@@ -64,7 +64,7 @@ const LoginForm = () => {
 
   /**
  * function to handle user login
- * @param {*} e
+ * @param {*} e - event object
  * @returns {Promise<void>}
  */
   const handleLogin = async (e) => {
@@ -103,7 +103,7 @@ const LoginForm = () => {
 
   /**
    * function to handle user registration
-   * @param {*} e
+   * @param {*} e - event object
    * @returns {Promise<void>}
    */
   const handleRegister = async (e) => {
@@ -177,7 +177,7 @@ const LoginForm = () => {
 
   /**
    * checks if the form is valid before submission
-   * @returns {boolean}
+   * @returns {boolean} - true if the form is valid, false otherwise
    */
   const isFormValid = () => {
     if (isLogin) {

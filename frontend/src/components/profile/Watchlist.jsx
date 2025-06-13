@@ -28,7 +28,7 @@ const Watchlist = () => {
 
   /**
    * fetches the watchlist of the user from the API
-   * @param {string} userId 
+   * @param {string} userId - ID of the user whose watchlist is to be fetched
    * @returns {void}
    */
   useEffect(() => {
@@ -51,7 +51,7 @@ const Watchlist = () => {
 
   /**
    * removes a movie from the watchlist of the user
-   * @param {*} movieId 
+   * @param {*} movieId - ID of the movie to remove
    * @returns {void}
    */
   const removeMovieFromWatchlist = (movieId) => {
@@ -71,7 +71,7 @@ const Watchlist = () => {
 
   /**
    * removes a series from the watchlist of the user
-   * @param {*} seriesId 
+   * @param {*} seriesId - the ID of the series to remove
    * @returns {void}
    */
   const removeSeriesFromWatchlist = (seriesId) => {
