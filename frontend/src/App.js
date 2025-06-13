@@ -9,7 +9,7 @@ import MovieDetail from './components/details/MovieDetail';
 import SeriesDetail from './components/details/SeriesDetail';
 import Watchlist from './components/profile/Watchlist';
 import UserProfile from './components/profile/UserProfile';
-import Calender from './components/explore/Calender';
+import Calendar from './components/explore/calender/Calendar';
 import AdminPanel from './components/admin/AdminPanel';
 
 const AppContent = () => {
@@ -28,7 +28,7 @@ const AppContent = () => {
         <Route path="/series/:id" element={<SeriesDetail />} />
         <Route path="/watchlist" element={<Watchlist />} />
         <Route path="/profile" element={<UserProfile />} />
-        <Route path="/calendar" element={<Calender />} />
+        <Route path="/calendar" element={<Calendar />} />
         <Route path="/admin" element={<AdminPanel />} />
 
       </Routes>
