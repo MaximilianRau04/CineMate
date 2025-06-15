@@ -1,6 +1,7 @@
 package com.cinemate.user;
 
 import com.cinemate.movie.Movie;
+import com.cinemate.notification.NotificationPreference;
 import com.cinemate.series.Series;
 import com.cinemate.user.dtos.UserRequestDTO;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -46,6 +47,9 @@ public class User {
     private List<Series> seriesWatched = new ArrayList<>();
     // private List<User> followers
     // private List<User> following;
+    private List<NotificationPreference> notificationPreferences = new ArrayList<>();
+    private boolean emailNotificationsEnabled = true;
+    private boolean webNotificationsEnabled = true;
 
 
     public User(String id, String username, String password, String email, String bio, String avatarUrl, Date joinedAt, Role role) {
@@ -183,6 +187,15 @@ public class User {
     public void setSeriesWatched(List<Series> seriesWatched) {
         this.seriesWatched = seriesWatched;
     }
+
+    public List<NotificationPreference> getNotificationPreferences() { return notificationPreferences; }
+    public void setNotificationPreferences(List<NotificationPreference> preferences) { this.notificationPreferences = preferences; }
+
+    public boolean isEmailNotificationsEnabled() { return emailNotificationsEnabled; }
+    public void setEmailNotificationsEnabled(boolean enabled) { this.emailNotificationsEnabled = enabled; }
+
+    public boolean isWebNotificationsEnabled() { return webNotificationsEnabled; }
+    public void setWebNotificationsEnabled(boolean enabled) { this.webNotificationsEnabled = enabled; }
 
     public void addMovieToWatchlist(Movie movie) {
         if (!movieWatchlist.contains(movie)) {

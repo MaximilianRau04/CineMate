@@ -1,0 +1,12 @@
+package com.cinemate.notification;
+
+public enum NotificationType {
+    NEW_MOVIE_RELEASE,
+    NEW_EPISODE_AVAILABLE,
+    SERIES_STATUS_UPDATE,
+    WATCHLIST_REMINDER,
+    RATING_UPDATE,
+    NEW_SEASON_ANNOUNCED,
+    RECOMMENDATION,
+    SYSTEM_ANNOUNCEMENT
+}

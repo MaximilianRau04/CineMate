@@ -373,6 +373,27 @@ GET http://localhost:8080/api/directors/682a285836f2d54c872d1bbf/movies
 ###
 DELETE http://localhost:8080/api/movies/682a27b836f2d54c872d1bb3/director
 ###
-
 POST http://localhost:8080/api/movies/682a27b836f2d54c872d1bb3/director/682a285836f2d54c872d1bbf
 Content-Type: application/json
+###
+GET http://localhost:8080/api/movies
+###
+
+POST http://localhost:8080/api/notifications
+Content-Type: application/json
+
+{
+  "userId": "6834b935a119f372560d8668",
+  "type": "NEW_MOVIE_RELEASE",
+  "title": "Neuer Film verfügbar!",
+  "message": "Der neue Marvel Film ist jetzt verfügbar zum Streamen.",
+  "ItemId": "682a27bf36f2d54c872d1bb5",
+  "ItemType": "movie",
+  "metadata": {
+     "director": "Ryan Coogler",
+     "genre": "Action",
+     "rating": 8.5
+  }
+}
+###
+GET http://localhost:8080/api/notifications/user/6834b935a119f372560d8668

@@ -1,16 +1,10 @@
 package com.cinemate.user;
 
 import com.cinemate.movie.DTOs.MovieResponseDTO;
-import com.cinemate.movie.Movie;
-import com.cinemate.review.DTOs.ReviewResponseDTO;
-import com.cinemate.review.Review;
-import com.cinemate.review.ReviewService;
 import com.cinemate.series.DTOs.SeriesResponseDTO;
-import com.cinemate.series.Series;
 import com.cinemate.user.dtos.UserRequestDTO;
 import com.cinemate.user.dtos.UserResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
