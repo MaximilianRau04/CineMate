@@ -4,7 +4,6 @@ import com.cinemate.movie.Movie;
 import com.cinemate.notification.NotificationPreference;
 import com.cinemate.series.Series;
 import com.cinemate.user.dtos.UserRequestDTO;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;

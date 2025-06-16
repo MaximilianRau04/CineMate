@@ -29,21 +29,86 @@ public class NotificationService {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
+    /**
+     * check if the notification type is enabled
+     * @param user
+     * @param type
+     * @param isEmail
+     * @return boolean
+     */
+    private boolean isNotificationTypeEnabled(User user, NotificationType type, boolean isEmail) {
+        return user.getNotificationPreferences().stream()
+                .filter(pref -> pref.getType() == type)
+                .findFirst()
+                .map(pref -> isEmail ? pref.isEmailEnabled() : pref.isWebEnabled())
+                .orElse(true);
+    }
+
+    /**
+     * returns notifications of user
+     * @param userId
+     * @return List<Notification>
+     */
+    public List<Notification> getUserNotifications(String userId) {
+        return notificationRepository.findByUserIdOrderByCreatedAtDesc(userId);
+    }
+
+    /**
+     * returns unread notifications of user
+     * @param userId
+     * @return List<Notification>
+     */
+    public List<Notification> getUnreadNotifications(String userId) {
+        return notificationRepository.findByUserIdAndReadFalseOrderByCreatedAtDesc(userId);
+    }
+
+    /**
+     * returns count of unread notifications
+     * @param userId
+     * @return long
+     */
+    public long getUnreadCount(String userId) {
+        return notificationRepository.countByUserIdAndReadFalse(userId);
+    }
+
+    /**
+     * crates a notification
+     * @param userId
+     * @param type
+     * @param title
+     * @param message
+     * @return Notification
+     */
     public Notification createNotification(String userId, NotificationType type, String title, String message) {
         Notification notification = new Notification(userId, type, title, message);
         return notificationRepository.save(notification);
     }
 
+    /**
+     * creates a notification with metadata
+     * @param userId
+     * @param type
+     * @param title
+     * @param message
+     * @param itemId
+     * @param itemType
+     * @param metadata
+     * @return Notification
+     */
     public Notification createNotificationWithMetadata(String userId, NotificationType type, String title,
-                                                       String message, String relatedItemId, String relatedItemType,
+                                                       String message, String itemId, String itemType,
                                                        Map<String, Object> metadata) {
         Notification notification = new Notification(userId, type, title, message);
-        notification.setItemId(relatedItemId);
-        notification.setItemType(relatedItemType);
+        notification.setItemId(itemId);
+        notification.setItemType(itemType);
         notification.setMetadata(metadata);
         return notificationRepository.save(notification);
     }
 
+    /**
+     * sends a notification
+     * @param notificationId
+     */
     @Async
     public void sendNotification(String notificationId) {
         Optional<Notification> notificationOpt = notificationRepository.findById(notificationId);
@@ -55,46 +120,26 @@ public class NotificationService {
 
         User user = userOpt.get();
 
-        // Check user preferences
         boolean shouldSendEmail = user.isEmailNotificationsEnabled() && isNotificationTypeEnabled(user, notification.getType(), true);
         boolean shouldSendWeb = user.isWebNotificationsEnabled() && isNotificationTypeEnabled(user, notification.getType(), false);
 
-        // Send email notification
         if (shouldSendEmail) {
             emailService.sendNotificationEmail(user.getEmail(), notification.getTitle(), notification.getMessage());
         }
 
-        // Send web notification via WebSocket
         if (shouldSendWeb) {
             messagingTemplate.convertAndSendToUser(user.getId(), "/queue/notifications", notification);
         }
 
-        // Mark as sent
         notification.setSent(true);
         notification.setSentAt(new Date());
         notificationRepository.save(notification);
     }
 
-    private boolean isNotificationTypeEnabled(User user, NotificationType type, boolean isEmail) {
-        return user.getNotificationPreferences().stream()
-                .filter(pref -> pref.getType() == type)
-                .findFirst()
-                .map(pref -> isEmail ? pref.isEmailEnabled() : pref.isWebEnabled())
-                .orElse(true);
-    }
-
-    public List<Notification> getUserNotifications(String userId) {
-        return notificationRepository.findByUserIdOrderByCreatedAtDesc(userId);
-    }
-
-    public List<Notification> getUnreadNotifications(String userId) {
-        return notificationRepository.findByUserIdAndReadFalseOrderByCreatedAtDesc(userId);
-    }
-
-    public long getUnreadCount(String userId) {
-        return notificationRepository.countByUserIdAndReadFalse(userId);
-    }
-
+    /**
+     * mark a notification as read
+     * @param notificationId
+     */
     public void markAsRead(String notificationId) {
         Optional<Notification> notificationOpt = notificationRepository.findById(notificationId);
         if (notificationOpt.isPresent()) {
@@ -105,9 +150,12 @@ public class NotificationService {
         }
     }
 
+    /**
+     * marks all notifications of user as read
+     * @param userId
+     */
     public void markAllAsRead(String userId) {
         List<Notification> unreadNotifications = getUnreadNotifications(userId);
-        LocalDateTime now = LocalDateTime.now();
 
         unreadNotifications.forEach(notification -> {
             notification.setRead(true);
@@ -117,6 +165,10 @@ public class NotificationService {
         notificationRepository.saveAll(unreadNotifications);
     }
 
+    /**
+     * deletes a notification
+     * @param notificationId
+     */
     public void deleteNotification(String notificationId) {
         notificationRepository.deleteById(notificationId);
     }

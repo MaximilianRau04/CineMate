@@ -1,6 +1,7 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
+import NotificationSystem from "../notifications/NotificationSystem";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -9,9 +10,13 @@ const Header = () => {
 
   const userRole = localStorage.getItem("userRole");
   const isAdmin = userRole === "ADMIN";
+  
+  const userId = localStorage.getItem("userId");
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("userRole");
+    localStorage.removeItem("userId");
     navigate("/");
   };
 
@@ -69,6 +74,8 @@ const Header = () => {
 
           {isLoggedIn && (
             <div className="d-flex align-items-center">
+              <NotificationSystem userId={userId} />
+              
               {/* Show user role badge */}
               {userRole && (
                 <span className={`badge me-3 ${isAdmin ? 'bg-warning text-dark' : 'bg-primary'}`}>

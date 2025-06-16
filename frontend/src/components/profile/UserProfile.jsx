@@ -169,8 +169,20 @@ const UserProfile = () => {
 
   if (loading)
     return <p className="text-center mt-5">🔄 Benutzer wird geladen...</p>;
-  if (error)
-    return <p className="text-center text-danger mt-5">❌ Fehler: {error}</p>;
+  
+  if (error) {
+    return (  
+      <div className="container py-5">
+        <div className="alert alert-danger" role="alert">
+          <h4 className="alert-heading">Fehler</h4>
+          <p>{error}</p>
+          <button className="btn btn-outline-danger" onClick={() => window.location.reload()}>
+            Erneut versuchen
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const { username, email, avatarUrl, joinedAt } = user;
   const formattedDate = new Date(joinedAt).toLocaleDateString("de-DE", {

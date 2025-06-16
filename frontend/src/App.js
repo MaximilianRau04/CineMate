@@ -31,6 +31,8 @@ const AppContent = () => {
         <Route path="/calendar" element={<Calendar />} />
         <Route path="/admin" element={<AdminPanel />} />
 
+        <Route path="*" element={<h2 className="text-center mt-5">Seite nicht gefunden</h2>} />
+
       </Routes>
     </>
   );
