@@ -1,9 +1,9 @@
 package com.cinemate.series.DTOs;
 
+import com.cinemate.series.Status;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.Date;
-import java.util.List;
 
 public class SeriesRequestDTO {
 
@@ -18,9 +18,10 @@ public class SeriesRequestDTO {
     private String posterUrl;
     private String country;
     private String trailerUrl;
+    private Status status;
 
     public SeriesRequestDTO(String id, String title, String description, String genre, double rating, int reviewCount, Date releaseDate, String posterUrl,
-                            String country, String trailerUrl) {
+                            String country, String trailerUrl, Status status) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -31,6 +32,7 @@ public class SeriesRequestDTO {
         this.posterUrl = posterUrl;
         this.country = country;
         this.trailerUrl = trailerUrl;
+        this.status = status;
     }
 
     public SeriesRequestDTO() {}
@@ -113,5 +115,13 @@ public class SeriesRequestDTO {
 
     public void setTrailerUrl(String trailerUrl) {
         this.trailerUrl = trailerUrl;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
     }
 }

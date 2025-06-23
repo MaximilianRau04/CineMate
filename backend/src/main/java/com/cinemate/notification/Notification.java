@@ -49,6 +49,7 @@ public class Notification {
         this.type = type;
         this.title = title;
         this.message = message;
+        this.createdAt = new Date();
     }
 
     public String getId() {

@@ -6,7 +6,6 @@ import com.cinemate.actor.DTOs.ActorResponseDTO;
 import com.cinemate.director.DTOs.DirectorResponseDTO;
 import com.cinemate.director.Director;
 import com.cinemate.director.DirectorRepository;
-import com.cinemate.movie.Movie;
 import com.cinemate.series.DTOs.SeriesRequestDTO;
 import com.cinemate.series.DTOs.SeriesResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,6 +99,7 @@ public class SeriesService {
         if (seriesDTO.getPosterUrl() != null) series.setPosterUrl(seriesDTO.getPosterUrl());
         if (seriesDTO.getCountry() != null) series.setCountry(seriesDTO.getCountry());
         if (seriesDTO.getTrailerUrl() != null) series.setTrailerUrl(seriesDTO.getTrailerUrl());
+        if (seriesDTO.getStatus() != null) series.setStatus(seriesDTO.getStatus());
     }
 
     /**
@@ -711,7 +711,8 @@ public class SeriesService {
                 dto.getReleaseDate(),
                 dto.getPosterUrl(),
                 dto.getCountry(),
-                dto.getTrailerUrl()
+                dto.getTrailerUrl(),
+                dto.getStatus()
         );
 
         return new Series(dto);

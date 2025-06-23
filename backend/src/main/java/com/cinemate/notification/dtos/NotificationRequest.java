@@ -10,7 +10,7 @@ public class NotificationRequest {
     private String title;
     private String message;
     private String itemId;
-    private String ItemType;
+    private String itemType;
     private Map<String, Object> metadata;
 
     public NotificationRequest(String userId, NotificationType type, String title, String message, String itemId, String itemType, Map<String, Object> metadata) {
@@ -19,7 +19,7 @@ public class NotificationRequest {
         this.title = title;
         this.message = message;
         this.itemId = itemId;
-        ItemType = itemType;
+        this.itemType = itemType;
         this.metadata = metadata;
     }
 
@@ -44,11 +44,11 @@ public class NotificationRequest {
     }
 
     public String getItemType() {
-        return ItemType;
+        return itemType;
     }
 
     public void setItemType(String itemType) {
-        ItemType = itemType;
+        this.itemType = itemType;
     }
 
     public Map<String, Object> getMetadata() { return metadata; }

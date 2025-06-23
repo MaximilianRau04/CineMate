@@ -3,6 +3,7 @@ package com.cinemate.series.DTOs;
 import com.cinemate.actor.Actor;
 import com.cinemate.director.Director;
 import com.cinemate.series.Series;
+import com.cinemate.series.Status;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
@@ -21,9 +22,10 @@ public class SeriesResponseDTO {
     private String posterUrl;
     private String country;
     private String trailerUrl;
+    private Status status;
 
     public SeriesResponseDTO(String id, String title, String description, String genre, double rating, int reviewCount, Date releaseDate, String posterUrl,
-                             String country, String trailerUrl) {
+                             String country, String trailerUrl, Status status) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -34,6 +36,7 @@ public class SeriesResponseDTO {
         this.posterUrl = posterUrl;
         this.country = country;
         this.trailerUrl = trailerUrl;
+        this.status = status;
     }
 
     public SeriesResponseDTO(Series series) {
@@ -47,6 +50,7 @@ public class SeriesResponseDTO {
         this.posterUrl = series.getPosterUrl();
         this.country = series.getCountry();
         this.trailerUrl = series.getTrailerUrl();
+        this.status = series.getStatus();
     }
 
     public SeriesResponseDTO() {}
@@ -131,4 +135,11 @@ public class SeriesResponseDTO {
         this.trailerUrl = trailerUrl;
     }
 
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
 }

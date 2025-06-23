@@ -35,9 +35,10 @@ public class Series {
     private List<Director> directors;
     private String country;
     private String trailerUrl;
+    private Status status;
 
     public Series(String id, String title, String description, String genre, double rating, int reviewCount, Date releaseDate, String posterUrl, List<Season> seasons,
-                  String country, String trailerUrl) {
+                  String country, String trailerUrl, Status status) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -49,6 +50,7 @@ public class Series {
         this.seasons = seasons;
         this.country = country;
         this.trailerUrl = trailerUrl;
+        this.status = status;
     }
 
     public Series() {
@@ -171,6 +173,14 @@ public class Series {
         this.directors = directors;
     }
 
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
 }
 
 
