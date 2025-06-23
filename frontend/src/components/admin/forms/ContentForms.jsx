@@ -1,4 +1,4 @@
-{/* ContentForm for movies and series*/}
+{/* ContentForm for movies and series*/ }
 export const ContentForm = ({ content, onChange, genres }) => (
   <div>
     <div className="row">
@@ -69,6 +69,17 @@ export const ContentForm = ({ content, onChange, genres }) => (
           onChange={(e) => onChange({ ...content, releaseDate: e.target.value })}
         />
       </div>
+      {content.type === "series" && (
+        <div className="col-md-6 mb-3">
+          <label className="form-label">Status</label>
+          <input
+            type="text"
+            className="form-control"
+            value={content.status || ''}
+            onChange={(e) => onChange({ ...content, status: e.target.value })}
+          />
+        </div>
+      )}
       {content.type === "movie" && (
         <div className="col-md-6 mb-3">
           <label className="form-label">Dauer (z.B. 120m)</label>
@@ -105,7 +116,7 @@ export const ContentForm = ({ content, onChange, genres }) => (
   </div>
 );
 
-{/* SeasonForm*/}
+{/* SeasonForm*/ }
 export const SeasonForm = ({ season, onChange }) => (
   <div>
     <div className="mb-3">
@@ -130,7 +141,7 @@ export const SeasonForm = ({ season, onChange }) => (
   </div>
 );
 
-{/* EpisodeForm */}
+{/* EpisodeForm */ }
 export const EpisodeForm = ({ episode, onChange }) => (
   <div>
     <div className="row">

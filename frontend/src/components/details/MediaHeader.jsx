@@ -1,4 +1,4 @@
-import { FaPlus, FaCheck, FaArrowLeft, FaEye, FaStar } from "react-icons/fa";
+import { FaPlus, FaCheck, FaArrowLeft, FaEye, FaStar, FaCircle } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 const MediaHeader = ({
@@ -36,6 +36,50 @@ const MediaHeader = ({
     );
   }
 
+  const getStatusBadgeStyle = (status) => {
+    switch (status?.toLowerCase()) {
+      case 'ongoing':
+      case 'laufend':
+        return 'bg-success';
+      case 'finished':
+      case 'beendet':
+        return 'bg-secondary';
+      case 'cancelled':
+      case 'abgesetzt':
+        return 'bg-danger';
+      case 'returning':
+      case 'zurückkehrend':
+        return 'bg-warning text-dark';
+      case 'in_production':
+      case 'in production':
+      case 'in produktion':
+        return 'bg-info text-dark';
+      default:
+        return 'bg-light text-dark';
+    }
+  };
+
+  // Helper function to translate status for German display
+  const formatStatus = (status) => {
+    if (!status) return '';
+
+    const statusMap = {
+      'ONGOING': 'Laufend',
+      'ongoing': 'Laufend',
+      'FINISHED': 'Beendet',
+      'finished': 'Beendet',
+      'CANCELLED': 'Abgesetzt',
+      'cancelled': 'Abgesetzt',
+      'RETURNING': 'Zurückkehrend',
+      'returning': 'Zurückkehrend',
+      'IN_PRODUCTION': 'In Produktion',
+      'in_production': 'In Produktion',
+      'in production': 'In Produktion'
+    };
+
+    return statusMap[status] || statusMap[status.toLowerCase()] || status;
+  };
+
   return (
     <div className="row g-0">
       <div className="col-md-4 text-center bg-dark text-white p-4">
@@ -60,6 +104,7 @@ const MediaHeader = ({
         </div>
 
         <h2 className="mb-3">{media.title}</h2>
+
         <div className="mb-3">
           {media.genre && (
             <span className="badge bg-primary me-2">{media.genre}</span>
@@ -69,6 +114,12 @@ const MediaHeader = ({
           )}
           {media.releaseYear && (
             <span className="badge bg-info text-dark">{media.releaseYear}</span>
+          )}
+          {media.status && (
+            <span className={`badge ${getStatusBadgeStyle(media.status)} me-2`}>
+              <FaCircle size={8} className="me-1" />
+              {formatStatus(media.status)}
+            </span>
           )}
         </div>
 

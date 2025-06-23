@@ -69,7 +69,7 @@ export const EpisodesManagement = ({ series, season, episodes, onAddEpisode, onE
             <thead>
               <tr>
                 <th>Episode Nr.</th>
-                <th>Titel</th>import { FaPlus } from "react-icons/fa";
+                <th>Titel</th>
                 <th>Dauer</th>
                 <th>Erscheinungsdatum</th>
                 <th>Aktionen</th>
