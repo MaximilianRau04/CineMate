@@ -11,7 +11,9 @@ import com.cinemate.series.SeriesRepository;
 import com.cinemate.user.User;
 import com.cinemate.user.UserRepository;
 import com.cinemate.user.dtos.UserResponseDTO;
+import com.cinemate.notification.events.ReviewCreatedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +27,7 @@ public class ReviewService {
     private final UserRepository userRepository;
     private final MovieRepository movieRepository;
     private final SeriesRepository seriesRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     private static final String TYPE_MOVIE = "movie";
     private static final String TYPE_SERIES = "series";
@@ -34,11 +37,13 @@ public class ReviewService {
 
     @Autowired
     public ReviewService(ReviewRepository reviewRepository, UserRepository userRepository,
-                         MovieRepository movieRepository, SeriesRepository seriesRepository) {
+                         MovieRepository movieRepository, SeriesRepository seriesRepository,
+                         ApplicationEventPublisher eventPublisher) {
         this.reviewRepository = reviewRepository;
         this.userRepository = userRepository;
         this.movieRepository = movieRepository;
         this.seriesRepository = seriesRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     /**
@@ -64,6 +69,13 @@ public class ReviewService {
 
         Review savedReview = reviewRepository.save(review);
         calculateContentRating(itemType, itemId);
+
+        String itemTitle = getItemTitle(itemType, itemId);
+        eventPublisher.publishEvent(new ReviewCreatedEvent(this, savedReview, itemTitle, itemType));
+
+        eventPublisher.publishEvent(new com.cinemate.notification.events.UserActivityEvent(this, savedReview.getUserId(), 
+            com.cinemate.notification.events.UserActivityEvent.ActivityType.REVIEW_CREATED, savedReview.getItemId()));
+        
         return new ReviewResponseDTO(savedReview);
     }
 
@@ -416,5 +428,21 @@ public class ReviewService {
             return TYPE_SERIES;
         }
         return null;
+    }
+
+    /**
+     * Gets the title of an item by its ID and type
+     */
+    private String getItemTitle(String itemType, String itemId) {
+        if (TYPE_MOVIE.equals(itemType)) {
+            return movieRepository.findById(itemId)
+                .map(Movie::getTitle)
+                .orElse("Unbekannter Film");
+        } else if (TYPE_SERIES.equals(itemType)) {
+            return seriesRepository.findById(itemId)
+                .map(Series::getTitle)
+                .orElse("Unbekannte Serie");
+        }
+        return "Unbekannter Inhalt";
     }
 }

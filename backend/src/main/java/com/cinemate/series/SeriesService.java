@@ -8,7 +8,9 @@ import com.cinemate.director.Director;
 import com.cinemate.director.DirectorRepository;
 import com.cinemate.series.DTOs.SeriesRequestDTO;
 import com.cinemate.series.DTOs.SeriesResponseDTO;
+import com.cinemate.notification.events.SeriesUpdatedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -23,14 +25,17 @@ public class SeriesService {
     private final SeriesRepository seriesRepository;
     private final ActorRepository actorRepository;
     private final DirectorRepository directorRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Autowired
     public SeriesService(SeriesRepository seriesRepository,
                          ActorRepository actorRepository,
-                         DirectorRepository directorRepository) {
+                         DirectorRepository directorRepository,
+                         ApplicationEventPublisher eventPublisher) {
         this.seriesRepository = seriesRepository;
         this.actorRepository = actorRepository;
         this.directorRepository = directorRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     /**
@@ -79,10 +84,16 @@ public class SeriesService {
         }
 
         Series existingSeries = optionalSeries.get();
+        Status oldStatus = existingSeries.getStatus();
 
         updateSeriesFields(existingSeries, seriesDTO);
 
         Series savedSeries = seriesRepository.save(existingSeries);
+
+        if (seriesDTO.getStatus() != null && oldStatus != null && !oldStatus.equals(seriesDTO.getStatus())) {
+            eventPublisher.publishEvent(new SeriesUpdatedEvent(this, savedSeries, oldStatus.toString()));
+        }
+        
         return ResponseEntity.ok(new SeriesResponseDTO(savedSeries));
     }
 
@@ -192,6 +203,10 @@ public class SeriesService {
         Series savedSeries = seriesRepository.save(series);
 
         Optional<Season> addedSeason = findSeasonByNumber(savedSeries, newSeason.getSeasonNumber());
+
+        if (addedSeason.isPresent()) {
+            eventPublisher.publishEvent(new SeriesUpdatedEvent(this, savedSeries, addedSeason.get()));
+        }
 
         return addedSeason
                 .map(season -> ResponseEntity.status(HttpStatus.CREATED).body(season))
@@ -336,6 +351,10 @@ public class SeriesService {
         }
 
         Optional<Episode> addedEpisode = findEpisodeByNumber(savedSeason.get(), newEpisode.getEpisodeNumber());
+
+        if (addedEpisode.isPresent()) {
+            eventPublisher.publishEvent(new SeriesUpdatedEvent(this, savedSeries, savedSeason.get(), addedEpisode.get()));
+        }
 
         return addedEpisode
                 .map(episode -> ResponseEntity.status(HttpStatus.CREATED).body(episode))

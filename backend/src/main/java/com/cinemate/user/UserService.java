@@ -9,7 +9,9 @@ import com.cinemate.series.Series;
 import com.cinemate.series.SeriesRepository;
 import com.cinemate.user.dtos.UserRequestDTO;
 import com.cinemate.user.dtos.UserResponseDTO;
+import com.cinemate.notification.events.UserActivityEvent;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -32,12 +34,15 @@ public class UserService {
     private final UserRepository userRepository;
     private final MovieRepository movieRepository;
     private final SeriesRepository seriesRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Autowired
-    public UserService(UserRepository userRepository, MovieRepository movieRepository, SeriesRepository seriesRepository) {
+    public UserService(UserRepository userRepository, MovieRepository movieRepository,
+                       SeriesRepository seriesRepository, ApplicationEventPublisher eventPublisher) {
         this.userRepository = userRepository;
         this.movieRepository = movieRepository;
         this.seriesRepository = seriesRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     /**
@@ -167,9 +172,8 @@ public class UserService {
         if (userRequestDTO.getRole() != null) existingUser.setRole(userRequestDTO.getRole());
 
         if (userRequestDTO.isRemoveAvatar()) {
-            // Alten Avatar löschen, falls vorhanden
             if (existingUser.getAvatarUrl() != null) {
-                Path oldAvatarPath = Paths.get(existingUser.getAvatarUrl().substring(1)); // Entferne den führenden "/"
+                Path oldAvatarPath = Paths.get(existingUser.getAvatarUrl().substring(1));
                 try {
                     Files.deleteIfExists(oldAvatarPath);
                 } catch (IOException e) {
@@ -229,6 +233,8 @@ public class UserService {
         user.addMovieToWatchlist(movie);
         User savedUser = userRepository.save(user);
 
+        eventPublisher.publishEvent(new UserActivityEvent(this, userId, UserActivityEvent.ActivityType.WATCHLIST_ITEM_ADDED, movieId));
+
         List<MovieResponseDTO> movieDTOs = savedUser.getMovieWatchlist().stream()
                 .map(MovieResponseDTO::new)
                 .collect(Collectors.toList());
@@ -260,6 +266,8 @@ public class UserService {
 
         user.addSeriesToWatchlist(series);
         User savedUser = userRepository.save(user);
+
+        eventPublisher.publishEvent(new UserActivityEvent(this, userId, UserActivityEvent.ActivityType.WATCHLIST_ITEM_ADDED, seriesId));
 
         List<SeriesResponseDTO> seriesDTOs = savedUser.getSeriesWatchlist().stream()
                 .map(SeriesResponseDTO::new)
@@ -505,6 +513,8 @@ public class UserService {
         user.addMovieToWatched(movie);
         User savedUser = userRepository.save(user);
 
+        eventPublisher.publishEvent(new UserActivityEvent(this, userId, UserActivityEvent.ActivityType.MOVIE_WATCHED, movieId));
+
         List<MovieResponseDTO> movieDTOs = savedUser.getMoviesWatched().stream()
                 .map(MovieResponseDTO::new)
                 .collect(Collectors.toList());
@@ -536,6 +546,8 @@ public class UserService {
 
         user.addSeriesToWatched(series);
         User savedUser = userRepository.save(user);
+
+        eventPublisher.publishEvent(new UserActivityEvent(this, userId, UserActivityEvent.ActivityType.SERIES_WATCHED, seriesId));
 
         List<SeriesResponseDTO> seriesDTOs = savedUser.getSeriesWatched().stream()
                 .map(SeriesResponseDTO::new)

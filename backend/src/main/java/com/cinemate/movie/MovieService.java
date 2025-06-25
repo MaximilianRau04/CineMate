@@ -8,7 +8,9 @@ import com.cinemate.director.DirectorRepository;
 import com.cinemate.director.DTOs.DirectorResponseDTO;
 import com.cinemate.movie.DTOs.MovieRequestDTO;
 import com.cinemate.movie.DTOs.MovieResponseDTO;
+import com.cinemate.notification.events.MovieReleasedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -21,14 +23,17 @@ public class MovieService {
     private final MovieRepository movieRepository;
     private final ActorRepository actorRepository;
     private final DirectorRepository directorRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Autowired
     public MovieService(MovieRepository movieRepository,
                         ActorRepository actorRepository,
-                        DirectorRepository directorRepository) {
+                        DirectorRepository directorRepository,
+                        ApplicationEventPublisher eventPublisher) {
         this.movieRepository = movieRepository;
         this.actorRepository = actorRepository;
         this.directorRepository = directorRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     /**
@@ -60,8 +65,12 @@ public class MovieService {
      */
     public ResponseEntity<MovieResponseDTO> createMovie(MovieRequestDTO movieDTO) {
         Movie movie = new Movie(movieDTO);
-
         Movie savedMovie = movieRepository.save(movie);
+
+        if (movie.getReleaseDate() != null && !movie.getReleaseDate().after(new Date())) {
+            eventPublisher.publishEvent(new MovieReleasedEvent(this, savedMovie));
+        }
+        
         return ResponseEntity.ok(new MovieResponseDTO(savedMovie));
     }
 
@@ -104,7 +113,21 @@ public class MovieService {
             existingMovie.setTrailerUrl(movieDTO.getTrailerUrl());
         }
 
+        Date oldReleaseDate = existingMovie.getReleaseDate();
+        Date newReleaseDate = movieDTO.getReleaseDate();
+        boolean wasJustReleased = false;
+        
+        if (newReleaseDate != null && oldReleaseDate != null) {
+            Date now = new Date();
+            wasJustReleased = oldReleaseDate.after(now) && !newReleaseDate.after(now);
+        }
+        
         Movie savedMovie = movieRepository.save(existingMovie);
+
+        if (wasJustReleased) {
+            eventPublisher.publishEvent(new MovieReleasedEvent(this, savedMovie));
+        }
+        
         return ResponseEntity.ok(new MovieResponseDTO(savedMovie));
     }
 
