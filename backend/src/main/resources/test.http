@@ -29,7 +29,7 @@ GET http://localhost:8080/api/users/me
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYXhpIiwiZXhwIjoxNzQ4NDA1ODY2LCJpYXQiOjE3NDgzNjk4NjZ9.p78xMveabfrcCLJWAx5FmPexqVKxDnbSLT-IfA8JueQ
 ###
 
-GET http://localhost:8080/api/reviews
+GET http://localhost:8080/api/users
 
 ###
 GET http://localhost:8080/api/series/682a284236f2d54c872d1bb9/seasons
@@ -334,9 +334,10 @@ Content-Type: application/json
 }
 ###
 DELETE http://localhost:8080/api/series/680e7b2023c0b14c9c4811bb/seasons/1/episodes/0
-
 ###
-GET http://localhost:8080/api/series
+DELETE http://localhost:8080/api/movies/682a27bf36f2d54c872d1bb5/actors/682a285636f2d54c872d1bbe
+###
+GET http://localhost:8080/api/movies/682a27bf36f2d54c872d1bb5/actors
 ###
 GET http://localhost:8080/api/reviews/user/682a27ab36f2d54c872d1bb0
 ###
@@ -369,11 +370,11 @@ Content-Type: application/json
   "image": "https://media.themoviedb.org/t/p/w300_and_h450_bestv2/xuAIuYSmsUzKlUMBFGVZaWsY3DZ.jpg"
 }
 ###
-GET http://localhost:8080/api/directors/682a285836f2d54c872d1bbf/movies
+GET http://localhost:8080/api/actors
 ###
 DELETE http://localhost:8080/api/movies/682a27b836f2d54c872d1bb3/director
 ###
-POST http://localhost:8080/api/movies/682a27b836f2d54c872d1bb3/director/682a285836f2d54c872d1bbf
+POST http://localhost:8080/api/movies/682a27b836f2d54c872d1bb3/actors/682a285636f2d54c872d1bbe
 Content-Type: application/json
 ###
 GET http://localhost:8080/api/users
@@ -410,3 +411,7 @@ Content-Type: application/json
 ###
 POST http://localhost:8080/api/notifications/check-milestones/6834b935a119f372560d8668
 Content-Type: application/json
+###
+GET http://localhost:8080/api/users
+###
+GET http://localhost:8080/api/notification-preferences/user/685d8917c4b8b638bba7503a/global

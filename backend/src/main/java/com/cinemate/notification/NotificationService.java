@@ -124,7 +124,7 @@ public class NotificationService {
         boolean shouldSendWeb = user.isWebNotificationsEnabled() && isNotificationTypeEnabled(user, notification.getType(), false);
 
         if (shouldSendEmail) {
-            emailService.sendNotificationEmail(user.getEmail(), notification.getTitle(), notification.getMessage());
+            sendEmailForNotificationType(notification, user);
         }
 
         if (shouldSendWeb) {
@@ -171,6 +171,85 @@ public class NotificationService {
      */
     public void deleteNotification(String notificationId) {
         notificationRepository.deleteById(notificationId);
+    }
+
+    /**
+     * Sends specialized emails based on a notification type
+     * @param notification
+     * @param user
+     */
+    private void sendEmailForNotificationType(Notification notification, User user) {
+        String actionUrl = null;
+        String actionText = null;
+
+        if (notification.getItemId() != null) {
+            switch (notification.getType()) {
+                case MOVIE_WATCHLIST_RELEASED:
+                case WATCHLIST_ITEM_REVIEWED:
+                    if ("movie".equals(notification.getItemType())) {
+                        actionUrl = "http://localhost:3000/movies/" + notification.getItemId();
+                        actionText = "Film ansehen";
+                    }
+                    break;
+                case SERIES_NEW_SEASON:
+                case SERIES_NEW_EPISODE:
+                case SERIES_STATUS_CHANGED:
+                    if ("series".equals(notification.getItemType())) {
+                        actionUrl = "http://localhost:3000/series/" + notification.getItemId();
+                        actionText = "Serie ansehen";
+                    }
+                    break;
+                case MILESTONE_REACHED:
+                    actionUrl = "http://localhost:3000/profile";
+                    actionText = "Profil ansehen";
+                    break;
+                case UPCOMING_RELEASES:
+                    actionUrl = "http://localhost:3000/watchlist";
+                    actionText = "Zur Watchlist";
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        switch (notification.getType()) {
+            case MILESTONE_REACHED:
+                if (notification.getMetadata() != null) {
+                    String milestoneType = (String) notification.getMetadata().get("milestoneType");
+                    Integer count = (Integer) notification.getMetadata().get("count");
+                    if (milestoneType != null && count != null) {
+                        emailService.sendMilestoneEmail(user.getId(), milestoneType, count);
+                        return;
+                    }
+                }
+                break;
+            case UPCOMING_RELEASES:
+                if (notification.getMetadata() != null) {
+                    Integer upcomingMovies = (Integer) notification.getMetadata().get("upcomingMovies");
+                    Integer upcomingSeries = (Integer) notification.getMetadata().get("upcomingSeries");
+                    if (upcomingMovies != null && upcomingSeries != null) {
+                        emailService.sendWeeklySummaryEmail(
+                            user.getId(), 
+                            notification.getTitle(), 
+                            notification.getMessage(),
+                            upcomingMovies,
+                            upcomingSeries
+                        );
+                        return;
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+
+        emailService.sendTemplatedNotificationEmail(
+            user.getEmail(), 
+            notification.getTitle(), 
+            notification.getMessage(),
+            actionUrl,
+            actionText
+        );
     }
 }
 
