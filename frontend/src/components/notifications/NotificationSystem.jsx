@@ -390,22 +390,6 @@ const NotificationSystem = () => {
                           {notification.message}
                         </p>
 
-                        {/* Metadata */}
-                        {notification.metadata && Object.keys(notification.metadata).length > 0 && (
-                          <div className="mb-2">
-                            {Object.entries(notification.metadata).map(([key, value]) => (
-                              <span
-                                key={key}
-                                className="badge bg-secondary me-1 mb-1"
-                                style={{ fontSize: '0.6rem' }}
-                                title={`${key}: ${value}`}
-                              >
-                                <strong>{key}:</strong> {value}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-
                         {/* Footer */}
                         <div className="d-flex justify-content-between align-items-center">
                           <small className="text-muted">

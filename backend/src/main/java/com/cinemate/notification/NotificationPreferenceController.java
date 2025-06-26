@@ -152,12 +152,10 @@ public class NotificationPreferenceController {
         return switch (type) {
             case MOVIE_WATCHLIST_RELEASED,
                  SERIES_NEW_SEASON,
-                 SERIES_NEW_EPISODE,
                  UPCOMING_RELEASES,
                  MILESTONE_REACHED -> true;
             case WATCHLIST_ITEM_REVIEWED,
                  FAVORITE_ITEM_REVIEWED,
-                 SERIES_STATUS_CHANGED,
                  SYSTEM_ANNOUNCEMENT -> false;
             default -> true;
         };

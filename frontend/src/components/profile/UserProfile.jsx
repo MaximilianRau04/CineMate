@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import UserMediaTabs from "./UserMediaTabs";
+import CompactNotificationSettings from "./CompactNotificationSettings";
 
 const UserProfile = () => {
   const [user, setUser] = useState(null);
@@ -353,6 +354,10 @@ const UserProfile = () => {
               <div className="card-body">
                 <UserMediaTabs userId={userId} />
               </div>
+            </div>
+
+            <div className="mt-4">
+              <CompactNotificationSettings userId={userId} />
             </div>
         </div>
       </div>
