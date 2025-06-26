@@ -56,7 +56,6 @@ ehthumbs.db
 
 # Sensitive files
 .env
-application.yml
 
 # Temporary files
 *.tmp
