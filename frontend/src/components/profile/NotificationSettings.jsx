@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNotificationSettings } from './utils/useNotificationSettings';
+import { useNotificationSettings } from '../../hooks/useNotificationSettings';
 import { getNotificationTypeLabel, sortNotificationTypes } from './utils/notificationUtils';
 
 const NotificationSettings = ({ userId }) => {

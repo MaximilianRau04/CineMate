@@ -1,11 +1,8 @@
-/**
- * Utility-Funktionen für Notification Settings
- */
 
 /**
- * Deutsche Übersetzungen für Notification-Typen
- * @param {string} type - Der Notification-Typ
- * @returns {string} Deutsche Beschreibung mit Emoji
+ * german translations for notification types
+ * @param {string} type - the notification type
+ * @returns {string} 
  */
 export const getNotificationTypeLabel = (type) => {
   const labels = {
@@ -31,9 +28,9 @@ export const getNotificationTypeLabel = (type) => {
 };
 
 /**
- * Erstellt eine Status-Nachricht basierend auf den globalen Einstellungen
- * @param {object} globalSettings - Die globalen Einstellungen
- * @returns {object} Status-Info mit Text und CSS-Klasse
+ * creates a status message based on global settings
+ * @param {object} globalSettings - the global settings
+ * @returns {object} status info with text and CSS class
  */
 export const getNotificationStatus = (globalSettings) => {
   const { emailNotificationsEnabled, webNotificationsEnabled } = globalSettings;
@@ -66,28 +63,24 @@ export const getNotificationStatus = (globalSettings) => {
 };
 
 /**
- * Sortiert Notification-Typen nach Wichtigkeit/Kategorie
- * @param {array} notificationTypes - Array der Notification-Typen
- * @returns {array} Sortierte Notification-Typen
+ * sorts notification types based on predefined order
+ * @param {array} notificationTypes - array of notification types
+ * @returns {array} 
  */
 export const sortNotificationTypes = (notificationTypes) => {
   const order = [
-    // Wichtige Watchlist-Benachrichtigungen
     'MOVIE_WATCHLIST_RELEASED',
     'SERIES_NEW_SEASON',
     'SERIES_NEW_EPISODE',
     'SERIES_STATUS_CHANGED',
     
-    // Reviews und Bewertungen
     'WATCHLIST_ITEM_REVIEWED',
     'FAVORITE_ITEM_REVIEWED',
     'RATING_UPDATE',
     
-    // Meilensteine und Zusammenfassungen
     'MILESTONE_REACHED',
     'UPCOMING_RELEASES',
     
-    // Allgemeine Benachrichtigungen
     'NEW_MOVIE_RELEASE',
     'NEW_EPISODE_AVAILABLE',
     'SERIES_STATUS_UPDATE',
@@ -102,7 +95,6 @@ export const sortNotificationTypes = (notificationTypes) => {
     const indexA = order.indexOf(a);
     const indexB = order.indexOf(b);
     
-    // Unbekannte Typen ans Ende
     if (indexA === -1 && indexB === -1) return 0;
     if (indexA === -1) return 1;
     if (indexB === -1) return -1;
@@ -112,9 +104,9 @@ export const sortNotificationTypes = (notificationTypes) => {
 };
 
 /**
- * Gruppiert Notification-Typen nach Kategorien
- * @param {array} notificationTypes - Array der Notification-Typen
- * @returns {object} Gruppierte Notification-Typen
+ * groups notification types into categories
+ * @param {array} notificationTypes - array of notification types
+ * @returns {object} 
  */
 export const groupNotificationTypes = (notificationTypes) => {
   const groups = {
@@ -136,7 +128,7 @@ export const groupNotificationTypes = (notificationTypes) => {
     }
   };
 
-  // Nur Gruppen mit verfügbaren Typen zurückgeben
+  // only include groups that have available types
   const result = {};
   Object.entries(groups).forEach(([key, group]) => {
     const availableTypes = group.types.filter(type => notificationTypes.includes(type));

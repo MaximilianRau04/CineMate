@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import UserMediaTabs from "./UserMediaTabs";
+import CompactNotificationSettings from "./CompactNotificationSettings";
 
 const UserProfile = () => {
   const [user, setUser] = useState(null);
@@ -169,9 +170,9 @@ const UserProfile = () => {
 
   if (loading)
     return <p className="text-center mt-5">🔄 Benutzer wird geladen...</p>;
-  
+
   if (error) {
-    return (  
+    return (
       <div className="container py-5">
         <div className="alert alert-danger" role="alert">
           <h4 className="alert-heading">Fehler</h4>
@@ -256,7 +257,7 @@ const UserProfile = () => {
                     }}
                     onClick={handleRemoveAvatar}
                     title="Avatar entfernen"
-                  > 
+                  >
                     <i className="bi bi-x-lg"></i>
                   </button>
                 </>
@@ -347,13 +348,17 @@ const UserProfile = () => {
           </div>
 
           <div className="card shadow-lg border-0 mt-4">
-              <div className="card-header bg-white">
-                <h4 className="mb-0">Meine Medien</h4>
-              </div>
-              <div className="card-body">
-                <UserMediaTabs userId={userId} />
-              </div>
+            <div className="card-header bg-white">
+              <h4 className="mb-0">Meine Medien</h4>
             </div>
+            <div className="card-body">
+              <UserMediaTabs userId={userId} />
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <CompactNotificationSettings userId={userId} />
+          </div>
         </div>
       </div>
 
