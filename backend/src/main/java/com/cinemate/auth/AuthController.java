@@ -1,5 +1,7 @@
 package com.cinemate.auth;
 
+import com.cinemate.notification.NotificationService;
+import com.cinemate.notification.NotificationType;
 import com.cinemate.user.UserRepository;
 import com.cinemate.user.User;
 import com.cinemate.user.dtos.UserRequestDTO;
@@ -29,6 +31,9 @@ public class AuthController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private NotificationService notificationService;
+
     /**
      * registers an user
      * @param userDTO
@@ -51,6 +56,28 @@ public class AuthController {
 
         User savedUser = userRepository.save(user);
         UserResponseDTO responseDTO = new UserResponseDTO(savedUser);
+
+        try {
+            // Send notification to admins about new user registration
+            notificationService.sendNotificationToAdmins(
+                NotificationType.NEW_USER_REGISTERED,
+                "Neue Benutzer-Registrierung",
+                String.format("Ein neuer Benutzer hat sich registriert: %s (%s)", 
+                    savedUser.getUsername(), savedUser.getEmail())
+            );
+            
+            // Send welcome notification to the new user
+            notificationService.sendNotification(
+                savedUser.getId(),
+                NotificationType.WELCOME_NEW_USER,
+                "Willkommen bei CineMate! 🎬",
+                String.format("Hallo %s! Herzlich willkommen bei CineMate. " +
+                    "Entdecke Filme und Serien, erstelle deine Watchlist und teile deine Bewertungen mit der Community. " +
+                    "Viel Spaß beim Stöbern!", savedUser.getUsername())
+            );
+        } catch (Exception e) {
+            System.err.println("Fehler beim Senden der Benachrichtigungen: " + e.getMessage());
+        }
 
         return ResponseEntity.ok(responseDTO);
     }

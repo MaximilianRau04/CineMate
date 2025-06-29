@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static com.cinemate.user.Role.ADMIN;
+
 @Service
 public class NotificationService {
 
@@ -137,6 +139,19 @@ public class NotificationService {
     }
 
     /**
+     * Creates and sends a notification in one step
+     * @param userId
+     * @param type
+     * @param title
+     * @param message
+     */
+    @Async
+    public void sendNotification(String userId, NotificationType type, String title, String message) {
+        Notification notification = createNotification(userId, type, title, message);
+        sendNotification(notification.getId());
+    }
+
+    /**
      * mark a notification as read
      * @param notificationId
      */
@@ -250,6 +265,52 @@ public class NotificationService {
             actionUrl,
             actionText
         );
+    }
+
+    /**
+     * Sends notification to all admin users
+     * @param type
+     * @param title
+     * @param message
+     */
+    @Async
+    public void sendNotificationToAdmins(NotificationType type, String title, String message) {
+        List<User> adminUsers = userRepository.findByRole(ADMIN);
+        
+        for (User admin : adminUsers) {
+            try {
+                sendNotification(admin.getId(), type, title, message);
+            } catch (Exception e) {
+                System.err.println("Fehler beim Senden der Benachrichtigung an Admin " + admin.getUsername() + ": " + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Sends notification to specific user or all users (for admin panel)
+     * @param type
+     * @param title
+     * @param message
+     * @param targetUserId - if null, sends to all users
+     */
+    @Async
+    public void sendAdminNotification(NotificationType type, String title, String message, String targetUserId) {
+        if (targetUserId != null) {
+            try {
+                sendNotification(targetUserId, type, title, message);
+            } catch (Exception e) {
+                System.err.println("Fehler beim Senden der Admin-Benachrichtigung an User " + targetUserId + ": " + e.getMessage());
+            }
+        } else {
+            List<User> allUsers = userRepository.findAll();
+            for (User user : allUsers) {
+                try {
+                    sendNotification(user.getId(), type, title, message);
+                } catch (Exception e) {
+                    System.err.println("Fehler beim Senden der Admin-Benachrichtigung an User " + user.getUsername() + ": " + e.getMessage());
+                }
+            }
+        }
     }
 }
 

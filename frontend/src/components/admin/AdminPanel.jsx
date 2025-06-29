@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { FaChartBar, FaFilm, FaUsers, FaComments, FaUserTie } from "react-icons/fa";
+import { FaChartBar, FaFilm, FaUsers, FaComments, FaUserTie, FaBell } from "react-icons/fa";
 
 import { useAppData, formatDateForInput, genres as GENRES } from "./utils/utils";
 import Dashboard from "./Dashboard";
@@ -9,6 +9,7 @@ import Modal from "./modals/Modal";
 import { ContentManagement, SeasonsManagement, EpisodesManagement } from "./management/ContentManagement";
 import UserManagement from "./management/UserManagement";
 import CastManagement from "./management/CastManagement";
+import AdminNotificationPanel from "./AdminNotificationPanel";
 
 import { SeasonForm, EpisodeForm, ContentForm } from "./forms/ContentForms";
 
@@ -354,7 +355,8 @@ const AdminPanel = () => {
                 { key: 'content', icon: FaFilm, label: 'Content Management' },
                 { key: 'users', icon: FaUsers, label: 'Benutzerverwaltung' },
                 { key: 'moderation', icon: FaComments, label: 'Moderation' },
-                { key: 'cast', icon: FaUserTie, label: 'Schauspieler & Regisseure' }
+                { key: 'cast', icon: FaUserTie, label: 'Schauspieler & Regisseure' },
+                { key: 'notifications', icon: FaBell, label: 'Benachrichtigungen' }
               ].map(({ key, icon: Icon, label }) => (
                 <button
                   key={key}
@@ -437,6 +439,8 @@ const AdminPanel = () => {
               loadData={loadData}
             />
           )}
+
+          {activeTab === 'notifications' && <AdminNotificationPanel />}
         </div>
       </div>
 

@@ -22,7 +22,10 @@ export const getNotificationTypeLabel = (type) => {
     'RATING_UPDATE': '⭐ Bewertungs-Update',
     'NEW_SEASON_ANNOUNCED': '📺 Neue Staffel angekündigt',
     'RECOMMENDATION': '💡 Empfehlung',
-    'BIRTHDAY_REMINDER': '🎂 Geburtstags-Erinnerung'
+    'BIRTHDAY_REMINDER': '🎂 Geburtstags-Erinnerung',
+    'NEW_USER_REGISTERED': '👤 Neue Benutzer-Registrierung',
+    'ADMIN_NOTIFICATION': '📢 Admin-Mitteilung',
+    'WELCOME_NEW_USER': '🎉 Willkommen bei CineMate'
   };
   return labels[type] || type;
 };
@@ -88,7 +91,11 @@ export const sortNotificationTypes = (notificationTypes) => {
     'NEW_SEASON_ANNOUNCED',
     'RECOMMENDATION',
     'BIRTHDAY_REMINDER',
-    'SYSTEM_ANNOUNCEMENT'
+    'SYSTEM_ANNOUNCEMENT',
+    
+    'NEW_USER_REGISTERED',
+    'ADMIN_NOTIFICATION',
+    'WELCOME_NEW_USER'
   ];
 
   return notificationTypes.sort((a, b) => {
@@ -125,6 +132,10 @@ export const groupNotificationTypes = (notificationTypes) => {
     general: {
       title: '📢 Allgemein',
       types: ['NEW_MOVIE_RELEASE', 'NEW_EPISODE_AVAILABLE', 'SERIES_STATUS_UPDATE', 'WATCHLIST_REMINDER', 'NEW_SEASON_ANNOUNCED', 'RECOMMENDATION', 'BIRTHDAY_REMINDER', 'SYSTEM_ANNOUNCEMENT']
+    },
+    admin: {
+      title: '👨‍💼 Administration',
+      types: ['NEW_USER_REGISTERED', 'ADMIN_NOTIFICATION', 'WELCOME_NEW_USER']
     }
   };
 
