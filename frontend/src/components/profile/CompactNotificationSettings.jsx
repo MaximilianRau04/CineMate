@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNotificationSettings } from './utils/useNotificationSettings';
-import { getNotificationTypeLabel, getNotificationStatus } from './utils/notificationUtils';
+import { getNotificationTypeLabel, getNotificationStatus, filterNotificationTypesByRole } from './utils/notificationUtils';
 
 const CompactNotificationSettings = ({ userId }) => {
   const [showDetails, setShowDetails] = useState(false);
@@ -10,11 +10,13 @@ const CompactNotificationSettings = ({ userId }) => {
     saving,
     globalSettings,
     notificationTypes,
+    user,
     updateGlobalSettings,
     updatePreference,
     getPreferenceForType
   } = useNotificationSettings(userId);
 
+  const filteredNotificationTypes = filterNotificationTypesByRole(notificationTypes, user);
   const status = getNotificationStatus(globalSettings);
 
   if (loading) {
@@ -88,7 +90,7 @@ const CompactNotificationSettings = ({ userId }) => {
             </div>
 
             <div className="row">
-              {notificationTypes.map((type) => {
+              {filteredNotificationTypes.map((type) => {
                 const pref = getPreferenceForType(type);
                 return (
                   <div key={type} className="col-12 mb-2">

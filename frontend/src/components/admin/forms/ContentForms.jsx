@@ -72,12 +72,18 @@ export const ContentForm = ({ content, onChange, genres }) => (
       {content.type === "series" && (
         <div className="col-md-6 mb-3">
           <label className="form-label">Status</label>
-          <input
-            type="text"
+          <select
             className="form-control"
             value={content.status || ''}
             onChange={(e) => onChange({ ...content, status: e.target.value })}
-          />
+          >
+            <option value="">Status auswählen</option>
+            <option value="ONGOING">Laufend</option>
+            <option value="FINISHED">Beendet</option>
+            <option value="IN_PRODUCTION">In Produktion</option>
+            <option value="CANCELLED">Abgebrochen</option>
+            <option value="RETURNING">Wiederkehrend</option>
+          </select>
         </div>
       )}
       {content.type === "movie" && (

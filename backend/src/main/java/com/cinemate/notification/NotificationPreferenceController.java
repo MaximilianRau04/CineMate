@@ -155,8 +155,7 @@ public class NotificationPreferenceController {
                  UPCOMING_RELEASES,
                  MILESTONE_REACHED,
                  NEW_USER_REGISTERED,
-                 ADMIN_NOTIFICATION,
-                 WELCOME_NEW_USER -> true;
+                 ADMIN_NOTIFICATION -> true;
             case WATCHLIST_ITEM_REVIEWED,
                  FAVORITE_ITEM_REVIEWED,
                  SYSTEM_ANNOUNCEMENT -> false;

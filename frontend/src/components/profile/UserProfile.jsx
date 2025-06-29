@@ -351,7 +351,13 @@ const UserProfile = () => {
             <div className="card-header bg-white">
               <h4 className="mb-0">Meine Medien</h4>
             </div>
-            <div className="card-body">
+            <div
+              className="card-body"
+              style={{
+                maxHeight: "350px",
+                overflowY: "auto"
+              }}
+            >
               <UserMediaTabs userId={userId} />
             </div>
           </div>

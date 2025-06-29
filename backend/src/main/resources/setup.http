@@ -1,0 +1,261 @@
+
+### === ACTORS ===
+POST http://localhost:8080/api/actors
+Content-Type: application/json
+
+{
+  "name": "Leonardo DiCaprio",
+  "birthday": "1974-11-11",
+  "biography": "Bekannter Schauspieler.",
+  "image": "https://image.tmdb.org/t/p/w500/A85WIRIKVsD2DeUSc8wQ4fOKc4e.jpg"
+}
+
+###
+
+POST http://localhost:8080/api/actors
+Content-Type: application/json
+
+{
+  "name": "Scarlett Johansson",
+  "birthday": "1984-11-22",
+  "biography": "Bekannte Schauspielerin.",
+  "image": "https://image.tmdb.org/t/p/w500/6NsMbJXRlDZuDzatN2akFdGuTvx.jpg"
+}
+
+###
+
+POST http://localhost:8080/api/actors
+Content-Type: application/json
+
+{
+  "name": "Henry Cavill",
+  "birthday": "1983-05-05",
+  "biography": "Bekannter Schauspieler.",
+  "image": "https://image.tmdb.org/t/p/w500/h86P6PpN6Fa4Hh9tZs2K3opgJbC.jpg"
+}
+
+### === DIRECTORS ===
+POST http://localhost:8080/api/directors
+Content-Type: application/json
+
+{
+  "name": "Steven Spielberg",
+  "birthday": "1946-12-18",
+  "biography": "Legendärer Regisseur.",
+  "image": "https://image.tmdb.org/t/p/w500/h56kXM14P0GH4nPOjIScNgg1WEh.jpg"
+}
+
+###
+
+POST http://localhost:8080/api/directors
+Content-Type: application/json
+
+{
+  "name": "Denis Villeneuve",
+  "birthday": "1967-10-03",
+  "biography": "Bekannter Regisseur.",
+  "image": "https://image.tmdb.org/t/p/w500/3jX6GA9uN8QuU9H2YCiMzZ6I0dY.jpg"
+}
+
+### === MOVIES ===
+POST http://localhost:8080/api/movies
+Content-Type: application/json
+
+{
+  "title": "Dune",
+  "description": "Eine epische Geschichte auf dem Wüstenplaneten Arrakis.",
+  "genre": "Sci-Fi",
+  "releaseDate": "2021-10-22",
+  "duration": "2h 35m",
+  "posterUrl": "https://image.tmdb.org/t/p/w500/d5NXSklXo0qyIYkgV94XAgMIckC.jpg"
+}
+
+###
+
+POST http://localhost:8080/api/movies
+Content-Type: application/json
+
+{
+  "title": "Titanic",
+  "description": "Eine Liebesgeschichte an Bord der Titanic.",
+  "genre": "Drama, Romance",
+  "releaseDate": "1997-12-19",
+  "duration": "3h 15m",
+  "posterUrl": "https://image.tmdb.org/t/p/w500/9xjZS2rlVxm8SFx8kPC3aIGCOYQ.jpg"
+}
+
+###
+
+POST http://localhost:8080/api/movies
+Content-Type: application/json
+
+{
+  "title": "Blade Runner 2049",
+  "description": "Die Fortsetzung des Sci-Fi-Klassikers.",
+  "genre": "Sci-Fi",
+  "releaseDate": "2017-10-06",
+  "duration": "2h 44m",
+  "posterUrl": "https://image.tmdb.org/t/p/w500/gajva2L0rPYkEWjzgFlBXCAVBE5.jpg"
+}
+
+###
+
+POST http://localhost:8080/api/movies
+Content-Type: application/json
+
+{
+  "title": "Iron Man",
+  "description": "Der Beginn des MCU mit Tony Stark.",
+  "genre": "Action",
+  "releaseDate": "2008-05-02",
+  "duration": "2h 6m",
+  "posterUrl": "https://image.tmdb.org/t/p/w500/78lPtwv72eTNqFW9COBYI0dWDJa.jpg"
+}
+
+###
+
+POST http://localhost:8080/api/movies
+Content-Type: application/json
+
+{
+  "title": "Man of Steel",
+  "description": "Die Geschichte von Superman.",
+  "genre": "Action",
+  "releaseDate": "2013-06-14",
+  "duration": "2h 23m",
+  "posterUrl": "https://image.tmdb.org/t/p/w500/7rIPjn5TUK04O25ZkMyHrGNPgLx.jpg"
+}
+
+### === SERIES ===
+POST http://localhost:8080/api/series
+Content-Type: application/json
+
+{
+  "title": "The Witcher",
+  "description": "Geralt von Riva, ein Hexer, jagt Monster.",
+  "genre": "Fantasy",
+  "releaseDate": "2019-12-20",
+  "posterUrl": "https://image.tmdb.org/t/p/w500/7vjaCdMw15FEbXyLQTVa04URsPm.jpg"
+}
+
+###
+
+POST http://localhost:8080/api/series
+Content-Type: application/json
+
+{
+  "title": "Westworld",
+  "description": "Ein futuristischer Freizeitpark mit Androiden.",
+  "genre": "Sci-Fi, Western",
+  "releaseDate": "2016-10-02",
+  "posterUrl": "https://image.tmdb.org/t/p/w500/wFrZ5dP7L6ZLihM4tA3vmnU86xR.jpg"
+}
+
+###
+
+POST http://localhost:8080/api/series
+Content-Type: application/json
+
+{
+  "title": "Sherlock",
+  "description": "Ein moderner Sherlock Holmes in London.",
+  "genre": "Crime, Drama",
+  "releaseDate": "2010-07-25",
+  "posterUrl": "https://image.tmdb.org/t/p/w500/f9zGxLHGyQB10cMDZNY5ZcGKhZi.jpg"
+}
+
+### === SEASONS & EPISODES ===
+POST http://localhost:8080/api/series/686169d8179314698a216b11/seasons
+Content-Type: application/json
+
+{
+  "seasonNumber": 1,
+  "episodes": [
+    {
+      "episodeNumber": 1,
+      "title": "Pilot",
+      "duration": "60m",
+      "releaseDate": "2019-12-20",
+      "description": "Die erste Begegnung mit Geralt.",
+      "posterUrl": "https://image.tmdb.org/t/p/w500/6fj8VZCkpXBJgp7wa9u0edPFsKn.jpg"
+    },
+    {
+      "episodeNumber": 2,
+      "title": "Four Marks",
+      "duration": "58m",
+      "releaseDate": "2019-12-20",
+      "description": "Yennefers Geschichte beginnt.",
+      "posterUrl": "https://image.tmdb.org/t/p/w500/jrPsbVxbkNjZspuEkkdQunlslqY.jpg"
+    }
+  ],
+  "trailerUrl": "https://www.youtube.com/watch?v=ndl1W4ltcmg"
+}
+
+###
+
+POST http://localhost:8080/api/series/686169d8179314698a216b12/seasons
+Content-Type: application/json
+
+{
+  "seasonNumber": 1,
+  "episodes": [
+    {
+      "episodeNumber": 1,
+      "title": "The Original",
+      "duration": "68m",
+      "releaseDate": "2016-10-02",
+      "description": "Willkommen in Westworld.",
+      "posterUrl": "https://image.tmdb.org/t/p/w500/lvIoEFYx8uWb1x1o1t4bmP1GV8e.jpg"
+    },
+    {
+      "episodeNumber": 2,
+      "title": "Chestnut",
+      "duration": "60m",
+      "releaseDate": "2016-10-09",
+      "description": "Ein neuer Besucher entdeckt Westworld.",
+      "posterUrl": "https://image.tmdb.org/t/p/w500/xtIv3ZXApX2HFqRSbVSSMzdEar3.jpg"
+    }
+  ],
+  "trailerUrl": "https://www.youtube.com/watch?v=IuS5huqOND4"
+}
+
+###
+
+POST http://localhost:8080/api/series/686169d8179314698a216b13/seasons
+Content-Type: application/json
+
+{
+  "seasonNumber": 1,
+  "episodes": [
+    {
+      "episodeNumber": 1,
+      "title": "A Study in Pink",
+      "duration": "88m",
+      "releaseDate": "2010-07-25",
+      "description": "Sherlock trifft John Watson.",
+      "posterUrl": "https://image.tmdb.org/t/p/w500/p1U4PLkZX31lrTqsxvFeoJAJhDig.jpg"
+    },
+    {
+      "episodeNumber": 2,
+      "title": "The Blind Banker",
+      "duration": "89m",
+      "releaseDate": "2010-08-01",
+      "description": "Ein Fall um Chinesische Symbole.",
+      "posterUrl": "https://image.tmdb.org/t/p/w500/9QpV5LiCFYl8aAkaI0s5momkGLw.jpg"
+    }
+  ],
+  "trailerUrl": "https://www.youtube.com/watch?v=IrBKwzL3K7s"
+}
+###
+GET http://localhost:8080/api/series
+###
+GET http://localhost:8080/api/movies
+###
+GET http://localhost:8080/api/users
+###
+GET http://localhost:8080/api/actors
+###
+GET http://localhost:8080/api/directors
+
+
+

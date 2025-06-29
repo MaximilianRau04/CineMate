@@ -1,4 +1,4 @@
-import { FaPlus, FaCheck, FaArrowLeft, FaEye, FaStar, FaCircle } from "react-icons/fa";
+import { FaPlus, FaCheck, FaArrowLeft, FaEye, FaStar, FaCircle, FaPlay } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 const MediaHeader = ({
@@ -143,86 +143,103 @@ const MediaHeader = ({
           </div>
         )}
 
-        {userId && !added && (
-          <button
-            className="btn btn-success me-2"
-            onClick={onAddToWatchlist}
-            disabled={adding}
-          >
-            {adding ? (
-              "Wird hinzugefügt..."
-            ) : (
-              <>
-                <FaPlus className="me-2" />
-                Zur Watchlist hinzufügen
-              </>
-            )}
-          </button>
-        )}
-
-        {added && (
-          <div
-            className="alert alert-success d-inline-flex align-items-center px-3 py-2 mt-2"
-            role="alert"
-          >
-            <FaCheck className="me-2" />
-            In deiner Watchlist!
+        {media.trailerUrl && (
+          <div className="mb-4">
+            <a
+              href={media.trailerUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-danger"
+              style={{ backgroundColor: '#ff0000', borderColor: '#ff0000' }}
+            >
+              <FaPlay className="me-2" />
+              🎬 Trailer ansehen
+            </a>
           </div>
         )}
 
-        {userId && !favorite && (
-          <button
-            className="btn btn-warning me-2"
-            onClick={onAddToFavorites}
-            disabled={favoriting}
-          >
-            {favoriting ? (
-              "Wird hinzugefügt..."
-            ) : (
-              <>
-                <FaStar className="me-2" />
-                Zu Favoriten hinzufügen
-              </>
-            )}
-          </button>
-        )}
+        <div className="d-flex flex-wrap gap-2 align-items-center">
+          {userId && !added && (
+            <button
+              className="btn btn-success"
+              onClick={onAddToWatchlist}
+              disabled={adding}
+            >
+              {adding ? (
+                "Wird hinzugefügt..."
+              ) : (
+                <>
+                  <FaPlus className="me-2" />
+                  Zur Watchlist hinzufügen
+                </>
+              )}
+            </button>
+          )}
 
-        {favorite && (
-          <div
-            className="alert alert-warning d-inline-flex align-items-center px-3 py-2"
-            role="alert"
-          >
-            <FaStar className="me-2" />
-            In deinen Favoriten!
-          </div>
-        )}
+          {added && (
+            <div
+              className="alert alert-success d-inline-flex align-items-center px-3 py-2 mb-0"
+              role="alert"
+            >
+              <FaCheck className="me-2" />
+              In deiner Watchlist!
+            </div>
+          )}
 
-        {userId && !watched && (
-          <button
-            className="btn btn-info me-2 text-white"
-            onClick={onMarkAsWatched}
-            disabled={watching}
-          >
-            {watching ? (
-              "Wird markiert..."
-            ) : (
-              <>
-                <FaEye className="me-2" />
-                Als gesehen markieren
-              </>
-            )}
-          </button>
-        )}
+          {userId && !favorite && (
+            <button
+              className="btn btn-warning"
+              onClick={onAddToFavorites}
+              disabled={favoriting}
+            >
+              {favoriting ? (
+                "Wird hinzugefügt..."
+              ) : (
+                <>
+                  <FaStar className="me-2" />
+                  Zu Favoriten hinzufügen
+                </>
+              )}
+            </button>
+          )}
 
-        {watched && (
-          <div
-            className="alert alert-info d-inline-flex align-items-center px-3 py-2 me-2"
-            role="alert"
-          >
-            <FaEye className="me-2" />
-            Als gesehen markiert
-          </div>
-        )}
+          {favorite && (
+            <div
+              className="alert alert-warning d-inline-flex align-items-center px-3 py-2 mb-0"
+              role="alert"
+            >
+              <FaStar className="me-2" />
+              In deinen Favoriten!
+            </div>
+          )}
+
+          {userId && !watched && (
+            <button
+              className="btn btn-info text-white"
+              onClick={onMarkAsWatched}
+              disabled={watching}
+            >
+              {watching ? (
+                "Wird markiert..."
+              ) : (
+                <>
+                  <FaEye className="me-2" />
+                  Als gesehen markieren
+                </>
+              )}
+            </button>
+          )}
+
+          {watched && (
+            <div
+              className="alert alert-info d-inline-flex align-items-center px-3 py-2 mb-0"
+              role="alert"
+            >
+              <FaEye className="me-2" />
+              Als gesehen markiert
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -91,7 +91,7 @@ POST http://localhost:8080/api/movies
 Content-Type: application/json
 
 {
-  "title": "Fight Clb",
+  "title": "Fight Club",
   "description": "Ein gelangweilter Büroarbeiter gründet mit einem Seifenverkäufer einen geheimen Fight Club.",
   "genre": "Drama",
   "releaseDate": "1999-10-15",
@@ -192,7 +192,7 @@ Content-Type: application/json
 GET http://localhost:8080/api/users/6813a9c6a70428033d933986/watchlist/series
 
 ###
-GET http://localhost:8080/api/users
+GET http://localhost:8080/api/series
 
 ###
 GET http://localhost:8080/api/series/682a284236f2d54c872d1bb9/seasons
@@ -209,7 +209,7 @@ Content-Type: application/json
   "posterUrl": "https://image.tmdb.org/t/p/w500/x2LSRK2Cm7MZhjluni1msVJ3wDF.jpg"
 }
 ###
-POST http://localhost:8080/api/series/682a284236f2d54c872d1bb9/seasons
+POST http://localhost:8080/api/series/68616a3c179314698a216b1c/seasons
 Content-Type: application/json
 
 {
@@ -235,10 +235,10 @@ Content-Type: application/json
        "trailerUrl": "https://www.youtube.com/watch?v=h-2LIjOt0r"
  }
 ###
-DELETE http://localhost:8080/api/series/682a284236f2d54c872d1bb9/seasons/1
+DELETE http://localhost:8080/api/series/68616a5b179314698a216b1f
 
 ###
-POST http://localhost:8080/api/series/682a284236f2d54c872d1bb9/seasons
+POST http://localhost:8080/api/series/68616a3c179314698a216b1c/seasons
 Content-Type: application/json
 
 {
@@ -412,6 +412,13 @@ Content-Type: application/json
 POST http://localhost:8080/api/notifications/check-milestones/6834b935a119f372560d8668
 Content-Type: application/json
 ###
-GET http://localhost:8080/api/users
+GET http://localhost:8080/api/series
 ###
 GET http://localhost:8080/api/notification-preferences/user/685d8917c4b8b638bba7503a/global
+###
+PUT http://localhost:8080/api/series/686169d8179314698a216b13
+Content-Type: application/json
+
+{
+  "posterUrl": "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/cIfGAkpvWD2zxHrXzhv3uptYbyV.jpg"
+}

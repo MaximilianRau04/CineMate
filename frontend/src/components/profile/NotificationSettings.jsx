@@ -1,6 +1,6 @@
 import React from 'react';
-import { useNotificationSettings } from '../../hooks/useNotificationSettings';
-import { getNotificationTypeLabel, sortNotificationTypes } from './utils/notificationUtils';
+import { useNotificationSettings } from './utils/useNotificationSettings';
+import { getNotificationTypeLabel, sortNotificationTypes, filterNotificationTypesByRole } from './utils/notificationUtils';
 
 const NotificationSettings = ({ userId }) => {
   const {
@@ -9,13 +9,15 @@ const NotificationSettings = ({ userId }) => {
     error,
     globalSettings,
     notificationTypes,
+    user,
     updateGlobalSettings,
     updatePreference,
     getPreferenceForType,
     clearError
   } = useNotificationSettings(userId);
 
-  const sortedNotificationTypes = sortNotificationTypes(notificationTypes);
+  const filteredNotificationTypes = filterNotificationTypesByRole(notificationTypes, user);
+  const sortedNotificationTypes = sortNotificationTypes(filteredNotificationTypes);
 
   if (loading) {
     return (

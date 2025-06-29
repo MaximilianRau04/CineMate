@@ -1,4 +1,3 @@
-
 /**
  * german translations for notification types
  * @param {string} type - the notification type
@@ -16,16 +15,13 @@ export const getNotificationTypeLabel = (type) => {
     'UPCOMING_RELEASES': '📅 Wöchentliche Zusammenfassung',
     'SYSTEM_ANNOUNCEMENT': '📢 System-Ankündigung',
     'NEW_MOVIE_RELEASE': '🎬 Neue Filmveröffentlichung',
-    'NEW_EPISODE_AVAILABLE': '📺 Neue Episode verfügbar',
-    'SERIES_STATUS_UPDATE': '📊 Serie Status-Update',
     'WATCHLIST_REMINDER': '📋 Watchlist-Erinnerung',
     'RATING_UPDATE': '⭐ Bewertungs-Update',
     'NEW_SEASON_ANNOUNCED': '📺 Neue Staffel angekündigt',
     'RECOMMENDATION': '💡 Empfehlung',
     'BIRTHDAY_REMINDER': '🎂 Geburtstags-Erinnerung',
     'NEW_USER_REGISTERED': '👤 Neue Benutzer-Registrierung',
-    'ADMIN_NOTIFICATION': '📢 Admin-Mitteilung',
-    'WELCOME_NEW_USER': '🎉 Willkommen bei CineMate'
+    'ADMIN_NOTIFICATION': '📢 Admin-Mitteilung'
   };
   return labels[type] || type;
 };
@@ -85,8 +81,6 @@ export const sortNotificationTypes = (notificationTypes) => {
     'UPCOMING_RELEASES',
     
     'NEW_MOVIE_RELEASE',
-    'NEW_EPISODE_AVAILABLE',
-    'SERIES_STATUS_UPDATE',
     'WATCHLIST_REMINDER',
     'NEW_SEASON_ANNOUNCED',
     'RECOMMENDATION',
@@ -94,8 +88,7 @@ export const sortNotificationTypes = (notificationTypes) => {
     'SYSTEM_ANNOUNCEMENT',
     
     'NEW_USER_REGISTERED',
-    'ADMIN_NOTIFICATION',
-    'WELCOME_NEW_USER'
+    'ADMIN_NOTIFICATION'
   ];
 
   return notificationTypes.sort((a, b) => {
@@ -131,11 +124,11 @@ export const groupNotificationTypes = (notificationTypes) => {
     },
     general: {
       title: '📢 Allgemein',
-      types: ['NEW_MOVIE_RELEASE', 'NEW_EPISODE_AVAILABLE', 'SERIES_STATUS_UPDATE', 'WATCHLIST_REMINDER', 'NEW_SEASON_ANNOUNCED', 'RECOMMENDATION', 'BIRTHDAY_REMINDER', 'SYSTEM_ANNOUNCEMENT']
+      types: ['NEW_MOVIE_RELEASE', 'WATCHLIST_REMINDER', 'NEW_SEASON_ANNOUNCED', 'RECOMMENDATION', 'BIRTHDAY_REMINDER', 'SYSTEM_ANNOUNCEMENT']
     },
     admin: {
       title: '👨‍💼 Administration',
-      types: ['NEW_USER_REGISTERED', 'ADMIN_NOTIFICATION', 'WELCOME_NEW_USER']
+      types: ['NEW_USER_REGISTERED', 'ADMIN_NOTIFICATION']
     }
   };
 
@@ -152,4 +145,24 @@ export const groupNotificationTypes = (notificationTypes) => {
   });
 
   return result;
+};
+
+/**
+ * filters notification types based on user role
+ * @param {array} notificationTypes - array of notification types
+ * @param {object} user - user object with role information
+ * @returns {array} 
+ */
+export const filterNotificationTypesByRole = (notificationTypes, user) => {
+  if (!user || !notificationTypes) return [];
+  
+  // Filter out WELCOME_NEW_USER from settings (but keep the type itself for notifications)
+  let filteredTypes = notificationTypes.filter(type => type !== 'WELCOME_NEW_USER');
+  
+  // Only show NEW_USER_REGISTERED for admins
+  if (user.role !== 'ADMIN') {
+    filteredTypes = filteredTypes.filter(type => type !== 'NEW_USER_REGISTERED');
+  }
+  
+  return filteredTypes;
 };

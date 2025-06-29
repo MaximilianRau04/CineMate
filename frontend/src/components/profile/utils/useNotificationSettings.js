@@ -10,6 +10,7 @@ export const useNotificationSettings = (userId) => {
   });
   const [preferences, setPreferences] = useState([]);
   const [notificationTypes, setNotificationTypes] = useState([]);
+  const [user, setUser] = useState(null);
   useEffect(() => {
     if (!userId) return;
 
@@ -20,6 +21,17 @@ export const useNotificationSettings = (userId) => {
       try {
         setLoading(true);
         setError(null);
+        
+        // Load user information
+        const userResponse = await fetch('http://localhost:8080/api/users/me', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
+        if (userResponse.ok) {
+          const userData = await userResponse.json();
+          setUser(userData);
+        }
         
         const globalResponse = await fetch(`http://localhost:8080/api/notification-preferences/user/${userId}/global`);
         if (globalResponse.ok) {
@@ -144,6 +156,7 @@ export const useNotificationSettings = (userId) => {
     globalSettings,
     preferences,
     notificationTypes,
+    user,
 
     updateGlobalSettings,
     updatePreference,
