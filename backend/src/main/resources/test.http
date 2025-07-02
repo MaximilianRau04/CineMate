@@ -412,7 +412,7 @@ Content-Type: application/json
 POST http://localhost:8080/api/notifications/check-milestones/6834b935a119f372560d8668
 Content-Type: application/json
 ###
-GET http://localhost:8080/api/series
+GET http://localhost:8080/api/users
 ###
 GET http://localhost:8080/api/notification-preferences/user/685d8917c4b8b638bba7503a/global
 ###
@@ -422,3 +422,5 @@ Content-Type: application/json
 {
   "posterUrl": "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/cIfGAkpvWD2zxHrXzhv3uptYbyV.jpg"
 }
+###
+GET http://localhost:8080/api/recommendations/user/686164a973f46f014d5448f1

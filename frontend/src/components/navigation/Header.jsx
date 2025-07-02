@@ -60,6 +60,11 @@ const Header = () => {
                   Profil
                 </Link>
               </li>
+              <li className="nav-item">
+                <Link className="nav-link" to="/recommendations">
+                  Empfehlungen
+                </Link>
+              </li>
               {/* Admin Panel for admins */}
               {isAdmin && (
                 <li className="nav-item">

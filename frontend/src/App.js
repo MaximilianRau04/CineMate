@@ -11,6 +11,7 @@ import Watchlist from './components/profile/Watchlist';
 import UserProfile from './components/profile/UserProfile';
 import Calendar from './components/explore/calender/Calendar';
 import AdminPanel from './components/admin/AdminPanel';
+import RecommendationsPage from './components/recommendations/RecommendationsPage';
 
 const AppContent = () => {
   const location = useLocation();
@@ -30,6 +31,7 @@ const AppContent = () => {
         <Route path="/profile" element={<UserProfile />} />
         <Route path="/calendar" element={<Calendar />} />
         <Route path="/admin" element={<AdminPanel />} />
+        <Route path="/recommendations" element={<RecommendationsPage />} />
 
         <Route path="*" element={<h2 className="text-center mt-5">Seite nicht gefunden</h2>} />
 
