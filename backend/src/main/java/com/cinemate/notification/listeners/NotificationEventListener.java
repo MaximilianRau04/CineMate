@@ -2,6 +2,7 @@ package com.cinemate.notification.listeners;
 
 import com.cinemate.notification.AutoNotificationService;
 import com.cinemate.notification.events.*;
+import com.cinemate.recommendation.RecommendationNotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
@@ -12,6 +13,9 @@ public class NotificationEventListener {
 
     @Autowired
     private AutoNotificationService autoNotificationService;
+
+    @Autowired
+    private RecommendationNotificationService recommendationNotificationService;
 
     @EventListener
     @Async
@@ -55,5 +59,20 @@ public class NotificationEventListener {
     @Async
     public void handleUserActivityEvent(UserActivityEvent event) {
         autoNotificationService.checkAndNotifyMilestones(event.getUserId());
+    }
+
+    @EventListener
+    @Async
+    public void handleUserPreferenceChangedEvent(UserPreferenceChangedEvent event) {
+        // Send triggered recommendations based on user activity
+        try {
+            recommendationNotificationService.sendTriggeredRecommendations(
+                event.getUserId(), 
+                event.getActivityType()
+            );
+        } catch (Exception e) {
+            System.err.println("Error sending triggered recommendation notifications for user " 
+                + event.getUserId() + ": " + e.getMessage());
+        }
     }
 }

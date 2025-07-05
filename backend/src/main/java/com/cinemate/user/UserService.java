@@ -10,6 +10,7 @@ import com.cinemate.series.SeriesRepository;
 import com.cinemate.user.dtos.UserRequestDTO;
 import com.cinemate.user.dtos.UserResponseDTO;
 import com.cinemate.notification.events.UserActivityEvent;
+import com.cinemate.recommendation.utils.RecommendationTriggerUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
@@ -35,14 +36,17 @@ public class UserService {
     private final MovieRepository movieRepository;
     private final SeriesRepository seriesRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final RecommendationTriggerUtil recommendationTrigger;
 
     @Autowired
     public UserService(UserRepository userRepository, MovieRepository movieRepository,
-                       SeriesRepository seriesRepository, ApplicationEventPublisher eventPublisher) {
+                       SeriesRepository seriesRepository, ApplicationEventPublisher eventPublisher,
+                       RecommendationTriggerUtil recommendationTrigger) {
         this.userRepository = userRepository;
         this.movieRepository = movieRepository;
         this.seriesRepository = seriesRepository;
         this.eventPublisher = eventPublisher;
+        this.recommendationTrigger = recommendationTrigger;
     }
 
     /**
@@ -235,6 +239,8 @@ public class UserService {
 
         eventPublisher.publishEvent(new UserActivityEvent(this, userId, UserActivityEvent.ActivityType.WATCHLIST_ITEM_ADDED, movieId));
 
+        recommendationTrigger.triggerOnWatchlistUpdate(userId, movieId, "movie");
+
         List<MovieResponseDTO> movieDTOs = savedUser.getMovieWatchlist().stream()
                 .map(MovieResponseDTO::new)
                 .collect(Collectors.toList());
@@ -268,6 +274,8 @@ public class UserService {
         User savedUser = userRepository.save(user);
 
         eventPublisher.publishEvent(new UserActivityEvent(this, userId, UserActivityEvent.ActivityType.WATCHLIST_ITEM_ADDED, seriesId));
+
+        recommendationTrigger.triggerOnWatchlistUpdate(userId, seriesId, "series");
 
         List<SeriesResponseDTO> seriesDTOs = savedUser.getSeriesWatchlist().stream()
                 .map(SeriesResponseDTO::new)
@@ -375,6 +383,8 @@ public class UserService {
         user.addMovieToFavorites(movie);
         User savedUser = userRepository.save(user);
 
+        recommendationTrigger.triggerOnNewFavorite(userId, movieId, "movie");
+
         List<MovieResponseDTO> movieDTOs = savedUser.getMovieFavorites().stream()
                 .map(MovieResponseDTO::new)
                 .collect(Collectors.toList());
@@ -406,6 +416,8 @@ public class UserService {
 
         user.addSeriesToFavorites(series);
         User savedUser = userRepository.save(user);
+
+        recommendationTrigger.triggerOnNewFavorite(userId, seriesId, "series");
 
         List<SeriesResponseDTO> seriesDTOs = savedUser.getSeriesFavorites().stream()
                 .map(SeriesResponseDTO::new)
@@ -515,6 +527,8 @@ public class UserService {
 
         eventPublisher.publishEvent(new UserActivityEvent(this, userId, UserActivityEvent.ActivityType.MOVIE_WATCHED, movieId));
 
+        recommendationTrigger.triggerOnWatched(userId, movieId, "movie");
+
         List<MovieResponseDTO> movieDTOs = savedUser.getMoviesWatched().stream()
                 .map(MovieResponseDTO::new)
                 .collect(Collectors.toList());
@@ -548,6 +562,8 @@ public class UserService {
         User savedUser = userRepository.save(user);
 
         eventPublisher.publishEvent(new UserActivityEvent(this, userId, UserActivityEvent.ActivityType.SERIES_WATCHED, seriesId));
+
+        recommendationTrigger.triggerOnWatched(userId, seriesId, "series");
 
         List<SeriesResponseDTO> seriesDTOs = savedUser.getSeriesWatched().stream()
                 .map(SeriesResponseDTO::new)

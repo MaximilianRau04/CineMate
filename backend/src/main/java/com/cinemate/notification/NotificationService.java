@@ -222,6 +222,18 @@ public class NotificationService {
                     actionUrl = "http://localhost:3000/watchlist";
                     actionText = "Zur Watchlist";
                     break;
+                case RECOMMENDATION:
+                    if ("movie".equals(notification.getItemType())) {
+                        actionUrl = "http://localhost:3000/movies/" + notification.getItemId();
+                        actionText = "Film ansehen";
+                    } else if ("series".equals(notification.getItemType())) {
+                        actionUrl = "http://localhost:3000/series/" + notification.getItemId();
+                        actionText = "Serie ansehen";
+                    } else if ("recommendations".equals(notification.getItemType())) {
+                        actionUrl = "http://localhost:3000/explore";
+                        actionText = "Alle Empfehlungen ansehen";
+                    }
+                    break;
                 default:
                     break;
             }
@@ -252,6 +264,25 @@ public class NotificationService {
                         );
                         return;
                     }
+                }
+                break;
+            case RECOMMENDATION:
+                if (notification.getMetadata() != null) {
+                    String posterUrl = (String) notification.getMetadata().get("posterUrl");
+                    String reason = (String) notification.getMetadata().get("reason");
+                    Double score = (Double) notification.getMetadata().get("score");
+                    
+                    emailService.sendRecommendationEmail(
+                        user.getId(),
+                        notification.getTitle(),
+                        notification.getMessage(),
+                        notification.getItemId(),
+                        notification.getItemType(),
+                        posterUrl,
+                        reason,
+                        score != null ? score : 0.0
+                    );
+                    return;
                 }
                 break;
             default:
@@ -287,7 +318,7 @@ public class NotificationService {
     }
 
     /**
-     * Sends notification to specific user or all users (for admin panel)
+     * Sends notification to a specific user or all users (for admin panel)
      * @param type
      * @param title
      * @param message

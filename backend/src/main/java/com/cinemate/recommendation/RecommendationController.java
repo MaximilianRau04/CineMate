@@ -12,10 +12,12 @@ import java.util.List;
 public class RecommendationController {
 
     private final RecommendationService recommendationService;
+    private final RecommendationNotificationService recommendationNotificationService;
 
     @Autowired
-    public RecommendationController(RecommendationService recommendationService) {
+    public RecommendationController(RecommendationService recommendationService, RecommendationNotificationService recommendationNotificationService) {
         this.recommendationService = recommendationService;
+        this.recommendationNotificationService = recommendationNotificationService;
     }
 
     /**
@@ -81,5 +83,59 @@ public class RecommendationController {
     public ResponseEntity<List<RecommendationResponseDTO>> getCollaborativeRecommendations(@PathVariable String userId) {
         List<RecommendationResponseDTO> recommendations = recommendationService.getCollaborativeRecommendations(userId);
         return ResponseEntity.ok(recommendations);
+    }
+
+    /**
+     * sends recommendation notifications to a specific user
+     * @param maxRecommendations - max number of notifications per user (optional, standard: 3)
+     * @return Confirmation of success
+     */
+    @PostMapping("/notify/{userId}")
+    public ResponseEntity<String> sendRecommendationNotifications(
+            @PathVariable String userId,
+            @RequestParam(defaultValue = "3") int maxRecommendations) {
+
+        try {
+            recommendationNotificationService.sendRecommendationNotifications(userId, maxRecommendations);
+            return ResponseEntity.ok("Empfehlungsbenachrichtigungen erfolgreich gesendet für Benutzer: " + userId);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Fehler beim Senden der Empfehlungsbenachrichtigungen: " + e.getMessage());
+        }
+    }
+
+    /**
+     * sends recommendation notifications to all users
+     * @param maxRecommendations - max number of notifications per user (optional, standard: 3)
+     * @return Confirmation of success
+     */
+    @PostMapping("/notify/all")
+    public ResponseEntity<String> sendRecommendationNotificationsToAll(
+            @RequestParam(defaultValue = "3") int maxRecommendations) {
+
+        try {
+            recommendationNotificationService.sendRecommendationNotificationsToAllUsers(maxRecommendations);
+            return ResponseEntity.ok("Empfehlungsbenachrichtigungen erfolgreich an alle Benutzer gesendet");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Fehler beim Senden der Empfehlungsbenachrichtigungen: " + e.getMessage());
+        }
+    }
+
+    /**
+     * sends triggered recommendations based on user activity
+     * @param userId - id of the user
+     * @param trigger the trigger (e.g. "new_favorite", "new_rating")
+     * @return Confirmation of success
+     */
+    @PostMapping("/notify/{userId}/triggered")
+    public ResponseEntity<String> sendTriggeredRecommendations(
+            @PathVariable String userId,
+            @RequestParam String trigger) {
+
+        try {
+            recommendationNotificationService.sendTriggeredRecommendations(userId, trigger);
+            return ResponseEntity.ok("Getriggerte Empfehlungsbenachrichtigungen erfolgreich gesendet für Benutzer: " + userId);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Fehler beim Senden der getriggerten Empfehlungsbenachrichtigungen: " + e.getMessage());
+        }
     }
 }

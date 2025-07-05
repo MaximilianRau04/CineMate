@@ -209,8 +209,8 @@ const LoginForm = () => {
           CineMate
         </div>
 
-        {error && <div className="alert alert-danger">{error}</div>}
-        {success && <div className="alert alert-success">{success}</div>}
+        {error && <div className="alert alert-danger text-dark">{error}</div>}
+        {success && <div className="alert alert-success text-dark">{success}</div>}
 
         {/* username */}
         <form onSubmit={isLogin ? handleLogin : handleRegister}>

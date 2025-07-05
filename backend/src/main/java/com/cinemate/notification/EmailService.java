@@ -48,7 +48,7 @@ public class EmailService {
     /**
      * Check if user has exceeded email rate limit
      * @param userEmail
-     * @return true if within rate limit
+     * @return true if within the rate limit
      */
     private boolean isWithinRateLimit(String userEmail) {
         EmailRateLimit rateLimit = rateLimitMap.computeIfAbsent(userEmail, k -> new EmailRateLimit());
@@ -69,6 +69,12 @@ public class EmailService {
         return true;
     }
 
+    /**
+     * Sends a notification email asynchronously to the specified recipient
+     * @param toEmail the email address of the recipient
+     * @param subject the subject of the email
+     * @param message the text content of the email to be sent
+     */
     @Async
     public void sendNotificationEmail(String toEmail, String subject, String message) {
         if (!mailEnabled || mailSender == null) {
@@ -95,6 +101,12 @@ public class EmailService {
         }
     }
 
+    /**
+     * Sends an HTML notification email asynchronously to the specified recipient.
+     * @param toEmail the email address of the recipient
+     * @param subject the subject of the email
+     * @param htmlContent the HTML content of the email to be sent
+     */
     @Async
     public void sendHtmlNotificationEmail(String toEmail, String subject, String htmlContent) {
         if (!mailEnabled || mailSender == null) {
@@ -123,12 +135,31 @@ public class EmailService {
         }
     }
 
+    /**
+     * Sends a templated notification email asynchronously to the specified recipient.
+     *
+     * @param toEmail the email address of the recipient
+     * @param title the title or subject of the notification email
+     * @param message the message content to be included in the notification email
+     * @param actionUrl the URL for the actionable link in the email
+     * @param actionText the text that describes the action associated with the URL
+     */
     @Async
     public void sendTemplatedNotificationEmail(String toEmail, String title, String message, String actionUrl, String actionText) {
         String htmlContent = emailTemplateService.createNotificationEmailTemplate(title, message, actionUrl, actionText);
         sendHtmlNotificationEmail(toEmail, title, htmlContent);
     }
 
+    /**
+     * Sends a weekly summary email to a user asynchronously. The email content is generated
+     * using a template that includes details about the user's upcoming movies and series, as well as a custom message.
+     *
+     * @param userId the unique identifier of the user to whom the email will be sent
+     * @param title the title or subject of the email
+     * @param content the custom message content to be included in the email
+     * @param upcomingMovies the number of upcoming movies to be highlighted in the email
+     * @param upcomingSeries the number of upcoming series to be highlighted in the email
+     */
     @Async
     public void sendWeeklySummaryEmail(String userId, String title, String content, int upcomingMovies, int upcomingSeries) {
         Optional<User> userOpt = userRepository.findById(userId);
@@ -141,6 +172,14 @@ public class EmailService {
         sendHtmlNotificationEmail(user.getEmail(), title, htmlContent);
     }
 
+    /**
+     * Sends a milestone email asynchronously to a user. The email contains
+     * details about the achieved milestone, such as its type and count.
+     *
+     * @param userId the unique identifier of the user to whom the email will be sent
+     * @param milestoneType the type of milestone achieved (e.g., "movies watched")
+     * @param count the numerical value associated with the milestone (e.g., "100 movies watched")
+     */
     @Async
     public void sendMilestoneEmail(String userId, String milestoneType, int count) {
         Optional<User> userOpt = userRepository.findById(userId);
@@ -149,5 +188,37 @@ public class EmailService {
         User user = userOpt.get();
         String htmlContent = emailTemplateService.createMilestoneTemplate(user.getUsername(), milestoneType, count);
         sendHtmlNotificationEmail(user.getEmail(), "🏆 Meilenstein erreicht!", htmlContent);
+    }
+
+    /**
+     * Sends a recommendation email asynchronously to a user. The email contains detailed information
+     * about a recommended item such as its title, type, poster image, reason for recommendation, and score.
+     *
+     * @param userId the unique identifier of the user to whom the recommendation email will be sent
+     * @param title the title or subject of the recommendation email
+     * @param message the detailed message content to be included in the email
+     * @param itemId the unique identifier of the recommended item
+     * @param itemType the type of the recommended item (e.g., "movie", "series")
+     * @param posterUrl the URL of the poster image of the recommended item
+     * @param reason the reason for the recommendation
+     * @param score the recommendation score associated with the item
+     */
+    @Async
+    public void sendRecommendationEmail(String userId, String title, String message, String itemId, String itemType, String posterUrl, String reason, double score) {
+        Optional<User> userOpt = userRepository.findById(userId);
+        if (userOpt.isEmpty()) return;
+        
+        User user = userOpt.get();
+        String htmlContent = emailTemplateService.createRecommendationTemplate(
+            user.getUsername(), 
+            title, 
+            message, 
+            itemId, 
+            itemType, 
+            posterUrl, 
+            reason, 
+            score
+        );
+        sendHtmlNotificationEmail(user.getEmail(), title, htmlContent);
     }
 }

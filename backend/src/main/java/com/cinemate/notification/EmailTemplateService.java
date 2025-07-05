@@ -70,7 +70,7 @@ public class EmailTemplateService {
     }
 
     /**
-     * Creates weekly summary email template
+     * Creates a weekly summary email template
      * @param userName - user's name
      * @param upcomingMovies - number of upcoming movies
      * @param upcomingSeries - number of upcoming series
@@ -217,5 +217,127 @@ public class EmailTemplateService {
             case "watchlist_size" -> "Einträge in der Watchlist";
             default -> "Meilenstein erreicht";
         };
+    }
+
+    /**
+     * Creates recommendation email template
+     * @param userName - user's name
+     * @param title - recommendation title
+     * @param message - recommendation message
+     * @param itemId - item ID
+     * @param itemType - "movie" or "series"
+     * @param posterUrl - poster image URL
+     * @param reason - recommendation reason
+     * @param score - recommendation score (0.0 - 1.0)
+     * @return formatted HTML email
+     */
+    public String createRecommendationTemplate(String userName, String title, String message, String itemId, String itemType, String posterUrl, String reason, double score) {
+        String actionUrl = itemId != null ? 
+            ("movie".equals(itemType) ? "http://localhost:3000/movies/" + itemId : "http://localhost:3000/series/" + itemId) :
+            "http://localhost:3000/explore";
+            
+        String actionText = itemId != null ? 
+            ("movie".equals(itemType) ? "Film ansehen" : "Serie ansehen") :
+            "Alle Empfehlungen";
+
+        int scorePercentage = (int) (score * 100);
+        String posterImage = posterUrl != null && !posterUrl.isEmpty() ? 
+            "<img src=\"" + posterUrl + "\" alt=\"Poster\" style=\"max-width: 200px; height: auto; border-radius: 8px; margin: 20px 0;\"/>" : "";
+
+        return """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>CineMate Empfehlung</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; }
+                    .container { max-width: 600px; margin: 0 auto; background-color: white; }
+                    .header { background-color: #1a1a1a; color: white; padding: 20px; text-align: center; }
+                    .recommendation { 
+                        text-align: center; 
+                        padding: 30px 20px; 
+                        background: linear-gradient(135deg, #667eea 0%%, #764ba2 100%%); 
+                        color: white; 
+                    }
+                    .score-badge { 
+                        display: inline-block; 
+                        background-color: #e50914; 
+                        color: white; 
+                        padding: 5px 15px; 
+                        border-radius: 20px; 
+                        font-weight: bold; 
+                        margin: 10px 0;
+                    }
+                    .content { padding: 20px; line-height: 1.6; }
+                    .reason-box { 
+                        background-color: #f8f9fa; 
+                        border-left: 4px solid #e50914; 
+                        padding: 15px; 
+                        margin: 20px 0; 
+                        font-style: italic;
+                    }
+                    .action-button { 
+                        display: inline-block; 
+                        background-color: #e50914; 
+                        color: white; 
+                        padding: 12px 24px; 
+                        text-decoration: none; 
+                        border-radius: 4px; 
+                        margin: 20px 0; 
+                        font-weight: bold;
+                    }
+                    .footer { 
+                        background-color: #f8f8f8; 
+                        padding: 20px; 
+                        text-align: center; 
+                        font-size: 12px; 
+                        color: #666; 
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <h1>🎬 CineMate</h1>
+                        <p>Persönliche Empfehlung für %s</p>
+                    </div>
+                    <div class="recommendation">
+                        <h2>✨ %s</h2>
+                        %s
+                        <div class="score-badge">%d%% Match</div>
+                    </div>
+                    <div class="content">
+                        <p>%s</p>
+                        
+                        %s
+                        
+                        <div style="text-align: center;">
+                            <a href="%s" class="action-button">%s</a>
+                        </div>
+                        
+                        <p style="text-align: center; margin-top: 30px;">
+                            <a href="http://localhost:3000/explore" style="color: #e50914;">→ Weitere Empfehlungen entdecken</a>
+                        </p>
+                    </div>
+                    <div class="footer">
+                        <p>Du erhältst diese E-Mail, weil du Empfehlungsbenachrichtigungen aktiviert hast.</p>
+                        <p><a href="http://localhost:3000/profile">Benachrichtigungseinstellungen verwalten</a></p>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """.formatted(
+                userName,
+                title.replace("Neue Empfehlung: ", ""),
+                posterImage,
+                scorePercentage,
+                message,
+                reason != null && !reason.isEmpty() ? 
+                    "<div class=\"reason-box\"><strong>Warum diese Empfehlung?</strong><br/>" + reason + "</div>" : "",
+                actionUrl,
+                actionText
+            );
     }
 }

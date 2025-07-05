@@ -1,6 +1,7 @@
 package com.cinemate.notification.scheduled;
 
 import com.cinemate.notification.AutoNotificationService;
+import com.cinemate.recommendation.RecommendationNotificationService;
 import com.cinemate.user.User;
 import com.cinemate.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,9 @@ public class ScheduledNotificationService {
 
     @Autowired
     private AutoNotificationService autoNotificationService;
+
+    @Autowired
+    private RecommendationNotificationService recommendationNotificationService;
 
     @Autowired
     private UserRepository userRepository;
@@ -33,6 +37,22 @@ public class ScheduledNotificationService {
                 System.err.println("Error sending weekly notification to user " + user.getId() + ": " + e.getMessage());
             }
         });
+    }
+
+    /**
+     * sends personalized recommendations to all users
+     * executed every Wednesday at 2pm
+     */
+    @Scheduled(cron = "0 0 14 * * WED")
+    public void sendWeeklyRecommendations() {
+        System.out.println("Starting weekly recommendation notifications at " + new java.util.Date());
+        
+        try {
+            recommendationNotificationService.sendRecommendationNotificationsToAllUsers(3);
+            System.out.println("Weekly recommendation notifications completed successfully");
+        } catch (Exception e) {
+            System.err.println("Error sending weekly recommendation notifications: " + e.getMessage());
+        }
     }
 
     /**

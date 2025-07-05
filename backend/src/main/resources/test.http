@@ -424,3 +424,7 @@ Content-Type: application/json
 }
 ###
 GET http://localhost:8080/api/recommendations/user/686164a973f46f014d5448f1
+###
+
+POST http://localhost:8080/api/recommendations/notify/686164a973f46f014d5448f1
+Content-Type: application/json

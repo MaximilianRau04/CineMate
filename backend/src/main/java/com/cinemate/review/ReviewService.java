@@ -12,6 +12,7 @@ import com.cinemate.user.User;
 import com.cinemate.user.UserRepository;
 import com.cinemate.user.dtos.UserResponseDTO;
 import com.cinemate.notification.events.ReviewCreatedEvent;
+import com.cinemate.recommendation.utils.RecommendationTriggerUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,7 @@ public class ReviewService {
     private final MovieRepository movieRepository;
     private final SeriesRepository seriesRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final RecommendationTriggerUtil recommendationTrigger;
 
     private static final String TYPE_MOVIE = "movie";
     private static final String TYPE_SERIES = "series";
@@ -38,16 +40,18 @@ public class ReviewService {
     @Autowired
     public ReviewService(ReviewRepository reviewRepository, UserRepository userRepository,
                          MovieRepository movieRepository, SeriesRepository seriesRepository,
-                         ApplicationEventPublisher eventPublisher) {
+                         ApplicationEventPublisher eventPublisher, RecommendationTriggerUtil recommendationTrigger) {
         this.reviewRepository = reviewRepository;
         this.userRepository = userRepository;
         this.movieRepository = movieRepository;
         this.seriesRepository = seriesRepository;
         this.eventPublisher = eventPublisher;
+        this.recommendationTrigger = recommendationTrigger;
     }
 
     /**
      * Creates a review for the given userId and the movie or series based on the given type
+     *
      * @param reviewRequestDTO Data transfer object containing review information
      * @return Response DTO with created review data
      */
@@ -73,14 +77,17 @@ public class ReviewService {
         String itemTitle = getItemTitle(itemType, itemId);
         eventPublisher.publishEvent(new ReviewCreatedEvent(this, savedReview, itemTitle, itemType));
 
-        eventPublisher.publishEvent(new com.cinemate.notification.events.UserActivityEvent(this, savedReview.getUserId(), 
-            com.cinemate.notification.events.UserActivityEvent.ActivityType.REVIEW_CREATED, savedReview.getItemId()));
-        
+        eventPublisher.publishEvent(new com.cinemate.notification.events.UserActivityEvent(this, savedReview.getUserId(),
+                com.cinemate.notification.events.UserActivityEvent.ActivityType.REVIEW_CREATED, savedReview.getItemId()));
+
+        recommendationTrigger.triggerOnNewRating(userId, itemId, itemType);
+
         return new ReviewResponseDTO(savedReview);
     }
 
     /**
      * Returns the review for the given id
+     *
      * @param id Review ID
      * @return ReviewResponseDTO if found
      */
@@ -91,6 +98,7 @@ public class ReviewService {
 
     /**
      * Returns all reviews
+     *
      * @return List of ReviewResponseDTO
      */
     public List<ReviewResponseDTO> getAllReviews() {
@@ -101,6 +109,7 @@ public class ReviewService {
 
     /**
      * Returns all reviews for the given movie
+     *
      * @param movieId Movie ID
      * @return List of ReviewResponseDTO
      */
@@ -115,6 +124,7 @@ public class ReviewService {
 
     /**
      * Returns all reviews for the given series
+     *
      * @param seriesId Series ID
      * @return List of ReviewResponseDTO
      */
@@ -129,6 +139,7 @@ public class ReviewService {
 
     /**
      * Returns all reviews for the given user
+     *
      * @param userId User ID
      * @return List of ReviewResponseDTO
      */
@@ -142,6 +153,7 @@ public class ReviewService {
 
     /**
      * returns a review by the given user for the given movie
+     *
      * @param movieId
      * @param userId
      * @return ReviewResponseDTO
@@ -156,6 +168,7 @@ public class ReviewService {
 
     /**
      * returns a review by the given user for the given series
+     *
      * @param seriesId
      * @param userId
      * @return ReviewResponseDTO
@@ -170,6 +183,7 @@ public class ReviewService {
 
     /**
      * Returns the user of a review by review id
+     *
      * @param reviewId
      * @return UserResponseDTO or null if review not found
      */
@@ -189,6 +203,7 @@ public class ReviewService {
 
     /**
      * Returns the movie of a review by review id
+     *
      * @param reviewId
      * @return MovieResponseDTO or null if review not found or not a movie review
      */
@@ -208,6 +223,7 @@ public class ReviewService {
 
     /**
      * Returns the series of a review by review id
+     *
      * @param reviewId
      * @return SeriesResponseDTO or null if review not found or not a series review
      */
@@ -227,6 +243,7 @@ public class ReviewService {
 
     /**
      * Retrieves the media (movie or series) associated with a review
+     *
      * @param reviewId the ID of the review
      * @return a map containing the media type and data, or null if not found
      */
@@ -252,7 +269,8 @@ public class ReviewService {
 
     /**
      * Updates the review for the given id
-     * @param id Review ID
+     *
+     * @param id               Review ID
      * @param reviewRequestDTO Updated review data
      * @return Updated ReviewResponseDTO if found
      */
@@ -282,6 +300,7 @@ public class ReviewService {
 
     /**
      * Deletes the review for the given id
+     *
      * @param id Review ID
      * @return true if deleted, false if not found
      */
@@ -306,6 +325,7 @@ public class ReviewService {
 
     /**
      * Validates that the rating is within allowed range and follows required step pattern
+     *
      * @param rating Rating to validate
      */
     private void validateRating(double rating) {
@@ -318,6 +338,7 @@ public class ReviewService {
 
     /**
      * Validates that a user exists
+     *
      * @param userId User ID to validate
      */
     private void validateUserExists(String userId) {
@@ -328,6 +349,7 @@ public class ReviewService {
 
     /**
      * Validates that a movie exists
+     *
      * @param movieId Movie ID to validate
      */
     private void validateMovieExists(String movieId) {
@@ -338,6 +360,7 @@ public class ReviewService {
 
     /**
      * Validates that a series exists
+     *
      * @param seriesId Series ID to validate
      */
     private void validateSeriesExists(String seriesId) {
@@ -348,8 +371,9 @@ public class ReviewService {
 
     /**
      * Validates that content (movie or series) exists based on type
+     *
      * @param contentType Type of content ("movie" or "series")
-     * @param contentId ID of the content
+     * @param contentId   ID of the content
      */
     private void validateContentExists(String contentType, String contentId) {
         if (TYPE_MOVIE.equalsIgnoreCase(contentType)) {
@@ -363,8 +387,9 @@ public class ReviewService {
 
     /**
      * Calculate the rating for a content (movie or series) based on all reviews
+     *
      * @param contentType Type of content ("movie" or "series")
-     * @param contentId ID of the content
+     * @param contentId   ID of the content
      */
     private void calculateContentRating(String contentType, String contentId) {
         List<Review> reviews = reviewRepository.findByItemId(contentId);
@@ -436,13 +461,15 @@ public class ReviewService {
     private String getItemTitle(String itemType, String itemId) {
         if (TYPE_MOVIE.equals(itemType)) {
             return movieRepository.findById(itemId)
-                .map(Movie::getTitle)
-                .orElse("Unbekannter Film");
+                    .map(Movie::getTitle)
+                    .orElse("Unbekannter Film");
         } else if (TYPE_SERIES.equals(itemType)) {
             return seriesRepository.findById(itemId)
-                .map(Series::getTitle)
-                .orElse("Unbekannte Serie");
+                    .map(Series::getTitle)
+                    .orElse("Unbekannte Serie");
         }
         return "Unbekannter Inhalt";
     }
+
+
 }
