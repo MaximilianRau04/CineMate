@@ -34,6 +34,8 @@ public class RecommendationService {
     /**
      * Generates personalized recommendations for a user
      * based on Content-Based Filtering
+     * @param userId
+     * @return list of recommendations
      */
     public List<RecommendationResponseDTO> getRecommendationsForUser(String userId) {
         Optional<User> userOptional = userRepository.findById(userId);
@@ -107,6 +109,8 @@ public class RecommendationService {
 
     /**
      * Extracts preferred genres based on favorites and watched content
+     * @param user
+     * @return set of genres
      */
     private Set<String> extractUserPreferredGenres(User user) {
         Set<String> genres = new HashSet<>();
@@ -127,7 +131,9 @@ public class RecommendationService {
     }
 
     /**
-     * Extracts preferred actors
+     * Extracts preferred actors for the user
+     * @param user
+     * @return set of actorIds
      */
     private Set<String> extractUserPreferredActors(User user) {
         Set<String> actorIds = new HashSet<>();
@@ -148,7 +154,9 @@ public class RecommendationService {
     }
 
     /**
-     * Extracts preferred directors
+     * Extracts preferred directors for the user
+     * @param user
+     * @return set of directorIds
      */
     private Set<String> extractUserPreferredDirectors(User user) {
         Set<String> directorIds = new HashSet<>();
@@ -169,7 +177,13 @@ public class RecommendationService {
     }
 
     /**
-     * Calculates the content score for a movie
+     * Calculates a content score for a given movie based on preferred genres, actors, and directors.
+     *
+     * @param movie the movie for which the content score is calculated
+     * @param preferredGenres a set of genres preferred by the user
+     * @param preferredActors a set of actor IDs preferred by the user
+     * @param preferredDirectors a set of director IDs preferred by the user
+     * @return the calculated content score as a double value
      */
     private double calculateContentScore(Movie movie, Set<String> preferredGenres, 
                                        Set<String> preferredActors, Set<String> preferredDirectors) {
@@ -207,7 +221,14 @@ public class RecommendationService {
     }
 
     /**
-     * Calculates the content score for a series
+     * Calculates a content score for a series based on the user's preferences for genres,
+     * actors, and directors, as well as the series' rating.
+     *
+     * @param series the Series object containing details about the series, such as genres, actors, directors, and rating
+     * @param preferredGenres a set of genres preferred by the user
+     * @param preferredActors a set of actor IDs preferred by the user
+     * @param preferredDirectors a set of director IDs preferred by the user
+     * @return the calculated content score as a double value based on the matching criteria and weights
      */
     private double calculateContentScore(Series series, Set<String> preferredGenres, 
                                        Set<String> preferredActors, Set<String> preferredDirectors) {
@@ -245,9 +266,11 @@ public class RecommendationService {
     }
 
     /**
-     * returns all favorite and watched movies and movies in the watchlist of the user
-     * @param user
-     * @return set of movieIds
+     * Retrieves a set of unique movie IDs associated with the given user.
+     * This includes movies from the user's favorite list, watched list, and watchlist.
+     *
+     * @param user the user whose movie IDs are to be retrieved
+     * @return a set of unique movie IDs from the user's favorite, watched, and watchlist movies
      */
     private Set<String> getUserMovieIds(User user) {
         Set<String> movieIds = new HashSet<>();
@@ -258,9 +281,11 @@ public class RecommendationService {
     }
 
     /**
-     * returns all favorite and watched series and series in the watchlist of the user
-     * @param user
-     * @return set of seriesIds
+     * Retrieves a set of unique series IDs associated with a user by combining
+     * their favorite series, watched series, and series in the watchlist.
+     *
+     * @param user the user whose series IDs are to be retrieved
+     * @return a set containing unique series IDs from the user's favorites, watched list, and watchlist
      */
     private Set<String> getUserSeriesIds(User user) {
         Set<String> seriesIds = new HashSet<>();
@@ -271,12 +296,14 @@ public class RecommendationService {
     }
 
     /**
-     * generates a reason for the recommended movie
-     * @param movie
-     * @param preferredGenres
-     * @param preferredActors
-     * @param preferredDirectors
-     * @return
+     * Generates a reason describing why a specific movie might align with a user's preferences,
+     * based on genres, actors, and directors.
+     *
+     * @param movie The movie for which the reason is being generated. Contains details such as genre, actors, and directors.
+     * @param preferredGenres A set of the user's preferred genres to be matched with the movie's genres.
+     * @param preferredActors A set of the user's preferred actors to be matched with the movie's actors.
+     * @param preferredDirectors A set of the user's preferred directors to be matched with the movie's directors.
+     * @return A string describing the reason why the movie corresponds to the user's preferences, or a default message if no matches are found.
      */
     private String generateReasonForMovie(Movie movie, Set<String> preferredGenres, 
                                          Set<String> preferredActors, Set<String> preferredDirectors) {
@@ -317,6 +344,17 @@ public class RecommendationService {
         return reasons.isEmpty() ? "Basierend auf deinen Vorlieben" : String.join(" und ", reasons);
     }
 
+    /**
+     * Generates a reason string explaining why a given series is recommended based on the user's
+     * preferred genres, actors, and directors.
+     *
+     * @param series the series for which the reason is being generated
+     * @param preferredGenres the set of genres preferred by the user
+     * @param preferredActors the set of actors preferred by the user
+     * @param preferredDirectors the set of directors preferred by the user
+     * @return a string explaining the reasons for recommending the series based on matches with
+     *         the user's preferences
+     */
     private String generateReasonForSeries(Series series, Set<String> preferredGenres, 
                                           Set<String> preferredActors, Set<String> preferredDirectors) {
         List<String> reasons = new ArrayList<>();
@@ -357,7 +395,12 @@ public class RecommendationService {
     }
 
     /**
-     * Returns popular/trending content based on ratings and popularity
+     * Fetches a list of trending recommendations, including movies and series,
+     * based on a weighted score derived from their ratings and number of reviews.
+     * The returned list combines top-rated movies and series, converts them into
+     *
+     * @return A list of {@link RecommendationResponseDTO} objects representing
+     *         trending movies and series.
      */
     public List<RecommendationResponseDTO> getTrendingRecommendations() {
         List<RecommendationResponseDTO> trending = new ArrayList<>();
@@ -409,7 +452,12 @@ public class RecommendationService {
     }
 
     /**
-     * Returns recommendations based on a specific genre
+     * Retrieves a list of recommendations based on the specified genre.
+     * The recommendations include both movies and series, ranked by their ratings.
+     *
+     * @param genre the genre used to filter the movies and series recommendations
+     * @return a list of {@link RecommendationResponseDTO} containing the recommended movies
+     *         and series for the specified genre
      */
     public List<RecommendationResponseDTO> getRecommendationsByGenre(String genre) {
         List<RecommendationResponseDTO> recommendations = new ArrayList<>();
@@ -455,8 +503,14 @@ public class RecommendationService {
     }
 
     /**
-     * Collaborative Filtering: Recommendations based on similar users
-     * (not yet implemented)
+     * Generates a list of recommendations based on a collaborative filtering approach.
+     * Finds users with similar preferences to the provided user and recommends their favorite
+     * movies and series that the current user has not yet engaged with.
+     *
+     * @param userId the unique identifier of the user for whom the recommendations are to be generated
+     * @return a list of {@code RecommendationResponseDTO} objects containing recommended movies
+     *         and series along with their details and scores; returns an empty list if no similar
+     *         users or recommendations are found
      */
     public List<RecommendationResponseDTO> getCollaborativeRecommendations(String userId) {
         // Here a Collaborative Filtering algorithm could be implemented that finds users with similar preferences and recommends their favorites
@@ -539,7 +593,11 @@ public class RecommendationService {
     }
 
     /**
-     * finds users with similar preferences (Jaccard Similarity)
+     * Finds and returns a list of users similar to the given user based on shared interests such as movies and series.
+     *
+     * @param currentUser the user for whom similar users are being searched
+     * @param allUsers the list of all available users to compare against
+     * @return a list of up to 5 users who are most similar to the current user, sorted in descending order of similarity
      */
     private List<User> findSimilarUsers(User currentUser, List<User> allUsers) {
         Map<User, Double> similarities = new HashMap<>();
@@ -569,7 +627,13 @@ public class RecommendationService {
     }
 
     /**
-     * Calculates Jaccard Similarity between two sets
+     * Calculates the Jaccard similarity between two sets of strings.
+     * The Jaccard similarity is defined as the size of the intersection
+     * divided by the size of the union of the two sets.
+     *
+     * @param set1 the first set of strings
+     * @param set2 the second set of strings
+     * @return the Jaccard similarity as a double value. Returns 0.0 if both sets are empty.
      */
     private double calculateJaccardSimilarity(Set<String> set1, Set<String> set2) {
         if (set1.isEmpty() && set2.isEmpty()) return 0.0;
@@ -584,7 +648,13 @@ public class RecommendationService {
     }
 
     /**
-     * returns hybrid recommendations (Content-based and Collaborative Filtering)
+     * Generates a hybrid recommendation list by combining content-based and collaborative filtering approaches
+     * with specific weightings. Content-based recommendations are given a 70% weighting, while
+     * collaborative recommendations are weighted at 30%.
+     *
+     * @param userId The unique identifier of the user for whom the hybrid recommendations are being generated.
+     * @return A list of RecommendationResponseDTO objects representing the hybrid recommendations, sorted
+     *         by their scores in descending order and limited to 15 items.
      */
     public List<RecommendationResponseDTO> getHybridRecommendations(String userId) {
         List<RecommendationResponseDTO> contentBased = getRecommendationsForUser(userId);
@@ -623,7 +693,12 @@ public class RecommendationService {
     }
 
     /**
-     * smart-recommendations: recommendations based on the time of the day and user behavior
+     * Provides smart content recommendations for a user based on the time of day.
+     * The method leverages different recommendation strategies to suggest content
+     * aligning with the user's potential mood or preference for a specific time window.
+     *
+     * @param userId a unique identifier for the user requesting recommendations
+     * @return a list of RecommendationResponseDTO objects containing the smart recommendations for the user
      */
     public List<RecommendationResponseDTO> getSmartRecommendations(String userId) {
         int hour = java.time.LocalTime.now().getHour();
@@ -645,7 +720,14 @@ public class RecommendationService {
     }
 
     /**
-     * Mood-based recommendations
+     * Provides a list of recommended movies and series based on the user's mood and preferences.
+     * The recommendations are filtered by mood-specific genres and exclude content the user has already watched.
+     *
+     * @param userId The unique identifier of the user for whom recommendations are generated.
+     * @param mood The mood of the user, which determines the genre and tone of content to be recommended.
+     *             Supported moods include "light", "evening", and "night".
+     * @return A list of recommendations containing movies and series tailored to the user's mood,
+     *         or an empty list if the user is not found or there are no recommendations available.
      */
     private List<RecommendationResponseDTO> getRecommendationsByMood(String userId, String mood) {
         List<String> moodGenres;
