@@ -2,6 +2,7 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import NotificationSystem from "../notifications/NotificationSystem";
+import { LogOut } from 'lucide-react';
 
 const Header = () => {
   const navigate = useNavigate();
@@ -23,7 +24,7 @@ const Header = () => {
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm sticky-top">
       <div className="container">
-        <Link className="navbar-brand fw-bold text-primary" to="/explore">
+        <Link className="navbar-brand fw-bold text-primary" to="/explore" style={{ marginTop: '8px' }}>
           🎬 CineMate
         </Link>
 
@@ -32,12 +33,13 @@ const Header = () => {
           type="button"
           data-bs-toggle="collapse"
           data-bs-target="#navbarNav"
+          style={{ marginTop: '8px' }}
         >
           <span className="navbar-toggler-icon"></span>
         </button>
 
         {/* Navbar links for logged-in users */}
-        <div className="collapse navbar-collapse" id="navbarNav">
+        <div className="collapse navbar-collapse" id="navbarNav" style={{ marginTop: '8px' }}>
           {isLoggedIn && (
             <ul className="navbar-nav me-auto">
               <li className="nav-item">
@@ -65,21 +67,34 @@ const Header = () => {
                   Empfehlungen
                 </Link>
               </li>
-              {/* Admin Panel for admins */}
-              {isAdmin && (
-                <li className="nav-item">
-                  <Link className="nav-link text-warning" to="/admin">
-                    <i className="fas fa-shield-alt me-1"></i>
-                    Admin-Panel
-                  </Link>
-                </li>
-              )}
             </ul>
           )}
 
           {isLoggedIn && (
             <div className="d-flex align-items-center">
               <NotificationSystem userId={userId} />
+              
+              {/* Admin Panel for admins */}
+              {isAdmin && (
+                <Link 
+                  className="text-warning text-decoration-none me-3 d-flex align-items-center" 
+                  to="/admin"
+                  style={{ 
+                    fontSize: '1.1rem',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.filter = 'drop-shadow(0 0 5px rgba(255, 193, 7, 0.5))';
+                    e.target.style.transform = 'scale(1.05)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.filter = 'none';
+                    e.target.style.transform = 'scale(1)';
+                  }}
+                  title="Admin Panel"
+                >
+                </Link>
+              )}
               
               {/* Show user role badge */}
               {userRole && (
@@ -88,10 +103,16 @@ const Header = () => {
                 </span>
               )}
               <button
-                className="btn btn-sm btn-outline-light"
+                className="btn btn-sm btn-outline-light d-flex align-items-center"
                 onClick={handleLogout}
+                style={{ 
+                  borderRadius: '8px',
+                  padding: '6px 12px',
+                  transition: 'all 0.2s ease'
+                }}
+                title="Abmelden"
               >
-                Logout
+                <LogOut size={18} />
               </button>
             </div>
           )}
