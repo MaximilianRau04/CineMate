@@ -1,0 +1,210 @@
+.streaming-availability {
+  margin: 20px 0;
+}
+
+.streaming-providers {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.streaming-provider-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  overflow: hidden;
+}
+
+.streaming-provider-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.provider-header {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background-color 0.2s ease;
+}
+
+.provider-header:hover {
+  background-color: #f8f9fa;
+}
+
+.provider-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.provider-logo-container {
+  position: relative;
+  width: 40px;
+  height: 40px;
+}
+
+.provider-logo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  border-radius: 8px;
+  background: #f8f9fa;
+  padding: 4px;
+}
+
+.provider-logo-fallback {
+  width: 40px;
+  height: 40px;
+  background: #e9ecef;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6c757d;
+  font-size: 18px;
+}
+
+.provider-name {
+  font-weight: 600;
+  font-size: 16px;
+  color: #2c3e50;
+}
+
+.availability-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.availability-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.availability-badge.subscription {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  border: 1px solid #bbdefb;
+}
+
+.availability-badge.rental {
+  background-color: #fff3e0;
+  color: #f57c00;
+  border: 1px solid #ffcc02;
+}
+
+.availability-badge.purchase {
+  background-color: #e8f5e8;
+  color: #388e3c;
+  border: 1px solid #c8e6c9;
+}
+
+.availability-badge.free {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+  border: 1px solid #e1bee7;
+}
+
+.availability-badge.free_with_ads {
+  background-color: #fce4ec;
+  color: #c2185b;
+  border: 1px solid #f8bbd9;
+}
+
+.availability-text {
+  font-weight: 600;
+}
+
+.availability-price {
+  margin-left: 4px;
+  font-weight: 700;
+}
+
+.availability-quality {
+  margin-left: 4px;
+  font-size: 10px;
+  background-color: rgba(0, 0, 0, 0.1);
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+
+.provider-actions {
+  padding: 0 16px 16px 16px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.provider-actions .btn {
+  border-radius: 20px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.provider-actions .btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+}
+
+.streaming-info {
+  border-top: 1px solid #e9ecef;
+  padding-top: 12px;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .provider-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .availability-options {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  
+  .availability-badge {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+  
+  .provider-logo {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .provider-name {
+    font-size: 14px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .streaming-provider-card {
+    background: #2c3e50;
+    border-color: #34495e;
+    color: white;
+  }
+  
+  .provider-header:hover {
+    background-color: #34495e;
+  }
+  
+  .provider-name {
+    color: white;
+  }
+  
+  .streaming-info {
+    border-color: #34495e;
+  }
+}

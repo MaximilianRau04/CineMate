@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import './RecommendationWidget.css';
+import '../../assets/recommendations-widget.css';
 
 const RecommendationWidget = ({ userId, type = 'personal', maxItems = 4, title = 'Empfehlungen für dich' }) => {
   const [recommendations, setRecommendations] = useState([]);

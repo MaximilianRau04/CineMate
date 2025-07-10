@@ -1,0 +1,65 @@
+/* Streaming Provider Management */
+.streaming-provider-management {
+  padding: 20px;
+}
+
+.streaming-provider-management .table {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.streaming-provider-management .table th {
+  background-color: #f8f9fa;
+  border-top: none;
+  font-weight: 600;
+  color: #495057;
+}
+
+.streaming-provider-management .btn-group .btn {
+  border-radius: 4px;
+}
+
+.streaming-provider-management .btn-group .btn:not(:last-child) {
+  margin-right: 4px;
+}
+
+/* Modal improvements */
+.streaming-provider-management .modal-content {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.streaming-provider-management .modal-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  border-radius: 12px 12px 0 0;
+}
+
+.streaming-provider-management .form-check {
+  padding: 8px 0;
+}
+
+.streaming-provider-management .form-check-input:checked {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+  .streaming-provider-management .table-responsive {
+    font-size: 14px;
+  }
+  
+  .streaming-provider-management .btn-group {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .streaming-provider-management .btn-group .btn {
+    margin-right: 0;
+    margin-bottom: 4px;
+  }
+}

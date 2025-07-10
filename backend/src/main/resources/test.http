@@ -428,3 +428,26 @@ GET http://localhost:8080/api/recommendations/user/686164a973f46f014d5448f1
 
 POST http://localhost:8080/api/recommendations/notify/686164a973f46f014d5448f1
 Content-Type: application/json
+###
+GET http://localhost:8080/api/streaming/providers
+###
+POST http://localhost:8080/api/streaming/providers
+Content-Type: application/json
+
+{
+  "name": "Disney+",
+  "displayName": "Disney+",
+  "logoUrl": "https://img.icons8.com/color/48/disney-plus.png",
+  "websiteUrl": "https://www.disneyplus.com",
+  "supportedCountries": ["US", "CA", "GB", "DE", "FR", "ES", "IT", "NL", "BE", "LU", "AT", "CH", "IE", "DK", "SE", "NO", "FI", "IS"],
+  "isActive": true
+}
+###
+DELETE http://localhost:8080/api/streaming/providers/687007403554396bb648df7e
+###
+PATCH http://localhost:8080/api/streaming/providers/686ff5aa417f207dacfe7179/toggle
+Content-Type: application/json
+
+{
+  "active": true
+}

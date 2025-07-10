@@ -70,12 +70,8 @@ const Header = () => {
             </ul>
           )}
 
-          {isLoggedIn && (
-            <div className="d-flex align-items-center">
-              <NotificationSystem userId={userId} />
-              
-              {/* Admin Panel for admins */}
-              {isAdmin && (
+          {/* Admin Panel for admins */}
+              {isLoggedIn && isAdmin && (
                 <Link 
                   className="text-warning text-decoration-none me-3 d-flex align-items-center" 
                   to="/admin"
@@ -93,8 +89,14 @@ const Header = () => {
                   }}
                   title="Admin Panel"
                 >
+                  <i className="bi bi-gear-fill me-1"></i>
+                  Admin-Panel
                 </Link>
               )}
+
+          {isLoggedIn && (
+            <div className="d-flex align-items-center">
+              <NotificationSystem userId={userId} />
               
               {/* Show user role badge */}
               {userRole && (

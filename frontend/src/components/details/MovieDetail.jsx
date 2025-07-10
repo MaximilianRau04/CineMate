@@ -7,6 +7,7 @@ import RatingSection from "./sections/RatingSection";
 import CastSection from "./sections/CastSection";
 import ReviewSection from "./sections/ReviewSection";
 import EditReviewModal from "./sections/EditReviewModal";
+import StreamingAvailability from "../streaming/StreamingAvailability";
 
 const MovieDetail = () => {
   const { mediaId, media, isLoading, error, userId, currentUser, actors, director, castLoading } =
@@ -90,6 +91,14 @@ const MovieDetail = () => {
           favoriting={addingToFavorites}
           onAddToFavorites={addToFavorites}
           renderStars={renderStars}
+        />
+      </div>
+
+      <div className="mt-4">
+        <StreamingAvailability 
+          mediaId={mediaId} 
+          mediaType="movies" 
+          userRegion="DE" 
         />
       </div>
 

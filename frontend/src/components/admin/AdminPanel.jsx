@@ -9,6 +9,7 @@ import Modal from "./modals/Modal";
 import { ContentManagement, SeasonsManagement, EpisodesManagement } from "./management/ContentManagement";
 import UserManagement from "./management/UserManagement";
 import CastManagement from "./management/CastManagement";
+import StreamingProviderManagement from "./management/StreamingProviderManagement";
 import AdminNotificationPanel from "./AdminNotificationPanel";
 
 import { SeasonForm, EpisodeForm, ContentForm } from "./forms/ContentForms";
@@ -356,6 +357,7 @@ const AdminPanel = () => {
                 { key: 'users', icon: FaUsers, label: 'Benutzerverwaltung' },
                 { key: 'moderation', icon: FaComments, label: 'Moderation' },
                 { key: 'cast', icon: FaUserTie, label: 'Schauspieler & Regisseure' },
+                { key: 'streaming', icon: FaFilm, label: 'Streaming-Anbieter' },
                 { key: 'notifications', icon: FaBell, label: 'Benachrichtigungen' }
               ].map(({ key, icon: Icon, label }) => (
                 <button
@@ -439,6 +441,8 @@ const AdminPanel = () => {
               loadData={loadData}
             />
           )}
+
+          {activeTab === 'streaming' && <StreamingProviderManagement />}
 
           {activeTab === 'notifications' && <AdminNotificationPanel />}
         </div>

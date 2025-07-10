@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import './RecommendationsPage.css';
+import '../../assets/recommendations-page.css';
 
 const RecommendationsPage = () => {
   const [recommendations, setRecommendations] = useState([]);

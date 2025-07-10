@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import StreamingIndicator from "../streaming/StreamingIndicator";
 
 const MediaList = ({ title, items, type }) => {
   if (items.length === 0) return null;
@@ -25,7 +26,12 @@ const MediaCard = ({ item, type }) => {
     <div className="col-md-6 mb-4">
       <div className="card h-100 shadow-sm">
         <div className="row g-0">
-          <div className="col-auto">
+          <div className="col-auto position-relative">
+            <StreamingIndicator 
+              mediaId={item.id} 
+              mediaType={type === "movie" ? "movies" : "series"} 
+              maxProviders={2}
+            />
             <img
               src={item.posterUrl}
               alt={item.title}
