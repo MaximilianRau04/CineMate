@@ -21,7 +21,6 @@ const StreamingAvailability = ({ mediaId, mediaType, userRegion = 'DE' }) => {
       console.log('Fetching streaming availability for:', { mediaId, mediaType, userRegion });
       
       const url = `http://localhost:8080/api/streaming/availability/${mediaType}/${mediaId}`;
-      console.log('API URL:', url);
       
       const response = await fetch(url);
       

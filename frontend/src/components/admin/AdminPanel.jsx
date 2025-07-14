@@ -11,7 +11,7 @@ import UserManagement from "./management/UserManagement";
 import CastManagement from "./management/CastManagement";
 import StreamingProviderManagement from "./management/StreamingProviderManagement";
 import StreamingAvailabilityManagement from "./management/StreamingAvailabilityManagement";
-import AdminNotificationPanel from "./management/AdminNotificationPanel";
+import AdminNotificationPanel from "./management/NotificationManagement";
 
 import { SeasonForm, EpisodeForm, ContentForm } from "./forms/ContentForms";
 
