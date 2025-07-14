@@ -16,23 +16,26 @@ const UserManagement = ({ users, onDeleteUser }) => {
       <div className="card mb-4">
         <div className="card-body">
           <div className="d-flex justify-content-end mb-3">
-            <div className="btn-group">
+            <div className="btn-group" role="group" aria-label="User filter">
               <button 
-                className={`btn ${filterRole === 'all' ? 'btn-primary' : 'btn-outline-primary'}`}
+                className={`btn ${filterRole === 'all' ? 'btn-primary' : 'btn-light border'}`}
                 onClick={() => setFilterRole('all')}
               >
+                <i className="bi bi-people me-1"></i>
                 Alle
               </button>
               <button 
-                className={`btn ${filterRole === 'USER' ? 'btn-primary' : 'btn-outline-primary'}`}
+                className={`btn ${filterRole === 'USER' ? 'btn-primary' : 'btn-light border'}`}
                 onClick={() => setFilterRole('USER')}
               >
+                <i className="bi bi-person me-1"></i>
                 User
               </button>
               <button 
-                className={`btn ${filterRole === 'ADMIN' ? 'btn-primary' : 'btn-outline-primary'}`}
+                className={`btn ${filterRole === 'ADMIN' ? 'btn-primary' : 'btn-light border'}`}
                 onClick={() => setFilterRole('ADMIN')}
               >
+                <i className="bi bi-shield-check me-1"></i>
                 Admin
               </button>
             </div>

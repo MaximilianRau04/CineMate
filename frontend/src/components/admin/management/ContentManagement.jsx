@@ -3,7 +3,7 @@ import { formatDate } from "../utils/utils";
 import ContentTable from "../tables/ContentTable";
 
 {/* ContentManagement for movies and series*/}
-export const ContentManagement = ({ data, onAdd, onEdit, onDelete, onSeriesSeasons }) => (
+export const ContentManagement = ({ data, onAdd, onEdit, onDelete, onSeriesSeasons, onManageStreaming }) => (
   <div>
     <div className="d-flex justify-content-between align-items-center mb-4">
       <h4>Content Management</h4>
@@ -24,6 +24,7 @@ export const ContentManagement = ({ data, onAdd, onEdit, onDelete, onSeriesSeaso
               type="movie"
               onEdit={onEdit}
               onDelete={onDelete}
+              onManageStreaming={onManageStreaming}
             />
           </div>
         </div>
@@ -39,6 +40,7 @@ export const ContentManagement = ({ data, onAdd, onEdit, onDelete, onSeriesSeaso
               onEdit={onEdit}
               onDelete={onDelete}
               onSeriesSeasons={onSeriesSeasons}
+              onManageStreaming={onManageStreaming}
             />
           </div>
         </div>
@@ -84,7 +86,7 @@ export const EpisodesManagement = ({ series, season, episodes, onAddEpisode, onE
                   <td>{formatDate(episode.releaseDate)}</td>
                   <td>
                     <button
-                      className="btn btn-sm btn-outline-primary me-2"
+                      className="btn btn-primary btn-sm me-2"
                       onClick={() => onEditEpisode(episode)}
                     >
                       <FaEdit />
@@ -155,7 +157,7 @@ export const SeasonsManagement = ({ series, seasons, onAddSeason, onEditSeason, 
                       Episoden
                     </button>
                     <button
-                      className="btn btn-sm btn-outline-primary me-2"
+                      className="btn btn-primary btn-sm me-2"
                       onClick={() => onEditSeason(season)}
                     >
                       <FaEdit />

@@ -74,7 +74,7 @@ const PersonList = ({
                       <FaLink />
                     </button>
                     <button
-                      className="btn btn-sm btn-outline-primary me-1"
+                      className="btn btn-primary btn-sm me-1"
                       onClick={() => onEdit(person)}
                       title="Bearbeiten"
                     >

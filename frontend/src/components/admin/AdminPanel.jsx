@@ -10,7 +10,8 @@ import { ContentManagement, SeasonsManagement, EpisodesManagement } from "./mana
 import UserManagement from "./management/UserManagement";
 import CastManagement from "./management/CastManagement";
 import StreamingProviderManagement from "./management/StreamingProviderManagement";
-import AdminNotificationPanel from "./AdminNotificationPanel";
+import StreamingAvailabilityManagement from "./management/StreamingAvailabilityManagement";
+import AdminNotificationPanel from "./management/AdminNotificationPanel";
 
 import { SeasonForm, EpisodeForm, ContentForm } from "./forms/ContentForms";
 
@@ -41,7 +42,8 @@ const AdminPanel = () => {
     addSeason: false,
     editSeason: false,
     addEpisode: false,
-    editEpisode: false
+    editEpisode: false,
+    manageStreaming: false
   });
 
   // Form states
@@ -56,7 +58,8 @@ const AdminPanel = () => {
     newSeason: { seasonNumber: "", trailerUrl: "" },
     editingSeason: null,
     newEpisode: { episodeNumber: "", title: "", description: "", duration: "", releaseDate: "", posterUrl: "" },
-    editingEpisode: null
+    editingEpisode: null,
+    streamingManagementItem: null
   });
 
   const [viewMode, setViewMode] = useState('content');
@@ -330,6 +333,19 @@ const AdminPanel = () => {
     deleteUser(userId);
   };
 
+  /**
+   * Handles opening the streaming availability management for a media item
+   * @param {*} item 
+   * @param {*} type 
+   */
+  const handleManageStreaming = (item, type) => {
+    setForms(prev => ({
+      ...prev,
+      streamingManagementItem: { ...item, type: type === 'series' ? 'series' : 'movie' }
+    }));
+    setModals(prev => ({ ...prev, manageStreaming: true }));
+  };
+
   if (loading) {
     return (
       <div className="container mt-4">
@@ -383,6 +399,7 @@ const AdminPanel = () => {
               onEdit={handleEditContent}
               onDelete={handleDeleteContent}
               onSeriesSeasons={handleSeriesSeasons}
+              onManageStreaming={handleManageStreaming}
             />
           )}
 
@@ -540,6 +557,25 @@ const AdminPanel = () => {
           />
         )}
       </Modal>
+
+      {/* Streaming Availability Management Modal */}
+      {modals.manageStreaming && forms.streamingManagementItem && (
+        <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog modal-xl">
+            <div className="modal-content">
+              <StreamingAvailabilityManagement
+                mediaId={forms.streamingManagementItem.id}
+                mediaType={forms.streamingManagementItem.type}
+                mediaTitle={forms.streamingManagementItem.title}
+                onClose={() => {
+                  setModals(prev => ({ ...prev, manageStreaming: false }));
+                  setForms(prev => ({ ...prev, streamingManagementItem: null }));
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

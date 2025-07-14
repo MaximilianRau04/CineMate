@@ -106,6 +106,16 @@ public class StreamingController {
     }
     
     /**
+     * Cleanup orphaned streaming availability entries
+     * @return Number of cleaned up entries
+     */
+    @DeleteMapping("/providers/cleanup-orphaned")
+    public ResponseEntity<String> cleanupOrphanedAvailabilities() {
+        int cleanedCount = providerService.cleanupOrphanedAvailabilities();
+        return ResponseEntity.ok("Bereinigt: " + cleanedCount + " verwaiste Einträge");
+    }
+    
+    /**
      * Get streaming availability for a specific media
      * @param mediaId
      * @param mediaType
@@ -198,26 +208,5 @@ public class StreamingController {
     @DeleteMapping("/availability/{mediaType}/{mediaId}")
     public ResponseEntity<Void> deleteAllAvailabilityForMedia(@PathVariable String mediaId, @PathVariable String mediaType) {
         return availabilityService.deleteAllAvailabilityForMedia(mediaId, mediaType);
-    }
-    
-    /**
-     * Clean up availability records with null providers
-     * This is a maintenance endpoint
-     * @return ResponseEntity
-     */
-    @PostMapping("/availability/cleanup")
-    public ResponseEntity<String> cleanupNullProviders() {
-        availabilityService.cleanupNullProviders();
-        return ResponseEntity.ok("Cleanup completed successfully");
-    }
-    
-    /**
-     * Reset all providers to default values
-     * This is a maintenance endpoint
-     * @return ResponseEntity
-     */
-    @PostMapping("/providers/reset")
-    public ResponseEntity<String> resetProviders() {
-        return providerService.resetToDefaultProviders();
     }
 }

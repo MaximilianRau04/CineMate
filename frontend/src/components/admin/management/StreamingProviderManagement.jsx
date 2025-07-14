@@ -53,12 +53,12 @@ const StreamingProviderManagement = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const url = editingProvider 
+      const url = editingProvider
         ? `http://localhost:8080/api/streaming/providers/${editingProvider.id}`
         : 'http://localhost:8080/api/streaming/providers';
-      
+
       const method = editingProvider ? 'PUT' : 'POST';
-      
+
       const response = await fetch(url, {
         method,
         headers: {
@@ -141,7 +141,13 @@ const StreamingProviderManagement = () => {
         throw new Error('Status konnte nicht geändert werden');
       }
 
-      await fetchProviders();
+      const updatedProvider = await response.json();
+
+      setProviders(prevProviders =>
+        prevProviders.map(provider =>
+          provider.id === providerId ? updatedProvider : provider
+        )
+      );
     } catch (err) {
       console.error('Fehler beim Ändern des Status:', err);
       setError(err.message);
@@ -198,7 +204,7 @@ const StreamingProviderManagement = () => {
           <i className="bi bi-tv me-2"></i>
           Streaming-Anbieter Verwaltung
         </h4>
-        <button 
+        <button
           className="btn btn-primary"
           onClick={() => setShowModal(true)}
         >
@@ -231,15 +237,15 @@ const StreamingProviderManagement = () => {
               <tr key={provider.id}>
                 <td>
                   {provider.logoUrl ? (
-                    <img 
-                      src={provider.logoUrl} 
+                    <img
+                      src={provider.logoUrl}
                       alt={provider.name}
                       style={{ width: '40px', height: '40px', objectFit: 'contain' }}
                       onError={(e) => e.target.style.display = 'none'}
                     />
                   ) : (
                     <div className="bg-light d-flex align-items-center justify-content-center"
-                         style={{ width: '40px', height: '40px', borderRadius: '4px' }}>
+                      style={{ width: '40px', height: '40px', borderRadius: '4px' }}>
                       <i className="bi bi-tv text-muted"></i>
                     </div>
                   )}
@@ -273,25 +279,25 @@ const StreamingProviderManagement = () => {
                   </div>
                 </td>
                 <td>
-                  <span className={`badge ${provider.isActive ? 'bg-success' : 'bg-danger'}`}>
-                    {provider.isActive ? 'Aktiv' : 'Inaktiv'}
+                  <span className={`badge ${provider.active ? 'bg-success' : 'bg-danger'}`}>
+                    {provider.active ? 'Aktiv' : 'Inaktiv'}
                   </span>
                 </td>
                 <td>
                   <div className="btn-group" role="group">
                     <button
-                      className="btn btn-outline-primary btn-sm"
+                      className="btn btn-primary btn-sm"
                       onClick={() => handleEdit(provider)}
                       title="Bearbeiten"
                     >
                       <i className="bi bi-pencil"></i>
                     </button>
                     <button
-                      className={`btn btn-outline-${provider.isActive ? 'warning' : 'success'} btn-sm`}
+                      className={`btn btn-outline-${provider.active ? 'warning' : 'success'} btn-sm`}
                       onClick={() => handleToggleStatus(provider.id)}
-                      title={provider.isActive ? 'Deaktivieren' : 'Aktivieren'}
+                      title={provider.active ? 'Deaktivieren' : 'Aktivieren'}
                     >
-                      <i className={`bi bi-${provider.isActive ? 'pause' : 'play'}`}></i>
+                      <i className={`bi bi-${provider.active ? 'pause' : 'play'}`}></i>
                     </button>
                     <button
                       className="btn btn-outline-danger btn-sm"
@@ -341,7 +347,7 @@ const StreamingProviderManagement = () => {
                       required
                     />
                   </div>
-                  
+
                   <div className="mb-3">
                     <label htmlFor="logoUrl" className="form-label">Logo URL</label>
                     <input
@@ -353,7 +359,7 @@ const StreamingProviderManagement = () => {
                       onChange={handleInputChange}
                     />
                   </div>
-                  
+
                   <div className="mb-3">
                     <label htmlFor="websiteUrl" className="form-label">Website URL</label>
                     <input
@@ -365,7 +371,7 @@ const StreamingProviderManagement = () => {
                       onChange={handleInputChange}
                     />
                   </div>
-                  
+
                   <div className="mb-3">
                     <label htmlFor="country" className="form-label">Land</label>
                     <select
@@ -385,7 +391,7 @@ const StreamingProviderManagement = () => {
                       <option value="CH">Schweiz</option>
                     </select>
                   </div>
-                  
+
                   <div className="mb-3">
                     <label className="form-label">Verfügbarkeitsoptionen</label>
                     <div className="form-check">

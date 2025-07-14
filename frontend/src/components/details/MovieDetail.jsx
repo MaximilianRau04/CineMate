@@ -97,8 +97,8 @@ const MovieDetail = () => {
       <div className="mt-4">
         <StreamingAvailability 
           mediaId={mediaId} 
-          mediaType="movies" 
-          userRegion="DE" 
+          mediaType="movie" 
+          userRegion="ALL" 
         />
       </div>
 

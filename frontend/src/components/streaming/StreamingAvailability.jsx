@@ -18,17 +18,19 @@ const StreamingAvailability = ({ mediaId, mediaType, userRegion = 'DE' }) => {
   const fetchStreamingAvailability = async () => {
     try {
       setLoading(true);
-      // Convert frontend mediaType to backend format
-      const backendMediaType = mediaType === 'movies' ? 'movie' : 'series';
-      const response = await fetch(
-        `http://localhost:8080/api/streaming/availability/${backendMediaType}/${mediaId}/region/${userRegion}`
-      );
+      console.log('Fetching streaming availability for:', { mediaId, mediaType, userRegion });
+      
+      const url = `http://localhost:8080/api/streaming/availability/${mediaType}/${mediaId}`;
+      console.log('API URL:', url);
+      
+      const response = await fetch(url);
       
       if (!response.ok) {
         throw new Error('Streaming-Verfügbarkeiten konnten nicht geladen werden');
       }
       
       const data = await response.json();
+
       setAvailabilities(data);
       setError(null);
     } catch (err) {

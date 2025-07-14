@@ -9,28 +9,18 @@ public class StreamingProvider {
     
     @Id
     private String id;
-    
-    @Field("name")
     private String name;
-    
     @Field("logo_url")
     private String logoUrl;
-    
     @Field("website_url")
     private String websiteUrl;
-    
-    @Field("country")
     private String country;
-    
     @Field("subscription_required")
     private boolean subscriptionRequired;
-    
     @Field("rental_available")
     private boolean rentalAvailable;
-    
     @Field("purchase_available")
     private boolean purchaseAvailable;
-    
     @Field("active")
     private boolean active = true;
 

@@ -1,7 +1,7 @@
 import { FaTrash, FaEdit } from "react-icons/fa";
 import { formatDate } from "../utils/utils";
 
-const ContentTable = ({ items, type, onEdit, onDelete, onSeriesSeasons }) => (
+const ContentTable = ({ items, type, onEdit, onDelete, onSeriesSeasons, onManageStreaming }) => (
   <div className="table-responsive">
     <table className="table">
       <thead>
@@ -32,7 +32,14 @@ const ContentTable = ({ items, type, onEdit, onDelete, onSeriesSeasons }) => (
                   </button>
                 )}
                 <button
-                  className="btn btn-sm btn-outline-primary me-2"
+                  className="btn btn-sm btn-outline-secondary me-2"
+                  onClick={() => onManageStreaming(item, type)}
+                  title="Streaming-Verfügbarkeiten verwalten"
+                >
+                  <i className="bi bi-tv"></i>
+                </button>
+                <button
+                  className="btn btn-primary btn-sm me-2"
                   onClick={() => onEdit(item, type)}
                 >
                   <FaEdit />

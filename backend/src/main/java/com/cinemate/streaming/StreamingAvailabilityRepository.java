@@ -17,4 +17,6 @@ public interface StreamingAvailabilityRepository extends MongoRepository<Streami
     List<StreamingAvailability> findByAvailabilityType(AvailabilityType availabilityType);
     
     void deleteByMediaIdAndMediaType(String mediaId, MediaType mediaType);
+    
+    void deleteByProviderId(String providerId);
 }

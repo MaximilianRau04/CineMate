@@ -428,8 +428,8 @@ GET http://localhost:8080/api/recommendations/user/686164a973f46f014d5448f1
 
 POST http://localhost:8080/api/recommendations/notify/686164a973f46f014d5448f1
 Content-Type: application/json
-###
-GET http://localhost:8080/api/streaming/providers
+###2
+GET http://localhost:8080/api/movies
 ###
 POST http://localhost:8080/api/streaming/providers
 Content-Type: application/json
@@ -445,9 +445,12 @@ Content-Type: application/json
 ###
 DELETE http://localhost:8080/api/streaming/providers/687007403554396bb648df7e
 ###
-PATCH http://localhost:8080/api/streaming/providers/686ff5aa417f207dacfe7179/toggle
+PATCH http://localhost:8080/api/streaming/providers/6875325553bf666aa496b6da/toggle
 Content-Type: application/json
 
 {
   "active": true
 }
+###
+
+GET http://localhost:8080/api/streaming/availability/movie/686169d8179314698a216b0c

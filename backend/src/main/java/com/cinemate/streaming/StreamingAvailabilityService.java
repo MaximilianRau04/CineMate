@@ -33,7 +33,7 @@ public class StreamingAvailabilityService {
         List<StreamingAvailability> availabilities = availabilityRepository.findByMediaIdAndMediaType(mediaId, type);
         
         List<StreamingAvailabilityResponseDTO> response = availabilities.stream()
-                .filter(availability -> availability.getProvider() != null) // Filter out null providers
+                .filter(availability -> availability.getProvider() != null) // Filtere null-Provider heraus
                 .map(StreamingAvailabilityResponseDTO::new)
                 .collect(Collectors.toList());
         
@@ -54,7 +54,7 @@ public class StreamingAvailabilityService {
                 .findByMediaIdAndMediaTypeAndRegion(mediaId, type, region);
         
         List<StreamingAvailabilityResponseDTO> response = availabilities.stream()
-                .filter(availability -> availability.getProvider() != null) // Filter out null providers
+                .filter(availability -> availability.getProvider() != null) // Filtere null-Provider heraus
                 .map(StreamingAvailabilityResponseDTO::new)
                 .collect(Collectors.toList());
         
@@ -114,11 +114,6 @@ public class StreamingAvailabilityService {
             return ResponseEntity.notFound().build();
         }
         
-        // Check if provider is null before proceeding
-        if (availability.getProvider() == null) {
-            return ResponseEntity.badRequest().build();
-        }
-        
         if (price != null) availability.setPrice(price);
         if (currency != null) availability.setCurrency(currency);
         if (quality != null) availability.setQuality(quality);
@@ -153,21 +148,5 @@ public class StreamingAvailabilityService {
         MediaType type = MediaType.valueOf(mediaType.toUpperCase());
         availabilityRepository.deleteByMediaIdAndMediaType(mediaId, type);
         return ResponseEntity.noContent().build();
-    }
-    
-    /**
-     * Clean up availability records with null providers
-     * This should be called as a maintenance operation
-     */
-    public void cleanupNullProviders() {
-        List<StreamingAvailability> allAvailabilities = availabilityRepository.findAll();
-        List<StreamingAvailability> toDelete = allAvailabilities.stream()
-                .filter(availability -> availability.getProvider() == null)
-                .collect(Collectors.toList());
-        
-        if (!toDelete.isEmpty()) {
-            availabilityRepository.deleteAll(toDelete);
-            System.out.println("Cleaned up " + toDelete.size() + " availability records with null providers.");
-        }
     }
 }

@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -15,10 +14,13 @@ import java.util.stream.Collectors;
 public class StreamingProviderService {
     
     private final StreamingProviderRepository providerRepository;
+    private final StreamingAvailabilityRepository availabilityRepository;
     
     @Autowired
-    public StreamingProviderService(StreamingProviderRepository providerRepository) {
+    public StreamingProviderService(StreamingProviderRepository providerRepository,
+                                   StreamingAvailabilityRepository availabilityRepository) {
         this.providerRepository = providerRepository;
+        this.availabilityRepository = availabilityRepository;
     }
     
     /**
@@ -124,6 +126,10 @@ public class StreamingProviderService {
             return ResponseEntity.notFound().build();
         }
         
+        // Lösche erst alle StreamingAvailability-Einträge, die auf diesen Provider verweisen
+        availabilityRepository.deleteByProviderId(id);
+        
+        // Dann lösche den Provider
         providerRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
@@ -148,103 +154,22 @@ public class StreamingProviderService {
     }
     
     /**
-     * Reset all providers to default values
-     * This is a maintenance operation
-     * @return ResponseEntity
+     * Bereinige verwaiste StreamingAvailability-Einträge (für Provider, die nicht mehr existieren)
+     * @return Anzahl der bereinigten Einträge
      */
-    public ResponseEntity<String> resetToDefaultProviders() {
-        // Delete all existing providers
-        providerRepository.deleteAll();
+    public int cleanupOrphanedAvailabilities() {
+        List<StreamingAvailability> allAvailabilities = availabilityRepository.findAll();
+        List<StreamingAvailability> orphanedAvailabilities = allAvailabilities.stream()
+                .filter(availability -> availability.getProvider() == null)
+                .collect(Collectors.toList());
+                
+        if (!orphanedAvailabilities.isEmpty()) {
+            List<String> orphanedIds = orphanedAvailabilities.stream()
+                    .map(StreamingAvailability::getId)
+                    .collect(Collectors.toList());
+            availabilityRepository.deleteAllById(orphanedIds);
+        }
         
-        // Create default providers
-        List<StreamingProvider> defaultProviders = Arrays.asList(
-            new StreamingProvider(
-                "Netflix", 
-                "https://assets.nflxext.com/us/ffe/siteui/common/icons/nficon2016.png",
-                "https://netflix.com",
-                "DE",
-                true, false, false
-            ),
-            new StreamingProvider(
-                "Amazon Prime Video", 
-                "https://m.media-amazon.com/images/G/01/digital/video/merch/subs/benefit-id/primevideo-logo._CB462908803_.png",
-                "https://primevideo.com",
-                "DE",
-                true, true, true
-            ),
-            new StreamingProvider(
-                "Disney+", 
-                "https://prod-ripcut-delivery.disney-plus.net/v1/variant/disney/D7AEE1F05D10FC37C873176AAA26F777FC1B71E7A6563F36C6B1B497846E1BF1",
-                "https://disneyplus.com",
-                "DE",
-                true, false, false
-            ),
-            new StreamingProvider(
-                "Apple TV+", 
-                "https://www.apple.com/apple-tv-plus/images/shared/apple_tv_plus_logo__b64rjp1cov82_large.png",
-                "https://tv.apple.com",
-                "DE",
-                true, true, true
-            ),
-            new StreamingProvider(
-                "Paramount+", 
-                "https://www.paramount.com/sites/default/files/2021-02/paramount-plus-logo.png",
-                "https://paramountplus.com",
-                "DE",
-                true, false, false
-            ),
-            new StreamingProvider(
-                "Sky", 
-                "https://www.sky.de/static/img/logos/sky-logo-xs.png",
-                "https://sky.de",
-                "DE",
-                true, false, false
-            ),
-            new StreamingProvider(
-                "WOW", 
-                "https://www.wowschau.de/static/img/logos/wow-logo.svg",
-                "https://wowschau.de",
-                "DE",
-                true, false, false
-            ),
-            new StreamingProvider(
-                "ARD Mediathek", 
-                "https://www.ard.de/static/logos/ard-logo.svg",
-                "https://ardmediathek.de",
-                "DE",
-                false, false, false
-            ),
-            new StreamingProvider(
-                "ZDF Mediathek", 
-                "https://www.zdf.de/static/0.122.15133/img/logos/zdf-logo.svg",
-                "https://zdf.de",
-                "DE",
-                false, false, false
-            ),
-            new StreamingProvider(
-                "YouTube", 
-                "https://www.youtube.com/img/desktop/yt_1200.png",
-                "https://youtube.com",
-                "DE",
-                false, true, true
-            ),
-            new StreamingProvider(
-                "Joyn", 
-                "https://www.joyn.de/static/img/joyn_logo.png",
-                "https://joyn.de",
-                "DE",
-                false, false, false
-            ),
-            new StreamingProvider(
-                "RTL+", 
-                "https://www.rtlplus.com/static/img/rtlplus-logo.svg",
-                "https://rtlplus.com",
-                "DE",
-                true, false, false
-            )
-        );
-        
-        providerRepository.saveAll(defaultProviders);
-        return ResponseEntity.ok("Providers reset to default values successfully. Total providers: " + defaultProviders.size());
+        return orphanedAvailabilities.size();
     }
 }

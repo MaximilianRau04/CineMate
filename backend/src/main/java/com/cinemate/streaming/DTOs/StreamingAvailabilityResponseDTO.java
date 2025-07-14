@@ -25,20 +25,12 @@ public class StreamingAvailabilityResponseDTO {
     public StreamingAvailabilityResponseDTO() {}
 
     public StreamingAvailabilityResponseDTO(StreamingAvailability availability) {
-        if (availability == null) {
-            throw new IllegalArgumentException("StreamingAvailability cannot be null");
-        }
         this.id = availability.getId();
         this.mediaId = availability.getMediaId();
         this.mediaType = availability.getMediaType();
-        
-        // Handle null provider case
-        if (availability.getProvider() != null) {
-            this.provider = new StreamingProviderResponseDTO(availability.getProvider());
-        } else {
-            this.provider = null;
-        }
-        
+        // Null-Check für Provider, da gelöschte Provider zu null führen können
+        this.provider = availability.getProvider() != null ? 
+            new StreamingProviderResponseDTO(availability.getProvider()) : null;
         this.availabilityType = availability.getAvailabilityType();
         this.price = availability.getPrice();
         this.currency = availability.getCurrency();

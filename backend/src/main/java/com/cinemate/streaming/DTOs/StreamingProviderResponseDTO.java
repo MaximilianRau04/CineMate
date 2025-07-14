@@ -17,9 +17,6 @@ public class StreamingProviderResponseDTO {
     public StreamingProviderResponseDTO() {}
 
     public StreamingProviderResponseDTO(StreamingProvider provider) {
-        if (provider == null) {
-            throw new IllegalArgumentException("StreamingProvider cannot be null");
-        }
         this.id = provider.getId();
         this.name = provider.getName();
         this.logoUrl = provider.getLogoUrl();
