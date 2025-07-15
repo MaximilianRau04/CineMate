@@ -44,8 +44,12 @@ public class User {
     private List<Movie> moviesWatched = new ArrayList<>();
     @DBRef(lazy = true)
     private List<Series> seriesWatched = new ArrayList<>();
-    // private List<User> followers
-    // private List<User> following;
+    
+
+    private boolean profilePublic = true;
+    private boolean allowFriendRequests = true;
+    private Date lastActiveAt;
+    
     private List<NotificationPreference> notificationPreferences = new ArrayList<>();
     private boolean emailNotificationsEnabled = true;
     private boolean webNotificationsEnabled = true;
@@ -255,5 +259,15 @@ public class User {
     public void removeSeriesFromWatched(Series series) {
         seriesWatched.removeIf(m -> m.getId().equals(series.getId()));
     }
+    
+    // Social features getters and setters
+    public boolean isProfilePublic() { return profilePublic; }
+    public void setProfilePublic(boolean profilePublic) { this.profilePublic = profilePublic; }
+    
+    public boolean isAllowFriendRequests() { return allowFriendRequests; }
+    public void setAllowFriendRequests(boolean allowFriendRequests) { this.allowFriendRequests = allowFriendRequests; }
+    
+    public Date getLastActiveAt() { return lastActiveAt; }
+    public void setLastActiveAt(Date lastActiveAt) { this.lastActiveAt = lastActiveAt; }
 
 }

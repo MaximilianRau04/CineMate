@@ -12,6 +12,9 @@ import UserProfile from './components/profile/UserProfile';
 import Calendar from './components/explore/calender/Calendar';
 import AdminPanel from './components/admin/AdminPanel';
 import RecommendationsPage from './components/recommendations/RecommendationsPage';
+import FriendsPage from './components/social/FriendsPage';
+import Leaderboard from './components/social/Leaderboard';
+import FriendProfile from './components/social/FriendProfile';
 
 const AppContent = () => {
   const location = useLocation();
@@ -32,6 +35,11 @@ const AppContent = () => {
         <Route path="/calendar" element={<Calendar />} />
         <Route path="/admin" element={<AdminPanel />} />
         <Route path="/recommendations" element={<RecommendationsPage />} />
+        
+        {/* Social routes */}
+        <Route path="/friends" element={<FriendsPage />} />
+        <Route path="/leaderboard" element={<Leaderboard />} />
+        <Route path="/profile/:userId" element={<FriendProfile />} />
 
         <Route path="*" element={<h2 className="text-center mt-5">Seite nicht gefunden</h2>} />
 

@@ -13,6 +13,7 @@ import com.cinemate.user.UserRepository;
 import com.cinemate.user.dtos.UserResponseDTO;
 import com.cinemate.notification.events.ReviewCreatedEvent;
 import com.cinemate.recommendation.utils.RecommendationTriggerUtil;
+import com.cinemate.social.points.PointsEventListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,7 @@ public class ReviewService {
     private final SeriesRepository seriesRepository;
     private final ApplicationEventPublisher eventPublisher;
     private final RecommendationTriggerUtil recommendationTrigger;
+    private final PointsEventListener pointsEventListener;
 
     private static final String TYPE_MOVIE = "movie";
     private static final String TYPE_SERIES = "series";
@@ -40,13 +42,15 @@ public class ReviewService {
     @Autowired
     public ReviewService(ReviewRepository reviewRepository, UserRepository userRepository,
                          MovieRepository movieRepository, SeriesRepository seriesRepository,
-                         ApplicationEventPublisher eventPublisher, RecommendationTriggerUtil recommendationTrigger) {
+                         ApplicationEventPublisher eventPublisher, RecommendationTriggerUtil recommendationTrigger,
+                         PointsEventListener pointsEventListener) {
         this.reviewRepository = reviewRepository;
         this.userRepository = userRepository;
         this.movieRepository = movieRepository;
         this.seriesRepository = seriesRepository;
         this.eventPublisher = eventPublisher;
         this.recommendationTrigger = recommendationTrigger;
+        this.pointsEventListener = pointsEventListener;
     }
 
     /**
@@ -81,6 +85,9 @@ public class ReviewService {
                 com.cinemate.notification.events.UserActivityEvent.ActivityType.REVIEW_CREATED, savedReview.getItemId()));
 
         recommendationTrigger.triggerOnNewRating(userId, itemId, itemType);
+
+        // Award points for writing a review
+        pointsEventListener.onReviewCreated(userId);
 
         return new ReviewResponseDTO(savedReview);
     }

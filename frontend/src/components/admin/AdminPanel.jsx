@@ -369,7 +369,7 @@ const AdminPanel = () => {
             <div className="list-group list-group-flush">
               {[
                 { key: 'dashboard', icon: FaChartBar, label: 'Dashboard' },
-                { key: 'content', icon: FaFilm, label: 'Content Management' },
+                { key: 'content', icon: FaFilm, label: 'Contentverwaltung' },
                 { key: 'users', icon: FaUsers, label: 'Benutzerverwaltung' },
                 { key: 'moderation', icon: FaComments, label: 'Moderation' },
                 { key: 'cast', icon: FaUserTie, label: 'Schauspieler & Regisseure' },

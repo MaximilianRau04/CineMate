@@ -454,3 +454,9 @@ Content-Type: application/json
 ###
 
 GET http://localhost:8080/api/streaming/availability/movie/686169d8179314698a216b0c
+###
+GET http://localhost:8080/api/users
+###
+GET http://localhost:8080/api/social/points/686164a973f46f014d5448f1
+###
+GET http://localhost:8080/api/social/friends/686164a973f46f014d5448f1

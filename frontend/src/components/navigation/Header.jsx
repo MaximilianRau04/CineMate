@@ -67,6 +67,40 @@ const Header = () => {
                   Empfehlungen
                 </Link>
               </li>
+              <li className="nav-item dropdown">
+                <a 
+                  className="nav-link dropdown-toggle" 
+                  href="#" 
+                  id="socialDropdown" 
+                  role="button" 
+                  data-bs-toggle="dropdown" 
+                  aria-expanded="false"
+                >
+                  <i className="bi bi-people-fill me-1"></i>
+                  Social
+                </a>
+                <ul className="dropdown-menu" aria-labelledby="socialDropdown">
+                  <li>
+                    <Link className="dropdown-item" to="/friends">
+                      <i className="bi bi-person-hearts me-2"></i>
+                      Freunde
+                    </Link>
+                  </li>
+                  <li>
+                    <Link className="dropdown-item" to="/leaderboard">
+                      <i className="bi bi-trophy-fill me-2"></i>
+                      Rangliste
+                    </Link>
+                  </li>
+                  <li><hr className="dropdown-divider" /></li>
+                  <li>
+                    <Link className="dropdown-item" to="/forum">
+                      <i className="bi bi-chat-square-text me-2"></i>
+                      Forum (Bald verfügbar)
+                    </Link>
+                  </li>
+                </ul>
+              </li>
             </ul>
           )}
 

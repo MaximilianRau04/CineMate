@@ -180,6 +180,7 @@ const MediaHeader = ({
             <div
               className="alert alert-success d-inline-flex align-items-center px-3 py-2 mb-0"
               role="alert"
+              style={{ color: 'black' }}
             >
               <FaCheck className="me-2" />
               In deiner Watchlist!
@@ -207,6 +208,7 @@ const MediaHeader = ({
             <div
               className="alert alert-warning d-inline-flex align-items-center px-3 py-2 mb-0"
               role="alert"
+              style={{ color: 'black' }}
             >
               <FaStar className="me-2" />
               In deinen Favoriten!
@@ -234,6 +236,7 @@ const MediaHeader = ({
             <div
               className="alert alert-info d-inline-flex align-items-center px-3 py-2 mb-0"
               role="alert"
+              style={{ color: 'black' }}
             >
               <FaEye className="me-2" />
               Als gesehen markiert
