@@ -1,7 +1,7 @@
 package com.cinemate.user;
 
 import com.cinemate.movie.Movie;
-import com.cinemate.notification.NotificationPreference;
+import com.cinemate.notification.preference.NotificationPreference;
 import com.cinemate.series.Series;
 import com.cinemate.user.dtos.UserRequestDTO;
 import jakarta.validation.constraints.Email;
@@ -53,6 +53,7 @@ public class User {
     private List<NotificationPreference> notificationPreferences = new ArrayList<>();
     private boolean emailNotificationsEnabled = true;
     private boolean webNotificationsEnabled = true;
+    private boolean summaryRecommendationsEnabled = false;
 
 
     public User(String id, String username, String password, String email, String bio, String avatarUrl, Date joinedAt, Role role) {
@@ -200,6 +201,9 @@ public class User {
     public boolean isWebNotificationsEnabled() { return webNotificationsEnabled; }
     public void setWebNotificationsEnabled(boolean enabled) { this.webNotificationsEnabled = enabled; }
 
+    public boolean isSummaryRecommendationsEnabled() { return summaryRecommendationsEnabled; }
+    public void setSummaryRecommendationsEnabled(boolean enabled) { this.summaryRecommendationsEnabled = enabled; }
+
     public void addMovieToWatchlist(Movie movie) {
         if (!movieWatchlist.contains(movie)) {
             movieWatchlist.add(movie);
@@ -260,7 +264,6 @@ public class User {
         seriesWatched.removeIf(m -> m.getId().equals(series.getId()));
     }
     
-    // Social features getters and setters
     public boolean isProfilePublic() { return profilePublic; }
     public void setProfilePublic(boolean profilePublic) { this.profilePublic = profilePublic; }
     

@@ -104,6 +104,24 @@ public class RecommendationController {
     }
 
     /**
+     * sends recommendation summary notification to a specific user
+     * @param maxRecommendations - max number of recommendations to include (optional, standard: 5)
+     * @return Confirmation of success
+     */
+    @PostMapping("/notify/{userId}/summary")
+    public ResponseEntity<String> sendSummaryRecommendationNotifications(
+            @PathVariable String userId,
+            @RequestParam(defaultValue = "5") int maxRecommendations) {
+
+        try {
+            recommendationNotificationService.sendSummaryRecommendationNotifications(userId, maxRecommendations);
+            return ResponseEntity.ok("Zusammenfassungsbenachrichtigung erfolgreich gesendet für Benutzer: " + userId);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Fehler beim Senden der Zusammenfassungsbenachrichtigung: " + e.getMessage());
+        }
+    }
+
+    /**
      * sends recommendation notifications to all users
      * @param maxRecommendations - max number of notifications per user (optional, standard: 3)
      * @return Confirmation of success
@@ -117,6 +135,23 @@ public class RecommendationController {
             return ResponseEntity.ok("Empfehlungsbenachrichtigungen erfolgreich an alle Benutzer gesendet");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Fehler beim Senden der Empfehlungsbenachrichtigungen: " + e.getMessage());
+        }
+    }
+
+    /**
+     * sends summary recommendation notifications to all users
+     * @param maxRecommendations - max number of recommendations per user (optional, standard: 5)
+     * @return Confirmation of success
+     */
+    @PostMapping("/notify/all/summary")
+    public ResponseEntity<String> sendSummaryRecommendationNotificationsToAll(
+            @RequestParam(defaultValue = "5") int maxRecommendations) {
+
+        try {
+            recommendationNotificationService.sendSummaryRecommendationNotificationsToAllUsers(maxRecommendations);
+            return ResponseEntity.ok("Zusammenfassungsbenachrichtigungen erfolgreich an alle Benutzer gesendet");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Fehler beim Senden der Zusammenfassungsbenachrichtigungen: " + e.getMessage());
         }
     }
 

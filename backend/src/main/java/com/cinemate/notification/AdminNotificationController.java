@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/admin/notifications")
@@ -30,10 +29,9 @@ public class AdminNotificationController {
      */
     @PostMapping("/send")
     public ResponseEntity<?> sendNotification(@RequestBody NotificationRequest request, Authentication authentication) {
-        // TODO: Re-enable admin check when authentication is properly configured
-        // if (!isAdmin(authentication)) {
-        //     return ResponseEntity.status(403).body("Nur Admins können Benachrichtigungen senden");
-        // }
+        if (!isAdmin(authentication)) {
+            return ResponseEntity.status(403).body("Nur Admins können Benachrichtigungen senden");
+        }
 
         try {
             notificationService.sendAdminNotification(
@@ -57,10 +55,9 @@ public class AdminNotificationController {
      */
     @GetMapping("/users")
     public ResponseEntity<?> getAllUsers(Authentication authentication) {
-        // TODO: Re-enable admin check when authentication is properly configured
-        // if (!isAdmin(authentication)) {
-        //     return ResponseEntity.status(403).body("Nur Admins können Benutzerlisten abrufen");
-        // }
+        if (!isAdmin(authentication)) {
+            return ResponseEntity.status(403).body("Nur Admins können Benutzerlisten abrufen");
+        }
 
         try {
             List<User> users = userRepository.findAll();
@@ -88,58 +85,12 @@ public class AdminNotificationController {
         }
 
         Object principal = authentication.getPrincipal();
-        String username;
-
-        if (principal instanceof String) {
-            username = (String) principal;
-        } else if (principal instanceof User) {
-            username = ((User) principal).getUsername();
-        } else {
-            return false;
+        
+        if (principal instanceof User) {
+            User user = (User) principal;
+            return "ADMIN".equals(user.getRole().toString());
         }
-
-        Optional<User> userOpt = userRepository.findByUsername(username);
-        return userOpt.isPresent() && "ADMIN".equals(userOpt.get().getRole());
-    }
-
-    /**
-     * DTO for notification requests from admin panel
-     */
-    public static class NotificationRequest {
-        private String title;
-        private String message;
-        private String targetUserId;
-
-        public NotificationRequest() {}
-
-        public NotificationRequest(String title, String message, String targetUserId) {
-            this.title = title;
-            this.message = message;
-            this.targetUserId = targetUserId;
-        }
-
-        public String getTitle() {
-            return title;
-        }
-
-        public void setTitle(String title) {
-            this.title = title;
-        }
-
-        public String getMessage() {
-            return message;
-        }
-
-        public void setMessage(String message) {
-            this.message = message;
-        }
-
-        public String getTargetUserId() {
-            return targetUserId;
-        }
-
-        public void setTargetUserId(String targetUserId) {
-            this.targetUserId = targetUserId;
-        }
+        
+        return false;
     }
 }

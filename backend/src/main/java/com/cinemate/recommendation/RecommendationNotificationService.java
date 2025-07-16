@@ -55,10 +55,49 @@ public class RecommendationNotificationService {
                 .limit(maxRecommendations)
                 .toList();
 
-        // Create individual notifications for each recommendation
-        for (RecommendationResponseDTO recommendation : topRecommendations) {
-            sendSingleRecommendationNotification(user, recommendation);
+        // Check if user prefers summary notifications
+        if (user.isSummaryRecommendationsEnabled() && topRecommendations.size() > 1) {
+            // Send summary notification
+            sendSummaryRecommendationNotification(user, topRecommendations);
+        } else {
+            // Create individual notifications for each recommendation
+            for (RecommendationResponseDTO recommendation : topRecommendations) {
+                sendSingleRecommendationNotification(user, recommendation);
+            }
         }
+    }
+
+    /**
+     * Sends personalized summary recommendations as a single notification to a user
+     * @param userId The user's ID
+     * @param maxRecommendations Maximum number of recommendations to include
+     */
+    public void sendSummaryRecommendationNotifications(String userId, int maxRecommendations) {
+        Optional<User> userOpt = userRepository.findById(userId);
+        if (userOpt.isEmpty()) {
+            return;
+        }
+
+        User user = userOpt.get();
+        
+        // Check if user has recommendation notifications enabled
+        if (!shouldSendRecommendationNotification(user)) {
+            return;
+        }
+
+        List<RecommendationResponseDTO> recommendations = recommendationService.getRecommendationsForUser(userId);
+        
+        if (recommendations.isEmpty()) {
+            return;
+        }
+
+        // Send only the best recommendations as summary
+        List<RecommendationResponseDTO> topRecommendations = recommendations.stream()
+                .limit(maxRecommendations)
+                .toList();
+
+        // Always send as summary
+        sendSummaryRecommendationNotification(user, topRecommendations);
     }
 
     /**
@@ -140,6 +179,23 @@ public class RecommendationNotificationService {
                 sendRecommendationNotifications(user.getId(), maxRecommendationsPerUser);
             } catch (Exception e) {
                 System.err.println("Error sending recommendation notifications to user " + 
+                        user.getId() + ": " + e.getMessage());
+            }
+        });
+    }
+
+    /**
+     * Sends summary recommendation notifications to all users
+     * @param maxRecommendationsPerUser Maximum number of recommendations per user
+     */
+    public void sendSummaryRecommendationNotificationsToAllUsers(int maxRecommendationsPerUser) {
+        List<User> users = userRepository.findAll();
+        
+        users.forEach(user -> {
+            try {
+                sendSummaryRecommendationNotifications(user.getId(), maxRecommendationsPerUser);
+            } catch (Exception e) {
+                System.err.println("Error sending summary recommendation notifications to user " + 
                         user.getId() + ": " + e.getMessage());
             }
         });

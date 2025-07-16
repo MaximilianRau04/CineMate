@@ -6,7 +6,8 @@ export const useNotificationSettings = (userId) => {
   const [error, setError] = useState(null);
   const [globalSettings, setGlobalSettings] = useState({
     emailNotificationsEnabled: true,
-    webNotificationsEnabled: true
+    webNotificationsEnabled: true,
+    summaryRecommendationsEnabled: false
   });
   const [preferences, setPreferences] = useState([]);
   const [notificationTypes, setNotificationTypes] = useState([]);
@@ -16,6 +17,8 @@ export const useNotificationSettings = (userId) => {
 
     /**
      * loads all notification settings for the user
+     * @returns {Promise<void>}
+     * @throws {Error} if the request fails or the user is not found
      */
     const loadSettings = async () => {
       try {

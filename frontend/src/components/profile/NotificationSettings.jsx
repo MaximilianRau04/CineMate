@@ -112,6 +112,23 @@ const NotificationSettings = ({ userId }) => {
               </div>
             </label>
           </div>
+
+          <div className="form-check form-switch">
+            <input
+              className="form-check-input"
+              type="checkbox"
+              id="summaryRecommendations"
+              checked={globalSettings.summaryRecommendationsEnabled}
+              onChange={(e) => updateGlobalSettings('summaryRecommendationsEnabled', e.target.checked)}
+              disabled={saving}
+            />
+            <label className="form-check-label" htmlFor="summaryRecommendations">
+              <strong>📝 Empfehlungen als Zusammenfassung</strong>
+              <div className="text-muted small">
+                Erhalte mehrere Empfehlungen in einer einzigen Benachrichtigung anstatt einzeln
+              </div>
+            </label>
+          </div>
         </div>
 
         {/* specific settings */}

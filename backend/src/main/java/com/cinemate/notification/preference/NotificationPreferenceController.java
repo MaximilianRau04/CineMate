@@ -1,5 +1,6 @@
-package com.cinemate.notification;
+package com.cinemate.notification.preference;
 
+import com.cinemate.notification.NotificationType;
 import com.cinemate.user.User;
 import com.cinemate.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,11 +93,16 @@ public class NotificationPreferenceController {
             user.setWebNotificationsEnabled(settings.get("webNotificationsEnabled"));
         }
 
+        if (settings.containsKey("summaryRecommendationsEnabled")) {
+            user.setSummaryRecommendationsEnabled(settings.get("summaryRecommendationsEnabled"));
+        }
+
         userRepository.save(user);
 
         return ResponseEntity.ok(Map.of(
             "emailNotificationsEnabled", user.isEmailNotificationsEnabled(),
-            "webNotificationsEnabled", user.isWebNotificationsEnabled()
+            "webNotificationsEnabled", user.isWebNotificationsEnabled(),
+            "summaryRecommendationsEnabled", user.isSummaryRecommendationsEnabled()
         ));
     }
 
@@ -115,7 +121,8 @@ public class NotificationPreferenceController {
         User user = userOpt.get();
         return ResponseEntity.ok(Map.of(
             "emailNotificationsEnabled", user.isEmailNotificationsEnabled(),
-            "webNotificationsEnabled", user.isWebNotificationsEnabled()
+            "webNotificationsEnabled", user.isWebNotificationsEnabled(),
+            "summaryRecommendationsEnabled", user.isSummaryRecommendationsEnabled()
         ));
     }
 

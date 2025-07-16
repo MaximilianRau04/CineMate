@@ -82,6 +82,27 @@ const CompactNotificationSettings = ({ userId }) => {
           </div>
         </div>
 
+        <div className="row mb-3">
+          <div className="col-12">
+            <div className="form-check form-switch">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                id="summaryRecommendations"
+                checked={globalSettings.summaryRecommendationsEnabled}
+                onChange={(e) => updateGlobalSettings('summaryRecommendationsEnabled', e.target.checked)}
+                disabled={saving}
+              />
+              <label className="form-check-label" htmlFor="summaryRecommendations">
+                📝 Empfehlungen als Zusammenfassung
+                <div className="text-muted small">
+                  Mehrere Empfehlungen in einer Benachrichtigung
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+
         {showDetails && (
           <div className="mt-4">
             <h6 className="border-bottom pb-2 mb-3">⚙️ Detaillierte Einstellungen</h6>

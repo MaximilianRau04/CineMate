@@ -58,4 +58,18 @@ public class AutoNotificationController {
             return ResponseEntity.badRequest().body("Fehler bei wöchentlichen Benachrichtigungen: " + e.getMessage());
         }
     }
+
+    /**
+     * Manual trigger for daily release check
+     * @return ResponseEntity
+     */
+    @PostMapping("/trigger-daily")
+    public ResponseEntity<String> triggerDailyReleaseCheck() {
+        try {
+            scheduledNotificationService.checkDailyReleases();
+            return ResponseEntity.ok("Tägliche Release-Überprüfung durchgeführt.");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Fehler bei täglicher Release-Überprüfung: " + e.getMessage());
+        }
+    }
 }

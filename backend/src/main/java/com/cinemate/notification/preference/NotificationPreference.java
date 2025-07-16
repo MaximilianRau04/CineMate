@@ -1,4 +1,6 @@
-package com.cinemate.notification;
+package com.cinemate.notification.preference;
+
+import com.cinemate.notification.NotificationType;
 
 public class NotificationPreference {
     private NotificationType type;

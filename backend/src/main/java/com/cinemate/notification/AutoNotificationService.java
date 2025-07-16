@@ -58,6 +58,57 @@ public class AutoNotificationService {
     }
 
     /**
+     * Notifies users about daily releases from their watchlist
+     * @param releasingMovies - movies releasing today
+     * @param releasingSeries - series releasing today
+     */
+    public void notifyDailyReleases(List<Movie> releasingMovies, List<Series> releasingSeries) {
+        List<User> users = userRepository.findAll();
+        
+        for (User user : users) {
+            List<Movie> userMovies = releasingMovies.stream()
+                .filter(movie -> user.getMovieWatchlist().contains(movie))
+                .toList();
+                
+            List<Series> userSeries = releasingSeries.stream()
+                .filter(series -> user.getSeriesWatchlist().contains(series))
+                .toList();
+            
+            if (userMovies.isEmpty() && userSeries.isEmpty()) {
+                continue;
+            }
+            
+            String title = "🎉 Neue Releases heute!";
+            StringBuilder messageBuilder = new StringBuilder("Heute erscheinen Inhalte aus deiner Watchlist:\n\n");
+            
+            for (Movie movie : userMovies) {
+                messageBuilder.append("🎬 ").append(movie.getTitle()).append("\n");
+            }
+            
+            for (Series series : userSeries) {
+                messageBuilder.append("📺 ").append(series.getTitle()).append("\n");
+            }
+            
+            Map<String, Object> metadata = new HashMap<>();
+            metadata.put("moviesCount", userMovies.size());
+            metadata.put("seriesCount", userSeries.size());
+            metadata.put("totalReleases", userMovies.size() + userSeries.size());
+            
+            Notification notification = notificationService.createNotificationWithMetadata(
+                user.getId(),
+                NotificationType.NEW_MOVIE_RELEASE,
+                title,
+                messageBuilder.toString(),
+                null,
+                "daily_releases",
+                metadata
+            );
+            
+            notificationService.sendNotification(notification.getId());
+        }
+    }
+
+    /**
      * Notifies users when a new season of a series has been added from their watchlist
      * @param series - the series with the new season
      * @param newSeason - the new season

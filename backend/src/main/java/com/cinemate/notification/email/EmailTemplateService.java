@@ -1,4 +1,4 @@
-package com.cinemate.notification;
+package com.cinemate.notification.email;
 
 import org.springframework.stereotype.Service;
 

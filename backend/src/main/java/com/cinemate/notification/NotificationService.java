@@ -1,6 +1,7 @@
 package com.cinemate.notification;
 
 
+import com.cinemate.notification.email.EmailService;
 import com.cinemate.user.User;
 import com.cinemate.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;

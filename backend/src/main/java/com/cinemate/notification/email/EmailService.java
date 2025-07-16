@@ -1,4 +1,4 @@
-package com.cinemate.notification;
+package com.cinemate.notification.email;
 
 import com.cinemate.user.User;
 import com.cinemate.user.UserRepository;
