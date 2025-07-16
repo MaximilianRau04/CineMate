@@ -3,7 +3,6 @@ package com.cinemate.director;
 import com.cinemate.director.DTOs.DirectorRequestDTO;
 import com.cinemate.movie.Movie;
 import com.cinemate.series.Series;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;

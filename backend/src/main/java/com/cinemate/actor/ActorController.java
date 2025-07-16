@@ -2,7 +2,6 @@ package com.cinemate.actor;
 
 import com.cinemate.actor.DTOs.ActorRequestDTO;
 import com.cinemate.actor.DTOs.ActorResponseDTO;
-import com.cinemate.director.Director;
 import com.cinemate.movie.DTOs.MovieResponseDTO;
 import com.cinemate.series.DTOs.SeriesResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;

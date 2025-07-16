@@ -25,7 +25,38 @@ const FriendProfile = () => {
   }, [userId]);
 
   /**
+   * Renders a profile image with fallback to default avatar
+   * @param {string} avatarUrl - The user's avatar URL
+   * @param {string} username - The user's username
+   * @param {number} size - The size of the avatar (default: 150)
+   * @returns {JSX.Element} Profile image element
+   */
+  const renderProfileImage = (avatarUrl, username, size = 150) => {
+    if (avatarUrl) {
+      return (
+        <img
+          src={`http://localhost:8080${avatarUrl}`}
+          alt={username}
+          className="img-fluid rounded-circle shadow-sm mb-3"
+          style={{ width: `${size}px`, height: `${size}px`, objectFit: "cover" }}
+        />
+      );
+    } else {
+      return (
+        <div
+          className="rounded-circle bg-secondary d-flex align-items-center justify-content-center shadow-sm mb-3"
+          style={{ width: `${size}px`, height: `${size}px` }}
+        >
+          <i className="bi bi-person-fill text-white" style={{ fontSize: `${size * 0.6}px` }}></i>
+        </div>
+      );
+    }
+  };
+
+  /**
    * Load user data, points, friends, and check friendship status.
+   * @return {Promise<void>} Resolves when all data is loaded.
+   * @throws {Error} if any of the API requests fail.
    */
   const loadUserData = async () => {
     setLoading(true);
@@ -47,6 +78,7 @@ const FriendProfile = () => {
   /**
    * Load user profile data from the API.
    * @returns {Promise<void>}
+   * @throws {Error} if the request fails
    */
   const loadUser = async () => {
     try {
@@ -68,6 +100,7 @@ const FriendProfile = () => {
   /**
    * Load user points from the API.
    * @returns {Promise<void>}
+   * @throws {Error} if the request fails
    */
   const loadUserPoints = async () => {
     try {
@@ -87,6 +120,7 @@ const FriendProfile = () => {
   /**
    * Load user friends from the API.
    * @returns {Promise<void>}
+   * @throws {Error} if the request fails
    */
   const loadUserFriends = async () => {
     try {
@@ -105,6 +139,8 @@ const FriendProfile = () => {
 
   /**
    * Check if the current user is friends with the viewed profile user.
+   * @return {Promise<void>} Resolves when friendship status is checked.
+   * @throws {Error} if the request fails
    */
   const checkFriendship = async () => {
     try {
@@ -124,6 +160,9 @@ const FriendProfile = () => {
 
   /**
    * Send a friend request to the user.
+   * @param {string} userId - The ID of the user to send a friend request to.
+   * @returns {Promise<void>} Resolves when the request is sent.
+   * @throws {Error} if the request fails
    */
   const sendFriendRequest = async () => {
     try {
@@ -193,22 +232,14 @@ const FriendProfile = () => {
         <div className="row g-0">
           {/* Profile Header */}
           <div className="col-md-4 d-flex flex-column align-items-center justify-content-center bg-dark text-white p-4">
-            <img
-              src={
-                user.avatarUrl
-                  ? `http://localhost:8080${user.avatarUrl}`
-                  : "https://via.placeholder.com/150?text=Kein+Bild"
-              }
-              alt={user.username}
-              className="img-fluid rounded-circle shadow-sm mb-3"
-              style={{ width: "150px", height: "150px", objectFit: "cover" }}
-            />
+            {renderProfileImage(user.avatarUrl, user.username, 150)}
             <h3 className="mb-2">{user.username}</h3>
             
             {!isOwnProfile && !isFriend && user.allowFriendRequests && (
               <button 
-                className="btn btn-primary mt-2"
+                className="btn btn-light mt-2 fw-bold"
                 onClick={sendFriendRequest}
+                style={{ color: '#0d6efd', borderColor: '#0d6efd' }}
               >
                 <FaUserFriends className="me-2" />
                 Freundschaftsanfrage senden
@@ -332,12 +363,7 @@ const FriendProfile = () => {
               {friends.slice(0, 6).map(friend => (
                 <div key={friend.id} className="col-md-2 col-4 mb-2">
                   <div className="text-center">
-                    <img
-                      src={friend.avatarUrl ? `http://localhost:8080${friend.avatarUrl}` : 'https://via.placeholder.com/60'}
-                      alt={friend.username}
-                      className="rounded-circle mb-1"
-                      style={{ width: '60px', height: '60px', objectFit: 'cover' }}
-                    />
+                    {renderProfileImage(friend.avatarUrl, friend.username, 60)}
                     <small className="d-block text-truncate">{friend.username}</small>
                   </div>
                 </div>

@@ -17,14 +17,14 @@ public class PointsEventListener {
     }
     
     /**
-     * Award points when user writes a review
+     * Award points when a user writes a review
      */
     public void onReviewCreated(String userId) {
         pointsService.awardPoints(userId, PointsType.REVIEW);
     }
     
     /**
-     * Award points when user marks content as watched
+     * Award points when a user marks content as watched
      */
     public void onContentWatched(String userId) {
         pointsService.awardPoints(userId, PointsType.WATCH);

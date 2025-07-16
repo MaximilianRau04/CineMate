@@ -3,7 +3,6 @@ package com.cinemate.actor.DTOs;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.Date;
-import java.util.List;
 
 public class ActorRequestDTO {
     private String id;

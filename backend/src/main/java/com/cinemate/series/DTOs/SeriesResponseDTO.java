@@ -1,15 +1,9 @@
 package com.cinemate.series.DTOs;
 
-import com.cinemate.actor.Actor;
-import com.cinemate.director.Director;
 import com.cinemate.series.Series;
 import com.cinemate.series.Status;
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
 
 import java.util.Date;
-import java.util.List;
 
 public class SeriesResponseDTO {
     private String id;

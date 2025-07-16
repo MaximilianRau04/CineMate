@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { FaTrophy, FaMedal, FaAward, FaStar, FaEye, FaHeart } from 'react-icons/fa';
 
 const Leaderboard = () => {
@@ -11,6 +12,35 @@ const Leaderboard = () => {
   useEffect(() => {
     loadData();
   }, []);
+
+  /**
+   * Renders a profile image with fallback to default avatar
+   * @param {string} avatarUrl - The user's avatar URL
+   * @param {string} username - The user's username
+   * @param {number} size - The size of the avatar (default: 40)
+   * @returns {JSX.Element} Profile image element
+   */
+  const renderProfileImage = (avatarUrl, username, size = 40) => {
+    if (avatarUrl) {
+      return (
+        <img 
+          src={`http://localhost:8080${avatarUrl}`}
+          alt={username}
+          className="rounded-circle"
+          style={{ width: `${size}px`, height: `${size}px`, objectFit: 'cover' }}
+        />
+      );
+    } else {
+      return (
+        <div
+          className="rounded-circle bg-secondary d-flex align-items-center justify-content-center"
+          style={{ width: `${size}px`, height: `${size}px` }}
+        >
+          <i className="bi bi-person-fill text-white" style={{ fontSize: `${size * 0.6}px` }}></i>
+        </div>
+      );
+    }
+  };
 
   /**
    * Loads the leaderboard and user's points data.
@@ -223,16 +253,40 @@ const Leaderboard = () => {
                             </td>
                             <td>
                               <div className="d-flex align-items-center">
-                                <img 
-                                  src={entry.avatarUrl ? `http://localhost:8080${entry.avatarUrl}` : 'https://via.placeholder.com/40'}
-                                  alt={entry.username}
-                                  className="rounded-circle me-3"
-                                  style={{ width: '40px', height: '40px', objectFit: 'cover' }}
-                                />
+                                {isCurrentUser ? (
+                                  <div className="me-3">
+                                    {renderProfileImage(entry.avatarUrl, entry.username, 40)}
+                                  </div>
+                                ) : (
+                                  <Link to={`/profile/${entry.userId}`} title="Profil ansehen" className="me-3">
+                                    <div style={{ 
+                                      cursor: 'pointer',
+                                      transition: 'transform 0.2s'
+                                    }}
+                                    onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                                    onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                    >
+                                      {renderProfileImage(entry.avatarUrl, entry.username, 40)}
+                                    </div>
+                                  </Link>
+                                )}
                                 <div>
                                   <div className="fw-bold">
-                                    {entry.username}
-                                    {isCurrentUser && <span className="badge bg-info ms-2">Du</span>}
+                                    {isCurrentUser ? (
+                                      <>
+                                        {entry.username}
+                                        <span className="badge bg-info ms-2">Du</span>
+                                      </>
+                                    ) : (
+                                      <Link 
+                                        to={`/profile/${entry.userId}`}
+                                        className="text-decoration-none fw-bold"
+                                        style={{ color: 'inherit' }}
+                                        title="Profil ansehen"
+                                      >
+                                        {entry.username}
+                                      </Link>
+                                    )}
                                   </div>
                                 </div>
                               </div>

@@ -3,7 +3,6 @@ package com.cinemate.movie.DTOs;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.Date;
-import java.util.List;
 
 public class MovieRequestDTO {
 

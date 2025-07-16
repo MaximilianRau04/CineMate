@@ -182,7 +182,7 @@ const AdminNotificationPanel = () => {
           <div className="d-flex justify-content-between align-items-center">
             <div className="text-muted small">
               {formData.targetUserId ? (
-                <span><User size={16} className="me-1" />Wird an einen spezifischen Benutzer gesendet</span>
+                <span><User size={16} className="me-1" />Wird an einen Benutzer gesendet</span>
               ) : (
                 <span><Users size={16} className="me-1" />Wird an alle {users.length} Benutzer gesendet</span>
               )}

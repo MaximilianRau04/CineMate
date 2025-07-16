@@ -63,10 +63,9 @@ public class FriendService {
             if (existingFriendship.isPresent()) {
                 return ResponseEntity.badRequest().body("Friendship request already exists");
             }
-            
-            // Create new friend request
+
             Friend friendRequest = new Friend(currentUser, targetUser);
-            Friend savedRequest = friendRepository.save(friendRequest);
+            friendRepository.save(friendRequest);
             
             // Send notification
             notificationService.sendNotification(
@@ -103,7 +102,7 @@ public class FriendService {
             
             Friend friendship = friendshipOpt.get();
             
-            // Verify current user is the recipient
+            // Verify the current user is the recipient
             if (!friendship.getRecipient().getId().equals(currentUserId)) {
                 return ResponseEntity.status(403).body("Not authorized to accept this request");
             }
@@ -115,7 +114,7 @@ public class FriendService {
             // Accept the friendship
             friendship.setStatus(FriendshipStatus.ACCEPTED);
             friendship.setAcceptedAt(new Date());
-            Friend savedFriendship = friendRepository.save(friendship);
+            friendRepository.save(friendship);
             
             // Send notification to requester
             notificationService.sendNotification(

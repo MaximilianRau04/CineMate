@@ -1,13 +1,11 @@
 package com.cinemate.notification;
 
 import com.cinemate.movie.Movie;
-import com.cinemate.movie.MovieRepository;
 import com.cinemate.review.Review;
 import com.cinemate.review.ReviewRepository;
 import com.cinemate.series.Episode;
 import com.cinemate.series.Season;
 import com.cinemate.series.Series;
-import com.cinemate.series.SeriesRepository;
 import com.cinemate.user.User;
 import com.cinemate.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,12 +22,6 @@ public class AutoNotificationService {
 
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private MovieRepository movieRepository;
-
-    @Autowired
-    private SeriesRepository seriesRepository;
 
     @Autowired
     private ReviewRepository reviewRepository;

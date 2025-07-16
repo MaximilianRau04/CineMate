@@ -139,8 +139,7 @@ public class PointsService {
                     leaderboard = leaderboard.subList(0, limit);
                 }
             }
-            
-            // Debug: Print all entries and remove duplicates by keeping highest scoring entry per user
+
             Map<String, UserPoints> uniqueEntries = new LinkedHashMap<>();
             for (int i = 0; i < leaderboard.size(); i++) {
                 UserPoints entry = leaderboard.get(i);
@@ -161,45 +160,6 @@ public class PointsService {
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).build();
-        }
-    }
-
-    /**
-     * Removes duplicate UserPoints entries and keeps only the latest one for each user.
-     * This is a cleanup method that should be run if there are data inconsistencies.
-     */
-    public ResponseEntity<?> cleanupDuplicateUserPoints() {
-        try {
-            
-            List<UserPoints> allUserPoints = userPointsRepository.findAll();
-            
-            Map<String, List<UserPoints>> userPointsMap = allUserPoints.stream()
-                .collect(java.util.stream.Collectors.groupingBy(up -> up.getUser().getId()));
-            
-            int duplicatesRemoved = 0;
-            for (Map.Entry<String, List<UserPoints>> entry : userPointsMap.entrySet()) {
-                String userId = entry.getKey();
-                List<UserPoints> userPointsList = entry.getValue();
-                
-                if (userPointsList.size() > 1) {
-                    
-                    // Sort by lastUpdated (newest first) and keep the first one
-                    userPointsList.sort((a, b) -> b.getLastUpdated().compareTo(a.getLastUpdated()));
-                    
-                    // Remove all other entries except the first (newest) one
-                    for (int i = 1; i < userPointsList.size(); i++) {
-                        UserPoints toDelete = userPointsList.get(i);
-                        userPointsRepository.delete(toDelete);
-                        duplicatesRemoved++;
-                    }
-                }
-            }
-
-            return ResponseEntity.ok("Cleanup completed. Removed " + duplicatesRemoved + " duplicate entries");
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500).body("Error during cleanup: " + e.getMessage());
         }
     }
 }
