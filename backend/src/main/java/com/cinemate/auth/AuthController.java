@@ -66,7 +66,7 @@ public class AuthController {
                     savedUser.getUsername(), savedUser.getEmail())
             );
             
-            // Send welcome notification to the new user
+            // Send a welcome notification to the new user
             notificationService.sendNotification(
                 savedUser.getId(),
                 NotificationType.WELCOME_NEW_USER,
