@@ -75,4 +75,16 @@ public class NotificationEventListener {
                 + event.getUserId() + ": " + e.getMessage());
         }
     }
+
+    @EventListener
+    @Async
+    public void handleForumPostCreatedEvent(ForumPostCreatedEvent event) {
+        autoNotificationService.notifyForumPostCreated(event.getForumPost());
+    }
+
+    @EventListener
+    @Async
+    public void handleForumReplyCreatedEvent(ForumReplyCreatedEvent event) {
+        autoNotificationService.notifyForumReplyCreated(event.getForumReply(), event.getForumPost());
+    }
 }

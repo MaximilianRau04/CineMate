@@ -15,6 +15,9 @@ import RecommendationsPage from './components/recommendations/RecommendationsPag
 import FriendsPage from './components/social/FriendsPage';
 import Leaderboard from './components/social/Leaderboard';
 import FriendProfile from './components/social/FriendProfile';
+import ForumHome from './components/forum/ForumHome';
+import ForumPostDetail from './components/forum/ForumPostDetail';
+import CreateForumPost from './components/forum/CreateForumPost';
 
 const AppContent = () => {
   const location = useLocation();
@@ -40,6 +43,11 @@ const AppContent = () => {
         <Route path="/friends" element={<FriendsPage />} />
         <Route path="/leaderboard" element={<Leaderboard />} />
         <Route path="/profile/:userId" element={<FriendProfile />} />
+
+        {/* Forum routes */}
+        <Route path="/forum" element={<ForumHome />} />
+        <Route path="/forum/post/:postId" element={<ForumPostDetail />} />
+        <Route path="/forum/create-post" element={<CreateForumPost />} />
 
         <Route path="*" element={<h2 className="text-center mt-5">Seite nicht gefunden</h2>} />
 

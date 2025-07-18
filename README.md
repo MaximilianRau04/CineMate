@@ -14,11 +14,19 @@ CineMate is a comprehensive web application that allows users to discover, manag
 - **Profile Customization**: Personal bio, profile picture, and preferences management
 - **Release Calendar**: Track upcoming releases of anticipated content
 
-### 🔧 **Admin Features**
+### � **Social Features**
+- **Friend System**: Connect with other users and see their activity
+- **Leaderboard**: Compete with friends based on activity and ratings
+- **Forum System**: Discuss movies and series with community members
+- **Post & Reply**: Create discussion threads and engage with others
+- **Subscription System**: Follow interesting discussions and get notified of new replies
+
+### �🔧 **Admin Features**
 - **Content Management**: Add, edit, and manage movies and series
 - **User Administration**: Manage user accounts and permissions
 - **Analytics Dashboard**: Monitor system usage and content performance
 - **Notification Management**: Send announcements and system notifications
+- **Forum Moderation**: Pin, lock, and manage forum discussions
 
 ### 🤖 **Intelligent Systems**
 - **Recommendation Engine**: Content-based filtering using genres, actors, and directors

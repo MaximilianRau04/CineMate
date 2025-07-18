@@ -27,7 +27,6 @@ Content-Type: application/json
 ###
 GET http://localhost:8080/api/users/me
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYXhpIiwiZXhwIjoxNzQ4NDA1ODY2LCJpYXQiOjE3NDgzNjk4NjZ9.p78xMveabfrcCLJWAx5FmPexqVKxDnbSLT-IfA8JueQ
-###
 
 GET http://localhost:8080/api/users
 
@@ -460,3 +459,7 @@ GET http://localhost:8080/api/users
 GET http://localhost:8080/api/social/points/686164a973f46f014d5448f1
 ###
 GET http://localhost:8080/api/social/friends/686164a973f46f014d5448f1
+
+###
+GET http://localhost:8080/api/forum/categories
+

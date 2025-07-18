@@ -6,6 +6,10 @@ import com.cinemate.review.ReviewRepository;
 import com.cinemate.series.Episode;
 import com.cinemate.series.Season;
 import com.cinemate.series.Series;
+import com.cinemate.social.forum.post.ForumPost;
+import com.cinemate.social.forum.reply.ForumReply;
+import com.cinemate.social.forum.subscription.ForumSubscription;
+import com.cinemate.social.forum.subscription.ForumSubscriptionRepository;
 import com.cinemate.user.User;
 import com.cinemate.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +29,9 @@ public class AutoNotificationService {
 
     @Autowired
     private ReviewRepository reviewRepository;
+    
+    @Autowired
+    private ForumSubscriptionRepository forumSubscriptionRepository;
 
     /**
      * Notifies users when a movie from their watchlist has been released
@@ -447,5 +454,76 @@ public class AutoNotificationService {
     private boolean shouldNotifyMilestone(int count) {
         int[] milestones = {5, 10, 25, 50, 100, 250, 500, 1000};
         return Arrays.stream(milestones).anyMatch(milestone -> milestone == count);
+    }
+
+    /**
+     * Notifies users when a new forum post is created in categories they're interested in
+     * @param forumPost - the created forum post
+     */
+    public void notifyForumPostCreated(ForumPost forumPost) {
+        List<User> users = userRepository.findAll();
+        
+        users.stream()
+            .filter(user -> !user.getId().equals(forumPost.getAuthor().getId())) // Don't notify the author
+            .forEach(user -> {
+                String title = "💬 Neuer Forum-Beitrag";
+                String message = String.format("'%s' hat einen neuen Beitrag erstellt: '%s'", 
+                    forumPost.getAuthor().getUsername(), forumPost.getTitle());
+                
+                Map<String, Object> metadata = new HashMap<>();
+                metadata.put("forumPostId", forumPost.getId());
+                metadata.put("forumPostTitle", forumPost.getTitle());
+                metadata.put("category", forumPost.getCategory().toString());
+                metadata.put("authorName", forumPost.getAuthor().getUsername());
+                
+                Notification notification = notificationService.createNotificationWithMetadata(
+                    user.getId(), 
+                    NotificationType.FORUM_POST_CREATED, 
+                    title, 
+                    message, 
+                    forumPost.getId(),
+                    "forum_post",
+                    metadata
+                );
+                
+                notificationService.sendNotification(notification.getId());
+            });
+    }
+
+    /**
+     * Notifies subscribed users when someone replies to a forum post they're subscribed to
+     * @param forumReply - the created reply
+     * @param forumPost - the original post
+     */
+    public void notifyForumReplyCreated(ForumReply forumReply, ForumPost forumPost) {
+        // Get all subscribers to this post
+        List<ForumSubscription> subscriptions =
+            forumSubscriptionRepository.findByPostIdAndIsActiveTrue(forumPost.getId());
+        
+        subscriptions.stream()
+            .filter(subscription -> !subscription.getUser().getId().equals(forumReply.getAuthor().getId())) // Don't notify the reply author
+            .forEach(subscription -> {
+                String title = "💬 Neue Antwort auf abonnierten Beitrag";
+                String message = String.format("'%s' hat auf den Beitrag '%s' geantwortet", 
+                    forumReply.getAuthor().getUsername(), forumPost.getTitle());
+                
+                Map<String, Object> metadata = new HashMap<>();
+                metadata.put("forumPostId", forumPost.getId());
+                metadata.put("forumPostTitle", forumPost.getTitle());
+                metadata.put("forumReplyId", forumReply.getId());
+                metadata.put("replyAuthorName", forumReply.getAuthor().getUsername());
+                
+                Notification notification = notificationService.createNotificationWithMetadata(
+                    subscription.getUser().getId(), 
+                    NotificationType.FORUM_REPLY_CREATED, 
+                    title, 
+                    message, 
+                    forumPost.getId(),
+                    "forum_post",
+                    metadata
+                );
+                
+                notificationService.sendNotification(notification.getId());
+            });
     }
 }

@@ -1,5 +1,7 @@
-package com.cinemate.social.forum;
+package com.cinemate.social.forum.post;
 
+import com.cinemate.social.forum.ForumCategory;
+import com.cinemate.social.forum.reply.ForumReply;
 import com.cinemate.user.User;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;

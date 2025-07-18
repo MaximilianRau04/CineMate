@@ -96,7 +96,7 @@ const Header = () => {
                   <li>
                     <Link className="dropdown-item" to="/forum">
                       <i className="bi bi-chat-square-text me-2"></i>
-                      Forum (Bald verfügbar)
+                      Forum
                     </Link>
                   </li>
                 </ul>
