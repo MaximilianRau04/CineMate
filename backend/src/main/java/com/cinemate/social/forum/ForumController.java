@@ -1,5 +1,7 @@
 package com.cinemate.social.forum;
 
+import com.cinemate.social.forum.dto.ForumDTOConverter;
+import com.cinemate.social.forum.dto.ForumPostDTO;
 import com.cinemate.social.forum.post.ForumPost;
 import com.cinemate.social.forum.reply.ForumReply;
 import com.cinemate.social.forum.subscription.ForumSubscription;
@@ -37,27 +39,33 @@ public class ForumController {
      * with the post as the creator. Responds with the created post along with the status.
      *
      * @param post The forum post data included in the body of the request.
-     * @return A ResponseEntity containing the created ForumPost and an HTTP status code.
+     * @return A ResponseEntity containing the created ForumPostDTO and an HTTP status code.
      */
     @PostMapping("/posts")
-    public ResponseEntity<ForumPost> createPost(@RequestBody ForumPost post) {
+    public ResponseEntity<ForumPostDTO> createPost(@RequestBody ForumPost post) {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             String userId = null;
             
             // Check if user is authenticated
             if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName())) {
-                userId = auth.getName();
+                Object principal = auth.getPrincipal();
+                
+                if (principal instanceof com.cinemate.user.User) {
+                    userId = ((com.cinemate.user.User) principal).getId();
+                } else if (principal instanceof String) {
+                    userId = (String) principal;
+                }
             }
             
-            // For testing purposes, use a default user if no authentication
+            // Require authentication for creating posts
             if (userId == null) {
-                // Try to find any existing user or create a test user
-                userId = "testuser"; // This should be a valid user ID from your database
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
             }
             
             ForumPost createdPost = forumService.createPost(post, userId);
-            return ResponseEntity.status(HttpStatus.CREATED).body(createdPost);
+            ForumPostDTO dto = ForumDTOConverter.convertToDTO(createdPost);
+            return ResponseEntity.status(HttpStatus.CREATED).body(dto);
         } catch (Exception e) {
             System.err.println("Error creating post: " + e.getMessage());
             e.printStackTrace();
@@ -72,10 +80,10 @@ public class ForumController {
      * @param size the number of posts per page, defaults to 10 if not specified
      * @param category optional parameter to filter posts by category
      * @param sortBy optional parameter to sort posts, e.g., "popular" or "recent"
-     * @return ResponseEntity containing a Page object with the requested forum posts
+     * @return ResponseEntity containing a Page object with the requested forum post DTOs
      */
     @GetMapping("/posts")
-    public ResponseEntity<Page<ForumPost>> getAllPosts(
+    public ResponseEntity<Page<ForumPostDTO>> getAllPosts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String category,
@@ -95,31 +103,33 @@ public class ForumController {
             posts = forumService.getAllPosts(pageable);
         }
         
-        return ResponseEntity.ok(posts);
+        Page<ForumPostDTO> postDTOs = ForumDTOConverter.convertToDTO(posts);
+        return ResponseEntity.ok(postDTOs);
     }
 
     /**
      * Retrieves a specific forum post by its unique identifier.
      *
      * @param id the unique identifier of the forum post to retrieve
-     * @return a ResponseEntity containing the ForumPost if found
+     * @return a ResponseEntity containing the ForumPostDTO if found
      */
     @GetMapping("/posts/{id}")
-    public ResponseEntity<ForumPost> getPostById(@PathVariable String id) {
+    public ResponseEntity<ForumPostDTO> getPostById(@PathVariable String id) {
         Optional<ForumPost> post = forumService.getPostById(id);
-        return post.map(ResponseEntity::ok)
+        return post.map(p -> ResponseEntity.ok(ForumDTOConverter.convertToDTO(p)))
                   .orElse(ResponseEntity.notFound().build());
     }
 
     /**
      * Retrieves a list of pinned forum posts.
      *
-     * @return a ResponseEntity containing a list of pinned forum posts as the body of the response
+     * @return a ResponseEntity containing a list of pinned forum post DTOs as the body of the response
      */
     @GetMapping("/posts/pinned")
-    public ResponseEntity<List<ForumPost>> getPinnedPosts() {
+    public ResponseEntity<List<ForumPostDTO>> getPinnedPosts() {
         List<ForumPost> pinnedPosts = forumService.getPinnedPosts();
-        return ResponseEntity.ok(pinnedPosts);
+        List<ForumPostDTO> dtoList = ForumDTOConverter.convertToDTO(pinnedPosts);
+        return ResponseEntity.ok(dtoList);
     }
 
     /**
@@ -128,17 +138,18 @@ public class ForumController {
      * @param query the search query string used to search posts
      * @param page the page number for pagination, defaults to 0 if not specified
      * @param size the number of posts per page for pagination, defaults to 10 if not specified
-     * @return a ResponseEntity containing a paginated result of forum posts matching the query
+     * @return a ResponseEntity containing a paginated result of forum post DTOs matching the query
      */
     @GetMapping("/posts/search")
-    public ResponseEntity<Page<ForumPost>> searchPosts(
+    public ResponseEntity<Page<ForumPostDTO>> searchPosts(
             @RequestParam String query,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         
         Pageable pageable = PageRequest.of(page, size);
         Page<ForumPost> posts = forumService.searchPosts(query, pageable);
-        return ResponseEntity.ok(posts);
+        Page<ForumPostDTO> postDTOs = ForumDTOConverter.convertToDTO(posts);
+        return ResponseEntity.ok(postDTOs);
     }
 
     /**
@@ -147,17 +158,18 @@ public class ForumController {
      * @param userId the unique identifier of the user whose posts are to be retrieved
      * @param page the page number of the results to be retrieved (default is 0)
      * @param size the number of posts per page (default is 10)
-     * @return a ResponseEntity containing a Page of ForumPost objects authored by the specified user
+     * @return a ResponseEntity containing a Page of ForumPostDTO objects authored by the specified user
      */
     @GetMapping("/posts/user/{userId}")
-    public ResponseEntity<Page<ForumPost>> getPostsByUser(
+    public ResponseEntity<Page<ForumPostDTO>> getPostsByUser(
             @PathVariable String userId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         
         Pageable pageable = PageRequest.of(page, size);
         Page<ForumPost> posts = forumService.getPostsByAuthor(userId, pageable);
-        return ResponseEntity.ok(posts);
+        Page<ForumPostDTO> postDTOs = ForumDTOConverter.convertToDTO(posts);
+        return ResponseEntity.ok(postDTOs);
     }
 
     /**
@@ -166,17 +178,18 @@ public class ForumController {
      * @param movieId the unique identifier of the movie for which the forum posts are requested
      * @param page the page number to retrieve (default is 0)
      * @param size the number of items per page (default is 10)
-     * @return a ResponseEntity containing a paginated list of ForumPost objects
+     * @return a ResponseEntity containing a paginated list of ForumPostDTO objects
      */
     @GetMapping("/posts/movie/{movieId}")
-    public ResponseEntity<Page<ForumPost>> getPostsByMovie(
+    public ResponseEntity<Page<ForumPostDTO>> getPostsByMovie(
             @PathVariable String movieId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         
         Pageable pageable = PageRequest.of(page, size);
         Page<ForumPost> posts = forumService.getPostsByMovieId(movieId, pageable);
-        return ResponseEntity.ok(posts);
+        Page<ForumPostDTO> postDTOs = ForumDTOConverter.convertToDTO(posts);
+        return ResponseEntity.ok(postDTOs);
     }
 
     /**
@@ -185,17 +198,18 @@ public class ForumController {
      * @param seriesId the identifier of the series to fetch posts for
      * @param page the page number to retrieve, defaults to 0 if not specified
      * @param size the number of posts per page to retrieve, defaults to 10 if not specified
-     * @return a ResponseEntity containing a Page of ForumPost objects associated with the specified series
+     * @return a ResponseEntity containing a Page of ForumPostDTO objects associated with the specified series
      */
     @GetMapping("/posts/series/{seriesId}")
-    public ResponseEntity<Page<ForumPost>> getPostsBySeries(
+    public ResponseEntity<Page<ForumPostDTO>> getPostsBySeries(
             @PathVariable String seriesId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         
         Pageable pageable = PageRequest.of(page, size);
         Page<ForumPost> posts = forumService.getPostsBySeriesId(seriesId, pageable);
-        return ResponseEntity.ok(posts);
+        Page<ForumPostDTO> postDTOs = ForumDTOConverter.convertToDTO(posts);
+        return ResponseEntity.ok(postDTOs);
     }
 
     /**
@@ -204,17 +218,18 @@ public class ForumController {
      * @param userId the ID of the user whose participated posts are being retrieved
      * @param page the page number to retrieve, defaults to 0 if not provided
      * @param size the number of posts per page, defaults to 10 if not provided
-     * @return a ResponseEntity containing a paginated list of forum posts the user has participated in
+     * @return a ResponseEntity containing a paginated list of forum post DTOs the user has participated in
      */
     @GetMapping("/posts/user/{userId}/participated")
-    public ResponseEntity<Page<ForumPost>> getPostsUserParticipatedIn(
+    public ResponseEntity<Page<ForumPostDTO>> getPostsUserParticipatedIn(
             @PathVariable String userId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         
         Pageable pageable = PageRequest.of(page, size);
         Page<ForumPost> posts = forumService.getPostsUserParticipatedIn(userId, pageable);
-        return ResponseEntity.ok(posts);
+        Page<ForumPostDTO> postDTOs = ForumDTOConverter.convertToDTO(posts);
+        return ResponseEntity.ok(postDTOs);
     }
 
     /**
@@ -554,6 +569,24 @@ public class ForumController {
             return ResponseEntity.ok(post);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+
+    /**
+     * Admin endpoint to delete posts without authorization checks.
+     * Useful for cleaning up posts from deleted users.
+     *
+     * @param id the unique identifier of the forum post to be deleted
+     * @return a ResponseEntity with no content if the deletion is successful
+     */
+    @DeleteMapping("/admin/posts/{id}")
+    public ResponseEntity<Void> adminDeletePost(@PathVariable String id) {
+        try {
+            // TODO: Add admin authorization check
+            forumService.adminDeletePost(id);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
 

@@ -2,6 +2,8 @@ package com.cinemate.social.forum.reply;
 
 import com.cinemate.social.forum.post.ForumPost;
 import com.cinemate.user.User;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -17,9 +19,12 @@ public class ForumReply {
     private String content;
     
     @DBRef
+    @JsonIgnoreProperties({"movieWatchlist", "seriesWatchlist", "movieFavorites", "seriesFavorites", 
+                          "moviesWatched", "seriesWatched", "notificationPreferences", "password"})
     private User author;
     
     @DBRef
+    @JsonBackReference  // This prevents circular reference back to parent post
     private ForumPost parentPost;
     
     private Date createdAt;

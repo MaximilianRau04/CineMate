@@ -208,7 +208,7 @@ Content-Type: application/json
   "posterUrl": "https://image.tmdb.org/t/p/w500/x2LSRK2Cm7MZhjluni1msVJ3wDF.jpg"
 }
 ###
-POST http://localhost:8080/api/series/68616a3c179314698a216b1c/seasons
+POST http://localhost:8080/api/series/687f7adf50088966faa7dc7e/seasons
 Content-Type: application/json
 
 {
@@ -237,7 +237,7 @@ Content-Type: application/json
 DELETE http://localhost:8080/api/series/68616a5b179314698a216b1f
 
 ###
-POST http://localhost:8080/api/series/68616a3c179314698a216b1c/seasons
+POST http://localhost:8080/api/series/687f7adf50088966faa7dc7e/seasons
 Content-Type: application/json
 
 {
@@ -442,7 +442,7 @@ Content-Type: application/json
   "isActive": true
 }
 ###
-DELETE http://localhost:8080/api/streaming/providers/687007403554396bb648df7e
+DELETE http://localhost:8080/api/users/com.cinemate.user.User@56e56391
 ###
 PATCH http://localhost:8080/api/streaming/providers/6875325553bf666aa496b6da/toggle
 Content-Type: application/json
@@ -461,5 +461,7 @@ GET http://localhost:8080/api/social/points/686164a973f46f014d5448f1
 GET http://localhost:8080/api/social/friends/686164a973f46f014d5448f1
 
 ###
-GET http://localhost:8080/api/forum/categories
+GET http://localhost:8080/api/forum/posts
+###
+DELETE http://localhost:8080/api/forum/admin/posts/687f829d3973e51fc9f207e1
 

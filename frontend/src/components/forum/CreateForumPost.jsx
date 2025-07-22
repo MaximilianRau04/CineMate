@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import SearchableMediaSelect from './SearchableMediaSelect';
 import './CreateForumPost.css';
 
 const CreateForumPost = () => {
@@ -14,8 +15,14 @@ const CreateForumPost = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            // Redirect to login if not authenticated
+            navigate('/login');
+            return;
+        }
         fetchCategories();
-    }, []);
+    }, [navigate]);
 
     /**
      * Fetches the list of forum categories from the backend.
@@ -70,8 +77,12 @@ const CreateForumPost = () => {
             if (response.ok) {
                 const createdPost = await response.json();
                 navigate(`/forum/post/${createdPost.id}`);
+            } else if (response.status === 401) {
+                setError('Sie müssen sich anmelden, um einen Beitrag zu erstellen');
+                setTimeout(() => navigate('/login'), 2000);
             } else {
-                throw new Error('Error creating post');
+                const errorData = await response.text();
+                throw new Error(errorData || 'Error creating post');
             }
         } catch (error) {
             console.error('Error creating post:', error);
@@ -107,7 +118,7 @@ const CreateForumPost = () => {
                 >
                     ← Zurück zum Forum
                 </button>
-                <h1 className="text-white">✍️ Neuen Beitrag erstellen</h1>
+                <h1>✍️ Neuen Beitrag erstellen</h1>
             </div>
 
             <form className="create-post-form" onSubmit={handleSubmit}>
@@ -145,24 +156,22 @@ const CreateForumPost = () => {
 
                 <div className="form-row">
                     <div className="form-group">
-                        <label htmlFor="movieId">Film ID (optional)</label>
-                        <input
-                            type="text"
-                            id="movieId"
+                        <label htmlFor="movieSelect">Film (optional)</label>
+                        <SearchableMediaSelect
+                            type="movie"
                             value={movieId}
-                            onChange={(e) => setMovieId(e.target.value)}
-                            placeholder="Wenn der Beitrag einen spezifischen Film betrifft..."
+                            onChange={setMovieId}
+                            placeholder="Nach Film suchen..."
                         />
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="seriesId">Serie ID (optional)</label>
-                        <input
-                            type="text"
-                            id="seriesId"
+                        <label htmlFor="seriesSelect">Serie (optional)</label>
+                        <SearchableMediaSelect
+                            type="series"
                             value={seriesId}
-                            onChange={(e) => setSeriesId(e.target.value)}
-                            placeholder="Wenn der Beitrag eine spezifische Serie betrifft..."
+                            onChange={setSeriesId}
+                            placeholder="Nach Serie suchen..."
                         />
                     </div>
                 </div>
@@ -188,6 +197,7 @@ const CreateForumPost = () => {
                     <ul>
                         <li>Verwende einen aussagekräftigen Titel</li>
                         <li>Wähle die passende Kategorie</li>
+                        <li>Nutze die Suchfunktion, um passende Filme oder Serien zu verknüpfen</li>
                         <li>Strukturiere deinen Text mit Absätzen</li>
                         <li>Sei respektvoll und konstruktiv</li>
                         <li>Verwende die Spoiler-Warnung bei Bedarf</li>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './ForumHome.css';
 
@@ -13,16 +13,34 @@ const ForumHome = () => {
     const [totalPages, setTotalPages] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [currentUser, setCurrentUser] = useState(null);
     
     const navigate = useNavigate();
 
-    useEffect(() => {
-        fetchCategories();
-        fetchPinnedPosts();
-        fetchPosts();
-    }, [selectedCategory, sortBy, currentPage]);
+    /**
+     * Fetches the current user information
+     * @returns {Promise<void>}
+     */
+    const fetchCurrentUser = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) return;
 
-        /**
+            const response = await fetch('http://localhost:8080/api/users/me', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            if (response.ok) {
+                const userData = await response.json();
+                setCurrentUser(userData);
+            }
+        } catch (error) {
+            console.error('Error fetching current user:', error);
+        }
+    };
+
+    /**
      * Fetches the available forum categories from the backend.
      * @returns {Promise<void>}
      */
@@ -60,7 +78,7 @@ const ForumHome = () => {
      * Fetches the forum posts based on selected category, sort option, and pagination.
      * @returns {Promise<void>}
      */
-    const fetchPosts = async () => {
+    const fetchPosts = useCallback(async () => {
         setLoading(true);
         try {
             let url = `http://localhost:8080/api/forum/posts?page=${currentPage}&size=10`;
@@ -85,7 +103,17 @@ const ForumHome = () => {
             setError('Fehler beim Laden der Beiträge');
             setLoading(false);
         }
-    };
+    }, [currentPage, selectedCategory, sortBy]);
+
+    useEffect(() => {
+        fetchCategories();
+        fetchPinnedPosts();
+        fetchCurrentUser();
+    }, []);
+
+    useEffect(() => {
+        fetchPosts();
+    }, [fetchPosts]);
 
     /**
      * handles the search functionality for forum posts.
@@ -149,6 +177,15 @@ const ForumHome = () => {
         return categoryMap[category] || category;
     };
 
+    const handleCreatePost = () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            navigate('/login');
+            return;
+        }
+        navigate('/forum/create-post');
+    };
+
     if (loading) {
         return (
             <div className="forum-home">
@@ -161,22 +198,29 @@ const ForumHome = () => {
     }
 
     if (error) {
-        return (
-            <div className="forum-home">
-                <div className="error-message">
-                    <h2>Fehler</h2>
-                    <p>{error}</p>
-                    <button onClick={() => window.location.reload()}>Seite neu laden</button>
-                </div>
-            </div>
-        );
-    }
+    return (
+      <div className="container py-5">
+        <div className="alert alert-danger" role="alert">
+          <h4 className="alert-heading">Fehler</h4>
+          <p>{error}</p>
+          <button className="btn btn-outline-danger" onClick={() => window.location.reload()}>
+            Erneut versuchen
+          </button>
+        </div>
+      </div>
+    );
+  }
 
     return (
         <div className="forum-home">
             <div className="forum-header">
-                <h1 className="text-white">🎬 CineMate Forum</h1>
+                <h1>🎬 CineMate Forum</h1>
                 <p>Diskutiere mit anderen über Filme und Serien</p>
+                {currentUser && (
+                    <div className="user-welcome">
+                        Willkommen zurück, <strong>{currentUser.username}</strong>! 👋
+                    </div>
+                )}
             </div>
 
             <div className="forum-controls">
@@ -215,7 +259,7 @@ const ForumHome = () => {
 
                     <button 
                         className="create-post-btn"
-                        onClick={() => navigate('/forum/create-post')}
+                        onClick={handleCreatePost}
                     >
                         ➕ Neuer Beitrag
                     </button>
@@ -234,7 +278,7 @@ const ForumHome = () => {
                                     <span className="post-category">{getCategoryDisplayName(post.category)}</span>
                                 </div>
                                 <div className="post-meta">
-                                    <span className="post-author">von {post.author.username}</span>
+                                    <span className="post-author">von {post.author?.username || 'Unbekannter Autor'}</span>
                                     <span className="post-date">{formatDate(post.createdAt)}</span>
                                     <div className="post-stats">
                                         <span>👍 {post.likesCount}</span>
@@ -253,7 +297,7 @@ const ForumHome = () => {
                 {posts.length === 0 ? (
                     <div className="no-posts">
                         <p>Keine Beiträge gefunden.</p>
-                        <button onClick={() => navigate('/forum/create-post')}>
+                        <button onClick={handleCreatePost}>
                             Ersten Beitrag erstellen
                         </button>
                     </div>
@@ -272,7 +316,7 @@ const ForumHome = () => {
                                     }
                                 </div>
                                 <div className="post-meta">
-                                    <span className="post-author">von {post.author.username}</span>
+                                    <span className="post-author">von {post.author?.username || 'Unbekannter Autor'}</span>
                                     <span className="post-date">{formatDate(post.createdAt)}</span>
                                     <div className="post-stats">
                                         <span>👍 {post.likesCount}</span>

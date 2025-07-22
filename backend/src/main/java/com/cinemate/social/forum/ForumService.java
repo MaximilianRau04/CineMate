@@ -56,21 +56,21 @@ public class ForumService {
      * @throws RuntimeException if the user is not found
      */
     public ForumPost createPost(ForumPost post, String userId) {
+        
         Optional<User> userOpt = userRepository.findById(userId);
-        User user;
         
         if (!userOpt.isPresent()) {
-            // For testing purposes, create a test user if not found
-            user = new User();
-            user.setId(userId);
-            user.setUsername("testuser");
-            user.setEmail("test@test.com");
-            user.setPassword("password"); // Required field
-            user.setJoinedAt(new Date());
-            user = userRepository.save(user);
-        } else {
-            user = userOpt.get();
+            System.err.println("ERROR: User not found with ID: " + userId);
+            // Try to find user by username if userId doesn't work
+            Optional<User> userByUsername = userRepository.findByUsername(userId);
+            if (userByUsername.isPresent()) {
+                userOpt = userByUsername;
+            } else {
+                throw new RuntimeException("User not found with ID or username: " + userId);
+            }
         }
+        
+        User user = userOpt.get();
         
         post.setAuthor(user);
         post.setCreatedAt(new Date());
@@ -254,6 +254,24 @@ public class ForumService {
             throw new RuntimeException("Not authorized to delete this post");
         }
         
+        post.setDeleted(true);
+        forumPostRepository.save(post);
+    }
+    
+    /**
+     * Admin method to delete posts without authorization checks.
+     * Useful for cleaning up posts from deleted users.
+     *
+     * @param postId the ID of the post to delete
+     * @throws RuntimeException if the post is not found
+     */
+    public void adminDeletePost(String postId) {
+        Optional<ForumPost> postOpt = forumPostRepository.findById(postId);
+        if (!postOpt.isPresent()) {
+            throw new RuntimeException("Post not found");
+        }
+        
+        ForumPost post = postOpt.get();
         post.setDeleted(true);
         forumPostRepository.save(post);
     }
