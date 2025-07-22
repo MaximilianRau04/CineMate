@@ -25,6 +25,7 @@ const CreateForumPost = () => {
 
     /**
      * Fetches the list of forum categories
+     * @returns {Promise<void>} - Resolves when categories are fetched
      */
     const fetchCategories = async () => {
         try {
@@ -41,6 +42,9 @@ const CreateForumPost = () => {
 
     /**
      * Handles form submission
+     * @param {React.FormEvent} e - The form submission event
+     * @returns {Promise<void>} - Resolves when the post is created
+     * @throws {Error} - If the post creation fails
      */
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -49,7 +53,6 @@ const CreateForumPost = () => {
             return;
         }
 
-        // Clear movieId if seriesId is selected and vice versa
         const finalMovieId = seriesId ? '' : movieId;
         const finalSeriesId = movieId ? '' : seriesId;
 
@@ -94,6 +97,8 @@ const CreateForumPost = () => {
 
     /**
      * Returns category display name
+     * @param {string} category - The category key
+     * @returns {string} - The display name for the category
      */
     const getCategoryDisplayName = (category) => {
         const categoryMap = {

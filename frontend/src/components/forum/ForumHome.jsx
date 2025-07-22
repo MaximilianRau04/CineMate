@@ -19,6 +19,8 @@ const ForumHome = () => {
 
     /**
      * Fetches the current user information
+     * @returns {Promise<void>} - Resolves when the user data is fetched
+     * @throws {Error} - If fetching user data fails
      */
     const fetchCurrentUser = async () => {
         try {
@@ -41,6 +43,8 @@ const ForumHome = () => {
 
     /**
      * Fetches the available forum categories
+     * @returns {Promise<void>} - Resolves when categories are fetched
+     * @throws {Error} - If fetching categories fails
      */
     const fetchCategories = async () => {
         try {
@@ -57,6 +61,8 @@ const ForumHome = () => {
 
     /**
      * Fetches the pinned posts
+     * @return {Promise<void>} - Resolves when pinned posts are fetched
+     * @throws {Error} - If fetching pinned posts fails
      */
     const fetchPinnedPosts = async () => {
         try {
@@ -73,6 +79,11 @@ const ForumHome = () => {
 
     /**
      * Fetches the forum posts
+     * @param {number} currentPage - The current page number
+     * @param {string} selectedCategory - The selected category filter
+     * @param {string} sortBy - The sorting criteria
+     * @returns {Promise<void>} - Resolves when posts are fetched
+     * @throws {Error} - If fetching posts fails
      */
     const fetchPosts = useCallback(async () => {
         setLoading(true);
@@ -113,6 +124,9 @@ const ForumHome = () => {
 
     /**
      * Handles the search functionality
+     * @param {string} searchQuery - The query to search for
+     * @returns {Promise<void>} - Resolves when search results are fetched
+     * @throws {Error} - If searching posts fails
      */
     const handleSearch = async () => {
         if (!searchQuery.trim()) {
@@ -140,6 +154,8 @@ const ForumHome = () => {
 
     /**
      * Formats date string
+     * @param {string} dateString - The date string to format
+     * @returns {string} - Formatted date string
      */
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -156,6 +172,8 @@ const ForumHome = () => {
 
     /**
      * Returns category display name
+     * @param {string} category - The category key
+     * @returns {string} - The display name for the category
      */
     const getCategoryDisplayName = (category) => {
         const categoryMap = {
@@ -170,6 +188,10 @@ const ForumHome = () => {
         return categoryMap[category] || category;
     };
 
+    /**
+     * Navigates to the create post page if user is authenticated
+     * @returns {void} 
+     */
     const handleCreatePost = () => {
         const token = localStorage.getItem('token');
         if (!token) {

@@ -10,6 +10,12 @@ const SearchableMediaSelect = ({ type, value, onChange, placeholder, disabled })
     const [allMediaLoaded, setAllMediaLoaded] = useState(false);
     const dropdownRef = useRef(null);
 
+    /**
+     * Fetches media details by ID
+     * @param {string} mediaId - The ID of the media to fetch
+     * @returns {Promise<void>} - Resolves when media details are fetched
+     * @throws {Error} - If fetching media details fails
+     */
     const fetchMediaDetails = useCallback(async (mediaId) => {
         try {
             const endpoint = type === 'movie' ? 'movies' : 'series';
@@ -23,6 +29,12 @@ const SearchableMediaSelect = ({ type, value, onChange, placeholder, disabled })
         }
     }, [type]);
 
+    /**
+     * Searches for media based on the search term
+     * @param {string} query - The search term to use
+     * @returns {Promise<void>} - Resolves when search results are fetched
+     * @throws {Error} - If searching for media fails
+     */
     const searchMedia = useCallback(async (query) => {
         setLoading(true);
         try {
@@ -40,6 +52,11 @@ const SearchableMediaSelect = ({ type, value, onChange, placeholder, disabled })
         }
     }, [type]);
 
+    /**
+     * Loads all media of the specified type if not already loaded
+     * @returns {Promise<void>} - Resolves when all media is loaded
+     * @throws {Error} - If loading all media fails
+     */
     const loadAllMedia = useCallback(async () => {
         if (allMediaLoaded) return;
         
@@ -65,6 +82,11 @@ const SearchableMediaSelect = ({ type, value, onChange, placeholder, disabled })
         }
     }, [value, fetchMediaDetails]);
 
+    /**
+     * Handles search term changes and debounces the search request
+     * @returns {void}
+     * @throws {Error} - If search term handling fails
+     */
     useEffect(() => {
         if (searchTerm.length >= 2) {
             const debounceTimer = setTimeout(() => {
@@ -76,6 +98,11 @@ const SearchableMediaSelect = ({ type, value, onChange, placeholder, disabled })
         }
     }, [searchTerm, searchMedia, loadAllMedia, allMediaLoaded]);
 
+    /**
+     * Handles clicks outside the dropdown to close it
+     * @returns {void}
+     * @throws {Error} - If handling outside click fails
+     */
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -87,6 +114,10 @@ const SearchableMediaSelect = ({ type, value, onChange, placeholder, disabled })
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+    /**
+     * Handles media selection from the dropdown
+     * @param {*} media 
+     */
     const handleSelect = (media) => {
         setSelectedMedia(media);
         onChange(media.id);
@@ -94,12 +125,22 @@ const SearchableMediaSelect = ({ type, value, onChange, placeholder, disabled })
         setSearchTerm('');
     };
 
+    /**
+     * Clears the selected media and resets the search term
+     * @returns {void}
+     * @throws {Error} - If clearing selection fails
+     */
     const handleClear = () => {
         setSelectedMedia(null);
         onChange('');
         setSearchTerm('');
     };
 
+    /**
+     * Handles input click to open the dropdown and load all media if necessary
+     * @returns {void}
+     * @throws {Error} - If handling input click fails
+     */
     const handleInputClick = () => {
         if (!disabled) {
             setIsOpen(true);
@@ -109,10 +150,20 @@ const SearchableMediaSelect = ({ type, value, onChange, placeholder, disabled })
         }
     };
 
+    /**
+     * Gets the title of the media item
+     * @param {*} media 
+     * @returns {string} - The title of the media item
+     */
     const getMediaTitle = (media) => {
         return media.title || media.name || 'Unbekannt';
     };
 
+    /**
+     * returns the release year of the media item
+     * @param {*} media 
+     * @returns {number} - The release year of the media item
+     */
     const getMediaYear = (media) => {
         const date = media.releaseDate || media.firstAirDate;
         return date ? new Date(date).getFullYear() : '';

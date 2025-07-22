@@ -25,6 +25,8 @@ const ForumPostDetail = () => {
 
     /**
      * Fetches the forum post details
+     * @return {Promise<void>} - Resolves when the post data is fetched
+     * @throws {Error} - If fetching post data fails
      */
     const fetchPost = async () => {
         try {
@@ -44,6 +46,9 @@ const ForumPostDetail = () => {
 
     /**
      * Fetches replies for the post
+     * @param {number} currentPage - The current page number
+     * @returns {Promise<void>} - Resolves when replies are fetched
+     * @throws {Error} - If fetching replies fails
      */
     const fetchReplies = async () => {
         try {
@@ -61,6 +66,8 @@ const ForumPostDetail = () => {
 
     /**
      * Fetches subscription status
+     * @return {Promise<void>} - Resolves when subscription status is fetched
+     * @throws {Error} - If fetching subscription status fails
      */
     const fetchSubscriptionStatus = async () => {
         try {
@@ -76,6 +83,8 @@ const ForumPostDetail = () => {
 
     /**
      * Fetches current user information
+     * @return {Promise<void>} - Resolves when current user data is fetched
+     * @throws {Error} - If fetching current user fails
      */
     const fetchCurrentUser = async () => {
         try {
@@ -98,6 +107,8 @@ const ForumPostDetail = () => {
 
     /**
      * Handles subscription toggle
+     * @returns {Promise<void>} - Resolves when subscription status is toggled
+     * @throws {Error} - If toggling subscription fails
      */
     const handleSubscribe = async () => {
         try {
@@ -120,6 +131,8 @@ const ForumPostDetail = () => {
 
     /**
      * Handles reply submission
+     * @param {React.FormEvent} e - The form submission event
+     * @returns {Promise<void>} - Resolves when the reply is submitted
      */
     const handleReplySubmit = async (e) => {
         e.preventDefault();
@@ -140,7 +153,7 @@ const ForumPostDetail = () => {
             if (response.ok) {
                 setReplyContent('');
                 fetchReplies();
-                fetchPost(); // Update reply count
+                fetchPost(); 
             } else {
                 throw new Error('Failed to submit reply');
             }
@@ -153,6 +166,8 @@ const ForumPostDetail = () => {
 
     /**
      * Handles like toggle
+     * @returns {Promise<void>} - Resolves when like status is toggled
+     * @throws {Error} - If toggling like fails
      */
     const handleLike = async () => {
         try {
@@ -175,6 +190,8 @@ const ForumPostDetail = () => {
 
     /**
      * Formats date to readable format
+     * @param {string} dateString - The date string to format
+     * @returns {string} - Formatted date string
      */
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -195,6 +212,8 @@ const ForumPostDetail = () => {
 
     /**
      * Returns category display name
+     * @param {string} category - The category key
+     * @returns {string} - The display name for the category
      */
     const getCategoryDisplayName = (category) => {
         const categoryMap = {
