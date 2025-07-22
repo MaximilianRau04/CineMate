@@ -19,13 +19,12 @@ const ForumHome = () => {
 
     /**
      * Fetches the current user information
-     * @returns {Promise<void>}
      */
     const fetchCurrentUser = async () => {
         try {
             const token = localStorage.getItem('token');
             if (!token) return;
-
+            
             const response = await fetch('http://localhost:8080/api/users/me', {
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -41,8 +40,7 @@ const ForumHome = () => {
     };
 
     /**
-     * Fetches the available forum categories from the backend.
-     * @returns {Promise<void>}
+     * Fetches the available forum categories
      */
     const fetchCategories = async () => {
         try {
@@ -58,8 +56,7 @@ const ForumHome = () => {
     };
 
     /**
-     * Fetches the pinned posts from the backend.
-     * @returns {Promise<void>}
+     * Fetches the pinned posts
      */
     const fetchPinnedPosts = async () => {
         try {
@@ -75,8 +72,7 @@ const ForumHome = () => {
     };
 
     /**
-     * Fetches the forum posts based on selected category, sort option, and pagination.
-     * @returns {Promise<void>}
+     * Fetches the forum posts
      */
     const fetchPosts = useCallback(async () => {
         setLoading(true);
@@ -116,8 +112,7 @@ const ForumHome = () => {
     }, [fetchPosts]);
 
     /**
-     * handles the search functionality for forum posts.
-     * @returns {Promise<void>}
+     * Handles the search functionality
      */
     const handleSearch = async () => {
         if (!searchQuery.trim()) {
@@ -144,34 +139,32 @@ const ForumHome = () => {
     };
 
     /**
-     * formats the date string to a readable format.
-     * @param {*} dateString 
-     * @returns formatted date string 
+     * Formats date string
      */
     const formatDate = (dateString) => {
         const date = new Date(dateString);
-        return date.toLocaleDateString('de-DE', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
+        const now = new Date();
+        const diffTime = Math.abs(now - date);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays === 1) return 'Heute';
+        if (diffDays === 2) return 'Gestern';
+        if (diffDays <= 7) return `vor ${diffDays - 1} Tagen`;
+        
+        return date.toLocaleDateString('de-DE');
     };
 
     /**
-     * returns the display name for a given category.
-     * @param {*} category 
-     * @returns category display name 
+     * Returns category display name
      */
     const getCategoryDisplayName = (category) => {
         const categoryMap = {
-            'GENERAL': 'Allgemeine Diskussion',
-            'MOVIE_DISCUSSION': 'Film-Diskussion',
-            'SERIES_DISCUSSION': 'Serien-Diskussion',
+            'GENERAL': 'Allgemein',
+            'MOVIE_DISCUSSION': 'Filme',
+            'SERIES_DISCUSSION': 'Serien',
             'RECOMMENDATIONS': 'Empfehlungen',
             'REVIEWS': 'Bewertungen',
-            'NEWS': 'News & Updates',
+            'NEWS': 'News',
             'OFF_TOPIC': 'Off-Topic'
         };
         return categoryMap[category] || category;
@@ -180,65 +173,64 @@ const ForumHome = () => {
     const handleCreatePost = () => {
         const token = localStorage.getItem('token');
         if (!token) {
-            navigate('/login');
+            navigate('/');
             return;
         }
         navigate('/forum/create-post');
     };
 
-    if (loading) {
+    if (loading && posts.length === 0) {
         return (
             <div className="forum-home">
-                <div className="loading-spinner">
-                    <div className="spinner"></div>
-                    <p>Beiträge werden geladen...</p>
+                <div className="loading-container">
+                    <div className="loading-spinner"></div>
+                    <p>Lädt...</p>
                 </div>
             </div>
         );
     }
 
     if (error) {
-    return (
-      <div className="container py-5">
-        <div className="alert alert-danger" role="alert">
-          <h4 className="alert-heading">Fehler</h4>
-          <p>{error}</p>
-          <button className="btn btn-outline-danger" onClick={() => window.location.reload()}>
-            Erneut versuchen
-          </button>
-        </div>
-      </div>
-    );
-  }
+        return (
+            <div className="forum-home">
+                <div className="error-container">
+                    <p>{error}</p>
+                    <button onClick={() => window.location.reload()}>
+                        Erneut versuchen
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="forum-home">
+            {/* Header */}
             <div className="forum-header">
-                <h1>🎬 CineMate Forum</h1>
-                <p>Diskutiere mit anderen über Filme und Serien</p>
-                {currentUser && (
-                    <div className="user-welcome">
-                        Willkommen zurück, <strong>{currentUser.username}</strong>! 👋
-                    </div>
-                )}
+                <h1>Forum</h1>
+                <button className="create-btn" onClick={handleCreatePost}>
+                    <span>+</span> Neuer Beitrag
+                </button>
             </div>
 
+            {/* Search and Filters */}
             <div className="forum-controls">
-                <div className="search-bar">
+                <div className="search-section">
                     <input
                         type="text"
-                        placeholder="Beiträge durchsuchen..."
+                        placeholder="Beiträge suchen..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                        className="search-input"
                     />
-                    <button onClick={handleSearch}>🔍</button>
                 </div>
 
-                <div className="filter-controls">
+                <div className="filters">
                     <select 
                         value={selectedCategory} 
                         onChange={(e) => setSelectedCategory(e.target.value)}
+                        className="filter-select"
                     >
                         <option value="">Alle Kategorien</option>
                         {categories.map(category => (
@@ -251,38 +243,39 @@ const ForumHome = () => {
                     <select 
                         value={sortBy} 
                         onChange={(e) => setSortBy(e.target.value)}
+                        className="filter-select"
                     >
-                        <option value="">Neuste zuerst</option>
+                        <option value="">Neueste</option>
                         <option value="popular">Beliebteste</option>
-                        <option value="recent">Kürzlich aktiv</option>
+                        <option value="recent">Aktuelle</option>
                     </select>
-
-                    <button 
-                        className="create-post-btn"
-                        onClick={handleCreatePost}
-                    >
-                        ➕ Neuer Beitrag
-                    </button>
                 </div>
             </div>
 
             {/* Pinned Posts */}
             {pinnedPosts.length > 0 && (
-                <div className="pinned-posts">
-                    <h2>📌 Angepinnte Beiträge</h2>
-                    <div className="posts-list">
+                <div className="pinned-section">
+                    <h2>Wichtige Beiträge</h2>
+                    <div className="posts-grid">
                         {pinnedPosts.map(post => (
-                            <div key={post.id} className="post-item pinned">
-                                <div className="post-header">
-                                    <h3 onClick={() => navigate(`/forum/post/${post.id}`)}>{post.title}</h3>
-                                    <span className="post-category">{getCategoryDisplayName(post.category)}</span>
-                                </div>
+                            <div 
+                                key={post.id} 
+                                className="post-card pinned"
+                                onClick={() => navigate(`/forum/post/${post.id}`)}
+                            >
                                 <div className="post-meta">
-                                    <span className="post-author">von {post.author?.username || 'Unbekannter Autor'}</span>
-                                    <span className="post-date">{formatDate(post.createdAt)}</span>
+                                    <span className="category">
+                                        {getCategoryDisplayName(post.category)}
+                                    </span>
+                                    <span className="pinned-badge">📌</span>
+                                </div>
+                                <h3>{post.title}</h3>
+                                <div className="post-info">
+                                    <span>{post.author?.username}</span>
+                                    <span>{formatDate(post.createdAt)}</span>
                                     <div className="post-stats">
-                                        <span>👍 {post.likesCount}</span>
-                                        <span>💬 {post.repliesCount}</span>
+                                        <span>👍 {post.likesCount || 0}</span>
+                                        <span>💬 {post.repliesCount || 0}</span>
                                     </div>
                                 </div>
                             </div>
@@ -292,35 +285,44 @@ const ForumHome = () => {
             )}
 
             {/* Regular Posts */}
-            <div className="forum-posts">
-                <h2 className="text-white">💬 Alle Beiträge</h2>
+            <div className="posts-section">
+                <h2>Alle Beiträge</h2>
+                
                 {posts.length === 0 ? (
                     <div className="no-posts">
-                        <p>Keine Beiträge gefunden.</p>
-                        <button onClick={handleCreatePost}>
+                        <p>Noch keine Beiträge vorhanden.</p>
+                        <button onClick={handleCreatePost} className="create-first-btn">
                             Ersten Beitrag erstellen
                         </button>
                     </div>
                 ) : (
-                    <div className="posts-list">
+                    <div className="posts-grid">
                         {posts.map(post => (
-                            <div key={post.id} className="post-item">
-                                <div className="post-header">
-                                    <h3 onClick={() => navigate(`/forum/post/${post.id}`)}>{post.title}</h3>
-                                    <span className="post-category">{getCategoryDisplayName(post.category)}</span>
+                            <div 
+                                key={post.id} 
+                                className="post-card"
+                                onClick={() => navigate(`/forum/post/${post.id}`)}
+                            >
+                                <div className="post-meta">
+                                    <span className="category">
+                                        {getCategoryDisplayName(post.category)}
+                                    </span>
+                                    {post.movieId && <span className="media-tag">🎬</span>}
+                                    {post.seriesId && <span className="media-tag">📺</span>}
                                 </div>
-                                <div className="post-content-preview">
-                                    {post.content.length > 200 ? 
-                                        `${post.content.substring(0, 200)}...` : 
+                                <h3>{post.title}</h3>
+                                <p className="post-preview">
+                                    {post.content.length > 120 ? 
+                                        `${post.content.substring(0, 120)}...` : 
                                         post.content
                                     }
-                                </div>
-                                <div className="post-meta">
-                                    <span className="post-author">von {post.author?.username || 'Unbekannter Autor'}</span>
-                                    <span className="post-date">{formatDate(post.createdAt)}</span>
+                                </p>
+                                <div className="post-info">
+                                    <span>{post.author?.username}</span>
+                                    <span>{formatDate(post.createdAt)}</span>
                                     <div className="post-stats">
-                                        <span>👍 {post.likesCount}</span>
-                                        <span>💬 {post.repliesCount}</span>
+                                        <span>👍 {post.likesCount || 0}</span>
+                                        <span>💬 {post.repliesCount || 0}</span>
                                     </div>
                                 </div>
                             </div>
@@ -334,15 +336,17 @@ const ForumHome = () => {
                         <button 
                             onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
                             disabled={currentPage === 0}
+                            className="page-btn"
                         >
-                            ◀ Zurück
+                            ← Zurück
                         </button>
-                        <span>Seite {currentPage + 1} von {totalPages}</span>
+                        <span className="page-info">Seite {currentPage + 1} von {totalPages}</span>
                         <button 
                             onClick={() => setCurrentPage(prev => Math.min(totalPages - 1, prev + 1))}
                             disabled={currentPage === totalPages - 1}
+                            className="page-btn"
                         >
-                            Weiter ▶
+                            Weiter →
                         </button>
                     </div>
                 )}

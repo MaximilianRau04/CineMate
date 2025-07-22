@@ -17,16 +17,14 @@ const CreateForumPost = () => {
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (!token) {
-            // Redirect to login if not authenticated
-            navigate('/login');
+            navigate('/');
             return;
         }
         fetchCategories();
     }, [navigate]);
 
     /**
-     * Fetches the list of forum categories from the backend.
-     * @returns {Promise<void>}
+     * Fetches the list of forum categories
      */
     const fetchCategories = async () => {
         try {
@@ -42,8 +40,7 @@ const CreateForumPost = () => {
     };
 
     /**
-     * handles the form submission to create a new forum post.
-     * @param {*} e  
+     * Handles form submission
      */
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -51,6 +48,10 @@ const CreateForumPost = () => {
             setError('Titel und Inhalt sind erforderlich');
             return;
         }
+
+        // Clear movieId if seriesId is selected and vice versa
+        const finalMovieId = seriesId ? '' : movieId;
+        const finalSeriesId = movieId ? '' : seriesId;
 
         setLoading(true);
         setError(null);
@@ -60,8 +61,8 @@ const CreateForumPost = () => {
                 title: title.trim(),
                 content: content.trim(),
                 category: category,
-                movieId: movieId || null,
-                seriesId: seriesId || null
+                movieId: finalMovieId || null,
+                seriesId: finalSeriesId || null
             };
 
             const token = localStorage.getItem('token');
@@ -79,7 +80,7 @@ const CreateForumPost = () => {
                 navigate(`/forum/post/${createdPost.id}`);
             } else if (response.status === 401) {
                 setError('Sie müssen sich anmelden, um einen Beitrag zu erstellen');
-                setTimeout(() => navigate('/login'), 2000);
+                setTimeout(() => navigate('/'), 2000);
             } else {
                 const errorData = await response.text();
                 throw new Error(errorData || 'Error creating post');
@@ -92,141 +93,173 @@ const CreateForumPost = () => {
     };
 
     /**
-     * returns the display name for a given category.
-     * @param {*} category 
-     * @returns category display name 
+     * Returns category display name
      */
     const getCategoryDisplayName = (category) => {
         const categoryMap = {
-            'GENERAL': 'Allgemeine Diskussion',
-            'MOVIE_DISCUSSION': 'Film-Diskussion',
-            'SERIES_DISCUSSION': 'Serien-Diskussion',
+            'GENERAL': 'Allgemein',
+            'MOVIE_DISCUSSION': 'Filme',
+            'SERIES_DISCUSSION': 'Serien',
             'RECOMMENDATIONS': 'Empfehlungen',
             'REVIEWS': 'Bewertungen',
-            'NEWS': 'News & Updates',
+            'NEWS': 'News',
             'OFF_TOPIC': 'Off-Topic'
         };
         return categoryMap[category] || category;
     };
 
     return (
-        <div className="create-forum-post">
-            <div className="create-post-header">
-                <button 
-                    className="back-button" 
-                    onClick={() => navigate('/forum')}
-                >
-                    ← Zurück zum Forum
-                </button>
-                <h1>✍️ Neuen Beitrag erstellen</h1>
+        <div className="create-forum-post modern-create-page">
+            {/* Modern Header */}
+            <div className="modern-create-header">
+                <div className="header-content">
+                    <button 
+                        className="modern-back-button" 
+                        onClick={() => navigate('/forum')}
+                        type="button"
+                    >
+                        <span className="back-arrow">←</span>
+                        <span>Zurück zum Forum</span>
+                    </button>
+                    <div className="header-title-section">
+                        <h1 className="modern-create-title">Neuen Beitrag erstellen</h1>
+                        <p className="header-subtitle">Teile deine Gedanken mit der Community</p>
+                    </div>
+                </div>
             </div>
 
-            <form className="create-post-form" onSubmit={handleSubmit}>
-                <div className="form-group">
-                    <label htmlFor="title">Titel *</label>
-                    <input
-                        type="text"
-                        id="title"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        placeholder="Gib deinem Beitrag einen aussagekräftigen Titel..."
-                        required
-                        maxLength={200}
-                    />
-                    <div className="char-count">
-                        {title.length}/200
-                    </div>
-                </div>
-
-                <div className="form-group">
-                    <label htmlFor="category">Kategorie *</label>
-                    <select
-                        id="category"
-                        value={category}
-                        onChange={(e) => setCategory(e.target.value)}
-                        required
-                    >
-                        {categories.map(cat => (
-                            <option key={cat} value={cat}>
-                                {getCategoryDisplayName(cat)}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-
-                <div className="form-row">
-                    <div className="form-group">
-                        <label htmlFor="movieSelect">Film (optional)</label>
-                        <SearchableMediaSelect
-                            type="movie"
-                            value={movieId}
-                            onChange={setMovieId}
-                            placeholder="Nach Film suchen..."
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label htmlFor="seriesSelect">Serie (optional)</label>
-                        <SearchableMediaSelect
-                            type="series"
-                            value={seriesId}
-                            onChange={setSeriesId}
-                            placeholder="Nach Serie suchen..."
-                        />
-                    </div>
-                </div>
-
-                <div className="form-group">
-                    <label htmlFor="content">Inhalt *</label>
-                    <textarea
-                        id="content"
-                        value={content}
-                        onChange={(e) => setContent(e.target.value)}
-                        placeholder="Schreibe hier deinen Beitrag..."
-                        required
-                        rows="12"
-                        maxLength={5000}
-                    />
-                    <div className="char-count">
-                        {content.length}/5000
-                    </div>
-                </div>
-
-                <div className="form-tips">
-                    <h3>💡 Tipps für einen guten Beitrag:</h3>
-                    <ul>
-                        <li>Verwende einen aussagekräftigen Titel</li>
-                        <li>Wähle die passende Kategorie</li>
-                        <li>Nutze die Suchfunktion, um passende Filme oder Serien zu verknüpfen</li>
-                        <li>Strukturiere deinen Text mit Absätzen</li>
-                        <li>Sei respektvoll und konstruktiv</li>
-                        <li>Verwende die Spoiler-Warnung bei Bedarf</li>
-                    </ul>
-                </div>
-
+            {/* Form */}
+            <div className="create-form-container enhanced-form-container">
                 {error && (
-                    <div className="error-message">
+                    <div className="error-message enhanced-error-message">
                         {error}
                     </div>
                 )}
 
-                <div className="form-actions">
-                    <button 
-                        type="button" 
-                        className="cancel-button"
-                        onClick={() => navigate('/forum')}
-                    >
-                        Abbrechen
-                    </button>
-                    <button 
-                        type="submit" 
-                        className="submit-button"
-                        disabled={loading || !title.trim() || !content.trim()}
-                    >
-                        {loading ? 'Wird erstellt...' : 'Beitrag erstellen'}
-                    </button>
-                </div>
-            </form>
+                <form className="create-form enhanced-create-form" onSubmit={handleSubmit}>
+                    {/* Title */}
+                    <div className="form-group enhanced-form-group">
+                        <label htmlFor="title" className="enhanced-label">Titel *</label>
+                        <input
+                            type="text"
+                            id="title"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                            placeholder="Gib deinem Beitrag einen aussagekräftigen Titel..."
+                            required
+                            maxLength={200}
+                            className="enhanced-input"
+                        />
+                        <div className="char-count enhanced-char-count">
+                            {title.length}/200
+                        </div>
+                    </div>
+
+                    {/* Category */}
+                    <div className="form-group enhanced-form-group">
+                        <label htmlFor="category" className="enhanced-label">Kategorie *</label>
+                        <select
+                            id="category"
+                            value={category}
+                            onChange={(e) => setCategory(e.target.value)}
+                            required
+                            className="enhanced-select"
+                        >
+                            {categories.map(cat => (
+                                <option key={cat} value={cat} className="enhanced-option">
+                                    {getCategoryDisplayName(cat)}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Media Selection */}
+                    <div className="form-row enhanced-form-row">
+                        <div className="form-group enhanced-form-group">
+                            <label htmlFor="movieSelect" className="enhanced-label">Film (optional)</label>
+                            <SearchableMediaSelect
+                                type="movie"
+                                value={movieId}
+                                onChange={setMovieId}
+                                placeholder="Film suchen und auswählen..."
+                                disabled={!!seriesId}
+                                className="enhanced-media-select"
+                            />
+                            {seriesId && (
+                                <div className="info-text enhanced-info-text">
+                                    Film-Auswahl ist deaktiviert, da bereits eine Serie ausgewählt wurde.
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="form-group enhanced-form-group">
+                            <label htmlFor="seriesSelect" className="enhanced-label">Serie (optional)</label>
+                            <SearchableMediaSelect
+                                type="series"
+                                value={seriesId}
+                                onChange={setSeriesId}
+                                placeholder="Serie suchen und auswählen..."
+                                disabled={!!movieId}
+                                className="enhanced-media-select"
+                            />
+                            {movieId && (
+                                <div className="info-text enhanced-info-text">
+                                    Serien-Auswahl ist deaktiviert, da bereits ein Film ausgewählt wurde.
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="form-group enhanced-form-group">
+                        <label htmlFor="content" className="enhanced-label">Inhalt *</label>
+                        <textarea
+                            id="content"
+                            value={content}
+                            onChange={(e) => setContent(e.target.value)}
+                            placeholder="Schreibe hier deinen Beitrag..."
+                            required
+                            rows="12"
+                            maxLength={5000}
+                            className="enhanced-textarea"
+                        />
+                        <div className="char-count enhanced-char-count">
+                            {content.length}/5000
+                        </div>
+                    </div>
+
+                    {/* Tips */}
+                    <div className="form-tips enhanced-form-tips">
+                        <h3>💡 Tipps für einen guten Beitrag:</h3>
+                        <ul className="enhanced-tips-list">
+                            <li>Verwende einen aussagekräftigen Titel</li>
+                            <li>Wähle die passende Kategorie</li>
+                            <li>Verknüpfe einen Film oder eine Serie, falls relevant</li>
+                            <li>Strukturiere deinen Text mit Absätzen</li>
+                            <li>Sei respektvoll und konstruktiv</li>
+                        </ul>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="form-actions enhanced-form-actions">
+                        <button 
+                            type="button" 
+                            className="cancel-btn enhanced-cancel-btn"
+                            onClick={() => navigate('/forum')}
+                            disabled={loading}
+                        >
+                            Abbrechen
+                        </button>
+                        <button 
+                            type="submit" 
+                            className="submit-btn enhanced-submit-btn"
+                            disabled={loading || !title.trim() || !content.trim()}
+                        >
+                            {loading ? 'Wird erstellt...' : 'Beitrag erstellen'}
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     );
 };

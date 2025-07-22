@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './SearchableMediaSelect.css';
 
-const SearchableMediaSelect = ({ type, value, onChange, placeholder }) => {
+const SearchableMediaSelect = ({ type, value, onChange, placeholder, disabled }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [options, setOptions] = useState([]);
     const [loading, setLoading] = useState(false);
     const [selectedMedia, setSelectedMedia] = useState(null);
+    const [allMediaLoaded, setAllMediaLoaded] = useState(false);
     const dropdownRef = useRef(null);
 
     const fetchMediaDetails = useCallback(async (mediaId) => {
@@ -26,7 +27,7 @@ const SearchableMediaSelect = ({ type, value, onChange, placeholder }) => {
         setLoading(true);
         try {
             const endpoint = type === 'movie' ? 'movies' : 'series';
-            const response = await fetch(`http://localhost:8080/api/${endpoint}/search?query=${encodeURIComponent(query)}&page=0&size=10`);
+            const response = await fetch(`http://localhost:8080/api/${endpoint}/search?query=${encodeURIComponent(query)}&page=0&size=20`);
             if (response.ok) {
                 const data = await response.json();
                 setOptions(data.content || data);
@@ -39,28 +40,30 @@ const SearchableMediaSelect = ({ type, value, onChange, placeholder }) => {
         }
     }, [type]);
 
-    const loadInitialOptions = useCallback(async () => {
+    const loadAllMedia = useCallback(async () => {
+        if (allMediaLoaded) return;
+        
+        setLoading(true);
         try {
             const endpoint = type === 'movie' ? 'movies' : 'series';
-            const response = await fetch(`http://localhost:8080/api/${endpoint}?page=0&size=20`);
+            const response = await fetch(`http://localhost:8080/api/${endpoint}?page=0&size=100`);
             if (response.ok) {
                 const data = await response.json();
                 setOptions(data.content || data);
+                setAllMediaLoaded(true);
             }
         } catch (error) {
-            console.error(`Error loading initial ${type} options:`, error);
+            console.error(`Error loading all ${type}:`, error);
+        } finally {
+            setLoading(false);
         }
-    }, [type]);
+    }, [type, allMediaLoaded]);
 
     useEffect(() => {
         if (value) {
             fetchMediaDetails(value);
         }
-        // Load initial options when component mounts
-        if (!options.length) {
-            loadInitialOptions();
-        }
-    }, [value, fetchMediaDetails, options.length, loadInitialOptions]);
+    }, [value, fetchMediaDetails]);
 
     useEffect(() => {
         if (searchTerm.length >= 2) {
@@ -68,10 +71,10 @@ const SearchableMediaSelect = ({ type, value, onChange, placeholder }) => {
                 searchMedia(searchTerm);
             }, 300);
             return () => clearTimeout(debounceTimer);
-        } else {
-            setOptions([]);
+        } else if (searchTerm.length === 0 && !allMediaLoaded) {
+            loadAllMedia();
         }
-    }, [searchTerm, searchMedia]);
+    }, [searchTerm, searchMedia, loadAllMedia, allMediaLoaded]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -97,6 +100,15 @@ const SearchableMediaSelect = ({ type, value, onChange, placeholder }) => {
         setSearchTerm('');
     };
 
+    const handleInputClick = () => {
+        if (!disabled) {
+            setIsOpen(true);
+            if (!allMediaLoaded && searchTerm.length === 0) {
+                loadAllMedia();
+            }
+        }
+    };
+
     const getMediaTitle = (media) => {
         return media.title || media.name || 'Unbekannt';
     };
@@ -107,7 +119,7 @@ const SearchableMediaSelect = ({ type, value, onChange, placeholder }) => {
     };
 
     return (
-        <div className="searchable-media-select" ref={dropdownRef}>
+        <div className={`searchable-media-select ${disabled ? 'disabled' : ''}`} ref={dropdownRef}>
             <div className="selected-media-container">
                 {selectedMedia ? (
                     <div className="selected-media">
@@ -129,6 +141,7 @@ const SearchableMediaSelect = ({ type, value, onChange, placeholder }) => {
                             className="clear-button" 
                             onClick={handleClear}
                             title="Auswahl entfernen"
+                            disabled={disabled}
                         >
                             ✕
                         </button>
@@ -137,19 +150,22 @@ const SearchableMediaSelect = ({ type, value, onChange, placeholder }) => {
                     <div className="search-input-container">
                         <input
                             type="text"
-                            placeholder={placeholder}
+                            placeholder={disabled ? 'Deaktiviert' : placeholder}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            onFocus={() => setIsOpen(true)}
-                            onClick={() => setIsOpen(true)}
+                            onFocus={handleInputClick}
+                            onClick={handleInputClick}
                             className="search-input"
+                            disabled={disabled}
                         />
-                        <div className="search-icon" onClick={() => setIsOpen(!isOpen)}>🔍</div>
+                        <div className="search-icon" onClick={() => !disabled && setIsOpen(!isOpen)}>
+                            {disabled ? '�' : '�🔍'}
+                        </div>
                     </div>
                 )}
             </div>
 
-            {isOpen && !selectedMedia && (
+            {isOpen && !selectedMedia && !disabled && (
                 <div className="dropdown-menu">
                     {loading ? (
                         <div className="loading-item">
@@ -158,6 +174,9 @@ const SearchableMediaSelect = ({ type, value, onChange, placeholder }) => {
                         </div>
                     ) : options.length > 0 ? (
                         <div className="options-list">
+                            <div className="options-header">
+                                {searchTerm ? `Suchergebnisse für "${searchTerm}"` : `Alle verfügbaren ${type === 'movie' ? 'Filme' : 'Serien'}`}
+                            </div>
                             {options.map((media) => (
                                 <div
                                     key={media.id}
@@ -178,8 +197,8 @@ const SearchableMediaSelect = ({ type, value, onChange, placeholder }) => {
                                         )}
                                         {media.overview && (
                                             <div className="option-overview">
-                                                {media.overview.length > 100 
-                                                    ? `${media.overview.substring(0, 100)}...` 
+                                                {media.overview.length > 80 
+                                                    ? `${media.overview.substring(0, 80)}...` 
                                                     : media.overview
                                                 }
                                             </div>
@@ -190,13 +209,13 @@ const SearchableMediaSelect = ({ type, value, onChange, placeholder }) => {
                         </div>
                     ) : searchTerm.length >= 2 ? (
                         <div className="no-results">
-                            Keine {type === 'movie' ? 'Filme' : 'Serien'} gefunden
+                            Keine {type === 'movie' ? 'Filme' : 'Serien'} gefunden für "{searchTerm}"
                         </div>
                     ) : (
                         <div className="search-hint">
-                            {options.length === 0 
-                                ? `Keine ${type === 'movie' ? 'Filme' : 'Serien'} verfügbar` 
-                                : `Tippen Sie, um zu suchen oder wählen Sie aus der Liste`
+                            {searchTerm.length < 2 
+                                ? `Mindestens 2 Zeichen eingeben zum Suchen` 
+                                : `Keine ${type === 'movie' ? 'Filme' : 'Serien'} verfügbar`
                             }
                         </div>
                     )}
