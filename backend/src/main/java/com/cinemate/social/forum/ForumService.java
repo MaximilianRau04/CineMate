@@ -2,6 +2,8 @@ package com.cinemate.social.forum;
 
 import com.cinemate.notification.events.ForumPostCreatedEvent;
 import com.cinemate.notification.events.ForumReplyCreatedEvent;
+import com.cinemate.social.forum.like.ForumLike;
+import com.cinemate.social.forum.like.ForumLikeRepository;
 import com.cinemate.social.forum.post.ForumPost;
 import com.cinemate.social.forum.post.ForumPostRepository;
 import com.cinemate.social.forum.reply.ForumReply;
@@ -24,25 +26,28 @@ import java.util.Optional;
  * Service class for managing forum operations.
  * Provides business logic for forum posts, replies, subscriptions, and related functionality.
  * Handles data persistence, event publishing, and business rule enforcement.
- * 
+ *
  * @author CineMate Team
  * @version 1.0
  */
 @Service
 public class ForumService {
-    
+
     @Autowired
     private ForumPostRepository forumPostRepository;
-    
+
     @Autowired
     private ForumReplyRepository forumReplyRepository;
-    
+
     @Autowired
     private ForumSubscriptionRepository forumSubscriptionRepository;
-    
+
+    @Autowired
+    private ForumLikeRepository forumLikeRepository;
+
     @Autowired
     private UserRepository userRepository;
-    
+
     @Autowired
     private ApplicationEventPublisher eventPublisher;
 
@@ -56,9 +61,9 @@ public class ForumService {
      * @throws RuntimeException if the user is not found
      */
     public ForumPost createPost(ForumPost post, String userId) {
-        
+
         Optional<User> userOpt = userRepository.findById(userId);
-        
+
         if (!userOpt.isPresent()) {
             System.err.println("ERROR: User not found with ID: " + userId);
             // Try to find user by username if userId doesn't work
@@ -69,25 +74,25 @@ public class ForumService {
                 throw new RuntimeException("User not found with ID or username: " + userId);
             }
         }
-        
+
         User user = userOpt.get();
-        
+
         post.setAuthor(user);
         post.setCreatedAt(new Date());
         post.setLastModified(new Date());
-        
+
         ForumPost savedPost = forumPostRepository.save(post);
-        
+
         // Auto-subscribe author to their own post
         ForumSubscription subscription = new ForumSubscription(user, savedPost);
         forumSubscriptionRepository.save(subscription);
-        
+
         // Publish event for notifications
         eventPublisher.publishEvent(new ForumPostCreatedEvent(this, savedPost));
-        
+
         return savedPost;
     }
-    
+
     /**
      * Retrieves all forum posts that are not deleted, ordered by creation date (newest first).
      *
@@ -97,7 +102,7 @@ public class ForumService {
     public Page<ForumPost> getAllPosts(Pageable pageable) {
         return forumPostRepository.findByIsDeletedFalseOrderByCreatedAtDesc(pageable);
     }
-    
+
     /**
      * Retrieves forum posts filtered by category, ordered by creation date (newest first).
      *
@@ -108,7 +113,7 @@ public class ForumService {
     public Page<ForumPost> getPostsByCategory(ForumCategory category, Pageable pageable) {
         return forumPostRepository.findByCategoryAndIsDeletedFalseOrderByCreatedAtDesc(category, pageable);
     }
-    
+
     /**
      * Retrieves a specific forum post by its unique identifier.
      *
@@ -118,7 +123,7 @@ public class ForumService {
     public Optional<ForumPost> getPostById(String id) {
         return forumPostRepository.findById(id);
     }
-    
+
     /**
      * Retrieves forum posts created by a specific author.
      *
@@ -129,7 +134,7 @@ public class ForumService {
     public Page<ForumPost> getPostsByAuthor(String authorId, Pageable pageable) {
         return forumPostRepository.findByAuthorIdAndIsDeletedFalseOrderByCreatedAtDesc(authorId, pageable);
     }
-    
+
     /**
      * Retrieves forum posts related to a specific movie.
      *
@@ -140,7 +145,7 @@ public class ForumService {
     public Page<ForumPost> getPostsByMovieId(String movieId, Pageable pageable) {
         return forumPostRepository.findByMovieIdAndIsDeletedFalseOrderByCreatedAtDesc(movieId, pageable);
     }
-    
+
     /**
      * Retrieves forum posts related to a specific series.
      *
@@ -151,7 +156,7 @@ public class ForumService {
     public Page<ForumPost> getPostsBySeriesId(String seriesId, Pageable pageable) {
         return forumPostRepository.findBySeriesIdAndIsDeletedFalseOrderByCreatedAtDesc(seriesId, pageable);
     }
-    
+
     /**
      * Searches for forum posts based on title or content matching the search term.
      *
@@ -162,7 +167,7 @@ public class ForumService {
     public Page<ForumPost> searchPosts(String searchTerm, Pageable pageable) {
         return forumPostRepository.searchPosts(searchTerm, pageable);
     }
-    
+
     /**
      * Retrieves forum posts ordered by like count (most liked first).
      *
@@ -172,17 +177,17 @@ public class ForumService {
     public Page<ForumPost> getPopularPosts(Pageable pageable) {
         return forumPostRepository.findByIsDeletedFalseOrderByLikesCountDesc(pageable);
     }
-    
+
     /**
      * Retrieves forum posts ordered by last modified date (most recently active first).
      *
      * @param pageable pagination information
      * @return a Page containing ForumPost entities ordered by recent activity
      */
-    public Page<ForumPost> getRecentlyActiveePosts(Pageable pageable) {
+    public Page<ForumPost> getRecentlyActivePosts(Pageable pageable) {
         return forumPostRepository.findByIsDeletedFalseOrderByLastModifiedDesc(pageable);
     }
-    
+
     /**
      * Retrieves all pinned forum posts.
      *
@@ -191,7 +196,7 @@ public class ForumService {
     public List<ForumPost> getPinnedPosts() {
         return forumPostRepository.findByIsPinnedTrueAndIsDeletedFalseOrderByCreatedAtDesc();
     }
-    
+
     /**
      * Retrieves forum posts where the specified user has participated (either as author or replied to).
      *
@@ -202,7 +207,7 @@ public class ForumService {
     public Page<ForumPost> getPostsUserParticipatedIn(String userId, Pageable pageable) {
         return forumPostRepository.findPostsUserParticipatedIn(userId, pageable);
     }
-    
+
     /**
      * Updates an existing forum post with new content.
      * Only the author of the post can update it.
@@ -218,21 +223,21 @@ public class ForumService {
         if (!existingPostOpt.isPresent()) {
             throw new RuntimeException("Post not found");
         }
-        
+
         ForumPost existingPost = existingPostOpt.get();
-        
+
         // Check if user is the author or has admin privileges
         if (!existingPost.getAuthor().getId().equals(userId)) {
             throw new RuntimeException("Not authorized to update this post");
         }
-        
+
         existingPost.setTitle(updatedPost.getTitle());
         existingPost.setContent(updatedPost.getContent());
         existingPost.setLastModified(new Date());
-        
+
         return forumPostRepository.save(existingPost);
     }
-    
+
     /**
      * Marks a forum post as deleted (soft delete).
      * Only the author of the post can delete it.
@@ -246,18 +251,18 @@ public class ForumService {
         if (!postOpt.isPresent()) {
             throw new RuntimeException("Post not found");
         }
-        
+
         ForumPost post = postOpt.get();
-        
+
         // Check if user is the author or has admin privileges
         if (!post.getAuthor().getId().equals(userId)) {
             throw new RuntimeException("Not authorized to delete this post");
         }
-        
+
         post.setDeleted(true);
         forumPostRepository.save(post);
     }
-    
+
     /**
      * Admin method to delete posts without authorization checks.
      * Useful for cleaning up posts from deleted users.
@@ -270,22 +275,69 @@ public class ForumService {
         if (!postOpt.isPresent()) {
             throw new RuntimeException("Post not found");
         }
-        
+
         ForumPost post = postOpt.get();
         post.setDeleted(true);
         forumPostRepository.save(post);
     }
-    
+
     public ForumPost toggleLike(String postId, String userId) {
         Optional<ForumPost> postOpt = forumPostRepository.findById(postId);
+        Optional<User> userOpt = userRepository.findById(userId);
+        
         if (!postOpt.isPresent()) {
             throw new RuntimeException("Post not found");
         }
-        
+        if (!userOpt.isPresent()) {
+            throw new RuntimeException("User not found");
+        }
+
         ForumPost post = postOpt.get();
-        // TODO: Implement like tracking (separate entity for user-post likes)
+        User user = userOpt.get();
         
+        Optional<ForumLike> existingLike = forumLikeRepository.findByUserIdAndPostId(userId, postId);
+        
+        if (existingLike.isPresent()) {
+            // Remove like
+            forumLikeRepository.delete(existingLike.get());
+            post.setLikesCount(Math.max(0, post.getLikesCount() - 1));
+        } else {
+            // Add like
+            ForumLike like = new ForumLike();
+            like.setUser(user);
+            like.setPost(post);
+            like.setCreatedAt(new Date());
+            like.setLikeType("POST");
+            forumLikeRepository.save(like);
+            post.setLikesCount(post.getLikesCount() + 1);
+        }
+
         return forumPostRepository.save(post);
+    }
+
+    /**
+     * Checks if a specific user has liked a specific forum post.
+     *
+     * @param postId the ID of the post to check
+     * @param userId the ID of the user to check
+     * @return true if the user has liked the post, false otherwise
+     */
+    public boolean isPostLikedByUser(String postId, String userId) {
+        return forumLikeRepository.findByUserIdAndPostId(userId, postId).isPresent();
+    }
+
+    /**
+     * Increments the view count of a forum post.
+     *
+     * @param postId the ID of the post to increment views for
+     */
+    public void incrementViewCount(String postId) {
+        Optional<ForumPost> postOpt = forumPostRepository.findById(postId);
+        if (postOpt.isPresent()) {
+            ForumPost post = postOpt.get();
+            post.setViews(post.getViews() + 1);
+            forumPostRepository.save(post);
+        }
     }
 
     /**
@@ -302,33 +354,43 @@ public class ForumService {
     public ForumReply createReply(ForumReply reply, String userId, String postId) {
         Optional<User> userOpt = userRepository.findById(userId);
         Optional<ForumPost> postOpt = forumPostRepository.findById(postId);
-        
+
         if (!userOpt.isPresent()) {
-            throw new RuntimeException("User not found");
+            throw new RuntimeException("User not found with ID: " + userId);
         }
         if (!postOpt.isPresent()) {
-            throw new RuntimeException("Post not found");
+            throw new RuntimeException("Post not found with ID: " + postId);
         }
-        
+
         ForumPost post = postOpt.get();
-        reply.setAuthor(userOpt.get());
+
+        if (post.isLocked()) {
+            throw new RuntimeException("Cannot reply to a locked post");
+        }
+        if (post.isDeleted()) {
+            throw new RuntimeException("Cannot reply to a deleted post");
+        }
+
+        User user = userOpt.get();
+        reply.setAuthor(user);
         reply.setParentPost(post);
         reply.setCreatedAt(new Date());
         reply.setLastModified(new Date());
-        
+        reply.setDeleted(false); 
+
         ForumReply savedReply = forumReplyRepository.save(reply);
-        
+
         // Update post reply count and last modified
         post.setRepliesCount(post.getRepliesCount() + 1);
         post.setLastModified(new Date());
         forumPostRepository.save(post);
-        
+
         // Publish event for notifications
         eventPublisher.publishEvent(new ForumReplyCreatedEvent(this, savedReply, post));
-        
+
         return savedReply;
     }
-    
+
     /**
      * Retrieves replies for a specific forum post, ordered by creation date (oldest first).
      *
@@ -339,7 +401,7 @@ public class ForumService {
     public Page<ForumReply> getRepliesForPost(String postId, Pageable pageable) {
         return forumReplyRepository.findByParentPostIdAndIsDeletedFalseOrderByCreatedAtAsc(postId, pageable);
     }
-    
+
     /**
      * Retrieves replies created by a specific author.
      *
@@ -350,7 +412,7 @@ public class ForumService {
     public Page<ForumReply> getRepliesByAuthor(String authorId, Pageable pageable) {
         return forumReplyRepository.findByAuthorIdAndIsDeletedFalseOrderByCreatedAtDesc(authorId, pageable);
     }
-    
+
     /**
      * Updates an existing forum reply with new content.
      * Only the author of the reply can update it.
@@ -366,20 +428,20 @@ public class ForumService {
         if (!existingReplyOpt.isPresent()) {
             throw new RuntimeException("Reply not found");
         }
-        
+
         ForumReply existingReply = existingReplyOpt.get();
-        
+
         // Check if user is the author
         if (!existingReply.getAuthor().getId().equals(userId)) {
             throw new RuntimeException("Not authorized to update this reply");
         }
-        
+
         existingReply.setContent(updatedReply.getContent());
         existingReply.setLastModified(new Date());
-        
+
         return forumReplyRepository.save(existingReply);
     }
-    
+
     /**
      * Marks a forum reply as deleted (soft delete).
      * Only the author of the reply can delete it.
@@ -393,23 +455,23 @@ public class ForumService {
         if (!replyOpt.isPresent()) {
             throw new RuntimeException("Reply not found");
         }
-        
+
         ForumReply reply = replyOpt.get();
-        
+
         // Check if user is the author
         if (!reply.getAuthor().getId().equals(userId)) {
             throw new RuntimeException("Not authorized to delete this reply");
         }
-        
+
         reply.setDeleted(true);
         forumReplyRepository.save(reply);
-        
+
         // Update post reply count
         ForumPost post = reply.getParentPost();
         post.setRepliesCount(Math.max(0, post.getRepliesCount() - 1));
         forumPostRepository.save(post);
     }
-    
+
     /**
      * Toggles a user's like on a forum reply.
      *
@@ -423,10 +485,10 @@ public class ForumService {
         if (!replyOpt.isPresent()) {
             throw new RuntimeException("Reply not found");
         }
-        
+
         ForumReply reply = replyOpt.get();
         // TODO: Implement like tracking (separate entity for user-reply likes)
-        
+
         return forumReplyRepository.save(reply);
     }
 
@@ -439,7 +501,7 @@ public class ForumService {
     public long getPostCountByCategory(ForumCategory category) {
         return forumPostRepository.countByCategoryAndIsDeletedFalse(category);
     }
-    
+
     /**
      * Counts the number of forum posts created by a specific author.
      *
@@ -449,7 +511,7 @@ public class ForumService {
     public long getPostCountByAuthor(String authorId) {
         return forumPostRepository.countByAuthorIdAndIsDeletedFalse(authorId);
     }
-    
+
     /**
      * Counts the number of forum replies created by a specific author.
      *
@@ -474,12 +536,12 @@ public class ForumService {
         if (!postOpt.isPresent()) {
             throw new RuntimeException("Post not found");
         }
-        
+
         ForumPost post = postOpt.get();
         post.setPinned(pinned);
         return forumPostRepository.save(post);
     }
-    
+
     /**
      * Locks or unlocks a forum post.
      * Locked posts cannot receive new replies.
@@ -494,7 +556,7 @@ public class ForumService {
         if (!postOpt.isPresent()) {
             throw new RuntimeException("Post not found");
         }
-        
+
         ForumPost post = postOpt.get();
         post.setLocked(locked);
         return forumPostRepository.save(post);
@@ -512,26 +574,36 @@ public class ForumService {
     public ForumSubscription subscribeToPost(String postId, String userId) {
         Optional<User> userOpt = userRepository.findById(userId);
         Optional<ForumPost> postOpt = forumPostRepository.findById(postId);
-        
+
         if (!userOpt.isPresent()) {
-            throw new RuntimeException("User not found");
+            throw new RuntimeException("User not found with ID: " + userId);
         }
         if (!postOpt.isPresent()) {
-            throw new RuntimeException("Post not found");
+            throw new RuntimeException("Post not found with ID: " + postId);
         }
-        
+
+        ForumPost post = postOpt.get();
+        if (post.isDeleted()) {
+            throw new RuntimeException("Cannot subscribe to a deleted post");
+        }
+
         // Check if already subscribed
-        Optional<ForumSubscription> existingSubscription = 
-            forumSubscriptionRepository.findByUserIdAndPostIdAndIsActiveTrue(userId, postId);
-        
+        Optional<ForumSubscription> existingSubscription =
+                forumSubscriptionRepository.findByUserIdAndPostIdAndIsActiveTrue(userId, postId);
+
         if (existingSubscription.isPresent()) {
             return existingSubscription.get();
         }
-        
-        ForumSubscription subscription = new ForumSubscription(userOpt.get(), postOpt.get());
+
+        // Create new subscription
+        ForumSubscription subscription = new ForumSubscription();
+        subscription.setUser(userOpt.get());
+        subscription.setPost(post);
+        subscription.setActive(true);
+
         return forumSubscriptionRepository.save(subscription);
     }
-    
+
     /**
      * Unsubscribes a user from a forum post.
      * Marks the subscription as inactive instead of deleting it.
@@ -540,16 +612,16 @@ public class ForumService {
      * @param userId the ID of the user unsubscribing
      */
     public void unsubscribeFromPost(String postId, String userId) {
-        Optional<ForumSubscription> subscriptionOpt = 
-            forumSubscriptionRepository.findByUserIdAndPostIdAndIsActiveTrue(userId, postId);
-        
+        Optional<ForumSubscription> subscriptionOpt =
+                forumSubscriptionRepository.findByUserIdAndPostIdAndIsActiveTrue(userId, postId);
+
         if (subscriptionOpt.isPresent()) {
             ForumSubscription subscription = subscriptionOpt.get();
             subscription.setActive(false);
             forumSubscriptionRepository.save(subscription);
         }
     }
-    
+
     /**
      * Retrieves all active subscriptions for a user.
      *
@@ -559,7 +631,7 @@ public class ForumService {
     public List<ForumSubscription> getUserSubscriptions(String userId) {
         return forumSubscriptionRepository.findByUserIdAndIsActiveTrue(userId);
     }
-    
+
     /**
      * Checks if a user is subscribed to a specific forum post.
      *
@@ -570,7 +642,7 @@ public class ForumService {
     public boolean isUserSubscribedToPost(String userId, String postId) {
         return forumSubscriptionRepository.findByUserIdAndPostIdAndIsActiveTrue(userId, postId).isPresent();
     }
-    
+
     /**
      * Counts the number of active subscriptions for a forum post.
      *

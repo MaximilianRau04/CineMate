@@ -69,7 +69,6 @@ const Leaderboard = () => {
       });
       if (response.ok) {
         const data = await response.json();
-        console.log('Leaderboard data received:', data);
         setLeaderboard(data);
       } else {
         console.error('Failed to load leaderboard:', response.status, response.statusText);

@@ -34,6 +34,9 @@ public class ForumController {
     @Autowired
     private ForumService forumService;
 
+    @Autowired
+    private ForumDTOConverter forumDTOConverter;
+
     /**
      * Handles the creation of a new forum post. The authenticated user is associated
      * with the post as the creator. Responds with the created post along with the status.
@@ -64,7 +67,7 @@ public class ForumController {
             }
             
             ForumPost createdPost = forumService.createPost(post, userId);
-            ForumPostDTO dto = ForumDTOConverter.convertToDTO(createdPost);
+            ForumPostDTO dto = forumDTOConverter.convertToDTO(createdPost);
             return ResponseEntity.status(HttpStatus.CREATED).body(dto);
         } catch (Exception e) {
             System.err.println("Error creating post: " + e.getMessage());
@@ -98,12 +101,12 @@ public class ForumController {
         } else if ("popular".equals(sortBy)) {
             posts = forumService.getPopularPosts(pageable);
         } else if ("recent".equals(sortBy)) {
-            posts = forumService.getRecentlyActiveePosts(pageable);
+            posts = forumService.getRecentlyActivePosts(pageable);
         } else {
             posts = forumService.getAllPosts(pageable);
         }
         
-        Page<ForumPostDTO> postDTOs = ForumDTOConverter.convertToDTO(posts);
+        Page<ForumPostDTO> postDTOs = forumDTOConverter.convertToDTO(posts);
         return ResponseEntity.ok(postDTOs);
     }
 
@@ -115,9 +118,38 @@ public class ForumController {
      */
     @GetMapping("/posts/{id}")
     public ResponseEntity<ForumPostDTO> getPostById(@PathVariable String id) {
-        Optional<ForumPost> post = forumService.getPostById(id);
-        return post.map(p -> ResponseEntity.ok(ForumDTOConverter.convertToDTO(p)))
-                  .orElse(ResponseEntity.notFound().build());
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String userId = null;
+            
+            // Check if user is authenticated
+            if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName())) {
+                Object principal = auth.getPrincipal();
+                
+                if (principal instanceof com.cinemate.user.User) {
+                    userId = ((com.cinemate.user.User) principal).getId();
+                } else if (principal instanceof String) {
+                    userId = (String) principal;
+                }
+            }
+            
+            Optional<ForumPost> postOpt = forumService.getPostById(id);
+            if (postOpt.isPresent()) {
+                ForumPost post = postOpt.get();
+
+                forumService.incrementViewCount(id);
+                
+                // Convert to DTO with user context
+                ForumPostDTO dto = forumDTOConverter.convertToDTO(post, userId);
+                return ResponseEntity.ok(dto);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            System.err.println("Error getting post by ID: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     /**
@@ -128,7 +160,7 @@ public class ForumController {
     @GetMapping("/posts/pinned")
     public ResponseEntity<List<ForumPostDTO>> getPinnedPosts() {
         List<ForumPost> pinnedPosts = forumService.getPinnedPosts();
-        List<ForumPostDTO> dtoList = ForumDTOConverter.convertToDTO(pinnedPosts);
+        List<ForumPostDTO> dtoList = forumDTOConverter.convertToDTO(pinnedPosts);
         return ResponseEntity.ok(dtoList);
     }
 
@@ -148,7 +180,7 @@ public class ForumController {
         
         Pageable pageable = PageRequest.of(page, size);
         Page<ForumPost> posts = forumService.searchPosts(query, pageable);
-        Page<ForumPostDTO> postDTOs = ForumDTOConverter.convertToDTO(posts);
+        Page<ForumPostDTO> postDTOs = forumDTOConverter.convertToDTO(posts);
         return ResponseEntity.ok(postDTOs);
     }
 
@@ -168,7 +200,7 @@ public class ForumController {
         
         Pageable pageable = PageRequest.of(page, size);
         Page<ForumPost> posts = forumService.getPostsByAuthor(userId, pageable);
-        Page<ForumPostDTO> postDTOs = ForumDTOConverter.convertToDTO(posts);
+        Page<ForumPostDTO> postDTOs = forumDTOConverter.convertToDTO(posts);
         return ResponseEntity.ok(postDTOs);
     }
 
@@ -188,7 +220,7 @@ public class ForumController {
         
         Pageable pageable = PageRequest.of(page, size);
         Page<ForumPost> posts = forumService.getPostsByMovieId(movieId, pageable);
-        Page<ForumPostDTO> postDTOs = ForumDTOConverter.convertToDTO(posts);
+        Page<ForumPostDTO> postDTOs = forumDTOConverter.convertToDTO(posts);
         return ResponseEntity.ok(postDTOs);
     }
 
@@ -208,7 +240,7 @@ public class ForumController {
         
         Pageable pageable = PageRequest.of(page, size);
         Page<ForumPost> posts = forumService.getPostsBySeriesId(seriesId, pageable);
-        Page<ForumPostDTO> postDTOs = ForumDTOConverter.convertToDTO(posts);
+        Page<ForumPostDTO> postDTOs = forumDTOConverter.convertToDTO(posts);
         return ResponseEntity.ok(postDTOs);
     }
 
@@ -228,7 +260,7 @@ public class ForumController {
         
         Pageable pageable = PageRequest.of(page, size);
         Page<ForumPost> posts = forumService.getPostsUserParticipatedIn(userId, pageable);
-        Page<ForumPostDTO> postDTOs = ForumDTOConverter.convertToDTO(posts);
+        Page<ForumPostDTO> postDTOs = forumDTOConverter.convertToDTO(posts);
         return ResponseEntity.ok(postDTOs);
     }
 
@@ -283,11 +315,66 @@ public class ForumController {
     public ResponseEntity<ForumPost> toggleLike(@PathVariable String id) {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            String userId = auth.getName();
+            String userId = null;
+            
+            // Check if user is authenticated
+            if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName())) {
+                Object principal = auth.getPrincipal();
+                
+                if (principal instanceof com.cinemate.user.User) {
+                    userId = ((com.cinemate.user.User) principal).getId();
+                } else if (principal instanceof String) {
+                    userId = (String) principal;
+                }
+            }
+            
+            // Require authentication for liking
+            if (userId == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            }
             
             ForumPost post = forumService.toggleLike(id, userId);
             return ResponseEntity.ok(post);
         } catch (Exception e) {
+            System.err.println("Error toggling like: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+
+    /**
+     * Removes the like from a forum post for the authenticated user.
+     *
+     * @param id the unique identifier of the forum post to be unliked
+     * @return ResponseEntity containing the updated ForumPost object if successful
+     */
+    @DeleteMapping("/posts/{id}/like")
+    public ResponseEntity<ForumPost> removeLike(@PathVariable String id) {
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String userId = null;
+            
+            // Check if user is authenticated
+            if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName())) {
+                Object principal = auth.getPrincipal();
+                
+                if (principal instanceof com.cinemate.user.User) {
+                    userId = ((com.cinemate.user.User) principal).getId();
+                } else if (principal instanceof String) {
+                    userId = (String) principal;
+                }
+            }
+            
+            // Require authentication for unliking
+            if (userId == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            }
+            
+            ForumPost post = forumService.toggleLike(id, userId);
+            return ResponseEntity.ok(post);
+        } catch (Exception e) {
+            System.err.println("Error removing like: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
@@ -303,11 +390,29 @@ public class ForumController {
     public ResponseEntity<ForumReply> createReply(@PathVariable String postId, @RequestBody ForumReply reply) {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            String userId = auth.getName();
-            
+            String userId = null;
+
+            // Check if user is authenticated
+            if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName())) {
+                Object principal = auth.getPrincipal();
+
+                if (principal instanceof com.cinemate.user.User) {
+                    userId = ((com.cinemate.user.User) principal).getId();
+                } else if (principal instanceof String) {
+                    userId = (String) principal;
+                }
+            }
+
+            // Require authentication for creating replies
+            if (userId == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            }
+
             ForumReply createdReply = forumService.createReply(reply, userId, postId);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdReply);
         } catch (Exception e) {
+            System.err.println("Error creating reply: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
@@ -396,16 +501,35 @@ public class ForumController {
      * has not liked the reply, a like is added.
      *
      * @param id the unique identifier
+     * @return the forum reply
      */
     @PostMapping("/replies/{id}/like")
     public ResponseEntity<ForumReply> toggleReplyLike(@PathVariable String id) {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            String userId = auth.getName();
-            
+            String userId = null;
+
+            // Check if user is authenticated
+            if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName())) {
+                Object principal = auth.getPrincipal();
+
+                if (principal instanceof com.cinemate.user.User) {
+                    userId = ((com.cinemate.user.User) principal).getId();
+                } else if (principal instanceof String) {
+                    userId = (String) principal;
+                }
+            }
+
+            // Require authentication for liking replies
+            if (userId == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            }
+
             ForumReply reply = forumService.toggleReplyLike(id, userId);
             return ResponseEntity.ok(reply);
         } catch (Exception e) {
+            System.err.println("Error toggling reply like: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
@@ -420,11 +544,29 @@ public class ForumController {
     public ResponseEntity<ForumSubscription> subscribeToPost(@PathVariable String postId) {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            String userId = auth.getName();
+            String userId = null;
+            
+            // Check if user is authenticated
+            if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName())) {
+                Object principal = auth.getPrincipal();
+                
+                if (principal instanceof com.cinemate.user.User) {
+                    userId = ((com.cinemate.user.User) principal).getId();
+                } else if (principal instanceof String) {
+                    userId = (String) principal;
+                }
+            }
+            
+            // Require authentication for subscribing
+            if (userId == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            }
             
             ForumSubscription subscription = forumService.subscribeToPost(postId, userId);
             return ResponseEntity.ok(subscription);
         } catch (Exception e) {
+            System.err.println("Error subscribing to post: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
@@ -441,11 +583,29 @@ public class ForumController {
     public ResponseEntity<Void> unsubscribeFromPost(@PathVariable String postId) {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            String userId = auth.getName();
+            String userId = null;
+
+            // Check if user is authenticated
+            if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName())) {
+                Object principal = auth.getPrincipal();
+                
+                if (principal instanceof com.cinemate.user.User) {
+                    userId = ((com.cinemate.user.User) principal).getId();
+                } else if (principal instanceof String) {
+                    userId = (String) principal;
+                }
+            }
+            
+            // Require authentication for unsubscribing
+            if (userId == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
             
             forumService.unsubscribeFromPost(postId, userId);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
+            System.err.println("Error unsubscribing from post: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
@@ -461,14 +621,33 @@ public class ForumController {
     public ResponseEntity<SubscriptionStatus> getSubscriptionStatus(@PathVariable String postId) {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            String userId = auth.getName();
+            String userId = null;
             
-            boolean isSubscribed = forumService.isUserSubscribedToPost(userId, postId);
+            // Check if user is authenticated
+            if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName())) {
+                Object principal = auth.getPrincipal();
+                
+                if (principal instanceof com.cinemate.user.User) {
+                    userId = ((com.cinemate.user.User) principal).getId();
+                } else if (principal instanceof String) {
+                    userId = (String) principal;
+                }
+            }
+            
+            boolean isSubscribed = false;
+            if (userId != null) {
+                isSubscribed = forumService.isUserSubscribedToPost(userId, postId);
+            } else {
+            }
+            
             long subscriberCount = forumService.getSubscriptionCount(postId);
             
             SubscriptionStatus status = new SubscriptionStatus(isSubscribed, subscriberCount);
+            
             return ResponseEntity.ok(status);
         } catch (Exception e) {
+            System.err.println("Error getting subscription status: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
@@ -484,11 +663,29 @@ public class ForumController {
     public ResponseEntity<List<ForumSubscription>> getUserSubscriptions() {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            String userId = auth.getName();
-            
+            String userId = null;
+
+            // Check if user is authenticated
+            if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName())) {
+                Object principal = auth.getPrincipal();
+
+                if (principal instanceof com.cinemate.user.User) {
+                    userId = ((com.cinemate.user.User) principal).getId();
+                } else if (principal instanceof String) {
+                    userId = (String) principal;
+                }
+            }
+
+            // Require authentication for getting subscriptions
+            if (userId == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            }
+
             List<ForumSubscription> subscriptions = forumService.getUserSubscriptions(userId);
             return ResponseEntity.ok(subscriptions);
         } catch (Exception e) {
+            System.err.println("Error getting user subscriptions: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
@@ -555,24 +752,6 @@ public class ForumController {
     }
 
     /**
-     * Locks or unlocks a forum post based on the provided parameters.
-     *
-     * @param id the unique identifier of the forum post to be locked or unlocked
-     * @param locked a boolean flag indicating whether the post should be locked (true) or unlocked (false)
-     * @return a ResponseEntity containing the updated ForumPost object if the operation is successful
-     */
-    @PostMapping("/admin/posts/{id}/lock")
-    public ResponseEntity<ForumPost> lockPost(@PathVariable String id, @RequestParam boolean locked) {
-        try {
-            // TODO: Add admin authorization check
-            ForumPost post = forumService.lockPost(id, locked);
-            return ResponseEntity.ok(post);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        }
-    }
-
-    /**
      * Admin endpoint to delete posts without authorization checks.
      * Useful for cleaning up posts from deleted users.
      *
@@ -613,6 +792,11 @@ public class ForumController {
         }
         
         public boolean isSubscribed() { return isSubscribed; }
+        public void setSubscribed(boolean subscribed) { this.isSubscribed = subscribed; }
+        
         public long getSubscriberCount() { return subscriberCount; }
+        public void setSubscriberCount(long subscriberCount) { this.subscriberCount = subscriberCount; }
+        
+        public boolean getIsSubscribed() { return isSubscribed; }
     }
 }

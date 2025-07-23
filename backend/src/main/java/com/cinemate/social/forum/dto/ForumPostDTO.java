@@ -19,9 +19,11 @@ public class ForumPostDTO {
     private Date lastModified;
     private int likesCount;
     private int repliesCount;
+    private int views;
     private boolean isPinned;
     private boolean isLocked;
     private boolean isDeleted;
+    private boolean likedByCurrentUser;
 
     public ForumPostDTO() {}
 
@@ -39,9 +41,21 @@ public class ForumPostDTO {
         this.lastModified = post.getLastModified();
         this.likesCount = post.getLikesCount();
         this.repliesCount = post.getRepliesCount();
+        this.views = post.getViews();
         this.isPinned = post.isPinned();
         this.isLocked = post.isLocked();
         this.isDeleted = post.isDeleted();
+        this.likedByCurrentUser = false; // Default value
+    }
+
+    public ForumPostDTO(ForumPost post, String userId) {
+        this(post); // Call the main constructor
+        // The likedByCurrentUser field will be set by the service layer
+    }
+
+    public ForumPostDTO(ForumPost post, String userId, boolean likedByCurrentUser) {
+        this(post); // Call the main constructor
+        this.likedByCurrentUser = likedByCurrentUser;
     }
 
     // Getters and Setters
@@ -86,4 +100,14 @@ public class ForumPostDTO {
 
     public boolean isDeleted() { return isDeleted; }
     public void setDeleted(boolean deleted) { isDeleted = deleted; }
+
+    public int getViews() { return views; }
+    public void setViews(int views) { this.views = views; }
+
+    public boolean isLikedByCurrentUser() { return likedByCurrentUser; }
+    public void setLikedByCurrentUser(boolean likedByCurrentUser) { this.likedByCurrentUser = likedByCurrentUser; }
+
+    // Alias for Jackson serialization
+    public boolean getLikedByCurrentUser() { return likedByCurrentUser; }
+    public int getLikes() { return likesCount; }
 }

@@ -37,6 +37,7 @@ public class ForumPost {
     
     private int likesCount;
     private int repliesCount;
+    private int views = 0;
     
     @DBRef
     @JsonIgnore 
@@ -62,7 +63,6 @@ public class ForumPost {
         this.isDeleted = false;
     }
 
-    // Getters and Setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
     
@@ -95,6 +95,9 @@ public class ForumPost {
     
     public int getRepliesCount() { return repliesCount; }
     public void setRepliesCount(int repliesCount) { this.repliesCount = repliesCount; }
+    
+    public int getViews() { return views; }
+    public void setViews(int views) { this.views = views; }
     
     public List<ForumReply> getReplies() { return replies; }
     public void setReplies(List<ForumReply> replies) { this.replies = replies; }

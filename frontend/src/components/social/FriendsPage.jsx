@@ -63,14 +63,11 @@ const FriendsPage = () => {
    */
   const loadPendingRequests = async () => {
     try {
-      console.log('Loading pending requests...');
       const response = await fetch('http://localhost:8080/api/social/friends/requests', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      console.log('Response status:', response.status);
       if (response.ok) {
         const data = await response.json();
-        console.log('Pending requests data:', data);
         setPendingRequests(data);
       } else {
         console.error('Failed to load pending requests:', response.status, response.statusText);
@@ -113,13 +110,10 @@ const FriendsPage = () => {
    */
   const sendFriendRequest = async (userId) => {
     try {
-      console.log('Sending friend request to user:', userId);
       const response = await fetch(`http://localhost:8080/api/social/friends/request/${userId}`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });
-
-      console.log('Send friend request response status:', response.status);
 
       if (response.ok) {
         alert('Freundschaftsanfrage gesendet!');
