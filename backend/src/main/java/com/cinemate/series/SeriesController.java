@@ -43,6 +43,16 @@ public class SeriesController {
     }
 
     /**
+     * search series by name
+     * @param query
+     * @return List<SeriesResponseDTO>
+     */
+    @GetMapping("/search")
+    public ResponseEntity<List<SeriesResponseDTO>> searchSeries(@RequestParam String query) {
+        return seriesService.searchSeries(query);
+    }
+
+    /**
      * creates a series
      * @param series
      * @return SeriesResponseDTO

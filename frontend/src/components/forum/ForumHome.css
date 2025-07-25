@@ -1,11 +1,9 @@
-/* Forum Home - Modern & Beautiful Design */
 .forum-home {
     min-height: 100vh;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     padding: 2rem;
 }
 
-/* Header */
 .forum-header {
     display: flex;
     justify-content: space-between;
@@ -53,7 +51,6 @@
     font-size: 1.2rem;
 }
 
-/* Controls */
 .forum-controls {
     background: rgba(255, 255, 255, 0.95);
     border-radius: 20px;
@@ -109,7 +106,6 @@
     box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
 }
 
-/* Sections */
 .pinned-section,
 .posts-section {
     margin-bottom: 3rem;
@@ -262,7 +258,6 @@
     transform: scale(1.05);
 }
 
-/* No Posts */
 .no-posts {
     text-align: center;
     padding: 4rem 2rem;
@@ -295,7 +290,6 @@
     box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
 }
 
-/* Pagination */
 .pagination {
     display: flex;
     justify-content: center;
@@ -340,7 +334,6 @@
     font-weight: 600;
 }
 
-/* Loading */
 .loading-container,
 .error-container {
     display: flex;
@@ -395,7 +388,6 @@
     box-shadow: 0 12px 35px rgba(229, 62, 62, 0.4);
 }
 
-/* Responsive */
 @media (max-width: 1024px) {
     .forum-home {
         padding: 1.5rem;
@@ -455,4 +447,75 @@
         width: 200px;
         padding: 1rem;
     }
+}
+
+/* Media Badges */
+.media-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-left: 0.5rem;
+}
+
+.movie-badge {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.series-badge {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+}
+
+.media-badge:hover {
+    transform: scale(1.05);
+    transition: transform 0.2s ease;
+}
+
+/* Filter improvements */
+.filters {
+    gap: 1rem;
+}
+
+.filter-select {
+    min-width: 140px;
+}
+
+.post-meta {
+    position: relative;
+}
+
+.delete-post-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: rgba(202, 83, 83, 0.1);
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.875rem;
+    opacity: 0;
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.post-card:hover .delete-post-btn {
+    opacity: 1;
+}
+
+.delete-post-btn:hover {
+    background: rgba(239, 68, 68, 0.2);
+    transform: scale(1.1);
+}
+
+.delete-post-btn:active {
+    transform: scale(0.95);
 }

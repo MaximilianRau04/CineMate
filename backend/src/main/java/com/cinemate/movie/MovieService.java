@@ -59,6 +59,19 @@ public class MovieService {
     }
 
     /**
+     * search movies by title
+     * @param query
+     * @return List<MovieResponseDTO>
+     */
+    public ResponseEntity<List<MovieResponseDTO>> searchMovies(String query) {
+        List<Movie> movies = movieRepository.findByTitleContainingIgnoreCase(query);
+        List<MovieResponseDTO> movieDTOs = movies.stream()
+                .map(MovieResponseDTO::new)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(movieDTOs);
+    }
+
+    /**
      * creates a movie
      * @param movieDTO
      * @return MovieResponseDTO

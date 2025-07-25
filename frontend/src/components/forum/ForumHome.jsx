@@ -7,6 +7,7 @@ const ForumHome = () => {
     const [pinnedPosts, setPinnedPosts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState('');
+    const [selectedMediaType, setSelectedMediaType] = useState('');
     const [sortBy, setSortBy] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(0);
@@ -95,6 +96,9 @@ const ForumHome = () => {
             if (sortBy) {
                 url += `&sortBy=${sortBy}`;
             }
+            if (selectedMediaType) {
+                url += `&mediaType=${selectedMediaType}`;
+            }
 
             const response = await fetch(url);
             if (!response.ok) {
@@ -110,7 +114,7 @@ const ForumHome = () => {
             setError('Fehler beim Laden der Beiträge');
             setLoading(false);
         }
-    }, [currentPage, selectedCategory, sortBy]);
+    }, [currentPage, selectedCategory, sortBy, selectedMediaType]);
 
     useEffect(() => {
         fetchCategories();
@@ -189,6 +193,54 @@ const ForumHome = () => {
     };
 
     /**
+     * Fetches media information for a post
+     * @param {object} post - The post object
+     * @returns {Promise<object|null>} - Media information or null
+     */
+    const fetchMediaInfo = async (post) => {
+        try {
+            if (post.movieId) {
+                const response = await fetch(`http://localhost:8080/api/movies/${post.movieId}`);
+                if (response.ok) {
+                    const movie = await response.json();
+                    return { type: 'movie', data: movie };
+                }
+            } else if (post.seriesId) {
+                const response = await fetch(`http://localhost:8080/api/series/${post.seriesId}`);
+                if (response.ok) {
+                    const series = await response.json();
+                    return { type: 'series', data: series };
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching media info:', error);
+        }
+        return null;
+    };
+
+    /**
+     * Renders media badge for a post
+     * @param {object} post - The post object
+     * @returns {JSX.Element|null} - Media badge component
+     */
+    const renderMediaBadge = (post) => {
+        if (post.movieId) {
+            return (
+                <span className="media-badge movie-badge" title="Verknüpfter Film">
+                    🎬 Film
+                </span>
+            );
+        } else if (post.seriesId) {
+            return (
+                <span className="media-badge series-badge" title="Verknüpfte Serie">
+                    📺 Serie
+                </span>
+            );
+        }
+        return null;
+    };
+
+    /**
      * Navigates to the create post page if user is authenticated
      * @returns {void} 
      */
@@ -199,6 +251,55 @@ const ForumHome = () => {
             return;
         }
         navigate('/forum/create-post');
+    };
+
+    /**
+     * Checks if the current user can delete a post (admin or author)
+     * @param {object} post - The post object
+     * @returns {boolean} - Whether the user can delete the post
+     */
+    const canDeletePost = (post) => {
+        if (!currentUser) return false;
+        return currentUser.role === 'ADMIN' || currentUser.id === post.author?.id;
+    };
+
+    /**
+     * Handles deleting a post from the home page
+     * @param {string} postId - The ID of the post to delete
+     * @param {Event} e - The click event
+     * @returns {Promise<void>} - Resolves when the post is deleted
+     */
+    const handleDeletePost = async (postId, e) => {
+        e.stopPropagation();
+        
+        if (!window.confirm("Möchten Sie diesen Beitrag wirklich löschen?")) {
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem('token');
+            const endpoint = currentUser.role === 'ADMIN' 
+                ? `http://localhost:8080/api/forum/admin/posts/${postId}`
+                : `http://localhost:8080/api/forum/posts/${postId}`;
+            
+            const response = await fetch(endpoint, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                setPosts(prevPosts => prevPosts.filter(post => post.id !== postId));
+                setPinnedPosts(prevPinned => prevPinned.filter(post => post.id !== postId));
+                alert("Beitrag erfolgreich gelöscht!");
+            } else {
+                alert("Fehler beim Löschen des Beitrags");
+            }
+        } catch (error) {
+            console.error('Error deleting post:', error);
+            alert("Fehler beim Löschen des Beitrags");
+        }
     };
 
     if (loading && posts.length === 0) {
@@ -263,6 +364,17 @@ const ForumHome = () => {
                     </select>
 
                     <select 
+                        value={selectedMediaType} 
+                        onChange={(e) => setSelectedMediaType(e.target.value)}
+                        className="filter-select"
+                    >
+                        <option value="">Alle Medien</option>
+                        <option value="movie">Nur Filme</option>
+                        <option value="series">Nur Serien</option>
+                        <option value="none">Ohne Medien</option>
+                    </select>
+
+                    <select 
                         value={sortBy} 
                         onChange={(e) => setSortBy(e.target.value)}
                         className="filter-select"
@@ -290,6 +402,16 @@ const ForumHome = () => {
                                         {getCategoryDisplayName(post.category)}
                                     </span>
                                     <span className="pinned-badge">📌</span>
+                                    {renderMediaBadge(post)}
+                                    {canDeletePost(post) && (
+                                        <button 
+                                            className="delete-post-btn"
+                                            onClick={(e) => handleDeletePost(post.id, e)}
+                                            title="Beitrag löschen"
+                                        >
+                                            🗑️
+                                        </button>
+                                    )}
                                 </div>
                                 <h3>{post.title}</h3>
                                 <div className="post-info">
@@ -329,8 +451,16 @@ const ForumHome = () => {
                                     <span className="category">
                                         {getCategoryDisplayName(post.category)}
                                     </span>
-                                    {post.movieId && <span className="media-tag">🎬</span>}
-                                    {post.seriesId && <span className="media-tag">📺</span>}
+                                    {renderMediaBadge(post)}
+                                    {canDeletePost(post) && (
+                                        <button 
+                                            className="delete-post-btn"
+                                            onClick={(e) => handleDeletePost(post.id, e)}
+                                            title="Beitrag löschen"
+                                        >
+                                            🗑️
+                                        </button>
+                                    )}
                                 </div>
                                 <h3>{post.title}</h3>
                                 <p className="post-preview">

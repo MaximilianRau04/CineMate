@@ -49,16 +49,14 @@ public class ForumPostDTO {
     }
 
     public ForumPostDTO(ForumPost post, String userId) {
-        this(post); // Call the main constructor
-        // The likedByCurrentUser field will be set by the service layer
+        this(post);
     }
 
     public ForumPostDTO(ForumPost post, String userId, boolean likedByCurrentUser) {
-        this(post); // Call the main constructor
+        this(post);
         this.likedByCurrentUser = likedByCurrentUser;
     }
 
-    // Getters and Setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 

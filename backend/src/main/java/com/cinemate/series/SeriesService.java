@@ -61,6 +61,19 @@ public class SeriesService {
     }
 
     /**
+     * search series by name
+     * @param query
+     * @return List<SeriesResponseDTO>
+     */
+    public ResponseEntity<List<SeriesResponseDTO>> searchSeries(String query) {
+        List<Series> seriesList = seriesRepository.findByNameContainingIgnoreCase(query);
+        List<SeriesResponseDTO> seriesDTOs = seriesList.stream()
+                .map(SeriesResponseDTO::new)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(seriesDTOs);
+    }
+
+    /**
      * creates a series
      * @param seriesDTO
      * @return SeriesResponseDTO

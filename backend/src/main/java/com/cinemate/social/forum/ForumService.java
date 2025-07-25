@@ -208,12 +208,12 @@ public class ForumService {
         return forumPostRepository.findPostsUserParticipatedIn(userId, pageable);
     }
 
-    /**
-     * Updates an existing forum post with new content.
-     * Only the author of the post can update it.
+        /**
+     * Updates a forum post.
+     * Only the author can edit their post (not admins).
      *
      * @param postId the ID of the post to update
-     * @param updatedPost the updated post-data
+     * @param updatedPost the updated post data
      * @param userId the ID of the user attempting to update the post
      * @return the updated ForumPost entity
      * @throws RuntimeException if the post is not found or user is not authorized
@@ -226,9 +226,9 @@ public class ForumService {
 
         ForumPost existingPost = existingPostOpt.get();
 
-        // Check if user is the author or has admin privileges
+        // Check if user is the author (only authors can edit, not admins)
         if (!existingPost.getAuthor().getId().equals(userId)) {
-            throw new RuntimeException("Not authorized to update this post");
+            throw new RuntimeException("Only the author can edit this post");
         }
 
         existingPost.setTitle(updatedPost.getTitle());
@@ -376,7 +376,7 @@ public class ForumService {
         reply.setParentPost(post);
         reply.setCreatedAt(new Date());
         reply.setLastModified(new Date());
-        reply.setDeleted(false); 
+        reply.setDeleted(false);
 
         ForumReply savedReply = forumReplyRepository.save(reply);
 
@@ -413,9 +413,9 @@ public class ForumService {
         return forumReplyRepository.findByAuthorIdAndIsDeletedFalseOrderByCreatedAtDesc(authorId, pageable);
     }
 
-    /**
-     * Updates an existing forum reply with new content.
-     * Only the author of the reply can update it.
+        /**
+     * Updates a forum reply.
+     * Only the author can edit their reply (not admins).
      *
      * @param replyId the ID of the reply to update
      * @param updatedReply the updated reply data
@@ -431,9 +431,9 @@ public class ForumService {
 
         ForumReply existingReply = existingReplyOpt.get();
 
-        // Check if user is the author
+        // Check if user is the author (only authors can edit, not admins)
         if (!existingReply.getAuthor().getId().equals(userId)) {
-            throw new RuntimeException("Not authorized to update this reply");
+            throw new RuntimeException("Only the author can edit this reply");
         }
 
         existingReply.setContent(updatedReply.getContent());
@@ -444,7 +444,7 @@ public class ForumService {
 
     /**
      * Marks a forum reply as deleted (soft delete).
-     * Only the author of the reply can delete it.
+     * Only the author of the reply or an admin can delete it.
      *
      * @param replyId the ID of the reply to delete
      * @param userId the ID of the user attempting to delete the reply
@@ -458,8 +458,12 @@ public class ForumService {
 
         ForumReply reply = replyOpt.get();
 
-        // Check if user is the author
-        if (!reply.getAuthor().getId().equals(userId)) {
+        // Check if user is the author or an admin
+        User user = userRepository.findById(userId).orElse(null);
+        boolean isAuthor = reply.getAuthor().getId().equals(userId);
+        boolean isAdmin = user != null && "ADMIN".equals(user.getRole().toString());
+        
+        if (!isAuthor && !isAdmin) {
             throw new RuntimeException("Not authorized to delete this reply");
         }
 
@@ -651,5 +655,46 @@ public class ForumService {
      */
     public long getSubscriptionCount(String postId) {
         return forumSubscriptionRepository.countByPostIdAndIsActiveTrue(postId);
+    }
+
+    /**
+     * Retrieves forum posts filtered by media type.
+     *
+     * @param mediaType the media type to filter by ("movie", "series", "none")
+     * @param pageable pagination information
+     * @return a Page containing ForumPost entities with the specified media type
+     */
+    public Page<ForumPost> getPostsByMediaType(String mediaType, Pageable pageable) {
+        switch (mediaType.toLowerCase()) {
+            case "movie":
+                return forumPostRepository.findByMovieIdIsNotNullAndIsDeletedFalseOrderByCreatedAtDesc(pageable);
+            case "series":
+                return forumPostRepository.findBySeriesIdIsNotNullAndIsDeletedFalseOrderByCreatedAtDesc(pageable);
+            case "none":
+                return forumPostRepository.findByMovieIdIsNullAndSeriesIdIsNullAndIsDeletedFalseOrderByCreatedAtDesc(pageable);
+            default:
+                return getAllPosts(pageable);
+        }
+    }
+
+    /**
+     * Retrieves forum posts filtered by both category and media type.
+     *
+     * @param category the category to filter by
+     * @param mediaType the media type to filter by ("movie", "series", "none")
+     * @param pageable pagination information
+     * @return a Page containing ForumPost entities matching both criteria
+     */
+    public Page<ForumPost> getPostsByCategoryAndMediaType(ForumCategory category, String mediaType, Pageable pageable) {
+        switch (mediaType.toLowerCase()) {
+            case "movie":
+                return forumPostRepository.findByCategoryAndMovieIdIsNotNullAndIsDeletedFalseOrderByCreatedAtDesc(category, pageable);
+            case "series":
+                return forumPostRepository.findByCategoryAndSeriesIdIsNotNullAndIsDeletedFalseOrderByCreatedAtDesc(category, pageable);
+            case "none":
+                return forumPostRepository.findByCategoryAndMovieIdIsNullAndSeriesIdIsNullAndIsDeletedFalseOrderByCreatedAtDesc(category, pageable);
+            default:
+                return getPostsByCategory(category, pageable);
+        }
     }
 }

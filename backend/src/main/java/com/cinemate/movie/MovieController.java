@@ -31,15 +31,25 @@ public class MovieController {
     }
 
     /**
-     * returns the movie object with the given id
+     * returns the movie with the given id
      * @param id
-     * @return Movie
+     * @return MovieResponseDTO
      */
     @GetMapping("/{id}")
     public ResponseEntity<MovieResponseDTO> getMovieById(@PathVariable String id) {
         return movieService.getMovieById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    /**
+     * search movies by title
+     * @param query
+     * @return List<MovieResponseDTO>
+     */
+    @GetMapping("/search")
+    public ResponseEntity<List<MovieResponseDTO>> searchMovies(@RequestParam String query) {
+        return movieService.searchMovies(query);
     }
 
     /**

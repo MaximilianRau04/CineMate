@@ -77,11 +77,12 @@ public class ForumController {
     }
 
     /**
-     * Retrieves a paginated list of forum posts, optionally filtered by category or sorted by criteria.
+     * Retrieves a paginated list of forum posts, optionally filtered by category, media type, or sorted by criteria.
      *
      * @param page the page number to retrieve, defaults to 0 if not specified
      * @param size the number of posts per page, defaults to 10 if not specified
      * @param category optional parameter to filter posts by category
+     * @param mediaType optional parameter to filter posts by media type ("movie", "series", "none")
      * @param sortBy optional parameter to sort posts, e.g., "popular" or "recent"
      * @return ResponseEntity containing a Page object with the requested forum post DTOs
      */
@@ -90,6 +91,7 @@ public class ForumController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String category,
+            @RequestParam(required = false) String mediaType,
             @RequestParam(required = false) String sortBy) {
         
         Pageable pageable = PageRequest.of(page, size);
@@ -97,7 +99,13 @@ public class ForumController {
         
         if (category != null && !category.isEmpty()) {
             ForumCategory forumCategory = ForumCategory.valueOf(category.toUpperCase());
-            posts = forumService.getPostsByCategory(forumCategory, pageable);
+            if (mediaType != null && !mediaType.isEmpty()) {
+                posts = forumService.getPostsByCategoryAndMediaType(forumCategory, mediaType, pageable);
+            } else {
+                posts = forumService.getPostsByCategory(forumCategory, pageable);
+            }
+        } else if (mediaType != null && !mediaType.isEmpty()) {
+            posts = forumService.getPostsByMediaType(mediaType, pageable);
         } else if ("popular".equals(sortBy)) {
             posts = forumService.getPopularPosts(pageable);
         } else if ("recent".equals(sortBy)) {
@@ -276,11 +284,29 @@ public class ForumController {
     public ResponseEntity<ForumPost> updatePost(@PathVariable String id, @RequestBody ForumPost post) {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            String userId = auth.getName();
+            String userId = null;
+            
+            // Check if user is authenticated
+            if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName())) {
+                Object principal = auth.getPrincipal();
+                
+                if (principal instanceof com.cinemate.user.User) {
+                    userId = ((com.cinemate.user.User) principal).getId();
+                } else if (principal instanceof String) {
+                    userId = (String) principal;
+                }
+            }
+            
+            // Require authentication for updating posts
+            if (userId == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            }
             
             ForumPost updatedPost = forumService.updatePost(id, post, userId);
             return ResponseEntity.ok(updatedPost);
         } catch (Exception e) {
+            System.err.println("Error updating post: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
     }
@@ -295,11 +321,29 @@ public class ForumController {
     public ResponseEntity<Void> deletePost(@PathVariable String id) {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            String userId = auth.getName();
+            String userId = null;
+            
+            // Check if user is authenticated
+            if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName())) {
+                Object principal = auth.getPrincipal();
+                
+                if (principal instanceof com.cinemate.user.User) {
+                    userId = ((com.cinemate.user.User) principal).getId();
+                } else if (principal instanceof String) {
+                    userId = (String) principal;
+                }
+            }
+            
+            // Require authentication for deleting posts
+            if (userId == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
             
             forumService.deletePost(id, userId);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
+            System.err.println("Error deleting post: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
     }
@@ -467,11 +511,29 @@ public class ForumController {
     public ResponseEntity<ForumReply> updateReply(@PathVariable String id, @RequestBody ForumReply reply) {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            String userId = auth.getName();
+            String userId = null;
+            
+            // Check if user is authenticated
+            if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName())) {
+                Object principal = auth.getPrincipal();
+                
+                if (principal instanceof com.cinemate.user.User) {
+                    userId = ((com.cinemate.user.User) principal).getId();
+                } else if (principal instanceof String) {
+                    userId = (String) principal;
+                }
+            }
+            
+            // Require authentication for updating replies
+            if (userId == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            }
             
             ForumReply updatedReply = forumService.updateReply(id, reply, userId);
             return ResponseEntity.ok(updatedReply);
         } catch (Exception e) {
+            System.err.println("Error updating reply: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
     }
@@ -486,11 +548,29 @@ public class ForumController {
     public ResponseEntity<Void> deleteReply(@PathVariable String id) {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            String userId = auth.getName();
+            String userId = null;
+            
+            // Check if user is authenticated
+            if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName())) {
+                Object principal = auth.getPrincipal();
+                
+                if (principal instanceof com.cinemate.user.User) {
+                    userId = ((com.cinemate.user.User) principal).getId();
+                } else if (principal instanceof String) {
+                    userId = (String) principal;
+                }
+            }
+            
+            // Require authentication for deleting replies
+            if (userId == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
             
             forumService.deleteReply(id, userId);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
+            System.err.println("Error deleting reply: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
     }

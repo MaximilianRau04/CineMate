@@ -27,7 +27,6 @@ public class UserSummaryDTO {
         this.profilePublic = user.isProfilePublic();
     }
 
-    // Getters and Setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 

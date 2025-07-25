@@ -10,5 +10,7 @@ public interface SeriesRepository extends MongoRepository<Series, String> {
     List<Series> findByActorId(String actorId);
     @Query("{ 'directors._id': ?0 }")
     List<Series> findByDirectorId(String directorId);
-
+    
+    @Query("{ 'name': { $regex: ?0, $options: 'i' } }")
+    List<Series> findByNameContainingIgnoreCase(String name);
 }

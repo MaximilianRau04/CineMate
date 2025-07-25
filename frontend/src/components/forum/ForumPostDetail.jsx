@@ -18,13 +18,25 @@ const ForumPostDetail = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [submittingReply, setSubmittingReply] = useState(false);
+  const [editingPost, setEditingPost] = useState(false);
+  const [editPostContent, setEditPostContent] = useState("");
+  const [editingReplyId, setEditingReplyId] = useState(null);
+  const [editReplyContent, setEditReplyContent] = useState("");
+  const [mediaInfo, setMediaInfo] = useState(null);
 
   useEffect(() => {
     fetchPost();
     fetchReplies();
     fetchSubscriptionStatus();
     fetchCurrentUser();
-  }, [postId, currentPage]);
+  }, [postId, currentPage]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Fetch media info when post is loaded
+  useEffect(() => {
+    if (post) {
+      fetchMediaInfo();
+    }
+  }, [post]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /**
    * Fetches the forum post details
@@ -140,6 +152,35 @@ const ForumPostDetail = () => {
       }
     } catch (error) {
       console.error("Error fetching current user:", error);
+    }
+  };
+
+  /**
+   * Fetches media information for the post
+   * @return {Promise<void>} - Resolves when media data is fetched
+   */
+  const fetchMediaInfo = async () => {
+    if (!post) return;
+    
+    try {
+      if (post.movieId) {
+        const response = await fetch(`http://localhost:8080/api/movies/${post.movieId}`);
+        if (response.ok) {
+          const movie = await response.json();
+          setMediaInfo({ type: 'movie', data: movie });
+        }
+      } else if (post.seriesId) {
+        const response = await fetch(`http://localhost:8080/api/series/${post.seriesId}`);
+        if (response.ok) {
+          const series = await response.json();
+          setMediaInfo({ type: 'series', data: series });
+        }
+      } else {
+        setMediaInfo(null);
+      }
+    } catch (error) {
+      console.error("Error fetching media info:", error);
+      setMediaInfo(null);
     }
   };
 
@@ -311,6 +352,193 @@ const ForumPostDetail = () => {
     return categoryMap[category] || category;
   };
 
+  /**
+   * Checks if the current user can edit a post or reply (only author can edit)
+   * @param {object} author - The author of the post/reply
+   * @returns {boolean} - Whether the user can edit
+   */
+  const canEdit = (author) => {
+    if (!currentUser) return false;
+    return currentUser.id === author.id;
+  };
+
+  /**
+   * Checks if the current user can delete a post or reply (author or admin)
+   * @param {object} author - The author of the post/reply
+   * @returns {boolean} - Whether the user can delete
+   */
+  const canDelete = (author) => {
+    if (!currentUser) return false;
+    return currentUser.id === author.id || currentUser.role === 'ADMIN';
+  };
+
+  /**
+   * Handles editing a post
+   * @returns {Promise<void>} - Resolves when the post is updated
+   */
+  const handleEditPost = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `http://localhost:8080/api/forum/posts/${postId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            title: post.title,
+            content: editPostContent,
+            category: post.category,
+          }),
+        }
+      );
+
+      if (response.ok) {
+        setEditingPost(false);
+        fetchPost(); 
+        alert("Beitrag erfolgreich bearbeitet!");
+      } else {
+        alert("Fehler beim Bearbeiten des Beitrags");
+      }
+    } catch (error) {
+      console.error("Error editing post:", error);
+      alert("Fehler beim Bearbeiten des Beitrags");
+    }
+  };
+
+  /**
+   * Handles deleting a post
+   * @returns {Promise<void>} - Resolves when the post is deleted
+   */
+  const handleDeletePost = async () => {
+    if (!window.confirm("Möchten Sie diesen Beitrag wirklich löschen?")) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+      const endpoint = currentUser.role === 'ADMIN' 
+        ? `http://localhost:8080/api/forum/admin/posts/${postId}`
+        : `http://localhost:8080/api/forum/posts/${postId}`;
+      
+      const response = await fetch(endpoint, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        alert("Beitrag erfolgreich gelöscht!");
+        navigate("/forum");
+      } else {
+        alert("Fehler beim Löschen des Beitrags");
+      }
+    } catch (error) {
+      console.error("Error deleting post:", error);
+      alert("Fehler beim Löschen des Beitrags");
+    }
+  };
+
+  /**
+   * Handles editing a reply
+   * @param {string} replyId - The ID of the reply to edit
+   * @returns {Promise<void>} - Resolves when the reply is updated
+   */
+  const handleEditReply = async (replyId) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `http://localhost:8080/api/forum/replies/${replyId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            content: editReplyContent,
+          }),
+        }
+      );
+
+      if (response.ok) {
+        setEditingReplyId(null);
+        setEditReplyContent("");
+        fetchReplies(); // Refresh the replies
+        alert("Antwort erfolgreich bearbeitet!");
+      } else {
+        alert("Fehler beim Bearbeiten der Antwort");
+      }
+    } catch (error) {
+      console.error("Error editing reply:", error);
+      alert("Fehler beim Bearbeiten der Antwort");
+    }
+  };
+
+  /**
+   * Handles deleting a reply
+   * @param {string} replyId - The ID of the reply to delete
+   * @returns {Promise<void>} - Resolves when the reply is deleted
+   */
+  const handleDeleteReply = async (replyId) => {
+    if (!window.confirm("Möchten Sie diese Antwort wirklich löschen?")) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `http://localhost:8080/api/forum/replies/${replyId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        fetchReplies(); 
+        alert("Antwort erfolgreich gelöscht!");
+      } else {
+        alert("Fehler beim Löschen der Antwort");
+      }
+    } catch (error) {
+      console.error("Error deleting reply:", error);
+      alert("Fehler beim Löschen der Antwort");
+    }
+  };
+
+  /**
+   * Starts editing a post
+   */
+  const startEditingPost = () => {
+    setEditPostContent(post.content);
+    setEditingPost(true);
+  };
+
+  /**
+   * Starts editing a reply
+   * @param {object} reply - The reply to edit
+   */
+  const startEditingReply = (reply) => {
+    setEditReplyContent(reply.content);
+    setEditingReplyId(reply.id);
+  };
+
+  /**
+   * Cancels editing
+   */
+  const cancelEditing = () => {
+    setEditingPost(false);
+    setEditingReplyId(null);
+    setEditPostContent("");
+    setEditReplyContent("");
+  };
+
   if (loading) {
     return (
       <div className="forum-detail">
@@ -378,8 +606,102 @@ const ForumPostDetail = () => {
         {/* Post Content */}
         <div className="main-post-card">
           <div className="post-content">
-            <p>{post.content}</p>
+            {editingPost ? (
+              <div className="edit-post-form">
+                <textarea
+                  value={editPostContent}
+                  onChange={(e) => setEditPostContent(e.target.value)}
+                  className="edit-textarea"
+                  rows="6"
+                />
+                <div className="edit-actions">
+                  <button onClick={handleEditPost} className="save-btn">
+                    Speichern
+                  </button>
+                  <button onClick={cancelEditing} className="cancel-btn">
+                    Abbrechen
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <p>{post.content}</p>
+                {(canEdit(post.author) || canDelete(post.author)) && (
+                  <div className="post-actions">
+                    {canEdit(post.author) && (
+                      <button onClick={startEditingPost} className="edit-btn">
+                        ✏️ Bearbeiten
+                      </button>
+                    )}
+                    {canDelete(post.author) && (
+                      <button onClick={handleDeletePost} className="delete-btn">
+                        🗑️ Löschen
+                      </button>
+                    )}
+                  </div>
+                )}
+              </>
+            )}
           </div>
+
+          {/* Related Media Section */}
+          {mediaInfo && (
+            <div className="related-media-section">
+              <h4>Verknüpftes Medium</h4>
+              <div className="media-card">
+                <div className="media-poster">
+                  {mediaInfo.data.posterUrl ? (
+                    <img 
+                      src={mediaInfo.data.posterUrl} 
+                      alt={mediaInfo.data.title || mediaInfo.data.name}
+                      className="poster-image"
+                    />
+                  ) : (
+                    <div className="poster-placeholder">
+                      {mediaInfo.type === 'movie' ? '🎬' : '📺'}
+                    </div>
+                  )}
+                </div>
+                <div className="media-info">
+                  <h5 className="media-title">
+                    {mediaInfo.data.title || mediaInfo.data.name}
+                  </h5>
+                  <p className="media-type">
+                    {mediaInfo.type === 'movie' ? 'Film' : 'Serie'}
+                    {mediaInfo.data.releaseYear && ` • ${mediaInfo.data.releaseYear}`}
+                  </p>
+                  {mediaInfo.data.overview && (
+                    <p className="media-description">
+                      {mediaInfo.data.overview.length > 150 
+                        ? `${mediaInfo.data.overview.substring(0, 150)}...`
+                        : mediaInfo.data.overview
+                      }
+                    </p>
+                  )}
+                  <div className="media-actions">
+                    <button 
+                      className="view-media-btn"
+                      onClick={() => navigate(
+                        mediaInfo.type === 'movie' 
+                          ? `/movies/${mediaInfo.data.id}` 
+                          : `/series/${mediaInfo.data.id}`
+                      )}
+                    >
+                      {mediaInfo.type === 'movie' ? 'Film ansehen' : 'Serie ansehen'}
+                    </button>
+                    <button 
+                      className="find-similar-btn"
+                      onClick={() => navigate(
+                        `/forum?${mediaInfo.type}Id=${mediaInfo.data.id}`
+                      )}
+                    >
+                      Ähnliche Posts finden
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="post-interactions">
             <div className="interaction-buttons">
@@ -484,9 +806,56 @@ const ForumPostDetail = () => {
                         </span>
                       </div>
                     </div>
+                    {(canEdit(reply.author) || canDelete(reply.author)) && (
+                      <div className="reply-actions">
+                        {canEdit(reply.author) && (
+                          <button 
+                            onClick={() => startEditingReply(reply)} 
+                            className="edit-reply-btn"
+                            title="Antwort bearbeiten"
+                          >
+                            ✏️
+                          </button>
+                        )}
+                        {canDelete(reply.author) && (
+                          <button 
+                            onClick={() => handleDeleteReply(reply.id)} 
+                            className="delete-reply-btn"
+                            title="Antwort löschen"
+                          >
+                            🗑️
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
                   <div className="reply-content">
-                    <p>{reply.content}</p>
+                    {editingReplyId === reply.id ? (
+                      <div className="edit-reply-form">
+                        <textarea
+                          value={editReplyContent}
+                          onChange={(e) => setEditReplyContent(e.target.value)}
+                          className="edit-reply-textarea"
+                          rows="3"
+                        />
+                        <div className="edit-reply-actions">
+                          <button 
+                            onClick={() => handleEditReply(reply.id)} 
+                            className="save-reply-btn"
+                          >
+                            Speichern
+                          </button>
+                          <button 
+                            onClick={cancelEditing} 
+                            className="cancel-reply-btn"
+                          >
+                            Abbrechen
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <p>{reply.content}</p>
+                    )}
                   </div>
                 </div>
               ))

@@ -39,4 +39,17 @@ public interface ForumPostRepository extends MongoRepository<ForumPost, String> 
 
     @Query("{'$and': [{'isDeleted': false}, {'$or': [{'author.$id': ?0}, {'replies': {'$elemMatch': {'author.$id': ?0}}}]}]}")
     Page<ForumPost> findPostsUserParticipatedIn(String userId, Pageable pageable);
+
+    // New methods for media type filtering
+    Page<ForumPost> findByMovieIdIsNotNullAndIsDeletedFalseOrderByCreatedAtDesc(Pageable pageable);
+
+    Page<ForumPost> findBySeriesIdIsNotNullAndIsDeletedFalseOrderByCreatedAtDesc(Pageable pageable);
+
+    Page<ForumPost> findByMovieIdIsNullAndSeriesIdIsNullAndIsDeletedFalseOrderByCreatedAtDesc(Pageable pageable);
+
+    Page<ForumPost> findByCategoryAndMovieIdIsNotNullAndIsDeletedFalseOrderByCreatedAtDesc(ForumCategory category, Pageable pageable);
+
+    Page<ForumPost> findByCategoryAndSeriesIdIsNotNullAndIsDeletedFalseOrderByCreatedAtDesc(ForumCategory category, Pageable pageable);
+
+    Page<ForumPost> findByCategoryAndMovieIdIsNullAndSeriesIdIsNullAndIsDeletedFalseOrderByCreatedAtDesc(ForumCategory category, Pageable pageable);
 }

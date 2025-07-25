@@ -11,4 +11,7 @@ public interface MovieRepository extends MongoRepository<Movie, String> {
 
     @Query("{ 'directors._id': ?0 }")
     List<Movie> findByDirectorId(String directorId);
+    
+    @Query("{ 'title': { $regex: ?0, $options: 'i' } }")
+    List<Movie> findByTitleContainingIgnoreCase(String title);
 }
