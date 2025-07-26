@@ -1,7 +1,6 @@
 import React from 'react';
 import { useToast } from './ToastContext';
 import Toast from './Toast';
-import './Toast.css';
 
 const ToastContainer = () => {
   const { toasts, removeToast } = useToast();
@@ -11,7 +10,10 @@ const ToastContainer = () => {
   }
 
   return (
-    <div className="toast-container">
+    <div 
+      className="toast-container position-fixed top-0 end-0 p-3" 
+      style={{ zIndex: 11000 }}
+    >
       {toasts.map(toast => (
         <Toast
           key={toast.id}
