@@ -26,6 +26,13 @@ export const ToastProvider = ({ children }) => {
     setToasts(prev => prev.filter(toast => toast.id !== id));
   }, []);
 
+  /**
+   * Adds a new toast message.
+   * @param {string} message The message to display in the toast.
+   * @param {string} type The type of toast (success, error, warning, info).
+   * @param {number} duration The duration in milliseconds before the toast disappears. Default is 5000ms.
+   * @returns {number} The ID of the created toast.
+   */
   const addToast = useCallback((message, type = 'info', duration = 5000) => {
     const id = Date.now() + Math.random();
     const toast = {

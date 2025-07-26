@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../../assets/login.css";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { useAuth } from "../../utils/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const LoginForm = () => {
+  const { login, register } = useAuth();
+  const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -73,31 +76,17 @@ const LoginForm = () => {
     setSuccess("");
 
     try {
-      const response = await axios.post(
-        "http://localhost:8080/api/auth/login",
-        {
-          username,
-          password,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      localStorage.setItem("token", response.data.token || response.data);
-
-      if (response.data.user) {
-        localStorage.setItem("user", JSON.stringify(response.data.user));
-        localStorage.setItem("userRole", response.data.user.role);
+      const result = await login(username, password);
+      
+      if (result.success) {
+        setSuccess("Login erfolgreich! Weiterleitung...");
+        setTimeout(() => navigate("/explore"), 1500);
+      } else {
+        setError(result.error || "Ungültige Anmeldedaten.");
       }
-
-      setSuccess("Login erfolgreich! Weiterleitung...");
-      setTimeout(() => (window.location.href = "/explore"), 1500);
     } catch (err) {
-      console.error("Login error:", err.response?.data || err.message);
-      setError("Ungültige Anmeldedaten.");
+      console.error("Login error:", err);
+      setError("Ein unerwarteter Fehler ist aufgetreten.");
     }
   };
 
@@ -128,34 +117,22 @@ const LoginForm = () => {
     }
 
     try {
-      const response = await axios.post(
-        "http://localhost:8080/api/auth/register",
-        {
-          username,
-          email,
-          password,
-          role,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const result = await register({
+        username,
+        email,
+        password,
+        role,
+      });
 
-      setSuccess("Registrierung erfolgreich!");
-      setTimeout(() => setIsLogin(true), 2000);
-    } catch (err) {
-      console.error("Registration error:", err.response?.data || err.message);
-
-      if (err.response?.status === 400) {
-        const errorMessage = err.response.data?.message || err.response.data?.error || "Ungültige Eingabedaten.";
-        setError(errorMessage);
-      } else if (err.response?.status === 409) {
-        setError("Benutzername oder E-Mail bereits vergeben.");
+      if (result.success) {
+        setSuccess("Registrierung erfolgreich!");
+        setTimeout(() => setIsLogin(true), 2000);
       } else {
-        setError("Registrierung fehlgeschlagen. Bitte versuchen Sie es später erneut.");
+        setError(result.error || "Registrierung fehlgeschlagen.");
       }
+    } catch (err) {
+      console.error("Registration error:", err);
+      setError("Ein unerwarteter Fehler ist aufgetreten.");
     }
   };
 

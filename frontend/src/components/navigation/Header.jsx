@@ -3,21 +3,19 @@ import { Link, useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import NotificationSystem from "../notifications/NotificationSystem";
 import { LogOut } from 'lucide-react';
+import { useAuth } from "../../utils/AuthContext";
 
 const Header = () => {
   const navigate = useNavigate();
-  const token = localStorage.getItem("token");
-  const isLoggedIn = !!token;
+  const { logout, user, isAuthenticated } = useAuth();
 
-  const userRole = localStorage.getItem("userRole");
+  const userRole = user?.role;
   const isAdmin = userRole === "ADMIN";
   
-  const userId = localStorage.getItem("userId");
+  const userId = user?.id;
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("userRole");
-    localStorage.removeItem("userId");
+    logout();
     navigate("/");
   };
 
@@ -40,7 +38,7 @@ const Header = () => {
 
         {/* Navbar links for logged-in users */}
         <div className="collapse navbar-collapse" id="navbarNav" style={{ marginTop: '8px' }}>
-          {isLoggedIn && (
+          {isAuthenticated && (
             <ul className="navbar-nav me-auto">
               <li className="nav-item">
                 <Link className="nav-link" to="/explore">
@@ -105,7 +103,7 @@ const Header = () => {
           )}
 
           {/* Admin Panel for admins */}
-              {isLoggedIn && isAdmin && (
+              {isAuthenticated && isAdmin && (
                 <Link 
                   className="text-warning text-decoration-none me-3 d-flex align-items-center" 
                   to="/admin"
@@ -128,7 +126,7 @@ const Header = () => {
                 </Link>
               )}
 
-          {isLoggedIn && (
+          {isAuthenticated && (
             <div className="d-flex align-items-center">
               <NotificationSystem userId={userId} />
               

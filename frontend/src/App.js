@@ -19,6 +19,9 @@ import ForumHome from './components/forum/ForumHome';
 import ForumPostDetail from './components/forum/ForumPostDetail';
 import CreateForumPost from './components/forum/CreateForumPost';
 import { ToastProvider, ToastContainer } from './components/toasts';
+import { AuthProvider } from './utils/AuthContext';
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import PublicRoute from './components/auth/PublicRoute';
 
 const AppContent = () => {
   const location = useLocation();
@@ -28,27 +31,87 @@ const AppContent = () => {
     <>
       {!hideHeader && <Header />}
       <Routes>
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={
+          <PublicRoute>
+            <Login />
+          </PublicRoute>
+        } />
 
         {/* protected routes */}
-        <Route path="/explore" element={<ExplorePage />} />
-        <Route path="/movies/:id" element={<MovieDetail />} />
-        <Route path="/series/:id" element={<SeriesDetail />} />
-        <Route path="/watchlist" element={<Watchlist />} />
-        <Route path="/profile" element={<UserProfile />} />
-        <Route path="/calendar" element={<Calendar />} />
-        <Route path="/admin" element={<AdminPanel />} />
-        <Route path="/recommendations" element={<RecommendationsPage />} />
+        <Route path="/explore" element={
+          <ProtectedRoute>
+            <ExplorePage />
+          </ProtectedRoute>
+        } />
+        <Route path="/movies/:id" element={
+          <ProtectedRoute>
+            <MovieDetail />
+          </ProtectedRoute>
+        } />
+        <Route path="/series/:id" element={
+          <ProtectedRoute>
+            <SeriesDetail />
+          </ProtectedRoute>
+        } />
+        <Route path="/watchlist" element={
+          <ProtectedRoute>
+            <Watchlist />
+          </ProtectedRoute>
+        } />
+        <Route path="/profile" element={
+          <ProtectedRoute>
+            <UserProfile />
+          </ProtectedRoute>
+        } />
+        <Route path="/calendar" element={
+          <ProtectedRoute>
+            <Calendar />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin" element={
+          <ProtectedRoute>
+            <AdminPanel />
+          </ProtectedRoute>
+        } />
+        <Route path="/recommendations" element={
+          <ProtectedRoute>
+            <RecommendationsPage />
+          </ProtectedRoute>
+        } />
         
         {/* Social routes */}
-        <Route path="/friends" element={<FriendsPage />} />
-        <Route path="/leaderboard" element={<Leaderboard />} />
-        <Route path="/profile/:userId" element={<FriendProfile />} />
+        <Route path="/friends" element={
+          <ProtectedRoute>
+            <FriendsPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/leaderboard" element={
+          <ProtectedRoute>
+            <Leaderboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/profile/:userId" element={
+          <ProtectedRoute>
+            <FriendProfile />
+          </ProtectedRoute>
+        } />
 
         {/* Forum routes */}
-        <Route path="/forum" element={<ForumHome />} />
-        <Route path="/forum/post/:postId" element={<ForumPostDetail />} />
-        <Route path="/forum/create-post" element={<CreateForumPost />} />
+        <Route path="/forum" element={
+          <ProtectedRoute>
+            <ForumHome />
+          </ProtectedRoute>
+        } />
+        <Route path="/forum/post/:postId" element={
+          <ProtectedRoute>
+            <ForumPostDetail />
+          </ProtectedRoute>
+        } />
+        <Route path="/forum/create-post" element={
+          <ProtectedRoute>
+            <CreateForumPost />
+          </ProtectedRoute>
+        } />
 
         <Route path="*" element={<h2 className="text-center mt-5">Seite nicht gefunden</h2>} />
 
@@ -59,12 +122,14 @@ const AppContent = () => {
 
 const App = () => {
   return (
-    <ToastProvider>
-      <Router>
-        <AppContent />
-        <ToastContainer />
-      </Router>
-    </ToastProvider>
+    <AuthProvider>
+      <ToastProvider>
+        <Router>
+          <AppContent />
+          <ToastContainer />
+        </Router>
+      </ToastProvider>
+    </AuthProvider>
   );
 };
 
