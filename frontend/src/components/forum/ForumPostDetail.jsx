@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useToast } from '../toasts';
 import "./ForumPostDetail.css";
 
 const ForumPostDetail = () => {
   const { postId } = useParams();
   const navigate = useNavigate();
+  const { success, error: showError } = useToast();
   const [post, setPost] = useState(null);
   const [replies, setReplies] = useState([]);
   const [subscriptionStatus, setSubscriptionStatus] = useState({
@@ -222,7 +224,7 @@ const ForumPostDetail = () => {
       if (response.ok) {
         // Show success message
         const action = wasSubscribed ? "abbestellt" : "abonniert";
-        alert(`Beitrag erfolgreich ${action}!`);
+        success(`Beitrag erfolgreich ${action}!`);
 
         // Refresh subscription status
         await fetchSubscriptionStatus();
@@ -233,11 +235,11 @@ const ForumPostDetail = () => {
           response.status,
           errorText
         );
-        alert("Fehler beim Ändern des Abonnement-Status");
+        showError("Fehler beim Ändern des Abonnement-Status");
       }
     } catch (error) {
       console.error("Error toggling subscription:", error);
-      alert("Fehler beim Ändern des Abonnement-Status");
+      showError("Fehler beim Ändern des Abonnement-Status");
     }
   };
 
@@ -398,13 +400,13 @@ const ForumPostDetail = () => {
       if (response.ok) {
         setEditingPost(false);
         fetchPost(); 
-        alert("Beitrag erfolgreich bearbeitet!");
+        success("Beitrag erfolgreich bearbeitet!");
       } else {
-        alert("Fehler beim Bearbeiten des Beitrags");
+        showError("Fehler beim Bearbeiten des Beitrags");
       }
     } catch (error) {
       console.error("Error editing post:", error);
-      alert("Fehler beim Bearbeiten des Beitrags");
+      showError("Fehler beim Bearbeiten des Beitrags");
     }
   };
 
@@ -431,14 +433,14 @@ const ForumPostDetail = () => {
       });
 
       if (response.ok) {
-        alert("Beitrag erfolgreich gelöscht!");
+        success("Beitrag erfolgreich gelöscht!");
         navigate("/forum");
       } else {
-        alert("Fehler beim Löschen des Beitrags");
+        showError("Fehler beim Löschen des Beitrags");
       }
     } catch (error) {
       console.error("Error deleting post:", error);
-      alert("Fehler beim Löschen des Beitrags");
+      showError("Fehler beim Löschen des Beitrags");
     }
   };
 
@@ -468,13 +470,13 @@ const ForumPostDetail = () => {
         setEditingReplyId(null);
         setEditReplyContent("");
         fetchReplies(); // Refresh the replies
-        alert("Antwort erfolgreich bearbeitet!");
+        success("Antwort erfolgreich bearbeitet!");
       } else {
-        alert("Fehler beim Bearbeiten der Antwort");
+        showError("Fehler beim Bearbeiten der Antwort");
       }
     } catch (error) {
       console.error("Error editing reply:", error);
-      alert("Fehler beim Bearbeiten der Antwort");
+      showError("Fehler beim Bearbeiten der Antwort");
     }
   };
 
@@ -502,13 +504,13 @@ const ForumPostDetail = () => {
 
       if (response.ok) {
         fetchReplies(); 
-        alert("Antwort erfolgreich gelöscht!");
+        success("Antwort erfolgreich gelöscht!");
       } else {
-        alert("Fehler beim Löschen der Antwort");
+        showError("Fehler beim Löschen der Antwort");
       }
     } catch (error) {
       console.error("Error deleting reply:", error);
-      alert("Fehler beim Löschen der Antwort");
+      showError("Fehler beim Löschen der Antwort");
     }
   };
 

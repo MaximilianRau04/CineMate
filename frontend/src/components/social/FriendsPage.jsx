@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FaUserFriends, FaUserPlus, FaCheck, FaTimes, FaSearch, FaTrash } from 'react-icons/fa';
+import { useToast } from '../toasts';
 
 const FriendsPage = () => {
   const [friends, setFriends] = useState([]);
@@ -10,6 +11,7 @@ const FriendsPage = () => {
   const [activeTab, setActiveTab] = useState('friends');
   const [loading, setLoading] = useState(true);
   const [allUsers, setAllUsers] = useState([]);
+  const { success, error: showError } = useToast();
 
   const token = localStorage.getItem('token');
 
@@ -116,17 +118,17 @@ const FriendsPage = () => {
       });
 
       if (response.ok) {
-        alert('Freundschaftsanfrage gesendet!');
+        success('Freundschaftsanfrage gesendet!');
         setAllUsers(prev => prev.filter(user => user.id !== userId));
         loadData();
       } else {
         const error = await response.text();
         console.error('Failed to send friend request:', error);
-        alert(`Fehler: ${error}`);
+        showError(`Fehler: ${error}`);
       }
     } catch (error) {
       console.error('Error sending friend request:', error);
-      alert('Fehler beim Senden der Freundschaftsanfrage');
+      showError('Fehler beim Senden der Freundschaftsanfrage');
     }
   };
 
@@ -144,11 +146,11 @@ const FriendsPage = () => {
       });
 
       if (response.ok) {
-        alert('Freundschaftsanfrage akzeptiert!');
+        success('Freundschaftsanfrage akzeptiert!');
         loadData();
       } else {
         const error = await response.text();
-        alert(`Fehler: ${error}`);
+        showError(`Fehler: ${error}`);
       }
     } catch (error) {
       console.error('Error accepting friend request:', error);
@@ -169,11 +171,11 @@ const FriendsPage = () => {
       });
 
       if (response.ok) {
-        alert('Freundschaftsanfrage abgelehnt');
+        success('Freundschaftsanfrage abgelehnt');
         loadPendingRequests();
       } else {
         const error = await response.text();
-        alert(`Fehler: ${error}`);
+        showError(`Fehler: ${error}`);
       }
     } catch (error) {
       console.error('Error declining friend request:', error);
@@ -198,11 +200,11 @@ const FriendsPage = () => {
       });
 
       if (response.ok) {
-        alert('Freund entfernt');
+        success('Freund entfernt');
         loadFriends();
       } else {
         const error = await response.text();
-        alert(`Fehler: ${error}`);
+        showError(`Fehler: ${error}`);
       }
     } catch (error) {
       console.error('Error removing friend:', error);
@@ -233,28 +235,44 @@ const FriendsPage = () => {
    * @param {string} avatarUrl - The user's avatar URL
    * @param {string} username - The user's username
    * @param {number} size - The size of the avatar (default: 50)
+   * @param {string} userId - The user's ID for profile link (optional)
    * @returns {JSX.Element} Profile image element
    */
-  const renderProfileImage = (avatarUrl, username, size = 50) => {
-    if (avatarUrl) {
+  const renderProfileImage = (avatarUrl, username, size = 50, userId = null) => {
+    const imageElement = avatarUrl ? (
+      <img
+        src={`http://localhost:8080${avatarUrl}`}
+        alt={username}
+        className="rounded-circle"
+        style={{ 
+          width: `${size}px`, 
+          height: `${size}px`, 
+          objectFit: 'cover',
+          cursor: userId ? 'pointer' : 'default'
+        }}
+      />
+    ) : (
+      <div
+        className="rounded-circle bg-secondary d-flex align-items-center justify-content-center"
+        style={{ 
+          width: `${size}px`, 
+          height: `${size}px`,
+          cursor: userId ? 'pointer' : 'default'
+        }}
+      >
+        <i className="bi bi-person-fill text-white" style={{ fontSize: `${size * 0.6}px` }}></i>
+      </div>
+    );
+
+    if (userId) {
       return (
-        <img
-          src={`http://localhost:8080${avatarUrl}`}
-          alt={username}
-          className="rounded-circle"
-          style={{ width: `${size}px`, height: `${size}px`, objectFit: 'cover' }}
-        />
-      );
-    } else {
-      return (
-        <div
-          className="rounded-circle bg-secondary d-flex align-items-center justify-content-center"
-          style={{ width: `${size}px`, height: `${size}px` }}
-        >
-          <i className="bi bi-person-fill text-white" style={{ fontSize: `${size * 0.6}px` }}></i>
-        </div>
+        <Link to={`/profile/${userId}`} className="d-block">
+          {imageElement}
+        </Link>
       );
     }
+
+    return imageElement;
   };
 
   if (loading) {
@@ -324,7 +342,7 @@ const FriendsPage = () => {
                           <div className="card-body">
                             <div className="d-flex align-items-center mb-3">
                               <div className="me-3">
-                                {renderProfileImage(friend.avatarUrl, friend.username, 50)}
+                                {renderProfileImage(friend.avatarUrl, friend.username, 50, friend.id)}
                               </div>
                               <div>
                                 <h6 className="mb-0">{friend.username}</h6>
@@ -332,13 +350,6 @@ const FriendsPage = () => {
                               </div>
                             </div>
                             <div className="d-flex justify-content-between">
-                              <Link
-                                to={`/profile/${friend.id}`}
-                                className="btn btn-light mt-2 fw-bold"
-                                style={{ color: '#0d6efd', borderColor: '#0d6efd' }}
-                              >
-                                Profil ansehen
-                              </Link>
                               <button
                                 className="btn btn-outline-danger btn-sm"
                                 onClick={() => removeFriend(friend.id)}
@@ -438,7 +449,7 @@ const FriendsPage = () => {
                               <div className="card-body">
                                 <div className="d-flex align-items-center mb-3">
                                   <div className="me-3">
-                                    {renderProfileImage(user.avatarUrl, user.username, 50)}
+                                    {renderProfileImage(user.avatarUrl, user.username, 50, user.id)}
                                   </div>
                                   <div>
                                     <h6 className="mb-0">{user.username}</h6>
@@ -446,13 +457,6 @@ const FriendsPage = () => {
                                   </div>
                                 </div>
                                 <div className="d-flex gap-2">
-                                  <Link
-                                    to={`/profile/${user.id}`}
-                                    className="btn btn-light mt-2 fw-bold"
-                                    style={{ color: '#0d6efd', borderColor: '#0d6efd' }}
-                                  >
-                                    Profil ansehen
-                                  </Link>
                                   <button
                                     className="btn btn-primary btn-sm px-3 py-1 d-flex align-items-center"
                                     onClick={() => sendFriendRequest(user.id)}

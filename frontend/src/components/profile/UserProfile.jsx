@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import { useToast } from '../toasts';
 import UserMediaTabs from "./UserMediaTabs";
 import CompactNotificationSettings from "./CompactNotificationSettings";
 
@@ -10,11 +11,13 @@ const UserProfile = () => {
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [isBioLoading, setIsBioLoading] = useState(false);
   const [userId, setUserId] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [modalBio, setModalBio] = useState("");
   const fileInputRef = useRef(null);
   const [reviews, setReviews] = useState([]);
+  const { success, error: showError } = useToast();
 
   /**
    * * Fetches the user data from the API and sets the user state.
@@ -99,8 +102,10 @@ const UserProfile = () => {
       setUser(updatedUser);
       setAvatarPreview(null);
       setAvatarFile(null);
+      success('Avatar erfolgreich entfernt!');
     } catch (err) {
       console.error("Fehler beim Entfernen des Avatars:", err);
+      showError('Fehler beim Entfernen des Avatars');
     } finally {
       setSaving(false);
     }
@@ -113,9 +118,44 @@ const UserProfile = () => {
   };
 
   // save the bio from the modal
-  const saveModalBio = () => {
-    setBio(modalBio);
-    setShowModal(false);
+    const saveModalBio = async () => {
+    if (!userId) return;
+    
+    setIsBioLoading(true);
+    try {
+      const formData = new FormData();
+      const userData = {
+        bio: modalBio
+      };
+
+      formData.append(
+        "user",
+        new Blob([JSON.stringify(userData)], { type: "application/json" })
+      );
+
+      const response = await fetch(`http://localhost:8080/api/users/${userId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: formData
+      });
+
+      if (response.ok) {
+        const updatedUser = await response.json();
+        setUser(updatedUser);
+        setBio(modalBio);
+        setShowModal(false);
+        success('Biografie erfolgreich aktualisiert!');
+      } else {
+        throw new Error('Fehler beim Speichern der Biografie');
+      }
+    } catch (error) {
+      console.error('Error saving bio:', error);
+      showError('Fehler beim Speichern der Biografie');
+    } finally {
+      setIsBioLoading(false);
+    }
   };
 
   const handleAvatarClick = () => {
@@ -157,8 +197,10 @@ const UserProfile = () => {
           setUser(updatedUser);
           setAvatarFile(null);
           setAvatarPreview(null);
+          success('Profil erfolgreich aktualisiert!');
         } catch (err) {
           console.error("Fehler beim Speichern:", err);
+          showError('Fehler beim Aktualisieren des Profils');
         } finally {
           setSaving(false);
         }
@@ -166,7 +208,7 @@ const UserProfile = () => {
 
       autoSave();
     }
-  }, [avatarFile, userId, bio]);
+  }, [avatarFile, userId, bio, showError, success]);
 
   if (loading)
     return <p className="text-center mt-5">🔄 Benutzer wird geladen...</p>;
@@ -327,7 +369,7 @@ const UserProfile = () => {
               </div>
               <button
                 type="button"
-                className="btn btn-outline-primary btn-sm"
+                className="btn btn-primary btn-sm"
                 onClick={openModal}
               >
                 <i className="bi bi-pencil-fill me-1"></i>
@@ -398,6 +440,7 @@ const UserProfile = () => {
                   type="button"
                   className="btn btn-secondary"
                   onClick={() => setShowModal(false)}
+                  disabled={isBioLoading}
                 >
                   Abbrechen
                 </button>
@@ -405,8 +448,16 @@ const UserProfile = () => {
                   type="button"
                   className="btn btn-primary"
                   onClick={saveModalBio}
+                  disabled={isBioLoading}
                 >
-                  Speichern
+                  {isBioLoading ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                      Speichern...
+                    </>
+                  ) : (
+                    'Speichern'
+                  )}
                 </button>
               </div>
             </div>

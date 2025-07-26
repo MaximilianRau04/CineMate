@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '../toasts';
 import SearchableMediaSelect from './SearchableMediaSelect';
 import './CreateForumPost.css';
 
@@ -13,6 +14,7 @@ const CreateForumPost = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
+    const { success, error: showError } = useToast();
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -80,6 +82,7 @@ const CreateForumPost = () => {
 
             if (response.ok) {
                 const createdPost = await response.json();
+                success('Beitrag erfolgreich erstellt!');
                 navigate(`/forum/post/${createdPost.id}`);
             } else if (response.status === 401) {
                 setError('Sie müssen sich anmelden, um einen Beitrag zu erstellen');
@@ -90,6 +93,7 @@ const CreateForumPost = () => {
             }
         } catch (error) {
             console.error('Error creating post:', error);
+            showError('Fehler beim Erstellen des Beitrags');
             setError('Fehler beim Erstellen des Beitrags');
             setLoading(false);
         }

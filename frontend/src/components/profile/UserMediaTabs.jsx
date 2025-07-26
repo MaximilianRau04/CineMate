@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useToast } from "../toasts";
 import MediaCard from "./MediaCard";
 
 const UserMediaTabs = ({ userId }) => {
@@ -7,6 +8,7 @@ const UserMediaTabs = ({ userId }) => {
   const [favorites, setFavorites] = useState({ movies: [], series: [] });
   const [watched, setWatched] = useState({ movies: [], series: [] });
   const [reviews, setReviews] = useState([]);
+  const { success, error: showError } = useToast();
   const [loading, setLoading] = useState({
     favorites: false,
     watched: false,
@@ -119,11 +121,14 @@ const UserMediaTabs = ({ userId }) => {
           ...prev,
           [mediaType + 's']: prev[mediaType + 's'].filter(item => item.id !== mediaId)
         }));
+        success(`${mediaType === 'movie' ? 'Film' : 'Serie'} aus Favoriten entfernt!`);
       } else {
         console.error(`Fehler beim Entfernen aus Favoriten: ${response.status}`);
+        showError('Fehler beim Entfernen aus Favoriten');
       }
     } catch (error) {
       console.error('Fehler beim Entfernen aus Favoriten:', error);
+      showError('Fehler beim Entfernen aus Favoriten');
     }
   };
 
@@ -144,11 +149,14 @@ const UserMediaTabs = ({ userId }) => {
           ...prev,
           [mediaType + 's']: prev[mediaType + 's'].filter(item => item.id !== mediaId)
         }));
+        success(`${mediaType === 'movie' ? 'Film' : 'Serie'} aus gesehenen Medien entfernt!`);
       } else {
         console.error(`Fehler beim Entfernen aus gesehenen Medien: ${response.status}`);
+        showError('Fehler beim Entfernen aus gesehenen Medien');
       }
     } catch (error) {
       console.error('Fehler beim Entfernen aus gesehenen Medien:', error);
+      showError('Fehler beim Entfernen aus gesehenen Medien');
     }
   };
 
@@ -187,23 +195,34 @@ const UserMediaTabs = ({ userId }) => {
   /**
    * renders the media title with appropriate link based on media data
    * @param {Object} review - The review object with mediaData
+   * @param {boolean} withLink - Whether to render with link or just text
    * @returns {JSX.Element} The rendered media title
    */
-  const renderMediaTitle = (review) => {
+  const renderMediaTitle = (review, withLink = true) => {
     if (review.movie) {
-      return (
-        <Link to={`/movies/${review.movie.id}`} className="text-decoration-none">
+      const content = (
+        <>
           🎬 {review.movie.title}
-        </Link>
+        </>
       );
+      return withLink ? (
+        <Link to={`/movies/${review.movie.id}`} className="text-decoration-none">
+          {content}
+        </Link>
+      ) : content;
     }
 
     if (review.series) {
-      return (
-        <Link to={`/series/${review.series.id}`} className="text-decoration-none">
+      const content = (
+        <>
           📺 {review.series.title}
-        </Link>
+        </>
       );
+      return withLink ? (
+        <Link to={`/series/${review.series.id}`} className="text-decoration-none">
+          {content}
+        </Link>
+      ) : content;
     }
     
     if (review.mediaData) {
@@ -211,12 +230,17 @@ const UserMediaTabs = ({ userId }) => {
       const isMovie = type === "movie";
       const route = isMovie ? `/movies/${data.id}` : `/series/${data.id}`;
       const icon = isMovie ? "🎬" : "📺";
-
-      return (
-        <Link to={route} className="text-decoration-none">
+      const content = (
+        <>
           {icon} {data.title}
-        </Link>
+        </>
       );
+
+      return withLink ? (
+        <Link to={route} className="text-decoration-none">
+          {content}
+        </Link>
+      ) : content;
     }
 
     return <span>Unbekannter Inhalt</span>;
@@ -277,7 +301,7 @@ const UserMediaTabs = ({ userId }) => {
                     >
                       <div className="d-flex justify-content-between align-items-center">
                         <h6 className="mb-1">
-                          {renderMediaTitle(review)}
+                          {renderMediaTitle(review, false)}
                         </h6>
                         <span className="badge bg-warning text-dark">
                           {"⭐".repeat(review.rating)}

@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { FaUserFriends, FaEye, FaHeart, FaStar, FaLock } from 'react-icons/fa';
+import { useToast } from '../toasts';
 import UserMediaTabs from '../profile/UserMediaTabs';
 
 const FriendProfile = () => {
   const { userId } = useParams();
+  const { success, error: showError } = useToast();
   const [user, setUser] = useState(null);
   const [userPoints, setUserPoints] = useState(null);
   const [friends, setFriends] = useState([]);
@@ -172,14 +174,14 @@ const FriendProfile = () => {
       });
       
       if (response.ok) {
-        alert('Freundschaftsanfrage gesendet!');
+        success('Freundschaftsanfrage gesendet!');
       } else {
         const error = await response.text();
-        alert(`Fehler: ${error}`);
+        showError(`Fehler: ${error}`);
       }
     } catch (error) {
       console.error('Error sending friend request:', error);
-      alert('Fehler beim Senden der Freundschaftsanfrage');
+      showError('Fehler beim Senden der Freundschaftsanfrage');
     }
   };
 

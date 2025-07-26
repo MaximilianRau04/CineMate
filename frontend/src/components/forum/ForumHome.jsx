@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '../toasts';
 import './ForumHome.css';
 
 const ForumHome = () => {
@@ -15,8 +16,47 @@ const ForumHome = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [currentUser, setCurrentUser] = useState(null);
+    const [mediaInfoCache, setMediaInfoCache] = useState({});
     
     const navigate = useNavigate();
+    const { success, error: showError } = useToast();
+
+    /**
+     * Fetches media information for a post
+     * @param {object} post - The post object
+     * @returns {Promise<object|null>} - Media information or null
+     */
+    const fetchMediaInfo = useCallback(async (post) => {
+        const cacheKey = post.movieId ? `movie_${post.movieId}` : `series_${post.seriesId}`;
+        
+        // Check cache first
+        if (mediaInfoCache[cacheKey]) {
+            return mediaInfoCache[cacheKey];
+        }
+
+        try {
+            if (post.movieId) {
+                const response = await fetch(`http://localhost:8080/api/movies/${post.movieId}`);
+                if (response.ok) {
+                    const movie = await response.json();
+                    const mediaInfo = { type: 'movie', data: movie };
+                    setMediaInfoCache(prev => ({ ...prev, [cacheKey]: mediaInfo }));
+                    return mediaInfo;
+                }
+            } else if (post.seriesId) {
+                const response = await fetch(`http://localhost:8080/api/series/${post.seriesId}`);
+                if (response.ok) {
+                    const series = await response.json();
+                    const mediaInfo = { type: 'series', data: series };
+                    setMediaInfoCache(prev => ({ ...prev, [cacheKey]: mediaInfo }));
+                    return mediaInfo;
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching media info:', error);
+        }
+        return null;
+    }, [mediaInfoCache]);
 
     /**
      * Fetches the current user information
@@ -126,6 +166,25 @@ const ForumHome = () => {
         fetchPosts();
     }, [fetchPosts]);
 
+    // Load media info for posts that have linked media
+    useEffect(() => {
+        const loadMediaInfo = async () => {
+            const allPosts = [...posts, ...pinnedPosts];
+            const postsWithMedia = allPosts.filter(post => post.movieId || post.seriesId);
+            
+            for (const post of postsWithMedia) {
+                const cacheKey = post.movieId ? `movie_${post.movieId}` : `series_${post.seriesId}`;
+                if (!mediaInfoCache[cacheKey]) {
+                    await fetchMediaInfo(post);
+                }
+            }
+        };
+        
+        if (posts.length > 0 || pinnedPosts.length > 0) {
+            loadMediaInfo();
+        }
+    }, [posts, pinnedPosts, mediaInfoCache, fetchMediaInfo]);
+
     /**
      * Handles the search functionality
      * @param {string} searchQuery - The query to search for
@@ -193,47 +252,24 @@ const ForumHome = () => {
     };
 
     /**
-     * Fetches media information for a post
-     * @param {object} post - The post object
-     * @returns {Promise<object|null>} - Media information or null
-     */
-    const fetchMediaInfo = async (post) => {
-        try {
-            if (post.movieId) {
-                const response = await fetch(`http://localhost:8080/api/movies/${post.movieId}`);
-                if (response.ok) {
-                    const movie = await response.json();
-                    return { type: 'movie', data: movie };
-                }
-            } else if (post.seriesId) {
-                const response = await fetch(`http://localhost:8080/api/series/${post.seriesId}`);
-                if (response.ok) {
-                    const series = await response.json();
-                    return { type: 'series', data: series };
-                }
-            }
-        } catch (error) {
-            console.error('Error fetching media info:', error);
-        }
-        return null;
-    };
-
-    /**
      * Renders media badge for a post
      * @param {object} post - The post object
      * @returns {JSX.Element|null} - Media badge component
      */
     const renderMediaBadge = (post) => {
+        const cacheKey = post.movieId ? `movie_${post.movieId}` : `series_${post.seriesId}`;
+        const mediaInfo = mediaInfoCache[cacheKey];
+        
         if (post.movieId) {
             return (
-                <span className="media-badge movie-badge" title="Verknüpfter Film">
-                    🎬 Film
+                <span className="media-badge movie-badge" title={mediaInfo ? `Film: ${mediaInfo.data.title}` : "Verknüpfter Film"}>
+                    🎬 {mediaInfo ? mediaInfo.data.title : 'Film'}
                 </span>
             );
         } else if (post.seriesId) {
             return (
-                <span className="media-badge series-badge" title="Verknüpfte Serie">
-                    📺 Serie
+                <span className="media-badge series-badge" title={mediaInfo ? `Serie: ${mediaInfo.data.title}` : "Verknüpfte Serie"}>
+                    📺 {mediaInfo ? mediaInfo.data.title : 'Serie'}
                 </span>
             );
         }
@@ -292,13 +328,13 @@ const ForumHome = () => {
             if (response.ok) {
                 setPosts(prevPosts => prevPosts.filter(post => post.id !== postId));
                 setPinnedPosts(prevPinned => prevPinned.filter(post => post.id !== postId));
-                alert("Beitrag erfolgreich gelöscht!");
+                success("Beitrag erfolgreich gelöscht!");
             } else {
-                alert("Fehler beim Löschen des Beitrags");
+                showError("Fehler beim Löschen des Beitrags");
             }
         } catch (error) {
             console.error('Error deleting post:', error);
-            alert("Fehler beim Löschen des Beitrags");
+            showError("Fehler beim Löschen des Beitrags");
         }
     };
 

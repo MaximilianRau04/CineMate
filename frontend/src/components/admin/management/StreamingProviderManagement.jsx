@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useToast } from '../../toasts';
 
 const StreamingProviderManagement = () => {
   const [providers, setProviders] = useState([]);
@@ -6,6 +7,7 @@ const StreamingProviderManagement = () => {
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [editingProvider, setEditingProvider] = useState(null);
+  const { success, error: showError } = useToast();
   const [formData, setFormData] = useState({
     name: '',
     logoUrl: '',
@@ -71,10 +73,13 @@ const StreamingProviderManagement = () => {
         throw new Error('Anbieter konnte nicht gespeichert werden');
       }
 
+      const action = editingProvider ? 'aktualisiert' : 'erstellt';
+      success(`Streaming-Anbieter erfolgreich ${action}!`);
       await fetchProviders();
       handleCloseModal();
     } catch (err) {
       console.error('Fehler beim Speichern:', err);
+      showError(err.message || 'Fehler beim Speichern des Anbieters');
       setError(err.message);
     }
   };
@@ -118,9 +123,11 @@ const StreamingProviderManagement = () => {
         throw new Error('Anbieter konnte nicht gelöscht werden');
       }
 
+      success('Streaming-Anbieter erfolgreich gelöscht!');
       await fetchProviders();
     } catch (err) {
       console.error('Fehler beim Löschen:', err);
+      showError(err.message || 'Fehler beim Löschen des Anbieters');
       setError(err.message);
     }
   };

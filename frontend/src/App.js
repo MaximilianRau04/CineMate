@@ -18,6 +18,7 @@ import FriendProfile from './components/social/FriendProfile';
 import ForumHome from './components/forum/ForumHome';
 import ForumPostDetail from './components/forum/ForumPostDetail';
 import CreateForumPost from './components/forum/CreateForumPost';
+import { ToastProvider, ToastContainer } from './components/toasts';
 
 const AppContent = () => {
   const location = useLocation();
@@ -58,9 +59,12 @@ const AppContent = () => {
 
 const App = () => {
   return (
-    <Router>
-      <AppContent />
-    </Router>
+    <ToastProvider>
+      <Router>
+        <AppContent />
+        <ToastContainer />
+      </Router>
+    </ToastProvider>
   );
 };
 

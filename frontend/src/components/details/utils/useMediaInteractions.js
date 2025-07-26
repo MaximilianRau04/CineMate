@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useToast } from "../../toasts";
 
 export const useMediaInteractions = (userId, mediaId, mediaType = 'movies') => {
   const [isInWatchlist, setIsInWatchlist] = useState(false);
@@ -7,6 +8,7 @@ export const useMediaInteractions = (userId, mediaId, mediaType = 'movies') => {
   const [markingAsWatched, setMarkingAsWatched] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [addingToFavorites, setAddingToFavorites] = useState(false);
+  const { success, error: showError } = useToast();
 
   const API_URL = "http://localhost:8080/api";
 
@@ -59,9 +61,11 @@ export const useMediaInteractions = (userId, mediaId, mediaType = 'movies') => {
       })
       .then(() => {
         setIsInWatchlist(true);
+        success(`${mediaType === 'movies' ? 'Film' : 'Serie'} zur Watchlist hinzugefügt!`);
       })
       .catch((err) => {
         console.error("Fehler beim Hinzufügen zur Watchlist:", err);
+        showError("Fehler beim Hinzufügen zur Watchlist");
       })
       .finally(() => {
         setAddingToWatchlist(false);
@@ -86,9 +90,11 @@ export const useMediaInteractions = (userId, mediaId, mediaType = 'movies') => {
       })
       .then(() => {
         setIsWatched(true);
+        success(`${mediaType === 'movies' ? 'Film' : 'Serie'} als gesehen markiert!`);
       })
       .catch((err) => {
         console.error("Fehler beim Markieren als gesehen:", err);
+        showError("Fehler beim Markieren als gesehen");
       })
       .finally(() => {
         setMarkingAsWatched(false);
@@ -113,9 +119,11 @@ export const useMediaInteractions = (userId, mediaId, mediaType = 'movies') => {
       })
       .then(() => {
         setIsFavorite(true);
+        success(`${mediaType === 'movies' ? 'Film' : 'Serie'} zu Favoriten hinzugefügt!`);
       })
       .catch((err) => {
         console.error("Fehler beim Hinzufügen zu Favoriten:", err);
+        showError("Fehler beim Hinzufügen zu Favoriten");
       })
       .finally(() => {
         setAddingToFavorites(false);
