@@ -8,11 +8,21 @@ const Toast = ({ toast, onRemove }) => {
     return () => clearTimeout(showTimer);
   }, []);
 
+  /**
+   * Handles the close button click event.
+   */
   const handleClose = () => {
+    console.log('Toast close button clicked, toast ID:', toast.id);
     setShow(false);
-    setTimeout(() => onRemove(toast.id), 300); 
+    setTimeout(() => {
+      onRemove(toast.id);
+    }, 300); 
   };
 
+  /**
+   * Gets the styles for the toast based on its type.
+   * @returns {Object} The styles object for the toast.
+   */
   const getStyles = () => {
     const base = {
       success: '#4CAF50',
@@ -36,16 +46,17 @@ const Toast = ({ toast, onRemove }) => {
         boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
         padding: '12px 16px',
         minWidth: '300px',
-        marginBottom: '0.5rem',
         transition: 'all 0.3s ease-in-out',
         transform: show ? 'translateX(0)' : 'translateX(120%)',
         opacity: show ? 1 : 0,
+        position: 'relative',
+        pointerEvents: 'auto',
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center' }}>
         <span style={{ fontSize: '1.3rem', marginRight: '10px' }}>
           {toast.type === 'success' && '✅'}
-          {toast.type === 'error' && '❌'}
+          {toast.type === 'error' && '❗️'}
           {toast.type === 'warning' && '⚠️'}
           {toast.type === 'info' && 'ℹ️'}
         </span>
@@ -60,16 +71,35 @@ const Toast = ({ toast, onRemove }) => {
         </div>
         <button
           onClick={handleClose}
+          type="button"
+          aria-label="Close"
           style={{
             background: 'transparent',
             border: 'none',
-            fontSize: '1.2rem',
+            fontSize: '1.4rem',
             cursor: 'pointer',
-            color: '#888',
+            color: '#333',
             marginLeft: '10px',
+            padding: '4px 8px',
+            borderRadius: '4px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '24px',
+            height: '24px',
+            zIndex: 1000,
+            fontWeight: 'bold',
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.backgroundColor = '#f0f0f0';
+            e.target.style.color = '#000';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.backgroundColor = 'transparent';
+            e.target.style.color = '#333';
           }}
         >
-          ✖
+          ×
         </button>
       </div>
     </div>

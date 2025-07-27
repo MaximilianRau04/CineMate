@@ -12,14 +12,22 @@ const ToastContainer = () => {
   return (
     <div 
       className="toast-container position-fixed top-0 end-0 p-3" 
-      style={{ zIndex: 11000 }}
+      style={{ 
+        zIndex: 11000,
+        pointerEvents: 'none',
+        maxWidth: '350px',
+      }}
     >
       {toasts.map(toast => (
-        <Toast
-          key={toast.id}
-          toast={toast}
-          onRemove={removeToast}
-        />
+        <div 
+          key={toast.id} 
+          style={{ pointerEvents: 'auto', marginBottom: '0.5rem' }}
+        >
+          <Toast
+            toast={toast}
+            onRemove={removeToast}
+          />
+        </div>
       ))}
     </div>
   );

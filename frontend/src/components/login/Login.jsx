@@ -4,24 +4,29 @@ import "../../assets/login.css";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useAuth } from "../../utils/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "../toasts";
 
 const LoginForm = () => {
   const { login, register } = useAuth();
   const navigate = useNavigate();
+  const { success, error: showError } = useToast();
   const [isLogin, setIsLogin] = useState(true);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState("USER");
   const [confirmPassword, setConfirmPassword] = useState("");
-
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const [emailError, setEmailError] = useState("");
 
+  /**
+   * real-time validation for password input
+   */
   useEffect(() => {
     if (!isLogin && password.length > 0) {
       if (password.length < 6) {
@@ -73,20 +78,25 @@ const LoginForm = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
-    setSuccess("");
+    setIsLoggingIn(true);
 
     try {
       const result = await login(username, password);
       
       if (result.success) {
-        setSuccess("Login erfolgreich! Weiterleitung...");
-        setTimeout(() => navigate("/explore"), 1500);
+        success("Login erfolgreich!");
+        setTimeout(() => {
+          navigate("/explore");
+          setIsLoggingIn(false);
+        }, 2000);
       } else {
-        setError(result.error || "Ungültige Anmeldedaten.");
+        showError(result.error || "Benutzername oder Passwort falsch.");
+        setIsLoggingIn(false);
       }
     } catch (err) {
       console.error("Login error:", err);
-      setError("Ein unerwarteter Fehler ist aufgetreten.");
+      showError("Ein unerwarteter Fehler ist aufgetreten.");
+      setIsLoggingIn(false);
     }
   };
 
@@ -98,7 +108,6 @@ const LoginForm = () => {
   const handleRegister = async (e) => {
     e.preventDefault();
     setError("");
-    setSuccess("");
 
     if (password.length < 6) {
       setError("Passwort muss mindestens 6 Zeichen lang sein.");
@@ -125,7 +134,7 @@ const LoginForm = () => {
       });
 
       if (result.success) {
-        setSuccess("Registrierung erfolgreich!");
+        success("Registrierung erfolgreich!");
         setTimeout(() => setIsLogin(true), 2000);
       } else {
         setError(result.error || "Registrierung fehlgeschlagen.");
@@ -142,7 +151,6 @@ const LoginForm = () => {
   const toggleForm = () => {
     setIsLogin(!isLogin);
     setError("");
-    setSuccess("");
     setPasswordError("");
     setConfirmPasswordError("");
     setEmailError("");
@@ -187,7 +195,6 @@ const LoginForm = () => {
         </div>
 
         {error && <div className="alert alert-danger text-dark">{error}</div>}
-        {success && <div className="alert alert-success text-dark">{success}</div>}
 
         {/* username */}
         <form onSubmit={isLogin ? handleLogin : handleRegister}>
@@ -326,9 +333,16 @@ const LoginForm = () => {
           <button
             type="submit"
             className="btn btn-danger w-100"
-            disabled={!isFormValid()}
+            disabled={!isFormValid() || isLoggingIn}
           >
-            {isLogin ? "Einloggen" : "Registrieren"}
+            {isLoggingIn ? (
+              <>
+                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Einloggen...
+              </>
+            ) : (
+              isLogin ? "Einloggen" : "Registrieren"
+            )}
           </button>
         </form>
 
