@@ -23,10 +23,8 @@ export const ToastProvider = ({ children }) => {
   const [toasts, setToasts] = useState([]);
 
   const removeToast = useCallback((id) => {
-    console.log('Removing toast from context, ID:', id);
     setToasts(prev => {
       const updated = prev.filter(toast => toast.id !== id);
-      console.log('Toasts before removal:', prev.length, 'after removal:', updated.length);
       return updated;
     });
   }, []);

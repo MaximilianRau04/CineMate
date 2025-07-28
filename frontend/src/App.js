@@ -9,6 +9,7 @@ import MovieDetail from './components/details/MovieDetail';
 import SeriesDetail from './components/details/SeriesDetail';
 import Watchlist from './components/profile/Watchlist';
 import UserProfile from './components/profile/UserProfile';
+import UserStatistics from './components/statistics/UserStatistics';
 import Calendar from './components/explore/calender/Calendar';
 import AdminPanel from './components/admin/AdminPanel';
 import RecommendationsPage from './components/recommendations/RecommendationsPage';
@@ -23,9 +24,12 @@ import { AuthProvider } from './utils/AuthContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import PublicRoute from './components/auth/PublicRoute';
 
+import { useAuth } from './utils/AuthContext';
+
 const AppContent = () => {
   const location = useLocation();
   const hideHeader = location.pathname === '/';
+  const { user } = useAuth();
 
   return (
     <>
@@ -61,6 +65,11 @@ const AppContent = () => {
         <Route path="/profile" element={
           <ProtectedRoute>
             <UserProfile />
+          </ProtectedRoute>
+        } />
+        <Route path="/statistics" element={
+          <ProtectedRoute>
+            <UserStatistics userId={user?.id} />
           </ProtectedRoute>
         } />
         <Route path="/calendar" element={

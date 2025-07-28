@@ -251,7 +251,7 @@ const UserMediaTabs = ({ userId }) => {
       <ul className="nav nav-tabs mb-3">
         <li className="nav-item">
           <button
-            className={`nav-link ${activeTab === 'reviews' ? 'active' : ''}`}
+            className={`nav-link ${activeTab === 'reviews' ? 'active bg-primary text-white' : 'text-dark'}`}
             onClick={() => setActiveTab('reviews')}
           >
             <i className="bi bi-star-fill me-1"></i>
@@ -260,7 +260,7 @@ const UserMediaTabs = ({ userId }) => {
         </li>
         <li className="nav-item">
           <button
-            className={`nav-link ${activeTab === 'favorites' ? 'active' : ''}`}
+            className={`nav-link ${activeTab === 'favorites' ? 'active bg-primary text-white' : 'text-dark'}`}
             onClick={() => setActiveTab('favorites')}
           >
             <i className="bi bi-heart-fill me-1"></i>
@@ -269,7 +269,7 @@ const UserMediaTabs = ({ userId }) => {
         </li>
         <li className="nav-item">
           <button
-            className={`nav-link ${activeTab === 'watched' ? 'active' : ''}`}
+            className={`nav-link ${activeTab === 'watched' ? 'active bg-primary text-white' : 'text-dark'}`}
             onClick={() => setActiveTab('watched')}
           >
             <i className="bi bi-eye-fill me-1"></i>

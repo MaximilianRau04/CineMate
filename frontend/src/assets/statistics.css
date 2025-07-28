@@ -1,0 +1,128 @@
+/* User Statistics Styles */
+.statistics-container {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  padding: 2rem 0;
+}
+
+.stats-card {
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stats-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+}
+
+.chart-container {
+  position: relative;
+  padding: 1rem;
+  border-radius: 10px;
+  background: white;
+}
+
+.stat-number {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  margin-bottom: 0;
+}
+
+.period-selector {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  border-radius: 8px;
+}
+
+.period-selector option {
+  background: #333;
+  color: #fff;
+}
+
+.compare-btn {
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.activity-item {
+  border-left: 4px solid #007bff;
+  padding-left: 1rem;
+  margin-bottom: 1rem;
+  background: rgba(0, 123, 255, 0.05);
+  border-radius: 0 8px 8px 0;
+}
+
+.activity-item:hover {
+  background: rgba(0, 123, 255, 0.1);
+}
+
+.friends-comparison-table {
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.friends-comparison-table thead {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.user-row {
+  background: rgba(0, 123, 255, 0.1);
+  font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  .stat-number {
+    font-size: 2rem;
+  }
+  
+  .chart-container {
+    height: 300px !important;
+  }
+  
+  .stats-card {
+    margin-bottom: 1rem;
+  }
+}
+
+@keyframes countUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stat-number {
+  animation: countUp 0.8s ease-out;
+}
+
+.chart-container:hover {
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.stats-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+}
+
+.stats-loading .spinner-border {
+  width: 3rem;
+  height: 3rem;
+}
