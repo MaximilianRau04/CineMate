@@ -2,6 +2,9 @@ package com.cinemate.statistics;
 
 import com.cinemate.social.friends.Friend;
 import com.cinemate.statistics.dto.*;
+import com.cinemate.statistics.dto.activities.MonthlyActivityDTO;
+import com.cinemate.statistics.dto.activities.RecentActivityDTO;
+import com.cinemate.statistics.dto.activities.YearlyActivityDTO;
 import com.cinemate.user.User;
 import com.cinemate.user.UserRepository;
 import com.cinemate.review.Review;
@@ -371,18 +374,67 @@ public class UserStatisticsService {
      * @return a list of MonthlyActivityDTO objects representing the activity data for each month in the defined period
      */
     private List<MonthlyActivityDTO> calculateMonthlyActivity(String userId, String period) {
-        // TODO, currently only test data
         List<MonthlyActivityDTO> activities = new ArrayList<>();
 
+        List<Review> userReviews = reviewRepository.findByUserId(userId);
+
+        Map<String, MonthlyStats> monthlyStats = new HashMap<>();
+        
+        // Initialize last 12 months
         for (int i = 11; i >= 0; i--) {
             LocalDateTime date = LocalDateTime.now().minusMonths(i);
             String monthKey = date.format(DateTimeFormatter.ofPattern("yyyy-MM"));
+            monthlyStats.put(monthKey, new MonthlyStats());
+        }
+        
+        // Process reviews to calculate monthly activity
+        userReviews.forEach(review -> {
+            LocalDateTime reviewDate = LocalDateTime.ofInstant(
+                review.getDate().toInstant(),
+                ZoneId.systemDefault()
+            );
+            String monthKey = reviewDate.format(DateTimeFormatter.ofPattern("yyyy-MM"));
+            
+            MonthlyStats stats = monthlyStats.get(monthKey);
+            if (stats != null) {
+                // Check if it's a movie or series
+                Optional<Movie> movie = movieRepository.findById(review.getItemId());
+                if (movie.isPresent()) {
+                    stats.moviesCount++;
+                    // Add movie duration to hours
+                    try {
+                        String duration = movie.get().getDuration();
+                        if (duration != null && !duration.isEmpty()) {
+                            String numberOnly = duration.replaceAll("[^0-9]", "");
+                            int minutes = numberOnly.isEmpty() ? 0 : Integer.parseInt(numberOnly);
+                            stats.hours += minutes / 60;
+                        }
+                    } catch (NumberFormatException e) {
+                        // Fallback duration for movies
+                        stats.hours += 2;
+                    }
+                } else {
+                    Optional<Series> series = seriesRepository.findById(review.getItemId());
+                    if (series.isPresent()) {
+                        stats.seriesCount++;
+                        // Add estimated series hours
+                        stats.hours += 5; // Estimate for series viewing
+                    }
+                }
+            }
+        });
+        
+        // Convert to DTOs
+        for (int i = 11; i >= 0; i--) {
+            LocalDateTime date = LocalDateTime.now().minusMonths(i);
+            String monthKey = date.format(DateTimeFormatter.ofPattern("yyyy-MM"));
+            MonthlyStats stats = monthlyStats.get(monthKey);
             
             activities.add(MonthlyActivityDTO.builder()
                     .month(monthKey)
-                    .hours((int) (Math.random() * 30) + 5)
-                    .moviesCount((int) (Math.random() * 10) + 1)
-                    .seriesCount((int) (Math.random() * 5) + 1)
+                    .hours(stats.hours)
+                    .moviesCount(stats.moviesCount)
+                    .seriesCount(stats.seriesCount)
                     .build());
         }
         
@@ -398,17 +450,73 @@ public class UserStatisticsService {
      * @return A list of YearlyActivityDTO objects containing yearly activity details for the user.
      */
     private List<YearlyActivityDTO> calculateYearlyActivity(String userId) {
-        // TODO, currently only test data
         List<YearlyActivityDTO> activities = new ArrayList<>();
 
+        List<Review> userReviews = reviewRepository.findByUserId(userId);
+
+        Map<String, YearlyStats> yearlyStats = new HashMap<>();
+        
+        // Initialize last 3 years
         for (int i = 2; i >= 0; i--) {
             int year = LocalDateTime.now().minusYears(i).getYear();
+            yearlyStats.put(String.valueOf(year), new YearlyStats());
+        }
+        
+        // Process reviews to calculate yearly activity
+        userReviews.forEach(review -> {
+            LocalDateTime reviewDate = LocalDateTime.ofInstant(
+                review.getDate().toInstant(),
+                ZoneId.systemDefault()
+            );
+            String yearKey = String.valueOf(reviewDate.getYear());
+            
+            YearlyStats stats = yearlyStats.get(yearKey);
+            if (stats != null) {
+                // Check if it's a movie or series
+                Optional<Movie> movie = movieRepository.findById(review.getItemId());
+                if (movie.isPresent()) {
+                    stats.moviesCount++;
+                    // Add movie duration to hours
+                    try {
+                        String duration = movie.get().getDuration();
+                        if (duration != null && !duration.isEmpty()) {
+                            String numberOnly = duration.replaceAll("[^0-9]", "");
+                            int minutes = numberOnly.isEmpty() ? 0 : Integer.parseInt(numberOnly);
+                            stats.hours += minutes / 60;
+                        }
+                    } catch (NumberFormatException e) {
+                        // Fallback duration for movies
+                        stats.hours += 2;
+                    }
+                } else {
+                    Optional<Series> series = seriesRepository.findById(review.getItemId());
+                    if (series.isPresent()) {
+                        stats.seriesCount++;
+                        // Add estimated series hours
+                        if (series.get().getSeasons() != null && !series.get().getSeasons().isEmpty()) {
+                            int totalEpisodes = series.get().getSeasons().stream()
+                                    .mapToInt(season -> season.getEpisodes() != null ? season.getEpisodes().size() : 0)
+                                    .sum();
+                            stats.hours += (totalEpisodes * 45) / 60;
+                        } else {
+                            stats.hours += 10; // Fallback estimate
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Convert to DTOs
+        for (int i = 2; i >= 0; i--) {
+            int year = LocalDateTime.now().minusYears(i).getYear();
+            String yearKey = String.valueOf(year);
+            YearlyStats stats = yearlyStats.get(yearKey);
             
             activities.add(YearlyActivityDTO.builder()
-                    .year(String.valueOf(year))
-                    .hours((int) (Math.random() * 300) + 100)
-                    .moviesCount((int) (Math.random() * 60) + 20)
-                    .seriesCount((int) (Math.random() * 20) + 5)
+                    .year(yearKey)
+                    .hours(stats.hours)
+                    .moviesCount(stats.moviesCount)
+                    .seriesCount(stats.seriesCount)
                     .build());
         }
         
@@ -475,17 +583,112 @@ public class UserStatisticsService {
      *         and a map of preferred genres categorized by time of day
      */
     private WatchingPatternsDTO calculateWatchingPatterns(String userId) {
-        // TODO, simple implementation
+        List<Review> userReviews = reviewRepository.findByUserId(userId);
+        
+        // Count activities by day of the week
+        Map<String, Integer> dayCount = new HashMap<>();
+        Map<Integer, Integer> hourCount = new HashMap<>();
+        Map<String, Map<String, Integer>> genreByTimeOfDay = new HashMap<>();
+        
+        // Initialize time periods
+        genreByTimeOfDay.put("morning", new HashMap<>());   // 6-12
+        genreByTimeOfDay.put("afternoon", new HashMap<>()); // 12-18
+        genreByTimeOfDay.put("evening", new HashMap<>());   // 18-22
+        genreByTimeOfDay.put("night", new HashMap<>());     // 22-6
+        
+        userReviews.forEach(review -> {
+            LocalDateTime reviewDate = LocalDateTime.ofInstant(
+                review.getDate().toInstant(),
+                ZoneId.systemDefault()
+            );
+            
+            // Track day of the week
+            String dayOfWeek = reviewDate.getDayOfWeek().toString();
+            dayCount.merge(dayOfWeek, 1, Integer::sum);
+            
+            // Track hour of the day
+            int hour = reviewDate.getHour();
+            hourCount.merge(hour, 1, Integer::sum);
+            
+            // Determine time of day and track genres
+            String timeOfDay;
+            if (hour >= 6 && hour < 12) {
+                timeOfDay = "morning";
+            } else if (hour >= 12 && hour < 18) {
+                timeOfDay = "afternoon";
+            } else if (hour >= 18 && hour < 22) {
+                timeOfDay = "evening";
+            } else {
+                timeOfDay = "night";
+            }
+            
+            // Get genre for this review
+            String genre = null;
+            Optional<Movie> movie = movieRepository.findById(review.getItemId());
+            if (movie.isPresent() && movie.get().getGenre() != null) {
+                genre = movie.get().getGenre();
+            } else {
+                Optional<Series> series = seriesRepository.findById(review.getItemId());
+                if (series.isPresent() && series.get().getGenre() != null) {
+                    genre = series.get().getGenre();
+                }
+            }
+            
+            if (genre != null) {
+                genreByTimeOfDay.get(timeOfDay).merge(genre, 1, Integer::sum);
+            }
+        });
+        
+        // Find the most active day
+        String mostActiveDay = dayCount.entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .map(entry -> {
+                    // Convert to German day names
+                    switch (entry.getKey()) {
+                        case "MONDAY": return "Montag";
+                        case "TUESDAY": return "Dienstag";
+                        case "WEDNESDAY": return "Mittwoch";
+                        case "THURSDAY": return "Donnerstag";
+                        case "FRIDAY": return "Freitag";
+                        case "SATURDAY": return "Samstag";
+                        case "SUNDAY": return "Sonntag";
+                        default: return "Unbekannt";
+                    }
+                })
+                .orElse("Samstag");
+        
+        // Find most active hour
+        Integer mostActiveHour = hourCount.entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .orElse(20);
+        
+        // Calculate average session length (estimated based on content)
+        double totalHours = userReviews.size() * 2.0; // Estimate 2 hours per session
+        double sessions = userReviews.size() * 0.8; // Assume some clustering
+        double averageSessionLength = sessions > 0 ? totalHours / sessions : 2.0;
+        
+        // Get the most preferred genre for each time of day
+        Map<String, String> preferredGenreByTime = new HashMap<>();
+        genreByTimeOfDay.forEach((time, genres) -> {
+            String topGenre = genres.entrySet().stream()
+                    .max(Map.Entry.comparingByValue())
+                    .map(Map.Entry::getKey)
+                    .orElse("Action"); // Default fallback
+            preferredGenreByTime.put(time, topGenre);
+        });
+        
+        // Ensure all time periods have a genre
+        if (!preferredGenreByTime.containsKey("morning")) preferredGenreByTime.put("morning", "Comedy");
+        if (!preferredGenreByTime.containsKey("afternoon")) preferredGenreByTime.put("afternoon", "Drama");
+        if (!preferredGenreByTime.containsKey("evening")) preferredGenreByTime.put("evening", "Action");
+        if (!preferredGenreByTime.containsKey("night")) preferredGenreByTime.put("night", "Horror");
+        
         return WatchingPatternsDTO.builder()
-                .mostActiveDay("Samstag")
-                .mostActiveHour(20)
-                .averageSessionLength(2.3)
-                .preferredGenreByTime(Map.of(
-                        "morning", "Comedy",
-                        "afternoon", "Drama",
-                        "evening", "Action",
-                        "night", "Horror"
-                ))
+                .mostActiveDay(mostActiveDay)
+                .mostActiveHour(mostActiveHour)
+                .averageSessionLength(averageSessionLength)
+                .preferredGenreByTime(preferredGenreByTime)
                 .build();
     }
 

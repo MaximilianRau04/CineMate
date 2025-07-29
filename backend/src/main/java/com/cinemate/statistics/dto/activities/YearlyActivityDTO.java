@@ -1,4 +1,4 @@
-package com.cinemate.statistics.dto;
+package com.cinemate.statistics.dto.activities;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MonthlyActivityDTO {
-    private String month;
+public class YearlyActivityDTO {
+    private String year;
     private Integer hours;
     private Integer moviesCount;
     private Integer seriesCount;

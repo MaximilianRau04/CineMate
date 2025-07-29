@@ -24,6 +24,13 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState(null);
 
+  // Function to reset all auth state
+  const resetAuthState = useCallback(() => {
+    setUser(null);
+    setIsAuthenticated(false);
+    setIsLoading(false);
+  }, []);
+
   // Function to log out the user and clear localStorage
   const logout = useCallback(() => {
     localStorage.removeItem('token');
@@ -31,9 +38,8 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('userRole');
     localStorage.removeItem('userId');
     
-    setUser(null);
-    setIsAuthenticated(false);
-  }, []);
+    resetAuthState();
+  }, [resetAuthState]);
 
   /**
    * Validates the user's token and sets the authentication state.
@@ -43,8 +49,7 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem('token');
     
     if (!token) {
-      setIsAuthenticated(false);
-      setIsLoading(false);
+      resetAuthState();
       return;
     }
 
@@ -59,6 +64,7 @@ export const AuthProvider = ({ children }) => {
         const userData = await response.json();
         setUser(userData);
         setIsAuthenticated(true);
+        setIsLoading(false);
         
         localStorage.setItem('user', JSON.stringify(userData));
         localStorage.setItem('userRole', userData.role);
@@ -69,10 +75,8 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error('Token validation failed:', error);
       logout();
-    } finally {
-      setIsLoading(false);
     }
-  }, [logout]);
+  }, [logout, resetAuthState]);
 
   useEffect(() => {
     validateToken();
@@ -86,6 +90,8 @@ export const AuthProvider = ({ children }) => {
    */
   const login = async (username, password) => {
     try {
+      setIsLoading(true); 
+      
       const response = await fetch('http://localhost:8080/api/auth/login', {
         method: 'POST',
         headers: {
@@ -110,10 +116,12 @@ export const AuthProvider = ({ children }) => {
 
       setUser(data.user);
       setIsAuthenticated(true);
+      setIsLoading(false);
 
       return { success: true };
     } catch (error) {
       console.error('Login error:', error);
+      setIsLoading(false); 
       return { success: false, error: error.message };
     }
   };

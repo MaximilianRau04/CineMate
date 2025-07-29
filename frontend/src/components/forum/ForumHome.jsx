@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../toasts';
-import './ForumHome.css';
+import './css/ForumHome.css';
 
 const ForumHome = () => {
     const [posts, setPosts] = useState([]);

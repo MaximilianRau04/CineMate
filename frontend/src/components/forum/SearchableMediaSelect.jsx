@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import './SearchableMediaSelect.css';
+import './css/SearchableMediaSelect.css';
 
 const SearchableMediaSelect = ({ type, value, onChange, placeholder, disabled }) => {
     const [isOpen, setIsOpen] = useState(false);

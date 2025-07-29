@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, BellRing, X, Check, CheckCheck, Trash2, Clock, Mail, Globe } from 'lucide-react';
+import { Bell, Check, CheckCheck, Trash2, Clock} from 'lucide-react';
 
 const NotificationSystem = () => {
   const [notifications, setNotifications] = useState([]);
@@ -142,6 +142,24 @@ const NotificationSystem = () => {
   };
 
   /**
+   * Deletes all notifications for the current user.
+   * @returns {Promise<void>}
+   */
+  const deleteAllNotifications = async () => {
+
+    try {
+      await fetch(`${API_BASE}/user/${userId}/delete-all`, {
+        method: 'DELETE'
+      });
+
+      setNotifications([]);
+      setUnreadCount(0);
+    } catch (error) {
+      console.error('Error deleting all notifications:', error);
+    }
+  };
+
+  /**
    * Deletes a notification.
    * @param {number} notificationId - The ID of the notification to delete.
    * @returns {Promise<void>}
@@ -236,14 +254,14 @@ const NotificationSystem = () => {
       fetchNotifications();
       fetchUnreadCount();
     }
-  }, [userId, showUnreadOnly]);
+  }, [userId, showUnreadOnly]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Handle dropdown open/close behavior
   useEffect(() => {
     if (isOpen) {
       fetchNotifications();
     }
-  }, [isOpen]);
+  }, [isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto-refresh every 30 seconds
   useEffect(() => {
@@ -254,7 +272,7 @@ const NotificationSystem = () => {
     }, 30000);
 
     return () => clearInterval(interval);
-  }, [userId]);
+  }, [userId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Toggle filter function with visual confirmation
   const handleFilterToggle = () => {
@@ -371,31 +389,59 @@ const NotificationSystem = () => {
                 </button>
               </div>
 
-              {unreadCount > 0 && (
-                <button
-                  className="btn btn-sm btn-outline-light"
-                  onClick={markAllAsRead}
-                  style={{
-                    borderRadius: '20px',
-                    fontSize: '0.75rem',
-                    padding: '4px 12px',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
-                    color: 'white',
-                    transition: 'all 0.2s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.background = 'rgba(255, 255, 255, 0.15)';
-                    e.target.style.borderColor = 'rgba(255, 255, 255, 0.5)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.background = 'transparent';
-                    e.target.style.borderColor = 'rgba(255, 255, 255, 0.3)';
-                  }}
-                >
-                  <CheckCheck size={12} className="me-1" />
-                  Alle lesen
-                </button>
-              )}
+              <div className="d-flex gap-2">
+                {unreadCount > 0 && (
+                  <button
+                    className="btn btn-sm btn-outline-light"
+                    onClick={markAllAsRead}
+                    style={{
+                      borderRadius: '20px',
+                      fontSize: '0.75rem',
+                      padding: '4px 12px',
+                      border: '1px solid rgba(255, 255, 255, 0.3)',
+                      color: 'white',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.background = 'rgba(255, 255, 255, 0.15)';
+                      e.target.style.borderColor = 'rgba(255, 255, 255, 0.5)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.background = 'transparent';
+                      e.target.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+                    }}
+                  >
+                    <CheckCheck size={12} className="me-1" />
+                    Alle lesen
+                  </button>
+                )}
+                
+                {notifications.length > 0 && (
+                  <button
+                    className="btn btn-sm btn-outline-light"
+                    onClick={deleteAllNotifications}
+                    style={{
+                      borderRadius: '20px',
+                      fontSize: '0.75rem',
+                      padding: '4px 12px',
+                      border: '1px solid rgba(255, 182, 193, 0.5)',
+                      color: 'white',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.background = 'rgba(255, 99, 132, 0.2)';
+                      e.target.style.borderColor = 'rgba(255, 99, 132, 0.7)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.background = 'transparent';
+                      e.target.style.borderColor = 'rgba(255, 182, 193, 0.5)';
+                    }}
+                  >
+                    <Trash2 size={12} className="me-1" />
+                    Alle löschen
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 

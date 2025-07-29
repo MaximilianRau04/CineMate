@@ -100,4 +100,14 @@ public class NotificationController {
         notificationService.deleteNotification(id);
         return ResponseEntity.ok().build();
     }
+
+    /**
+     * deletes all notifications of a user
+     * @param userId
+     */
+    @DeleteMapping("/user/{userId}/delete-all")
+    public ResponseEntity<Void> deleteAllUserNotifications(@PathVariable String userId) {
+        notificationService.deleteAllUserNotifications(userId);
+        return ResponseEntity.ok().build();
+    }
 }

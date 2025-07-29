@@ -1,6 +1,5 @@
 package com.cinemate.notification;
 
-
 import com.cinemate.notification.email.EmailService;
 import com.cinemate.user.User;
 import com.cinemate.user.UserRepository;
@@ -181,11 +180,20 @@ public class NotificationService {
     }
 
     /**
-     * deletes a notification
+     * deletes a notification by id
      * @param notificationId
      */
     public void deleteNotification(String notificationId) {
         notificationRepository.deleteById(notificationId);
+    }
+
+    /**
+     * deletes all notifications for a specific user
+     * @param userId
+     */
+    public void deleteAllUserNotifications(String userId) {
+        List<Notification> userNotifications = notificationRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        notificationRepository.deleteAll(userNotifications);
     }
 
     /**
@@ -344,4 +352,3 @@ public class NotificationService {
         }
     }
 }
-

@@ -1,4 +1,4 @@
-package com.cinemate.statistics.dto;
+package com.cinemate.statistics.dto.activities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;

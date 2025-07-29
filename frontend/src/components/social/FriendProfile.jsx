@@ -24,7 +24,7 @@ const FriendProfile = () => {
     if (userId) {
       loadUserData();
     }
-  }, [userId]);
+  }, [userId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /**
    * Renders a profile image with fallback to default avatar
