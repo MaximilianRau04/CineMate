@@ -69,27 +69,39 @@ public class UserStatisticsService {
      *         about each friend
      */
     public List<FriendStatisticsDTO> getFriendsStatistics(String userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        
-        List<Friend> friendships = friendRepository.findAcceptedFriendshipsByUser(user);
-        
-        return friendships.stream()
-                .map(friendship -> {
-                    User friend = friendship.getRequester().getId().equals(userId) 
-                        ? friendship.getRecipient() 
-                        : friendship.getRequester();
-                    
-                    return FriendStatisticsDTO.builder()
-                            .userId(Long.parseLong(friend.getId()))
-                            .username(friend.getUsername())
-                            .totalHoursWatched(calculateTotalHours(friend, null))
-                            .totalMoviesWatched(calculateMoviesWatched(friend, null))
-                            .totalSeriesWatched(calculateSeriesWatched(friend, null))
-                            .averageRating(calculateAverageRating(friend.getId(), null))
-                            .build();
-                })
-                .collect(Collectors.toList());
+        try {
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            
+            List<Friend> friendships = friendRepository.findAcceptedFriendshipsByUser(user);
+            
+            return friendships.stream()
+                    .map(friendship -> {
+                        User friend = friendship.getRequester().getId().equals(userId) 
+                            ? friendship.getRecipient() 
+                            : friendship.getRequester();
+                        
+                        try {
+                            return FriendStatisticsDTO.builder()
+                                    .userId(friend.getId())
+                                    .username(friend.getUsername())
+                                    .totalHoursWatched(calculateTotalHours(friend, null))
+                                    .totalMoviesWatched(calculateMoviesWatched(friend, null))
+                                    .totalSeriesWatched(calculateSeriesWatched(friend, null))
+                                    .averageRating(calculateAverageRating(friend.getId(), null))
+                                    .build();
+                        } catch (Exception e) {
+                            System.err.println("Error building FriendStatisticsDTO for friend: " + friend.getUsername() + " - " + e.getMessage());
+                            return null;
+                        }
+                    })
+                    .filter(dto -> dto != null)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            System.err.println("Error in getFriendsStatistics for userId: " + userId + " - " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Failed to get friends statistics", e);
+        }
     }
 
     /**
@@ -108,7 +120,7 @@ public class UserStatisticsService {
                 return now.minusYears(1);
             case "all":
             default:
-                return null; // Alle Zeit
+                return null;
         }
     }
 
@@ -127,17 +139,17 @@ public class UserStatisticsService {
         // calculate hours for movies
         int movieHours = watchedMovies.stream()
                 .mapToInt(movie -> {
-                    // Versuche die Duration zu parsen (angenommen in Minuten)
+                    // try to parse the duration
                     try {
                         String duration = movie.getDuration();
                         if (duration != null && !duration.isEmpty()) {
-                            // Entferne "min" oder andere Text-Suffixe und parse die Zahl
+                            // Remove "min" or other text suffixes and parse the number
                             String numberOnly = duration.replaceAll("[^0-9]", "");
                             return numberOnly.isEmpty() ? 0 : Integer.parseInt(numberOnly);
                         }
                         return 0;
                     } catch (NumberFormatException e) {
-                        return 0; // Fallback wenn Parsing fehlschlägt
+                        return 0; // Fallback if parsing fails
                     }
                 })
                 .sum();
@@ -145,12 +157,12 @@ public class UserStatisticsService {
         // calculate hours for series
         int seriesHours = watchedSeries.stream()
                 .mapToInt(series -> {
-                    // Berechne die gesamte Laufzeit einer Serie basierend auf den Staffeln
+                    // Calculate the total running time of a series based on seasons
                     if (series.getSeasons() != null && !series.getSeasons().isEmpty()) {
                         return series.getSeasons().stream()
                                 .mapToInt(season -> {
                                     int episodeCount = season.getEpisodes() != null ? season.getEpisodes().size() : 0;
-                                    return episodeCount * 45; // Annahme: 45 Minuten pro Episode
+                                    return episodeCount * 45;
                                 })
                                 .sum();
                     }
@@ -220,7 +232,7 @@ public class UserStatisticsService {
                 String genreName = movie.getGenre();
                 GenreStats stats = genreMap.getOrDefault(genreName, new GenreStats());
                 stats.count++;
-                // Versuche die Duration zu parsen
+                // try to parse the duration
                 try {
                     String duration = movie.getDuration();
                     if (duration != null && !duration.isEmpty()) {
@@ -229,7 +241,7 @@ public class UserStatisticsService {
                         stats.hours += minutes / 60;
                     }
                 } catch (NumberFormatException e) {
-                    // Fallback zu 0 wenn Parsing fehlschlägt
+                    // Fallback to 0 if parsing fails
                 }
                 genreMap.put(genreName, stats);
             }
@@ -241,7 +253,7 @@ public class UserStatisticsService {
                 String genreName = series.getGenre();
                 GenreStats stats = genreMap.getOrDefault(genreName, new GenreStats());
                 stats.count++;
-                // Berechne Stunden basierend auf Staffeln
+                // calculate hours basaed on seasons
                 if (series.getSeasons() != null && !series.getSeasons().isEmpty()) {
                     int totalEpisodes = series.getSeasons().stream()
                             .mapToInt(season -> season.getEpisodes() != null ? season.getEpisodes().size() : 0)

@@ -85,9 +85,19 @@ const UserStatistics = ({ userId }) => {
       if (response.ok) {
         const data = await response.json();
         setFriendsStats(data);
+      } else if (response.status === 404) {
+        console.warn('Friends comparison endpoint not found');
+        showError('Freunde-Vergleich ist momentan nicht verfügbar');
+        setFriendsStats([]);
+      } else {
+        console.error('Error response:', response.status, response.statusText);
+        showError('Fehler beim Laden der Freunde-Statistiken');
+        setFriendsStats([]);
       }
     } catch (err) {
       console.error('Error fetching friends stats:', err);
+      showError('Fehler beim Laden der Freunde-Statistiken');
+      setFriendsStats([]);
     }
   };
 
@@ -201,6 +211,26 @@ const UserStatistics = ({ userId }) => {
     },
   };
 
+  // Chart options for bar charts with integer steps
+  const barChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          stepSize: 1,
+          precision: 0
+        }
+      }
+    }
+  };
+
   return (
     <div className="container py-5">
       <div className="row mb-4">
@@ -219,7 +249,7 @@ const UserStatistics = ({ userId }) => {
             >
               <option value="month">Letzter Monat</option>
               <option value="year">Letztes Jahr</option>
-              <option value="all">Alle Zeit</option>
+              <option value="all">Insgesamt</option>
             </select>
             <button 
               className={`btn ${compareMode ? 'btn-primary' : 'btn-outline-primary'}`}
@@ -316,7 +346,7 @@ const UserStatistics = ({ userId }) => {
               </h5>
             </div>
             <div className="card-body" style={{ height: '400px' }}>
-              <Bar data={actorData} options={chartOptions} />
+              <Bar data={actorData} options={barChartOptions} />
             </div>
           </div>
         </div>
@@ -329,21 +359,7 @@ const UserStatistics = ({ userId }) => {
               </h5>
             </div>
             <div className="card-body" style={{ height: '400px' }}>
-              <Bar 
-                data={{
-                  labels: statistics?.favoriteDirectors?.map(director => director.name) || [],
-                  datasets: [
-                    {
-                      label: 'Anzahl Filme/Serien',
-                      data: statistics?.favoriteDirectors?.map(director => director.count) || [],
-                      backgroundColor: 'rgba(255, 99, 132, 0.6)',
-                      borderColor: 'rgba(255, 99, 132, 1)',
-                      borderWidth: 1
-                    }
-                  ]
-                }} 
-                options={chartOptions} 
-              />
+              <Bar data={directorData} options={barChartOptions} />
             </div>
           </div>
         </div>
@@ -410,7 +426,7 @@ const UserStatistics = ({ userId }) => {
             </div>
             <div className="card-body">
               {statistics?.recentActivity?.length > 0 ? (
-                <div className="list-group">
+                <div className="list-group" style={{ maxHeight: '400px', overflowY: 'auto' }}>
                   {statistics.recentActivity.map((activity, index) => (
                     <div key={index} className="list-group-item">
                       <div className="d-flex justify-content-between align-items-center">

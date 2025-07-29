@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FriendStatisticsDTO {
-    private Long userId;
+    private String userId;
     private String username;
     private Integer totalHoursWatched;
     private Integer totalMoviesWatched;

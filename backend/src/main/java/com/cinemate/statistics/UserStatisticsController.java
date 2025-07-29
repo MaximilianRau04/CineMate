@@ -26,9 +26,8 @@ public class UserStatisticsController {
     public ResponseEntity<UserStatisticsDTO> getUserStatistics(
             @PathVariable String userId,
             @RequestParam(defaultValue = "year") String period) {
-        
+
         try {
-            System.out.println("Received request for userId: " + userId + ", period: " + period);
             UserStatisticsDTO stats = statisticsService.calculateUserStatistics(userId, period);
             return ResponseEntity.ok(stats);
         } catch (Exception e) {
@@ -50,8 +49,14 @@ public class UserStatisticsController {
         try {
             List<FriendStatisticsDTO> friendsStats = statisticsService.getFriendsStatistics(userId);
             return ResponseEntity.ok(friendsStats);
+        } catch (RuntimeException e) {
+            System.err.println("Error in getFriendsComparison: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).build();
         } catch (Exception e) {
-            return ResponseEntity.notFound().build();
+            System.err.println("Unexpected error in getFriendsComparison: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).build();
         }
     }
 }

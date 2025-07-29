@@ -454,7 +454,7 @@ Content-Type: application/json
 
 GET http://localhost:8080/api/streaming/availability/movie/686169d8179314698a216b0c
 ###
-GET http://localhost:8080/api/reviews
+GET http://localhost:8080/api/users
 ###
 GET http://localhost:8080/api/social/points/686164a973f46f014d5448f1
 ###
@@ -468,5 +468,5 @@ Content-Type: application/json
 GET http://localhost:8080/api/forum/posts/687f8464fb43b32d18bc26e6/subscription-status
 
 ###
-GET http://localhost:8080/api/statistics/users/687f76dffa164e4344fe824c
+GET http://localhost:8080/api/statistics/users/687f76dffa164e4344fe824c/friends-comparison
 

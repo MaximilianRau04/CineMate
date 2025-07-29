@@ -15,5 +15,5 @@ public class WatchingPatternsDTO {
     private String mostActiveDay;
     private Integer mostActiveHour;
     private Double averageSessionLength;
-    private Map<String, String> preferredGenreByTime; // morning, afternoon, evening, night
+    private Map<String, String> preferredGenreByTime;
 }

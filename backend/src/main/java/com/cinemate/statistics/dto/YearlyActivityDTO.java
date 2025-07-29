@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class YearlyActivityDTO {
-    private String year; // Format: "2024"
+    private String year;
     private Integer hours;
     private Integer moviesCount;
     private Integer seriesCount;

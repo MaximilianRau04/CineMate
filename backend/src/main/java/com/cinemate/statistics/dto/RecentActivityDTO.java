@@ -13,9 +13,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RecentActivityDTO {
-    private String type; // "movie" or "series"
+    private String type;
     private String title;
-    private String action; // "Als gesehen markiert", "Bewertung abgegeben", etc.
+    private String action;
     
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime date;

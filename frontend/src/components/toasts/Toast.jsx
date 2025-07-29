@@ -12,7 +12,6 @@ const Toast = ({ toast, onRemove }) => {
    * Handles the close button click event.
    */
   const handleClose = () => {
-    console.log('Toast close button clicked, toast ID:', toast.id);
     setShow(false);
     setTimeout(() => {
       onRemove(toast.id);
