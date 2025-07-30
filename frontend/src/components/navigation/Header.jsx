@@ -67,6 +67,12 @@ const Header = () => {
                 </Link>
               </li>
               <li className="nav-item">
+                <Link className="nav-link" to="/achievements">
+                  <i className="bi bi-trophy me-1"></i>
+                  Achievements
+                </Link>
+              </li>
+              <li className="nav-item">
                 <Link className="nav-link" to="/recommendations">
                   Empfehlungen
                 </Link>

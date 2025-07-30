@@ -1,5 +1,6 @@
 package com.cinemate.social.friends;
 
+import com.cinemate.achievement.events.AchievementCheckEvent;
 import com.cinemate.notification.NotificationService;
 import com.cinemate.notification.NotificationType;
 import com.cinemate.social.points.PointsService;
@@ -8,6 +9,7 @@ import com.cinemate.user.User;
 import com.cinemate.user.UserRepository;
 import com.cinemate.user.dtos.UserResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -23,16 +25,19 @@ public class FriendService {
     private final UserRepository userRepository;
     private final NotificationService notificationService;
     private final PointsService pointsService;
+    private final ApplicationEventPublisher eventPublisher;
     
     @Autowired
     public FriendService(FriendRepository friendRepository, 
                         UserRepository userRepository,
                         NotificationService notificationService,
-                        PointsService pointsService) {
+                        PointsService pointsService,
+                        ApplicationEventPublisher eventPublisher) {
         this.friendRepository = friendRepository;
         this.userRepository = userRepository;
         this.notificationService = notificationService;
         this.pointsService = pointsService;
+        this.eventPublisher = eventPublisher;
     }
 
     /**
@@ -127,6 +132,10 @@ public class FriendService {
             // Award points to both users
             pointsService.awardPoints(currentUserId, PointsType.SOCIAL, 10);
             pointsService.awardPoints(friendship.getRequester().getId(), PointsType.SOCIAL, 10);
+            
+            // Check achievements for both users
+            eventPublisher.publishEvent(new AchievementCheckEvent(this, currentUserId, "friend_accepted"));
+            eventPublisher.publishEvent(new AchievementCheckEvent(this, friendship.getRequester().getId(), "friend_accepted"));
             
             return ResponseEntity.ok("Friend request accepted");
             

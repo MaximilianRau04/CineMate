@@ -40,7 +40,7 @@ public class PointsService {
             
             User user = userOpt.get();
 
-            UserPoints userPoints = userPointsRepository.findByUserId(userId)
+            UserPoints userPoints = userPointsRepository.findByUser_Id(userId)
                 .orElse(new UserPoints(user));
             
             int pointsToAward = customPoints > 0 ? customPoints : pointsType.getDefaultPoints();
@@ -101,7 +101,7 @@ public class PointsService {
      */
     public ResponseEntity<UserPointsDTO> getUserPointsDTO(String userId) {
         try {
-            Optional<UserPoints> userPointsOpt = userPointsRepository.findByUserId(userId);
+            Optional<UserPoints> userPointsOpt = userPointsRepository.findByUser_Id(userId);
             if (userPointsOpt.isEmpty()) {
                 Optional<User> userOpt = userRepository.findById(userId);
                 if (userOpt.isEmpty()) {
@@ -160,6 +160,39 @@ public class PointsService {
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).build();
+        }
+    }
+
+    /**
+     * Cleans up duplicate UserPoints entries for a user
+     */
+    public ResponseEntity<?> cleanupDuplicateUserPoints(String userId) {
+        try {
+            
+            List<UserPoints> allUserPoints = userPointsRepository.findAllByUser_Id(userId);
+            
+            if (allUserPoints.size() <= 1) {
+                return ResponseEntity.ok("No duplicates found");
+            }
+            
+            // Find the one with the most points (keep the best one)
+            UserPoints bestUserPoints = allUserPoints.stream()
+                .max((a, b) -> Integer.compare(a.getTotalPoints(), b.getTotalPoints()))
+                .orElse(allUserPoints.get(0));
+            
+            // Delete all others
+            for (UserPoints up : allUserPoints) {
+                if (!up.getId().equals(bestUserPoints.getId())) {
+                    System.out.println("DEBUG: Deleting UserPoints with " + up.getTotalPoints() + " points (ID: " + up.getId() + ")");
+                    userPointsRepository.delete(up);
+                }
+            }
+            
+            return ResponseEntity.ok("Cleaned up " + (allUserPoints.size() - 1) + " duplicate entries");
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Error during cleanup: " + e.getMessage());
         }
     }
 }

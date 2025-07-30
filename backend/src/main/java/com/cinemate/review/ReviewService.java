@@ -1,5 +1,6 @@
 package com.cinemate.review;
 
+import com.cinemate.achievement.events.AchievementCheckEvent;
 import com.cinemate.movie.DTOs.MovieResponseDTO;
 import com.cinemate.movie.Movie;
 import com.cinemate.movie.MovieRepository;
@@ -88,6 +89,9 @@ public class ReviewService {
 
         // Award points for writing a review
         pointsEventListener.onReviewCreated(userId);
+
+        // Check achievements after creating a review
+        eventPublisher.publishEvent(new AchievementCheckEvent(this, userId, "review_created"));
 
         return new ReviewResponseDTO(savedReview);
     }

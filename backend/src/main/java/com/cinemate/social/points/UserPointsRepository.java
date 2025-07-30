@@ -10,11 +10,15 @@ import java.util.Optional;
 @Repository
 public interface UserPointsRepository extends MongoRepository<UserPoints, String> {
     
-    @Query("{ 'user.$id': ?0 }")
+    Optional<UserPoints> findByUser_Id(String userId);
+    
+    @Query("{ 'user.$id': ObjectId(?0) }")
     Optional<UserPoints> findByUserId(String userId);
     
     @Query(value = "{}", sort = "{ 'totalPoints': -1 }")
     List<UserPoints> findAllOrderByTotalPointsDesc();
     
     List<UserPoints> findTop10ByOrderByTotalPointsDesc();
+
+    List<UserPoints> findAllByUser_Id(String userId);
 }

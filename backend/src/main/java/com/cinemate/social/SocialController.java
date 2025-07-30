@@ -169,6 +169,29 @@ public class SocialController {
     }
 
     /**
+     * TEST ENDPOINT: Awards points to a user manually for testing
+     */
+    @PostMapping("/test-award-points/{userId}")
+    public ResponseEntity<?> testAwardPoints(@PathVariable String userId, 
+                                           @RequestParam String type,
+                                           @RequestParam(defaultValue = "0") int points) {
+        try {
+            com.cinemate.social.points.PointsType pointsType = com.cinemate.social.points.PointsType.valueOf(type.toUpperCase());
+            return pointsService.awardPoints(userId, pointsType, points);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Invalid points type: " + type);
+        }
+    }
+
+    /**
+     * TEST ENDPOINT: Clean up duplicate UserPoints entries
+     */
+    @PostMapping("/cleanup-duplicate-points/{userId}")
+    public ResponseEntity<?> cleanupDuplicatePoints(@PathVariable String userId) {
+        return pointsService.cleanupDuplicateUserPoints(userId);
+    }
+
+    /**
      * Retrieves the user ID of the currently authenticated user.
      * @param authentication the Authentication object containing the details of the currently authenticated user
      * @return the user ID of the authenticated user or null

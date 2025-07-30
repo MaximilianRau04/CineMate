@@ -19,6 +19,7 @@ import FriendProfile from './components/social/FriendProfile';
 import ForumHome from './components/forum/ForumHome';
 import ForumPostDetail from './components/forum/ForumPostDetail';
 import CreateForumPost from './components/forum/CreateForumPost';
+import AchievementsPage from './components/achievements/AchievementsPage';
 import { ToastProvider, ToastContainer } from './components/toasts';
 import { AuthProvider } from './utils/AuthContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -70,6 +71,11 @@ const AppContent = () => {
         <Route path="/statistics" element={
           <ProtectedRoute>
             <UserStatistics userId={user?.id} />
+          </ProtectedRoute>
+        } />
+        <Route path="/achievements" element={
+          <ProtectedRoute>
+            <AchievementsPage userId={user?.id} />
           </ProtectedRoute>
         } />
         <Route path="/calendar" element={

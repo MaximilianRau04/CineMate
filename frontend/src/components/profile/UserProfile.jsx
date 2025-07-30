@@ -2,6 +2,8 @@ import React, { useEffect, useState, useRef } from "react";
 import { useToast } from '../toasts';
 import UserMediaTabs from "./UserMediaTabs";
 import CompactNotificationSettings from "./CompactNotificationSettings";
+import UserAchievementBadges from "../achievements/UserAchievementBadges";
+import { Link } from "react-router-dom";
 
 const UserProfile = () => {
   const [user, setUser] = useState(null);
@@ -376,6 +378,19 @@ const UserProfile = () => {
                 Bearbeiten
               </button>
             </div>
+            
+            {/* Achievements Section */}
+            <div className="mb-3">
+              <label className="form-label mb-2">
+                <strong>Meine Achievements:</strong>
+              </label>
+              {userId && <UserAchievementBadges userId={userId} limit={6} showCount={true} />}
+              <Link to={`/achievements`} className="btn btn-outline-primary btn-sm mt-2">
+                <i className="bi bi-trophy me-1"></i>
+                Alle Achievements anzeigen
+              </Link>
+            </div>
+            
             <p className="text-muted">
               <strong>Beigetreten:</strong> {formattedDate}
             </p>

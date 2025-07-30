@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FaTrophy, FaMedal, FaAward, FaStar, FaEye, FaHeart } from 'react-icons/fa';
+import UserAchievementBadges from '../achievements/UserAchievementBadges';
 
 const Leaderboard = () => {
   const [leaderboard, setLeaderboard] = useState([]);
@@ -11,7 +12,7 @@ const Leaderboard = () => {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   /**
    * Renders a profile image with fallback to default avatar
