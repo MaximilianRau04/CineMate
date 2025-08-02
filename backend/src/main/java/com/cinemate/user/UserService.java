@@ -11,6 +11,7 @@ import com.cinemate.user.dtos.UserRequestDTO;
 import com.cinemate.user.dtos.UserResponseDTO;
 import com.cinemate.notification.events.UserActivityEvent;
 import com.cinemate.recommendation.utils.RecommendationTriggerUtil;
+import com.cinemate.social.points.PointsEventListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
@@ -37,16 +38,18 @@ public class UserService {
     private final SeriesRepository seriesRepository;
     private final ApplicationEventPublisher eventPublisher;
     private final RecommendationTriggerUtil recommendationTrigger;
+    private final PointsEventListener pointsEventListener;
 
     @Autowired
     public UserService(UserRepository userRepository, MovieRepository movieRepository,
                        SeriesRepository seriesRepository, ApplicationEventPublisher eventPublisher,
-                       RecommendationTriggerUtil recommendationTrigger) {
+                       RecommendationTriggerUtil recommendationTrigger, PointsEventListener pointsEventListener) {
         this.userRepository = userRepository;
         this.movieRepository = movieRepository;
         this.seriesRepository = seriesRepository;
         this.eventPublisher = eventPublisher;
         this.recommendationTrigger = recommendationTrigger;
+        this.pointsEventListener = pointsEventListener;
     }
 
     /**
@@ -525,6 +528,9 @@ public class UserService {
         user.addMovieToWatched(movie);
         User savedUser = userRepository.save(user);
 
+        // Award points for watching a movie
+        pointsEventListener.onContentWatched(userId);
+
         eventPublisher.publishEvent(new UserActivityEvent(this, userId, UserActivityEvent.ActivityType.MOVIE_WATCHED, movieId));
 
         recommendationTrigger.triggerOnWatched(userId, movieId, "movie");
@@ -560,6 +566,9 @@ public class UserService {
 
         user.addSeriesToWatched(series);
         User savedUser = userRepository.save(user);
+
+        // Award points for watching a series
+        pointsEventListener.onContentWatched(userId);
 
         eventPublisher.publishEvent(new UserActivityEvent(this, userId, UserActivityEvent.ActivityType.SERIES_WATCHED, seriesId));
 

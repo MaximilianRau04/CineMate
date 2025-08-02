@@ -385,7 +385,7 @@ const UserProfile = () => {
                 <strong>Meine Achievements:</strong>
               </label>
               {userId && <UserAchievementBadges userId={userId} limit={6} showCount={true} />}
-              <Link to={`/achievements`} className="btn btn-outline-primary btn-sm mt-2">
+              <Link to={`/achievements`} className="btn btn-primary btn-sm mt-2">
                 <i className="bi bi-trophy me-1"></i>
                 Alle Achievements anzeigen
               </Link>
