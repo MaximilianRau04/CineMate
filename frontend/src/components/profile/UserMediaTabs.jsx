@@ -8,11 +8,13 @@ const UserMediaTabs = ({ userId }) => {
   const [favorites, setFavorites] = useState({ movies: [], series: [] });
   const [watched, setWatched] = useState({ movies: [], series: [] });
   const [reviews, setReviews] = useState([]);
+  const [customLists, setCustomLists] = useState([]);
   const { success, error: showError } = useToast();
   const [loading, setLoading] = useState({
     favorites: false,
     watched: false,
-    reviews: false
+    reviews: false,
+    lists: false
   });
 
   /**
@@ -102,6 +104,27 @@ const UserMediaTabs = ({ userId }) => {
       })
       .catch(err => console.error("Fehler beim Laden der gesehenen Medien:", err))
       .finally(() => setLoading(prev => ({ ...prev, watched: false })));
+  }, [userId, activeTab]);
+
+  /**
+   * fetches the user's custom lists from the API
+   * @returns {void}
+   */
+  useEffect(() => {
+    if (activeTab !== "lists" || !userId) return;
+
+    setLoading(prev => ({ ...prev, lists: true }));
+    const token = localStorage.getItem('token');
+    const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+    
+    fetch(`http://localhost:8080/api/lists/user/${userId}`, { headers })
+      .then(res => res.ok ? res.json() : [])
+      .then((data) => {
+        const validLists = Array.isArray(data) ? data.filter(list => list && list.id) : [];
+        setCustomLists(validLists);
+      })
+      .catch(err => console.error("Fehler beim Laden der Listen:", err))
+      .finally(() => setLoading(prev => ({ ...prev, lists: false })));
   }, [userId, activeTab]);
 
   /**
@@ -274,6 +297,15 @@ const UserMediaTabs = ({ userId }) => {
           >
             <i className="bi bi-eye-fill me-1"></i>
             Gesehen
+          </button>
+        </li>
+        <li className="nav-item">
+          <button
+            className={`nav-link ${activeTab === 'lists' ? 'active bg-primary text-white' : 'text-dark'}`}
+            onClick={() => setActiveTab('lists')}
+          >
+            <i className="bi bi-list-ul me-1"></i>
+            Listen
           </button>
         </li>
       </ul>
@@ -461,6 +493,90 @@ const UserMediaTabs = ({ userId }) => {
                   </div>
                 )}
               </>
+            )}
+          </div>
+        )}
+
+        {/* Lists Tab Content */}
+        {activeTab === 'lists' && (
+          <div className="tab-pane fade show active">
+            {loading.lists ? (
+              <div className="text-center py-3">
+                <div className="spinner-border text-primary" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </div>
+              </div>
+            ) : customLists.length > 0 ? (
+              <div className="row">
+                {customLists.map(list => (
+                  <div className="col-md-6 col-lg-4 mb-4" key={list.id}>
+                    <div className="card h-100">
+                      <div className="position-relative">
+                        <Link to={`/lists/${list.id}`}>
+                          <img
+                            src={list.coverImageUrl || (list.movies?.[0]?.posterUrl || list.series?.[0]?.posterUrl || 'https://via.placeholder.com/300x400?text=Liste')}
+                            alt={list.title}
+                            className="card-img-top"
+                            style={{ height: '200px', objectFit: 'cover' }}
+                            onError={(e) => {
+                              e.target.src = 'https://via.placeholder.com/300x400?text=Liste';
+                            }}
+                          />
+                        </Link>
+                        <div className="position-absolute top-0 start-0 m-2">
+                          <span className={`badge ${list.public ? 'bg-success' : 'bg-secondary'}`}>
+                            <i className={`bi bi-${list.public ? 'globe' : 'lock'} me-1`}></i>
+                            {list.public ? 'Öffentlich' : 'Privat'}
+                          </span>
+                        </div>
+                        <div className="position-absolute top-0 end-0 m-2">
+                          <span className="badge bg-dark bg-opacity-75">
+                            {list.totalItemsCount} {list.totalItemsCount === 1 ? 'Element' : 'Elemente'}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="card-body">
+                        <h5 className="card-title">
+                          <Link to={`/lists/${list.id}`} className="text-decoration-none">
+                            {list.title}
+                          </Link>
+                        </h5>
+                        {list.description && (
+                          <p className="card-text text-muted small">
+                            {list.description.length > 100 
+                              ? `${list.description.substring(0, 100)}...` 
+                              : list.description
+                            }
+                          </p>
+                        )}
+                        <div className="d-flex justify-content-between align-items-center">
+                          <small className="text-muted">
+                            {new Date(list.updatedAt).toLocaleDateString('de-DE')}
+                          </small>
+                          <div>
+                            <span className="text-muted me-2">
+                              <i className="bi bi-heart"></i> {list.likesCount}
+                            </span>
+                            <Link to={`/lists/${list.id}`} className="btn btn-outline-primary btn-sm">
+                              <i className="bi bi-eye"></i>
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="alert alert-light text-center">
+                <i className="bi bi-list-ul mb-3" style={{ fontSize: '3rem', opacity: 0.3 }}></i>
+                <h5>Keine Listen vorhanden</h5>
+                <p className="text-muted">Du hast noch keine Listen erstellt.</p>
+                <Link to="/lists" className="btn btn-primary">
+                  <i className="bi bi-plus-circle me-2"></i>
+                  Erste Liste erstellen
+                </Link>
+              </div>
             )}
           </div>
         )}
