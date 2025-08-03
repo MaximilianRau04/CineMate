@@ -469,4 +469,6 @@ GET http://localhost:8080/api/forum/posts/687f8464fb43b32d18bc26e6/subscription-
 
 ###
 GET http://localhost:8080/api/statistics/users/687f76dffa164e4344fe824c/friends-comparison
+###
+GET http://localhost:8080/api/lists
 

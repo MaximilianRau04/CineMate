@@ -7,7 +7,6 @@ import com.cinemate.achievement.repository.UserAchievementRepository;
 import com.cinemate.achievement.events.AchievementCheckEvent;
 import com.cinemate.social.forum.ForumService;
 import com.cinemate.social.friends.FriendRepository;
-import com.cinemate.social.friends.FriendshipStatus;
 import com.cinemate.social.points.PointsEventListener;
 import com.cinemate.user.User;
 import com.cinemate.user.UserRepository;
