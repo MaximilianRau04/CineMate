@@ -48,7 +48,6 @@ public class User implements UserDetails {
     private List<Movie> moviesWatched = new ArrayList<>();
     @DBRef(lazy = true)
     private List<Series> seriesWatched = new ArrayList<>();
-    
 
     private boolean profilePublic = true;
     private boolean allowFriendRequests = true;
