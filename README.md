@@ -139,8 +139,6 @@ springdoc.swagger-ui.url=/v3/api-docs
 springdoc.swagger-ui.operationsSorter=alpha
 springdoc.swagger-ui.tagsSorter=alpha
 
-# JWT Secret Key
-jwt.secret=yoursecretkey
 ```
 
 ### Build and Run
