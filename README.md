@@ -130,6 +130,17 @@ spring.mail.properties.mail.smtp.starttls.enable=true
 # File Upload Configuration
 cinemate.upload.dir=./uploads
 spring.servlet.multipart.max-file-size=10MB
+
+# Swagger
+springdoc.swagger-ui.path=/swagger-ui.html
+springdoc.api-docs.path=/v3/api-docs
+springdoc.swagger-ui.configUrl=/v3/api-docs/swagger-config
+springdoc.swagger-ui.url=/v3/api-docs
+springdoc.swagger-ui.operationsSorter=alpha
+springdoc.swagger-ui.tagsSorter=alpha
+
+# JWT Secret Key
+jwt.secret=yoursecretkey
 ```
 
 ### Build and Run
