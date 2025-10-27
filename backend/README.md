@@ -1,10 +1,10 @@
 # 🎯 Spring Boot RESTful API – Movies & Series
 
 This is a Java backend application that provides a REST API for managing movies and TV series.  
-It uses Spring Boot and connects to a MariaDB database.
+It uses Spring Boot and connects to a MongoDB database.
 
 📍 **Base URL**: [http://localhost:8080/api](http://localhost:8080/api)  
-📘 **Swagger UI**: [http://localhost:8080/api/swagger-ui](http://localhost:8080/api/swagger-ui)  
+📘 **Swagger UI**: [http://localhost:8080/api/swagger-ui](http://localhost:8080/api/swagger-ui.html)  
 📄 **OpenAPI JSON**: [http://localhost:8080/api/api-docs](http://localhost:8080/api/api-docs)
 
 
