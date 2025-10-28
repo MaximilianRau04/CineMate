@@ -290,11 +290,20 @@ const CustomListsPage = () => {
               style={{ fontSize: "4rem", opacity: 0.3 }}
             ></i>
           </div>
-          <h4 className="mb-3 text-white">
+          <h4 className="text-muted mb-3">
             {activeTab === "my-lists"
               ? "Keine eigenen Listen vorhanden"
               : "Keine Listen gefunden"}
           </h4>
+          {activeTab === "my-lists" && isAuthenticated && (
+            <button
+              className="btn btn-primary"
+              onClick={() => setShowCreateModal(true)}
+            >
+              <i className="bi bi-plus-circle me-2"></i>
+              Erste Liste erstellen
+            </button>
+          )}
         </div>
       );
     }
@@ -320,26 +329,25 @@ const CustomListsPage = () => {
   };
 
   return (
-    <div className="custom-lists-page">
-      <div className="container-fluid py-4">
-        <div className="row mb-4">
-          <div className="col">
-            <h1 className="text-white mb-4">
-              <i className="bi bi-list-ul me-3"></i>
-              Listen
-            </h1>
+    <div className="container-fluid py-4">
+      <div className="row mb-4">
+        <div className="col">
+          <h1 className="text-white mb-4">
+            <i className="bi bi-list-ul me-3"></i>
+            Listen
+          </h1>
+        </div>
+        {isAuthenticated && (
+          <div className="col-auto">
+            <button
+              className="btn btn-primary"
+              onClick={() => setShowCreateModal(true)}
+            >
+              <i className="bi bi-plus-circle me-2"></i>
+              Neue Liste erstellen
+            </button>
           </div>
-          {isAuthenticated && (
-            <div className="col-auto">
-              <button
-                className="btn btn-primary"
-                onClick={() => setShowCreateModal(true)}
-              >
-                <i className="bi bi-plus-circle me-2"></i>
-                Neue Liste erstellen
-              </button>
-            </div>
-          )}
+        )}
       </div>
 
       {/* Navigation Tabs */}
@@ -432,7 +440,6 @@ const CustomListsPage = () => {
           onSubmit={handleCreateList}
         />
       )}
-      </div>
     </div>
   );
 };

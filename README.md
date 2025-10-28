@@ -575,10 +575,6 @@ GET    /api/admin/content/pending       # Get pending content reviews
 - **Input Validation**: Comprehensive request validation
 - **File Upload Security**: Secure multipart file handling
 
-## Information
-
-This project was created with the help of artificial intelligence
-
 ## Contributing
 
 1. Fork the repository

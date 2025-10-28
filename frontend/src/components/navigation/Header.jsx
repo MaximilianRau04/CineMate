@@ -97,13 +97,6 @@ const Header = () => {
                     <span className="d-lg-none">Tipps</span>
                   </Link>
                 </li>
-                <li className="nav-item">
-                  <Link className="nav-link px-2 px-lg-3" to="/lists">
-                    <i className="bi bi-list-ul d-xl-none me-1"></i>
-                    <span className="d-none d-lg-inline">Listen</span>
-                    <span className="d-lg-none">Listen</span>
-                  </Link>
-                </li>
                 
                 {/* Social Dropdown */}
                 <li className="nav-item dropdown">

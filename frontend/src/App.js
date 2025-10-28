@@ -20,8 +20,6 @@ import ForumHome from './components/forum/ForumHome';
 import ForumPostDetail from './components/forum/ForumPostDetail';
 import CreateForumPost from './components/forum/CreateForumPost';
 import AchievementsPage from './components/achievements/AchievementsPage';
-import CustomListsPage from './components/lists/CustomListsPage';
-import ListDetailView from './components/lists/ListDetailView';
 import { ToastProvider, ToastContainer } from './components/toasts';
 import { AuthProvider } from './utils/AuthContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -127,18 +125,6 @@ const AppContent = () => {
         <Route path="/forum/create-post" element={
           <ProtectedRoute>
             <CreateForumPost />
-          </ProtectedRoute>
-        } />
-
-        {/* Custom Lists routes */}
-        <Route path="/lists" element={
-          <ProtectedRoute>
-            <CustomListsPage />
-          </ProtectedRoute>
-        } />
-        <Route path="/lists/:listId" element={
-          <ProtectedRoute>
-            <ListDetailView />
           </ProtectedRoute>
         } />
 

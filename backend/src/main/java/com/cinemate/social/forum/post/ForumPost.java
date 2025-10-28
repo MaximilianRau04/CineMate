@@ -4,6 +4,7 @@ import com.cinemate.social.forum.ForumCategory;
 import com.cinemate.social.forum.reply.ForumReply;
 import com.cinemate.user.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;

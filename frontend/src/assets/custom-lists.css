@@ -131,33 +131,33 @@
   color: #e2e8f0;
 }
 
-.custom-lists-page .form-label {
+.form-label {
   color: #a0aec0;
   font-weight: 500;
 }
 
-.custom-lists-page .form-control {
+.form-control {
   background: #4a5568;
   border: 1px solid #718096;
   color: #e2e8f0;
 }
 
-.custom-lists-page .form-control:focus {
+.form-control:focus {
   background: #4a5568;
   border-color: #4dabf7;
   color: #e2e8f0;
   box-shadow: 0 0 0 0.2rem rgba(77, 171, 247, 0.25);
 }
 
-.custom-lists-page .form-control::placeholder {
+.form-control::placeholder {
   color: #a0aec0;
 }
 
-.custom-lists-page .form-text {
+.form-text {
   color: #a0aec0;
 }
 
-.custom-lists-page .form-check-input:checked {
+.form-check-input:checked {
   background-color: #4dabf7;
   border-color: #4dabf7;
 }
@@ -196,13 +196,13 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.custom-lists-page .form-select {
+.form-select {
   background: #4a5568;
   border: 1px solid #718096;
   color: #e2e8f0;
 }
 
-.custom-lists-page .form-select:focus {
+.form-select:focus {
   background: #4a5568;
   border-color: #4dabf7;
   color: #e2e8f0;
