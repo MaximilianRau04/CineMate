@@ -309,23 +309,20 @@ const NotificationSystem = () => {
         <Bell size={25} fill="currentColor" />
         {unreadCount > 0 && (
           <span
-            className="position-absolute badge rounded-pill"
+            className="position-absolute top-0 start-100 translate-middle badge rounded-pill"
             style={{
-              top: '-2px',
-              right: '-6px',
               fontSize: '0.6rem',
               background: 'linear-gradient(135deg, rgb(255, 80, 80), rgb(255, 120, 120))',
               border: '2px solid white',
-              minWidth: '18px',
-              height: '18px',
+              minWidth: '20px',
+              height: '20px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               color: 'white',
               boxShadow: '0 0 4px rgba(0,0,0,0.2)',
               transform: 'scale(1)',
-              transition: 'transform 0.2s ease',
-              lineHeight: 1
+              transition: 'transform 0.2s ease'
             }}
           >
             {unreadCount > 99 ? '99+' : unreadCount}
