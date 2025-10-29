@@ -4,7 +4,7 @@ import com.cinemate.movie.DTOs.MovieResponseDTO;
 import com.cinemate.review.DTOs.ReviewRequestDTO;
 import com.cinemate.review.DTOs.ReviewResponseDTO;
 import com.cinemate.series.DTOs.SeriesResponseDTO;
-import com.cinemate.user.dtos.UserResponseDTO;
+import com.cinemate.user.DTOs.UserResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

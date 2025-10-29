@@ -2,8 +2,8 @@ package com.cinemate.user;
 
 import com.cinemate.movie.DTOs.MovieResponseDTO;
 import com.cinemate.series.DTOs.SeriesResponseDTO;
-import com.cinemate.user.dtos.UserRequestDTO;
-import com.cinemate.user.dtos.UserResponseDTO;
+import com.cinemate.user.DTOs.UserRequestDTO;
+import com.cinemate.user.DTOs.UserResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

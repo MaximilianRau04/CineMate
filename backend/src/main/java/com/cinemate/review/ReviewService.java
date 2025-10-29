@@ -11,10 +11,11 @@ import com.cinemate.series.Series;
 import com.cinemate.series.SeriesRepository;
 import com.cinemate.user.User;
 import com.cinemate.user.UserRepository;
-import com.cinemate.user.dtos.UserResponseDTO;
+import com.cinemate.user.DTOs.UserResponseDTO;
 import com.cinemate.notification.events.ReviewCreatedEvent;
 import com.cinemate.recommendation.utils.RecommendationTriggerUtil;
 import com.cinemate.social.points.PointsEventListener;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ReviewService {
 
     private final ReviewRepository reviewRepository;
@@ -39,20 +41,6 @@ public class ReviewService {
     private static final double MIN_RATING = 0.5;
     private static final double MAX_RATING = 5.0;
     private static final double RATING_STEP = 0.5;
-
-    @Autowired
-    public ReviewService(ReviewRepository reviewRepository, UserRepository userRepository,
-                         MovieRepository movieRepository, SeriesRepository seriesRepository,
-                         ApplicationEventPublisher eventPublisher, RecommendationTriggerUtil recommendationTrigger,
-                         PointsEventListener pointsEventListener) {
-        this.reviewRepository = reviewRepository;
-        this.userRepository = userRepository;
-        this.movieRepository = movieRepository;
-        this.seriesRepository = seriesRepository;
-        this.eventPublisher = eventPublisher;
-        this.recommendationTrigger = recommendationTrigger;
-        this.pointsEventListener = pointsEventListener;
-    }
 
     /**
      * Creates a review for the given userId and the movie or series based on the given type

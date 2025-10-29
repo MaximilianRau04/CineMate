@@ -1,17 +1,17 @@
 package com.cinemate.achievement;
 
-import com.cinemate.achievement.dto.AchievementDTO;
-import com.cinemate.achievement.dto.UserAchievementDTO;
+import com.cinemate.achievement.DTOs.AchievementDTO;
+import com.cinemate.achievement.DTOs.UserAchievementDTO;
 import com.cinemate.achievement.repository.AchievementRepository;
 import com.cinemate.achievement.repository.UserAchievementRepository;
 import com.cinemate.achievement.events.AchievementCheckEvent;
 import com.cinemate.social.forum.ForumService;
 import com.cinemate.social.friends.FriendRepository;
-import com.cinemate.social.friends.FriendshipStatus;
 import com.cinemate.social.points.PointsEventListener;
 import com.cinemate.user.User;
 import com.cinemate.user.UserRepository;
 import com.cinemate.review.ReviewRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +23,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class AchievementService {
 
     private final AchievementRepository achievementRepository;
@@ -32,23 +33,6 @@ public class AchievementService {
     private final ForumService forumService;
     private final FriendRepository friendRepository;
     private final PointsEventListener pointsEventListener;
-
-    @Autowired
-    public AchievementService(AchievementRepository achievementRepository,
-                             UserAchievementRepository userAchievementRepository,
-                             UserRepository userRepository,
-                             ReviewRepository reviewRepository,
-                             ForumService forumService,
-                             FriendRepository friendRepository,
-                             PointsEventListener pointsEventListener) {
-        this.achievementRepository = achievementRepository;
-        this.userAchievementRepository = userAchievementRepository;
-        this.userRepository = userRepository;
-        this.reviewRepository = reviewRepository;
-        this.forumService = forumService;
-        this.friendRepository = friendRepository;
-        this.pointsEventListener = pointsEventListener;
-    }
 
     /**
      * Initialize default achievements in the database

@@ -1,4 +1,4 @@
-package com.cinemate.social.forum.dto;
+package com.cinemate.social.forum.DTOs;
 
 import com.cinemate.social.forum.ForumService;
 import com.cinemate.social.forum.post.ForumPost;

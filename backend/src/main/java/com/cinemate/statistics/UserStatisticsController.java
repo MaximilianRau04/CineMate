@@ -1,7 +1,7 @@
 package com.cinemate.statistics;
 
-import com.cinemate.statistics.dto.FriendStatisticsDTO;
-import com.cinemate.statistics.dto.UserStatisticsDTO;
+import com.cinemate.statistics.DTOs.FriendStatisticsDTO;
+import com.cinemate.statistics.DTOs.UserStatisticsDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

@@ -1,7 +1,7 @@
 package com.cinemate.social.forum;
 
-import com.cinemate.social.forum.dto.ForumDTOConverter;
-import com.cinemate.social.forum.dto.ForumPostDTO;
+import com.cinemate.social.forum.DTOs.ForumDTOConverter;
+import com.cinemate.social.forum.DTOs.ForumPostDTO;
 import com.cinemate.social.forum.post.ForumPost;
 import com.cinemate.social.forum.reply.ForumReply;
 import com.cinemate.social.forum.subscription.ForumSubscription;

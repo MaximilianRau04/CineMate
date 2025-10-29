@@ -1,8 +1,10 @@
 package com.cinemate.notification.events;
 
 import com.cinemate.review.Review;
+import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 
+@Getter
 public class ReviewCreatedEvent extends ApplicationEvent {
     private final Review review;
     private final String itemTitle;
@@ -15,15 +17,4 @@ public class ReviewCreatedEvent extends ApplicationEvent {
         this.itemType = itemType;
     }
 
-    public Review getReview() {
-        return review;
-    }
-
-    public String getItemTitle() {
-        return itemTitle;
-    }
-
-    public String getItemType() {
-        return itemType;
-    }
 }

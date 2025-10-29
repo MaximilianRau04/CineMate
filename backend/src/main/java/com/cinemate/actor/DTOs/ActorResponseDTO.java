@@ -1,9 +1,17 @@
 package com.cinemate.actor.DTOs;
 
 import com.cinemate.actor.Actor;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.Date;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class ActorResponseDTO {
 
     private String id;
@@ -11,16 +19,6 @@ public class ActorResponseDTO {
     private Date birthday;
     private String image;
     private String biography;
-
-    public ActorResponseDTO(String id, String name, Date birthday, String image, String biography) {
-        this.id = id;
-        this.name = name;
-        this.birthday = birthday;
-        this.image = image;
-        this.biography = biography;
-    }
-
-    public ActorResponseDTO() {}
 
     public ActorResponseDTO(Actor actor) {
         this.id = actor.getId();
@@ -30,43 +28,4 @@ public class ActorResponseDTO {
         this.biography = actor.getBiography();
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Date getBirthday() {
-        return birthday;
-    }
-
-    public void setBirthday(Date birthday) {
-        this.birthday = birthday;
-    }
-
-    public String getImage() {
-        return image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
-    }
-
-    public String getBiography() {
-        return biography;
-    }
-
-    public void setBiography(String biography) {
-        this.biography = biography;
-    }
 }

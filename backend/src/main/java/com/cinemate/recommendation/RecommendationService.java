@@ -9,6 +9,7 @@ import com.cinemate.series.SeriesRepository;
 import com.cinemate.user.User;
 import com.cinemate.user.UserRepository;
 import com.cinemate.recommendation.DTOs.RecommendationResponseDTO;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,20 +17,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class RecommendationService {
 
     private final UserRepository userRepository;
     private final MovieRepository movieRepository;
     private final SeriesRepository seriesRepository;
-
-    @Autowired
-    public RecommendationService(UserRepository userRepository, 
-                               MovieRepository movieRepository, 
-                               SeriesRepository seriesRepository) {
-        this.userRepository = userRepository;
-        this.movieRepository = movieRepository;
-        this.seriesRepository = seriesRepository;
-    }
 
     /**
      * Generates personalized recommendations for a user

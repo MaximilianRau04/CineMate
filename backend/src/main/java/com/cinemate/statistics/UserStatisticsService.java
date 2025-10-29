@@ -1,10 +1,10 @@
 package com.cinemate.statistics;
 
 import com.cinemate.social.friends.Friend;
-import com.cinemate.statistics.dto.*;
-import com.cinemate.statistics.dto.activities.MonthlyActivityDTO;
-import com.cinemate.statistics.dto.activities.RecentActivityDTO;
-import com.cinemate.statistics.dto.activities.YearlyActivityDTO;
+import com.cinemate.statistics.DTOs.*;
+import com.cinemate.statistics.DTOs.activities.MonthlyActivityDTO;
+import com.cinemate.statistics.DTOs.activities.RecentActivityDTO;
+import com.cinemate.statistics.DTOs.activities.YearlyActivityDTO;
 import com.cinemate.user.User;
 import com.cinemate.user.UserRepository;
 import com.cinemate.review.Review;

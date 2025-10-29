@@ -4,7 +4,7 @@ import com.cinemate.social.friends.FriendRequestDTO;
 import com.cinemate.social.friends.FriendService;
 import com.cinemate.social.points.PointsService;
 import com.cinemate.social.points.UserPointsDTO;
-import com.cinemate.user.dtos.UserResponseDTO;
+import com.cinemate.user.DTOs.UserResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;

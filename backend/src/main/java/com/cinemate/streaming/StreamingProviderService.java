@@ -2,6 +2,7 @@ package com.cinemate.streaming;
 
 import com.cinemate.streaming.DTOs.StreamingProviderRequestDTO;
 import com.cinemate.streaming.DTOs.StreamingProviderResponseDTO;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -11,17 +12,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class StreamingProviderService {
     
     private final StreamingProviderRepository providerRepository;
     private final StreamingAvailabilityRepository availabilityRepository;
-    
-    @Autowired
-    public StreamingProviderService(StreamingProviderRepository providerRepository,
-                                   StreamingAvailabilityRepository availabilityRepository) {
-        this.providerRepository = providerRepository;
-        this.availabilityRepository = availabilityRepository;
-    }
     
     /**
      * Get all active streaming providers

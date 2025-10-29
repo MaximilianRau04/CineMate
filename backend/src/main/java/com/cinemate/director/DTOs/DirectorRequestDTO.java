@@ -1,10 +1,18 @@
 package com.cinemate.director.DTOs;
 
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.Date;
 import java.util.List;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class DirectorRequestDTO {
     private String id;
     @NotNull
@@ -16,70 +24,4 @@ public class DirectorRequestDTO {
     private List<String> movieIds;
     private List<String> seriesIds;
 
-    public DirectorRequestDTO(String id, String name, Date birthday, String image, String biography, List<String> movieIds, List<String> seriesIds) {
-        this.id = id;
-        this.name = name;
-        this.birthday = birthday;
-        this.image = image;
-        this.biography = biography;
-        this.movieIds = movieIds;
-        this.seriesIds = seriesIds;
-    }
-    public DirectorRequestDTO() {}
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Date getBirthday() {
-        return birthday;
-    }
-
-    public void setBirthday(Date birthday) {
-        this.birthday = birthday;
-    }
-
-    public String getImage() {
-        return image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
-    }
-
-    public String getBiography() {
-        return biography;
-    }
-
-    public void setBiography(String biography) {
-        this.biography = biography;
-    }
-
-    public List<String> getMovieIds() {
-        return movieIds;
-    }
-
-    public void setMovieIds(List<String> movieIds) {
-        this.movieIds = movieIds;
-    }
-
-    public List<String> getSeriesIds() {
-        return seriesIds;
-    }
-
-    public void setSeriesIds(List<String> seriesIds) {
-        this.seriesIds = seriesIds;
-    }
 }

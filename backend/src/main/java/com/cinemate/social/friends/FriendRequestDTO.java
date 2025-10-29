@@ -1,9 +1,15 @@
 package com.cinemate.social.friends;
 
-import com.cinemate.user.dtos.UserResponseDTO;
+import com.cinemate.user.DTOs.UserResponseDTO;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.Date;
 
+@Getter
+@Setter
+@NoArgsConstructor
 public class FriendRequestDTO {
     
     private String id;
@@ -17,16 +23,4 @@ public class FriendRequestDTO {
         this.requestedAt = friend.getRequestedAt();
         this.status = friend.getStatus();
     }
-
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
-    
-    public UserResponseDTO getRequester() { return requester; }
-    public void setRequester(UserResponseDTO requester) { this.requester = requester; }
-    
-    public Date getRequestedAt() { return requestedAt; }
-    public void setRequestedAt(Date requestedAt) { this.requestedAt = requestedAt; }
-    
-    public FriendshipStatus getStatus() { return status; }
-    public void setStatus(FriendshipStatus status) { this.status = status; }
 }

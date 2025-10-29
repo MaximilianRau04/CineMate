@@ -3,6 +3,12 @@ package com.cinemate.actor;
 import com.cinemate.actor.DTOs.ActorRequestDTO;
 import com.cinemate.movie.Movie;
 import com.cinemate.series.Series;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -11,9 +17,14 @@ import java.util.Date;
 import java.util.List;
 
 @Document(collection = "actors")
+@Getter
+@Setter
+@NoArgsConstructor
 public class Actor {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String id;
+    @NotNull
     private String name;
     private Date birthday;
     @DBRef(lazy = true)
@@ -37,63 +48,5 @@ public class Actor {
         this.birthday = actor.getBirthday();
         this.image = actor.getImage();
         this.biography = actor.getBiography();
-    }
-
-    public Actor() {}
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Date getBirthday() {
-        return birthday;
-    }
-
-    public void setBirthday(Date birthday) {
-        this.birthday = birthday;
-    }
-
-    public List<Movie> getMovies() {
-        return movies;
-    }
-
-    public void setMovies(List<Movie> movies) {
-        this.movies = movies;
-    }
-
-    public List<Series> getSeries() {
-        return series;
-    }
-
-    public void setSeries(List<Series> series) {
-        this.series = series;
-    }
-
-    public String getImage() {
-        return image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
-    }
-
-    public String getBiography() {
-        return biography;
-    }
-
-    public void setBiography(String biography) {
-        this.biography = biography;
     }
 }

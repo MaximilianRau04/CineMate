@@ -6,6 +6,7 @@ import com.cinemate.movie.DTOs.MovieResponseDTO;
 import com.cinemate.movie.MovieRepository;
 import com.cinemate.series.DTOs.SeriesResponseDTO;
 import com.cinemate.series.SeriesRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,18 +15,12 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ActorService {
 
     private final ActorRepository actorRepository;
     private final MovieRepository movieRepository;
     private final SeriesRepository seriesRepository;
-
-    @Autowired
-    public ActorService(ActorRepository actorRepository, MovieRepository movieRepository, SeriesRepository seriesRepository) {
-        this.actorRepository = actorRepository;
-        this.movieRepository = movieRepository;
-        this.seriesRepository = seriesRepository;
-    }
 
     /**
      * returns all actors

@@ -1,10 +1,20 @@
 package com.cinemate.series;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.List;
 
+@Document(collection = "seasons")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Season {
     @Id
     private String id;
@@ -15,42 +25,4 @@ public class Season {
     @Field("trailer_url")
     private String trailerUrl;
 
-    public Season(String id, int seasonNumber, List<Episode> episodes, String trailerUrl) {
-        this.id = id;
-        this.seasonNumber = seasonNumber;
-        this.episodes = episodes;
-        this.trailerUrl = trailerUrl;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public int getSeasonNumber() {
-        return seasonNumber;
-    }
-
-    public void setSeasonNumber(int seasonNumber) {
-        this.seasonNumber = seasonNumber;
-    }
-
-    public List<Episode> getEpisodes() {
-        return episodes;
-    }
-
-    public void setEpisodes(List<Episode> episodes) {
-        this.episodes = episodes;
-    }
-
-    public String getTrailerUrl() {
-        return trailerUrl;
-    }
-
-    public void setTrailerUrl(String trailerUrl) {
-        this.trailerUrl = trailerUrl;
-    }
 }

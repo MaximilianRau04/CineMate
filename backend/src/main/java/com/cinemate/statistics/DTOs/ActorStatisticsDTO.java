@@ -1,4 +1,4 @@
-package com.cinemate.statistics.dto;
+package com.cinemate.statistics.DTOs;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,39 +1,17 @@
 package com.cinemate.notification;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class NotificationRequest {
     private String title;
     private String message;
     private String targetUserId;
 
-    public NotificationRequest() {}
-
-    public NotificationRequest(String title, String message, String targetUserId) {
-        this.title = title;
-        this.message = message;
-        this.targetUserId = targetUserId;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public String getTargetUserId() {
-        return targetUserId;
-    }
-
-    public void setTargetUserId(String targetUserId) {
-        this.targetUserId = targetUserId;
-    }
 }

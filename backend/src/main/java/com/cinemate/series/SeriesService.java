@@ -9,6 +9,7 @@ import com.cinemate.director.DirectorRepository;
 import com.cinemate.series.DTOs.SeriesRequestDTO;
 import com.cinemate.series.DTOs.SeriesResponseDTO;
 import com.cinemate.notification.events.SeriesUpdatedEvent;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
@@ -20,23 +21,13 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class SeriesService {
 
     private final SeriesRepository seriesRepository;
     private final ActorRepository actorRepository;
     private final DirectorRepository directorRepository;
     private final ApplicationEventPublisher eventPublisher;
-
-    @Autowired
-    public SeriesService(SeriesRepository seriesRepository,
-                         ActorRepository actorRepository,
-                         DirectorRepository directorRepository,
-                         ApplicationEventPublisher eventPublisher) {
-        this.seriesRepository = seriesRepository;
-        this.actorRepository = actorRepository;
-        this.directorRepository = directorRepository;
-        this.eventPublisher = eventPublisher;
-    }
 
     /**
      * returns all series

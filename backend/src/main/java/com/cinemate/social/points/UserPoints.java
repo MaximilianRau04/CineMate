@@ -2,6 +2,12 @@ package com.cinemate.social.points;
 
 import com.cinemate.user.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -9,11 +15,14 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.util.Date;
 
 @Document(collection = "user_points")
+@Getter
+@Setter
+@NoArgsConstructor
 public class UserPoints {
     
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String id;
-    
     @DBRef
     @JsonIgnore
     private User user;
@@ -23,11 +32,8 @@ public class UserPoints {
     private int watchPoints;
     private int socialPoints;
     private int achievementPoints;
-    
     private Date lastUpdated;
-    
-    public UserPoints() {}
-    
+
     public UserPoints(User user) {
         this.user = user;
         this.totalPoints = 0;
@@ -56,29 +62,4 @@ public class UserPoints {
         this.totalPoints += points;
         this.lastUpdated = new Date();
     }
-
-    // Getters and Setters
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
-    
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
-    
-    public int getTotalPoints() { return totalPoints; }
-    public void setTotalPoints(int totalPoints) { this.totalPoints = totalPoints; }
-    
-    public int getReviewPoints() { return reviewPoints; }
-    public void setReviewPoints(int reviewPoints) { this.reviewPoints = reviewPoints; }
-    
-    public int getWatchPoints() { return watchPoints; }
-    public void setWatchPoints(int watchPoints) { this.watchPoints = watchPoints; }
-    
-    public int getSocialPoints() { return socialPoints; }
-    public void setSocialPoints(int socialPoints) { this.socialPoints = socialPoints; }
-    
-    public int getAchievementPoints() { return achievementPoints; }
-    public void setAchievementPoints(int achievementPoints) { this.achievementPoints = achievementPoints; }
-    
-    public Date getLastUpdated() { return lastUpdated; }
-    public void setLastUpdated(Date lastUpdated) { this.lastUpdated = lastUpdated; }
 }
