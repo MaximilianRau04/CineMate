@@ -2,8 +2,6 @@ package com.cinemate.social.forum.subscription;
 
 import com.cinemate.social.forum.post.ForumPost;
 import com.cinemate.user.User;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -20,7 +18,6 @@ import java.util.Date;
 public class ForumSubscription {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String id;
     @DBRef
     private User user;

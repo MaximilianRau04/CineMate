@@ -3,8 +3,6 @@ package com.cinemate.social.forum.like;
 import com.cinemate.social.forum.post.ForumPost;
 import com.cinemate.social.forum.reply.ForumReply;
 import com.cinemate.user.User;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,7 +19,6 @@ import java.util.Date;
 public class ForumLike {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String id;
     
     @DBRef

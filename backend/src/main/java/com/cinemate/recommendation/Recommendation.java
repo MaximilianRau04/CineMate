@@ -1,8 +1,6 @@
 package com.cinemate.recommendation;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import org.springframework.data.annotation.Id;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,7 +15,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor
 public class Recommendation {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String id;
     @NotNull
     private String title;

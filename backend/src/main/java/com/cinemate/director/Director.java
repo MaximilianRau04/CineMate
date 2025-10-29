@@ -3,10 +3,7 @@ package com.cinemate.director;
 import com.cinemate.director.DTOs.DirectorRequestDTO;
 import com.cinemate.movie.Movie;
 import com.cinemate.series.Series;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -23,7 +20,6 @@ import java.util.List;
 @NoArgsConstructor
 public class Director {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String id;
     @NotNull
     private String name;

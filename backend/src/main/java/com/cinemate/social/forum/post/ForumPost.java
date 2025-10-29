@@ -4,10 +4,7 @@ import com.cinemate.social.forum.ForumCategory;
 import com.cinemate.social.forum.reply.ForumReply;
 import com.cinemate.user.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,7 +24,6 @@ import java.util.ArrayList;
 public class ForumPost {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String id;
     @NotNull
     private String title;

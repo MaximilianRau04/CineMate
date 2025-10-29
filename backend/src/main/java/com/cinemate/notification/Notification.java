@@ -1,7 +1,5 @@
 package com.cinemate.notification;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,7 +18,6 @@ import java.util.Map;
 @AllArgsConstructor
 public class Notification {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String id;
     @NotNull
     private String userId;

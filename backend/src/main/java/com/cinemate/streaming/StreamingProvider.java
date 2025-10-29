@@ -1,7 +1,5 @@
 package com.cinemate.streaming;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,7 +15,6 @@ import org.springframework.data.mongodb.core.mapping.Field;
 public class StreamingProvider {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String id;
     @NotNull
     private String name;

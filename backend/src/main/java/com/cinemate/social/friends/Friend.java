@@ -1,8 +1,6 @@
 package com.cinemate.social.friends;
 
 import com.cinemate.user.User;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -19,7 +17,6 @@ import java.util.Date;
 public class Friend {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String id;
     @DBRef
     private User requester;

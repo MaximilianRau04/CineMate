@@ -3,10 +3,7 @@ package com.cinemate.series;
 import com.cinemate.actor.Actor;
 import com.cinemate.director.Director;
 import com.cinemate.series.DTOs.SeriesRequestDTO;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -26,7 +23,6 @@ import java.util.List;
 public class Series {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String id;
     @NotNull
     private String title;

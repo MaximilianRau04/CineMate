@@ -3,8 +3,6 @@ package com.cinemate.actor;
 import com.cinemate.actor.DTOs.ActorRequestDTO;
 import com.cinemate.movie.Movie;
 import com.cinemate.series.Series;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,7 +20,6 @@ import java.util.List;
 @NoArgsConstructor
 public class Actor {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String id;
     @NotNull
     private String name;

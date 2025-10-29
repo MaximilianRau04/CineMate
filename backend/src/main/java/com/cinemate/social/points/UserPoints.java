@@ -2,9 +2,6 @@ package com.cinemate.social.points;
 
 import com.cinemate.user.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,7 +18,6 @@ import java.util.Date;
 public class UserPoints {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String id;
     @DBRef
     @JsonIgnore
