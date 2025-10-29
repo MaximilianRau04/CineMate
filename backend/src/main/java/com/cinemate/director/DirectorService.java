@@ -6,6 +6,7 @@ import com.cinemate.movie.DTOs.MovieResponseDTO;
 import com.cinemate.movie.MovieRepository;
 import com.cinemate.series.DTOs.SeriesResponseDTO;
 import com.cinemate.series.SeriesRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,17 +15,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class DirectorService {
     private final DirectorRepository directorRepository;
     private final MovieRepository movieRepository;
     private final SeriesRepository seriesRepository;
-
-    @Autowired
-    public DirectorService(DirectorRepository directorRepository, MovieRepository movieRepository, SeriesRepository seriesRepository) {
-        this.directorRepository = directorRepository;
-        this.movieRepository = movieRepository;
-        this.seriesRepository = seriesRepository;
-    }
 
     /**
      * returns all directors

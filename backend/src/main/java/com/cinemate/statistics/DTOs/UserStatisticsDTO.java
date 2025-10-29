@@ -1,8 +1,8 @@
-package com.cinemate.statistics.dto;
+package com.cinemate.statistics.DTOs;
 
-import com.cinemate.statistics.dto.activities.MonthlyActivityDTO;
-import com.cinemate.statistics.dto.activities.RecentActivityDTO;
-import com.cinemate.statistics.dto.activities.YearlyActivityDTO;
+import com.cinemate.statistics.DTOs.activities.MonthlyActivityDTO;
+import com.cinemate.statistics.DTOs.activities.RecentActivityDTO;
+import com.cinemate.statistics.DTOs.activities.YearlyActivityDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

@@ -7,11 +7,12 @@ import com.cinemate.movie.MovieRepository;
 import com.cinemate.series.DTOs.SeriesResponseDTO;
 import com.cinemate.series.Series;
 import com.cinemate.series.SeriesRepository;
-import com.cinemate.user.dtos.UserRequestDTO;
-import com.cinemate.user.dtos.UserResponseDTO;
+import com.cinemate.user.DTOs.UserRequestDTO;
+import com.cinemate.user.DTOs.UserResponseDTO;
 import com.cinemate.notification.events.UserActivityEvent;
 import com.cinemate.recommendation.utils.RecommendationTriggerUtil;
 import com.cinemate.social.points.PointsEventListener;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
@@ -31,6 +32,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
@@ -39,18 +41,6 @@ public class UserService {
     private final ApplicationEventPublisher eventPublisher;
     private final RecommendationTriggerUtil recommendationTrigger;
     private final PointsEventListener pointsEventListener;
-
-    @Autowired
-    public UserService(UserRepository userRepository, MovieRepository movieRepository,
-                       SeriesRepository seriesRepository, ApplicationEventPublisher eventPublisher,
-                       RecommendationTriggerUtil recommendationTrigger, PointsEventListener pointsEventListener) {
-        this.userRepository = userRepository;
-        this.movieRepository = movieRepository;
-        this.seriesRepository = seriesRepository;
-        this.eventPublisher = eventPublisher;
-        this.recommendationTrigger = recommendationTrigger;
-        this.pointsEventListener = pointsEventListener;
-    }
 
     /**
      * returns the currently logged in user

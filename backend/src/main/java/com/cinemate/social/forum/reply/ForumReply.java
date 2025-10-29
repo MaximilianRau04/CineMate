@@ -4,6 +4,9 @@ import com.cinemate.social.forum.post.ForumPost;
 import com.cinemate.user.User;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -11,6 +14,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.util.Date;
 
 @Document(collection = "forum_replies")
+@Getter
+@Setter
+@NoArgsConstructor
 public class ForumReply {
     
     @Id
@@ -32,8 +38,7 @@ public class ForumReply {
     
     private int likesCount;
     private boolean isDeleted;
-    
-    public ForumReply() {}
+
     
     public ForumReply(String content, User author, ForumPost parentPost) {
         this.content = content;
@@ -44,28 +49,4 @@ public class ForumReply {
         this.likesCount = 0;
         this.isDeleted = false;
     }
-
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
-    
-    public String getContent() { return content; }
-    public void setContent(String content) { this.content = content; }
-    
-    public User getAuthor() { return author; }
-    public void setAuthor(User author) { this.author = author; }
-    
-    public ForumPost getParentPost() { return parentPost; }
-    public void setParentPost(ForumPost parentPost) { this.parentPost = parentPost; }
-    
-    public Date getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
-    
-    public Date getLastModified() { return lastModified; }
-    public void setLastModified(Date lastModified) { this.lastModified = lastModified; }
-    
-    public int getLikesCount() { return likesCount; }
-    public void setLikesCount(int likesCount) { this.likesCount = likesCount; }
-    
-    public boolean isDeleted() { return isDeleted; }
-    public void setDeleted(boolean deleted) { isDeleted = deleted; }
 }

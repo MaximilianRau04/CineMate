@@ -1,11 +1,21 @@
 package com.cinemate.social.points;
 
+import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.util.Date;
 
+@Getter
+@Setter
+@NoArgsConstructor
 public class UserPointsDTO {
     
     private String id;
+    @NotNull
     private String userId;
+    @NotNull
     private String username;
     private int totalPoints;
     private int reviewPoints;
@@ -15,8 +25,6 @@ public class UserPointsDTO {
     private Date lastUpdated;
     private String avatarUrl;
     private Date joinedAt;
-    
-    public UserPointsDTO() {}
     
     public UserPointsDTO(UserPoints userPoints) {
         this.id = userPoints.getId();
@@ -32,36 +40,4 @@ public class UserPointsDTO {
         this.joinedAt = userPoints.getUser().getJoinedAt();
     }
 
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
-    
-    public String getUserId() { return userId; }
-    public void setUserId(String userId) { this.userId = userId; }
-    
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
-    
-    public int getTotalPoints() { return totalPoints; }
-    public void setTotalPoints(int totalPoints) { this.totalPoints = totalPoints; }
-    
-    public int getReviewPoints() { return reviewPoints; }
-    public void setReviewPoints(int reviewPoints) { this.reviewPoints = reviewPoints; }
-    
-    public int getWatchPoints() { return watchPoints; }
-    public void setWatchPoints(int watchPoints) { this.watchPoints = watchPoints; }
-    
-    public int getSocialPoints() { return socialPoints; }
-    public void setSocialPoints(int socialPoints) { this.socialPoints = socialPoints; }
-    
-    public int getAchievementPoints() { return achievementPoints; }
-    public void setAchievementPoints(int achievementPoints) { this.achievementPoints = achievementPoints; }
-    
-    public Date getLastUpdated() { return lastUpdated; }
-    public void setLastUpdated(Date lastUpdated) { this.lastUpdated = lastUpdated; }
-    
-    public String getAvatarUrl() { return avatarUrl; }
-    public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl; }
-    
-    public Date getJoinedAt() { return joinedAt; }
-    public void setJoinedAt(Date joinedAt) { this.joinedAt = joinedAt; }
 }

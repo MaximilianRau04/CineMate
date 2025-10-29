@@ -7,7 +7,8 @@ import com.cinemate.social.points.PointsService;
 import com.cinemate.social.points.PointsType;
 import com.cinemate.user.User;
 import com.cinemate.user.UserRepository;
-import com.cinemate.user.dtos.UserResponseDTO;
+import com.cinemate.user.DTOs.UserResponseDTO;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class FriendService {
     
     private final FriendRepository friendRepository;
@@ -26,19 +28,6 @@ public class FriendService {
     private final NotificationService notificationService;
     private final PointsService pointsService;
     private final ApplicationEventPublisher eventPublisher;
-    
-    @Autowired
-    public FriendService(FriendRepository friendRepository, 
-                        UserRepository userRepository,
-                        NotificationService notificationService,
-                        PointsService pointsService,
-                        ApplicationEventPublisher eventPublisher) {
-        this.friendRepository = friendRepository;
-        this.userRepository = userRepository;
-        this.notificationService = notificationService;
-        this.pointsService = pointsService;
-        this.eventPublisher = eventPublisher;
-    }
 
     /**
      * Sends a friend request from one user to another.

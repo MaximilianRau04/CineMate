@@ -3,8 +3,11 @@ package com.cinemate.notification.events;
 import com.cinemate.series.Episode;
 import com.cinemate.series.Season;
 import com.cinemate.series.Series;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.context.ApplicationEvent;
 
+@Getter
 public class SeriesUpdatedEvent extends ApplicationEvent {
     private final Series series;
     private final Season newSeason;
@@ -45,23 +48,4 @@ public class SeriesUpdatedEvent extends ApplicationEvent {
         this.eventType = EventType.STATUS_CHANGED;
     }
 
-    public Series getSeries() {
-        return series;
-    }
-
-    public Season getNewSeason() {
-        return newSeason;
-    }
-
-    public Episode getNewEpisode() {
-        return newEpisode;
-    }
-
-    public String getOldStatus() {
-        return oldStatus;
-    }
-
-    public EventType getEventType() {
-        return eventType;
-    }
 }

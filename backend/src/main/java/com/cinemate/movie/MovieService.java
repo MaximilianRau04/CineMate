@@ -9,6 +9,7 @@ import com.cinemate.director.DTOs.DirectorResponseDTO;
 import com.cinemate.movie.DTOs.MovieRequestDTO;
 import com.cinemate.movie.DTOs.MovieResponseDTO;
 import com.cinemate.notification.events.MovieReleasedEvent;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
@@ -18,23 +19,13 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class MovieService {
 
     private final MovieRepository movieRepository;
     private final ActorRepository actorRepository;
     private final DirectorRepository directorRepository;
     private final ApplicationEventPublisher eventPublisher;
-
-    @Autowired
-    public MovieService(MovieRepository movieRepository,
-                        ActorRepository actorRepository,
-                        DirectorRepository directorRepository,
-                        ApplicationEventPublisher eventPublisher) {
-        this.movieRepository = movieRepository;
-        this.actorRepository = actorRepository;
-        this.directorRepository = directorRepository;
-        this.eventPublisher = eventPublisher;
-    }
 
     /**
      * return all movies

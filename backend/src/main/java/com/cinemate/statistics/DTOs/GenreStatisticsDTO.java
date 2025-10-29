@@ -1,4 +1,4 @@
-package com.cinemate.statistics.dto;
+package com.cinemate.statistics.DTOs;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DirectorStatisticsDTO {
+public class GenreStatisticsDTO {
     private String name;
     private Integer count;
+    private Integer hours;
 }

@@ -1,7 +1,9 @@
 package com.cinemate.notification.events;
 
+import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 
+@Getter
 public class UserActivityEvent extends ApplicationEvent {
     private final String userId;
     private final ActivityType activityType;
@@ -19,17 +21,5 @@ public class UserActivityEvent extends ApplicationEvent {
         this.userId = userId;
         this.activityType = activityType;
         this.itemId = itemId;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public ActivityType getActivityType() {
-        return activityType;
-    }
-
-    public String getItemId() {
-        return itemId;
     }
 }

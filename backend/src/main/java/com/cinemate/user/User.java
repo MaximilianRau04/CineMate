@@ -3,10 +3,13 @@ package com.cinemate.user;
 import com.cinemate.movie.Movie;
 import com.cinemate.notification.preference.NotificationPreference;
 import com.cinemate.series.Series;
-import com.cinemate.user.dtos.UserRequestDTO;
+import com.cinemate.user.DTOs.UserRequestDTO;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -17,6 +20,9 @@ import java.util.Date;
 import java.util.List;
 
 @Document(collection = "users")
+@Getter
+@Setter
+@NoArgsConstructor
 public class User {
 
     @Id
@@ -44,7 +50,6 @@ public class User {
     private List<Movie> moviesWatched = new ArrayList<>();
     @DBRef(lazy = true)
     private List<Series> seriesWatched = new ArrayList<>();
-    
 
     private boolean profilePublic = true;
     private boolean allowFriendRequests = true;
@@ -77,132 +82,6 @@ public class User {
         this.joinedAt = user.getJoinedAt();
         this.role = user.getRole();
     }
-
-    public User() {}
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public List<Movie> getMovieWatchlist() {
-        return movieWatchlist;
-    }
-
-    public void setMovieWatchlist(List<Movie> movieWatchlist) {
-        this.movieWatchlist = movieWatchlist;
-    }
-
-    public List<Series> getSeriesWatchlist() {
-        return seriesWatchlist;
-    }
-
-    public void setSeriesWatchlist(List<Series> seriesWatchlist) {
-        this.seriesWatchlist = seriesWatchlist;
-    }
-
-    public String getBio() {
-        return bio;
-    }
-
-    public void setBio(String bio) {
-        this.bio = bio;
-    }
-
-    public String getAvatarUrl() {
-        return avatarUrl;
-    }
-
-    public void setAvatarUrl(String avatarUrl) {
-        this.avatarUrl = avatarUrl;
-    }
-
-    public Date getJoinedAt() {
-        return joinedAt;
-    }
-
-    public void setJoinedAt(Date joinedAt) {
-        this.joinedAt = joinedAt;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
-    }
-
-    public List<Movie> getMovieFavorites() {
-        return movieFavorites;
-    }
-
-    public void setMovieFavorites(List<Movie> movieFavorites) {
-        this.movieFavorites = movieFavorites;
-    }
-
-    public List<Series> getSeriesFavorites() {
-        return seriesFavorites;
-    }
-
-    public void setSeriesFavorites(List<Series> seriesFavorites) {
-        this.seriesFavorites = seriesFavorites;
-    }
-
-    public List<Movie> getMoviesWatched() {
-        return moviesWatched;
-    }
-
-    public void setMoviesWatched(List<Movie> moviesWatched) {
-        this.moviesWatched = moviesWatched;
-    }
-
-    public List<Series> getSeriesWatched() {
-        return seriesWatched;
-    }
-
-    public void setSeriesWatched(List<Series> seriesWatched) {
-        this.seriesWatched = seriesWatched;
-    }
-
-    public List<NotificationPreference> getNotificationPreferences() { return notificationPreferences; }
-    public void setNotificationPreferences(List<NotificationPreference> preferences) { this.notificationPreferences = preferences; }
-
-    public boolean isEmailNotificationsEnabled() { return emailNotificationsEnabled; }
-    public void setEmailNotificationsEnabled(boolean enabled) { this.emailNotificationsEnabled = enabled; }
-
-    public boolean isWebNotificationsEnabled() { return webNotificationsEnabled; }
-    public void setWebNotificationsEnabled(boolean enabled) { this.webNotificationsEnabled = enabled; }
-
-    public boolean isSummaryRecommendationsEnabled() { return summaryRecommendationsEnabled; }
-    public void setSummaryRecommendationsEnabled(boolean enabled) { this.summaryRecommendationsEnabled = enabled; }
 
     public void addMovieToWatchlist(Movie movie) {
         if (!movieWatchlist.contains(movie)) {
@@ -263,14 +142,5 @@ public class User {
     public void removeSeriesFromWatched(Series series) {
         seriesWatched.removeIf(m -> m.getId().equals(series.getId()));
     }
-    
-    public boolean isProfilePublic() { return profilePublic; }
-    public void setProfilePublic(boolean profilePublic) { this.profilePublic = profilePublic; }
-    
-    public boolean isAllowFriendRequests() { return allowFriendRequests; }
-    public void setAllowFriendRequests(boolean allowFriendRequests) { this.allowFriendRequests = allowFriendRequests; }
-    
-    public Date getLastActiveAt() { return lastActiveAt; }
-    public void setLastActiveAt(Date lastActiveAt) { this.lastActiveAt = lastActiveAt; }
 
 }

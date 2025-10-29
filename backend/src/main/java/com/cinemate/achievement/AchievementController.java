@@ -1,7 +1,7 @@
 package com.cinemate.achievement;
 
-import com.cinemate.achievement.dto.AchievementDTO;
-import com.cinemate.achievement.dto.UserAchievementDTO;
+import com.cinemate.achievement.DTOs.AchievementDTO;
+import com.cinemate.achievement.DTOs.UserAchievementDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

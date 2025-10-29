@@ -2,6 +2,7 @@ package com.cinemate.social.points;
 
 import com.cinemate.user.User;
 import com.cinemate.user.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -12,16 +13,11 @@ import java.util.Map;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class PointsService {
     
     private final UserPointsRepository userPointsRepository;
     private final UserRepository userRepository;
-    
-    @Autowired
-    public PointsService(UserPointsRepository userPointsRepository, UserRepository userRepository) {
-        this.userPointsRepository = userPointsRepository;
-        this.userRepository = userRepository;
-    }
 
     /**
      * Awards points to a user based on the specified point type and custom points value.

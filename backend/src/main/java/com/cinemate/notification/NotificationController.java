@@ -1,6 +1,6 @@
 package com.cinemate.notification;
 
-import com.cinemate.notification.dtos.NotificationRequest;
+import com.cinemate.notification.DTOs.NotificationRequestDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -55,7 +55,7 @@ public class NotificationController {
      * @return Notification
      */
     @PostMapping
-    public ResponseEntity<Notification> createNotification(@RequestBody NotificationRequest request) {
+    public ResponseEntity<Notification> createNotification(@RequestBody NotificationRequestDTO request) {
         Notification notification = notificationService.createNotificationWithMetadata(
                 request.getUserId(),
                 request.getType(),
