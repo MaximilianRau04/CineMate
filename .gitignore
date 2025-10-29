@@ -62,3 +62,5 @@ application.properties
 *.tmp
 *.swp
 *.swo
+
+uploads/
