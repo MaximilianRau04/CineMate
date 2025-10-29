@@ -110,14 +110,18 @@ npm start
 Configure your `application.properties`:
 
 ```properties
+server.port=8080
+
 # MongoDB Configuration
 spring.data.mongodb.uri=mongodb://localhost:27017/cinemate
-# or for MongoDB Atlas:
-# spring.data.mongodb.uri=mongodb+srv://username:password@cluster.mongodb.net/cinemate
+spring.data.mongodb.host=localhost
+spring.data.mongodb.port=27017
+spring.data.mongodb.database=cinemate
+spring.data.mongodb.username=yourusername
+spring.data.mongodb.password=yourpassword
 
-# JWT Configuration
-cinemate.jwt.secret=yourSecretKey
-cinemate.jwt.expiration=86400000
+# JWT Configuration, for example use openssl rand -base64 32
+jwt.secret=yourjwtsecretkey
 
 # Email Configuration (optional)
 spring.mail.host=smtp.gmail.com
@@ -128,7 +132,7 @@ spring.mail.properties.mail.smtp.auth=true
 spring.mail.properties.mail.smtp.starttls.enable=true
 
 # File Upload Configuration
-cinemate.upload.dir=./uploads
+upload.dir=./uploads
 spring.servlet.multipart.max-file-size=10MB
 
 # Swagger
