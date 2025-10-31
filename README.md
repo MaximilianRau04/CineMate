@@ -85,29 +85,32 @@ cd cinemate
    - Local: Install MongoDB and start the service
    - Cloud: Create a MongoDB Atlas cluster and get connection string
 
-3. **Backend Setup:**
+## Create a .env file
 ```bash
-cd backend
-# Configure application.properties with your MongoDB connection
-mvn spring-boot:run
-```
+# MongoDB
+MONGO_DB=cinemate
+MONGO_PORT=27017
+MONGO_USER=yourusername
+MONGO_PASSWORD=yourpassword
 
-4. **Frontend Setup:**
+# Mongo Express
+MONGO_EXPRESS_PORT=8081
+
+# Backend
+BACKEND_PORT=8080
+```
+> Replace the values with your own settings. Do not use sensitive production credentials during development.
+
+### Start Database and MongoExpress via Docker
 ```bash
-cd frontend
-npm install
-npm start
+docker compose up -d --build
 ```
-
-5. **Access the application:**
-   - Frontend: `http://localhost:3000`
-   - Backend API: `http://localhost:8080`
 
 ## Backend - Spring Boot
 
 ### Configuration
 
-Configure your `application.properties`:
+Create and configure your `application.properties`:
 
 ```properties
 server.port=8080
@@ -156,6 +159,10 @@ mvn clean package
 java -jar target/cinemate-backend.jar
 ```
 
+### Access the application
+- Backend API: http://localhost:8080
+- Mongo Express: http://localhost:8081
+
 ## Frontend - React
 
 ### Setup
@@ -163,14 +170,6 @@ java -jar target/cinemate-backend.jar
 ```bash
 cd frontend
 npm install
-```
-
-### Environment Variables
-
-Create a `.env` file in the frontend directory:
-
-```env
-REACT_APP_API_BASE_URL=http://localhost:8080/api
 ```
 
 ### Development
