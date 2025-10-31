@@ -147,7 +147,7 @@ Content-Type: application/json
   "posterUrl": "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/1Aiq3YJuV96IVIZleLe6SE4i9Oo.jpg"
 }
 ###
-GET http://localhost:8080/api/directors
+GET http://localhost:8080/api/users
 ###
 GET http://localhost:8080/api/series/682a284236f2d54c872d1bb9/seasons
 
