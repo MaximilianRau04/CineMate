@@ -26,10 +26,10 @@ services:
       - mongodb
 
   backend:
-    build: .
+    build: ./backend
     container_name: cinemate-backend
     environment:
-      SPRING_DATA_MONGODB_URI: mongodb://mongodb:${MONGO_PORT}/${MONGO_DB}
+      SPRING_DATA_MONGODB_URI: mongodb://${MONGO_USER}:${MONGO_PASSWORD}@mongodb:27017/${MONGO_DB}?authSource=admin
       SERVER_PORT: ${BACKEND_PORT}
     ports:
       - "${BACKEND_PORT}:${BACKEND_PORT}"
