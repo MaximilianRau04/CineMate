@@ -163,6 +163,31 @@ java -jar target/cinemate-backend.jar
 - Backend API: http://localhost:8080
 - Mongo Express: http://localhost:8081
 
+## API Endpoints
+
+The backend exposes an OpenAPI (Swagger) documentation UI you can use to explore all available endpoints and their request/response schemas.
+
+- Swagger UI (interactive): http://localhost:8080/swagger-ui/index.html
+- Raw OpenAPI JSON: http://localhost:8080/v3/api-docs
+
+How to use
+
+1. Start the backend
+
+2. Open the Swagger UI URL in your browser. The UI shows grouped endpoints, models, and allows you to try requests directly from the browser.
+
+3. If you prefer to fetch the raw OpenAPI document (JSON):
+
+```bash
+curl -i http://localhost:8080/v3/api-docs
+```
+
+Common issues
+
+- If the Swagger UI fails with "The provided definition does not specify a valid version field", check that the backend is running and that `/v3/api-docs` returns a JSON object starting with `{"openapi": "..."}` and not a quoted string (this can happen if a custom HTTP message converter serializes the api-docs bytes incorrectly).
+- If you changed the OpenAPI configuration, the custom bean lives at `backend/src/main/java/com/cinemate/config/OpenApiConfig.java`.
+
+
 ## Frontend - React
 
 ### Setup
@@ -282,246 +307,6 @@ npm test
 - **Streaming Management**: Manage providers and availability data
 - **Forum Moderation**: Advanced tools for community management
 
-## API Endpoints
-
-### 🔐 Authentication
-```
-POST /api/auth/register          # Register new user
-POST /api/auth/login             # Login user
-```
-
-### 👤 User Management
-```
-GET    /api/users                       # Get all users
-GET    /api/users/{id}                  # Get user by ID
-GET    /api/users/me                    # Get current user profile
-POST   /api/users                       # Create user
-PUT    /api/users/{id}                  # Update user profile (with multipart support)
-DELETE /api/users/{id}                  # Delete user
-```
-
-### 🎬 Movies
-```
-GET    /api/movies                     # Get all movies (with pagination)
-GET    /api/movies/{id}               # Get movie by ID
-POST   /api/movies                    # Create movie (admin only)
-PUT    /api/movies/{id}               # Update movie (admin only)
-DELETE /api/movies/{id}               # Delete movie (admin only)
-GET    /api/movies/search             # Search movies
-GET    /api/movies/genre/{genre}      # Get movies by genre
-GET    /api/movies/{id}/actors        # Get actors of a movie
-GET    /api/movies/{id}/directors     # Get directors of a movie
-POST   /api/movies/{movieId}/actors/{actorId}     # Add actor to movie
-DELETE /api/movies/{movieId}/actors/{actorId}     # Remove actor from movie
-POST   /api/movies/{movieId}/directors/{directorId}   # Add director to movie
-DELETE /api/movies/{movieId}/directors/{directorId}   # Remove director from movie
-```
-
-### 📺 Series
-```
-GET    /api/series                     # Get all series (with pagination)
-GET    /api/series/{id}               # Get series by ID
-POST   /api/series                    # Create series (admin only)
-PUT    /api/series/{id}               # Update series (admin only)
-DELETE /api/series/{id}               # Delete series (admin only)
-GET    /api/series/search             # Search series
-GET    /api/series/{id}/seasons       # Get seasons of a series
-GET    /api/series/{id}/seasons/{seasonNumber} # Get specific season
-POST   /api/series/{id}/seasons       # Add season to series (admin only)
-```
-
-### ⭐ Reviews
-```
-GET    /api/reviews                    # Get all reviews
-GET    /api/reviews/{id}              # Get review by ID
-POST   /api/reviews/movie/{movieId}/user/{userId}     # Create movie review
-POST   /api/reviews/series/{seriesId}/user/{userId}   # Create series review
-PUT    /api/reviews/{id}              # Update review
-DELETE /api/reviews/{id}              # Delete review
-GET    /api/reviews/movie/{movieId}   # Get reviews for movie
-GET    /api/reviews/series/{seriesId} # Get reviews for series
-GET    /api/reviews/user/{userId}     # Get user's reviews
-GET    /api/reviews/movie/{movieId}/user/{userId}  # Get specific user's movie review
-GET    /api/reviews/series/{seriesId}/user/{userId} # Get specific user's series review
-GET    /api/reviews/{id}/user         # Get review author
-GET    /api/reviews/{id}/movie        # Get movie for review
-GET    /api/reviews/{id}/series       # Get series for review
-GET    /api/reviews/{id}/media        # Get media info for review
-```
-
-### 📋 Personal Lists
-```
-# Favorites
-GET    /api/users/{userId}/favorites/movies    # Get favorite movies
-PUT    /api/users/{userId}/favorites/movies/{movieId}    # Add movie to favorites
-DELETE /api/users/{userId}/favorites/movies/{movieId}    # Remove movie from favorites
-GET    /api/users/{userId}/favorites/series    # Get favorite series
-PUT    /api/users/{userId}/favorites/series/{seriesId}  # Add series to favorites
-DELETE /api/users/{userId}/favorites/series/{seriesId}  # Remove series from favorites
-
-# Watchlist
-GET    /api/users/{userId}/watchlist/movies     # Get movie watchlist
-PUT    /api/users/{userId}/watchlist/movies/{movieId}   # Add movie to watchlist
-DELETE /api/users/{userId}/watchlist/movies/{movieId}   # Remove movie from watchlist
-GET    /api/users/{userId}/watchlist/series     # Get series watchlist
-PUT    /api/users/{userId}/watchlist/series/{seriesId} # Add series to watchlist
-DELETE /api/users/{userId}/watchlist/series/{seriesId} # Remove series from watchlist
-
-# Watched
-GET    /api/users/{userId}/watched/movies       # Get watched movies
-PUT    /api/users/{userId}/watched/movies/{movieId}     # Mark movie as watched
-DELETE /api/users/{userId}/watched/movies/{movieId}     # Remove movie from watched
-GET    /api/users/{userId}/watched/series       # Get watched series
-PUT    /api/users/{userId}/watched/series/{seriesId}   # Mark series as watched
-DELETE /api/users/{userId}/watched/series/{seriesId}   # Remove series from watched
-```
-
-### 🤖 Recommendations
-```
-GET    /api/recommendations/user/{userId}           # Get personalized recommendations
-GET    /api/recommendations/trending                # Get trending content
-GET    /api/recommendations/genre/{genre}           # Get recommendations by genre
-GET    /api/recommendations/user/{userId}/hybrid    # Get hybrid recommendations
-GET    /api/recommendations/user/{userId}/smart     # Get smart recommendations
-GET    /api/recommendations/user/{userId}/collaborative # Get collaborative filtering recommendations
-POST   /api/recommendations/notify/{userId}         # Send recommendation notifications
-POST   /api/recommendations/notify/{userId}/summary # Send recommendation summary
-POST   /api/recommendations/notify/all              # Send recommendations to all users
-POST   /api/recommendations/notify/all/summary      # Send summary to all users
-POST   /api/recommendations/notify/{userId}/triggered # Send triggered recommendations
-```
-
-### 🔔 Notifications
-```
-GET    /api/notifications/user/{userId}           # Get user notifications
-GET    /api/notifications/user/{userId}/unread    # Get unread notifications
-GET    /api/notifications/user/{userId}/unread/count # Get unread notification count
-POST   /api/notifications                         # Create notification
-PUT    /api/notifications/{id}/read               # Mark notification as read
-PUT    /api/notifications/user/{userId}/read-all  # Mark all notifications as read
-DELETE /api/notifications/{id}                    # Delete notification
-
-# Notification Preferences
-GET    /api/notification-preferences/user/{userId}        # Get notification preferences
-PUT    /api/notification-preferences/user/{userId}        # Update notification preferences
-PUT    /api/notification-preferences/user/{userId}/global # Update global notification settings
-GET    /api/notification-preferences/user/{userId}/global # Get global notification settings
-GET    /api/notification-preferences/types               # Get available notification types
-
-# Auto Notifications
-POST   /api/notifications/check-milestones/{userId}   # Check user milestones
-POST   /api/notifications/upcoming-releases/{userId}  # Check upcoming releases
-POST   /api/notifications/trigger-weekly              # Trigger weekly notifications
-POST   /api/notifications/trigger-daily               # Trigger daily notifications
-```
-
-### 🎭 Actors & Directors
-```
-GET    /api/actors                     # Get all actors
-GET    /api/actors/{id}               # Get actor by ID
-POST   /api/actors                    # Create actor (admin only)
-PUT    /api/actors/{id}               # Update actor (admin only)
-DELETE /api/actors/{id}               # Delete actor (admin only)
-GET    /api/actors/{actorId}/movies   # Get movies by actor
-GET    /api/actors/{actorId}/series   # Get series by actor
-
-GET    /api/directors                 # Get all directors
-GET    /api/directors/{id}           # Get director by ID
-POST   /api/directors                # Create director (admin only)
-PUT    /api/directors/{id}           # Update director (admin only)
-DELETE /api/directors/{id}           # Delete director (admin only)
-GET    /api/directors/{id}/movies    # Get movies by director
-GET    /api/directors/{id}/series    # Get series by director
-```
-
-### 🤝 Social Features
-```
-# Friends
-POST   /api/social/friends/request/{targetUserId}  # Send friend request
-POST   /api/social/friends/accept/{friendshipId}   # Accept friend request
-POST   /api/social/friends/decline/{friendshipId}  # Decline friend request
-GET    /api/social/friends                        # Get current user's friends
-GET    /api/social/friends/{userId}               # Get user's friends
-GET    /api/social/friends/requests               # Get friend requests
-DELETE /api/social/friends/{friendUserId}         # Remove friend
-
-# Points & Leaderboard
-GET    /api/social/points                         # Get current user's points
-GET    /api/social/points/{userId}                # Get user's points
-GET    /api/social/leaderboard                    # Get leaderboard
-```
-
-### 📺 Streaming Services
-```
-# Streaming Providers
-GET    /api/streaming/providers                   # Get available streaming providers
-GET    /api/streaming/providers/all               # Get all streaming providers
-GET    /api/streaming/providers/country/{country} # Get providers by country
-GET    /api/streaming/providers/{id}              # Get provider by ID
-POST   /api/streaming/providers                   # Create streaming provider (admin only)
-PUT    /api/streaming/providers/{id}              # Update streaming provider (admin only)
-DELETE /api/streaming/providers/{id}              # Delete streaming provider (admin only)
-DELETE /api/streaming/providers/cleanup-orphaned  # Cleanup orphaned providers
-
-# Streaming Availability
-GET    /api/streaming/availability/{mediaType}/{mediaId}         # Get availability for media
-GET    /api/streaming/availability/{mediaType}/{mediaId}/region/{region} # Get regional availability
-POST   /api/streaming/availability/{mediaType}/{mediaId}         # Add streaming availability
-PUT    /api/streaming/availability/{availabilityId}              # Update availability
-DELETE /api/streaming/availability/{availabilityId}              # Delete availability
-DELETE /api/streaming/availability/{mediaType}/{mediaId}         # Delete all availability for media
-```
-
-### 💬 Forum System
-```
-# Forum Posts
-POST   /api/forum/posts                           # Create forum post
-GET    /api/forum/posts                           # Get all forum posts
-GET    /api/forum/posts/{id}                      # Get forum post by ID
-GET    /api/forum/posts/pinned                    # Get pinned posts
-GET    /api/forum/posts/search                    # Search forum posts
-GET    /api/forum/posts/user/{userId}             # Get posts by user
-GET    /api/forum/posts/movie/{movieId}           # Get posts about movie
-GET    /api/forum/posts/series/{seriesId}         # Get posts about series
-GET    /api/forum/posts/user/{userId}/participated # Get posts user participated in
-PUT    /api/forum/posts/{id}                      # Update forum post
-DELETE /api/forum/posts/{id}                      # Delete forum post
-POST   /api/forum/posts/{id}/like                 # Like/unlike forum post
-
-# Forum Replies
-POST   /api/forum/posts/{postId}/replies          # Create reply to post
-GET    /api/forum/posts/{postId}/replies          # Get replies for post
-GET    /api/forum/replies/user/{userId}           # Get replies by user
-PUT    /api/forum/replies/{id}                    # Update reply
-DELETE /api/forum/replies/{id}                    # Delete reply
-POST   /api/forum/replies/{id}/like               # Like/unlike reply
-
-# Forum Subscriptions
-POST   /api/forum/posts/{postId}/subscribe        # Subscribe to post
-DELETE /api/forum/posts/{postId}/unsubscribe      # Unsubscribe from post
-GET    /api/forum/posts/{postId}/subscription-status # Get subscription status
-GET    /api/forum/subscriptions                   # Get user's subscriptions
-
-# Forum Stats & Categories
-GET    /api/forum/stats/category/{category}       # Get category statistics
-GET    /api/forum/stats/user/{userId}             # Get user forum statistics
-GET    /api/forum/categories                      # Get available categories
-
-# Forum Admin
-POST   /api/forum/admin/posts/{id}/pin            # Pin/unpin post (admin only)
-POST   /api/forum/admin/posts/{id}/lock           # Lock/unlock post (admin only)
-```
-
-### 👨‍💼 Admin Endpoints
-```
-GET    /api/admin/dashboard              # Get admin dashboard data
-POST   /api/admin/notifications/send     # Send admin notifications
-GET    /api/admin/notifications/users    # Get all users for notifications
-GET    /api/admin/users                 # Get all users (admin only)
-PUT    /api/admin/users/{id}/role       # Update user role (admin only)
-GET    /api/admin/content/pending       # Get pending content reviews
-```
-
 ## System Architecture
 
 ### 🏗️ **Backend Architecture**
@@ -585,10 +370,6 @@ GET    /api/admin/content/pending       # Get pending content reviews
 3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Support
 
