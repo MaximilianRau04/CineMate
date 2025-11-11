@@ -5,8 +5,9 @@ const OUTPUT_FILE = "DIRECTORY.md";
 const ROOTS = (process.env.PATHS || "backend,frontend").split(",");
 const IGNORE_DIRS = ["node_modules", "build", "dist", "target", ".git"];
 const INDENT = "  ";
-const SHOW_EXTENSIONS = true;
 const INCLUDE_FILES = true;
+
+const ALLOWED_EXTENSIONS = [".java", ".js", ".html", ".css", ".jsx"];
 
 function generateTree(dir, prefix = "") {
   let tree = "";
@@ -25,7 +26,10 @@ function generateTree(dir, prefix = "") {
       tree += `${prefix}📂 ${entry.name}/\n`;
       tree += generateTree(fullPath, prefix + INDENT);
     } else if (INCLUDE_FILES) {
-      tree += `${prefix}${entry.name}\n`;
+      const ext = path.extname(entry.name).toLowerCase();
+      if (ALLOWED_EXTENSIONS.includes(ext)) {
+        tree += `${prefix}📄 ${entry.name}\n`;
+      }
     }
   }
 
