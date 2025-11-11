@@ -27,18 +27,21 @@ export const useCalendarData = () => {
    */
   const fetchData = useCallback(async () => {
     setIsLoading(true);
-    
+
     try {
+      const token = localStorage.getItem("token");
       // Fetch movies
-      const moviesResponse = await fetch("http://localhost:8080/api/movies");
+      const moviesResponse = await fetch("http://localhost:8080/api/movies", {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
       if (!moviesResponse.ok) {
         throw new Error("Filme konnten nicht geladen werden");
       }
-      
+
       const moviesData = await moviesResponse.json();
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      
+
       // Filter and process movies
       const upcomingMovies = moviesData
         .filter((movie) => {
@@ -47,80 +50,88 @@ export const useCalendarData = () => {
           return releaseDate >= today;
         })
         .sort((a, b) => new Date(a.releaseDate) - new Date(b.releaseDate))
-        .map(movie => {
+        .map((movie) => {
           const genreArray = movie.genre ? movie.genre.split(/,\s*/) : [];
-          return { ...movie, genreArray, contentType: 'movie' };
+          return { ...movie, genreArray, contentType: "movie" };
         });
-      
+
       setMovies(upcomingMovies);
-      
+
       // Fetch series
-      const seriesResponse = await fetch("http://localhost:8080/api/series");
+      const seriesResponse = await fetch("http://localhost:8080/api/series", {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
       if (!seriesResponse.ok) {
         throw new Error("Serien konnten nicht geladen werden");
       }
-      
+
       const seriesList = await seriesResponse.json();
-      
+
       // Fetch seasons for each series
       const seriesWithSeasons = await Promise.all(
         seriesList.map(async (seriesItem) => {
           try {
-            const seasonsResponse = await fetch(
-              `http://localhost:8080/api/series/${seriesItem.id}/seasons`
-            );
-            
+            const seasonsResponse = await fetch(`http://localhost:8080/api/series/${seriesItem.id}/seasons`, {
+              headers: token ? { Authorization: `Bearer ${token}` } : {},
+            });
+
             if (!seasonsResponse.ok) {
-              console.error(`Fehler beim Laden der Staffeln für Serie ${seriesItem.id}`);
+              console.error(
+                `Fehler beim Laden der Staffeln für Serie ${seriesItem.id}`
+              );
               return { ...seriesItem, seasons: [] };
             }
-            
+
             const seasons = await seasonsResponse.json();
-            const genreArray = seriesItem.genre ? seriesItem.genre.split(/,\s*/) : [];
-            
+            const genreArray = seriesItem.genre
+              ? seriesItem.genre.split(/,\s*/)
+              : [];
+
             return { ...seriesItem, seasons, genreArray };
           } catch (error) {
             console.error(
-              `Fehler beim Laden der Staffeln für Serie ${seriesItem.id}:`, 
+              `Fehler beim Laden der Staffeln für Serie ${seriesItem.id}:`,
               error
             );
             return { ...seriesItem, seasons: [] };
           }
         })
       );
-      
+
       // Filter series to only include those with future episodes
       const upcomingSeries = seriesWithSeasons
         .filter((series) => {
           if (!series.seasons || series.seasons.length === 0) return false;
-          
+
           const hasFutureEpisode = series.seasons.some((season) =>
             season.episodes?.some((episode) => {
               const episodeDate = new Date(episode.releaseDate);
               return episodeDate >= today;
             })
           );
-          
+
           if (hasFutureEpisode) {
             series.nextEpisodeDate = findNextEpisodeDate(series.seasons);
           }
-          
+
           return hasFutureEpisode;
         })
-        .sort((a, b) => new Date(a.nextEpisodeDate) - new Date(b.nextEpisodeDate))
-        .map(series => ({
+        .sort(
+          (a, b) => new Date(a.nextEpisodeDate) - new Date(b.nextEpisodeDate)
+        )
+        .map((series) => ({
           ...series,
-          contentType: 'series'
+          contentType: "series",
         }));
-      
+
       setSeries(upcomingSeries);
-      
+
       // Collect all genres
       const allGenres = [
-        ...upcomingMovies.flatMap(movie => movie.genreArray),
-        ...upcomingSeries.flatMap(series => series.genreArray)
+        ...upcomingMovies.flatMap((movie) => movie.genreArray),
+        ...upcomingSeries.flatMap((series) => series.genreArray),
       ].filter(Boolean);
-      
+
       setAvailableGenres([...new Set(allGenres)]);
       setError(null);
     } catch (err) {
@@ -142,7 +153,7 @@ export const useCalendarData = () => {
     isLoading,
     error,
     availableGenres,
-    fetchData
+    fetchData,
   };
 };
 
@@ -155,7 +166,8 @@ export const groupContentByMonth = (content) => {
   const grouped = {};
 
   content.forEach((item) => {
-    const dateField = item.contentType === 'movie' ? item.releaseDate : item.nextEpisodeDate;
+    const dateField =
+      item.contentType === "movie" ? item.releaseDate : item.nextEpisodeDate;
 
     if (!dateField) return;
 
@@ -181,14 +193,14 @@ export const groupContentByMonth = (content) => {
  */
 export const getCombinedContent = (movies, series) => {
   const combinedContent = [
-    ...movies.map(movie => ({
+    ...movies.map((movie) => ({
       ...movie,
-      releaseItem: movie.releaseDate
+      releaseItem: movie.releaseDate,
     })),
-    ...series.map(series => ({
+    ...series.map((series) => ({
       ...series,
-      releaseItem: series.nextEpisodeDate
-    }))
+      releaseItem: series.nextEpisodeDate,
+    })),
   ];
 
   combinedContent.sort((a, b) => {

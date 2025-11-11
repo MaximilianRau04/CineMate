@@ -11,8 +11,8 @@ export const useReviews = (userId, mediaId, mediaType) => {
   const [submitting, setSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
-  const typeMap = { movies: 'movie', series: 'series' }; 
-  const mediaPath = typeMap[mediaType]; 
+  const typeMap = { movies: "movie", series: "series" };
+  const mediaPath = typeMap[mediaType];
 
   /**
    * Calculates the average rating from an array of reviews.
@@ -27,12 +27,15 @@ export const useReviews = (userId, mediaId, mediaType) => {
 
   /**
    * fetches user data for a specific review.
-   * @param {*} reviewId 
-   * @return {Promise<Object|null>} 
+   * @param {*} reviewId
+   * @return {Promise<Object|null>}
    */
   const fetchReviewUser = async (reviewId) => {
     try {
-      const response = await fetch(`http://localhost:8080/api/reviews/${reviewId}/user`);
+      const token = localStorage.getItem("token");
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+      const response = await fetch(`http://localhost:8080/api/reviews/${reviewId}/user`, { headers });
 
       if (!response.ok) {
         console.error(`API Fehler für Review ${reviewId}: ${response.status}`);
@@ -42,7 +45,10 @@ export const useReviews = (userId, mediaId, mediaType) => {
       const userData = await response.json();
       return userData;
     } catch (error) {
-      console.error(`Fehler beim Laden des Benutzers für Review ${reviewId}:`, error);
+      console.error(
+        `Fehler beim Laden des Benutzers für Review ${reviewId}:`,
+        error
+      );
       return null;
     }
   };
@@ -53,9 +59,12 @@ export const useReviews = (userId, mediaId, mediaType) => {
    */
   const loadReviews = async () => {
     if (!mediaId || !mediaPath) return;
-    
+
     try {
-      const response = await fetch(`http://localhost:8080/api/reviews/${mediaPath}/${mediaId}`);
+      const token = localStorage.getItem("token");
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+      const response = await fetch(`http://localhost:8080/api/reviews/${mediaPath}/${mediaId}`, { headers });
       if (!response.ok) {
         if (response.status === 404) {
           setReviews([]);
@@ -63,7 +72,9 @@ export const useReviews = (userId, mediaId, mediaType) => {
           setReviewUsers({});
           return;
         }
-        throw new Error(`Bewertungen konnten nicht geladen werden (${response.status})`);
+        throw new Error(
+          `Bewertungen konnten nicht geladen werden (${response.status})`
+        );
       }
 
       const data = await response.json();
@@ -79,7 +90,6 @@ export const useReviews = (userId, mediaId, mediaType) => {
         }
       }
       setReviewUsers(newReviewUsers);
-
     } catch (error) {
       console.error("Fehler beim Laden der Bewertungen:", error);
       setReviews([]);
@@ -97,8 +107,10 @@ export const useReviews = (userId, mediaId, mediaType) => {
    */
   useEffect(() => {
     if (!userId || !mediaId) return;
+    const token = localStorage.getItem('token');
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-    fetch(`http://localhost:8080/api/reviews/${mediaPath}/${mediaId}/user/${userId}`)
+    fetch(`http://localhost:8080/api/reviews/${mediaPath}/${mediaId}/user/${userId}`, { headers })
       .then((res) => {
         if (!res.ok) {
           if (res.status === 404) return null;
@@ -121,12 +133,12 @@ export const useReviews = (userId, mediaId, mediaType) => {
   useEffect(() => {
     if (!mediaId) return;
     loadReviews();
-  }, [mediaId, mediaPath]);
+  }, [mediaId, mediaPath]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /**
    * adds a review for the media.
-   * @param {number} rating 
-   * @param {string} comment 
+   * @param {number} rating
+   * @param {string} comment
    * @returns {Promise<void>}
    */
   const handleSubmitReview = async () => {
@@ -136,17 +148,25 @@ export const useReviews = (userId, mediaId, mediaType) => {
     setSubmitSuccess(false);
 
     try {
-      const response = await fetch(`http://localhost:8080/api/reviews/${mediaPath}/${mediaId}/user/${userId}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId,
-          itemId: mediaId,
-          rating,
-          comment,
-          type: mediaPath,
-        }),
-      });
+      const token = localStorage.getItem("token");
+      const headers = token
+        ? { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
+        : { "Content-Type": "application/json" };
+
+      const response = await fetch(
+        `http://localhost:8080/api/reviews/${mediaPath}/${mediaId}/user/${userId}`,
+        {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            userId,
+            itemId: mediaId,
+            rating,
+            comment,
+            type: mediaPath,
+          }),
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.text();
@@ -181,9 +201,14 @@ export const useReviews = (userId, mediaId, mediaType) => {
     setSubmitting(true);
 
     try {
+      const token = localStorage.getItem("token");
+      const headers = token
+        ? { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
+        : { "Content-Type": "application/json" };
+
       const response = await fetch(`http://localhost:8080/api/reviews/${reviewId}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({
           userId,
           itemId: mediaId,
@@ -213,17 +238,24 @@ export const useReviews = (userId, mediaId, mediaType) => {
    * @returns {Promise<void>}
    */
   const handleDeleteReview = async () => {
-    const confirmDelete = window.confirm("Möchtest du deine Bewertung wirklich löschen?");
+    const confirmDelete = window.confirm(
+      "Möchtest du deine Bewertung wirklich löschen?"
+    );
     if (!confirmDelete) return;
 
     try {
-      
+      const token = localStorage.getItem("token");
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
       const response = await fetch(`http://localhost:8080/api/reviews/${reviewId}`, {
         method: "DELETE",
+        headers,
       });
 
       if (!response.ok) {
-        throw new Error(`Fehler beim Löschen der Bewertung (${response.status})`);
+        throw new Error(
+          `Fehler beim Löschen der Bewertung (${response.status})`
+        );
       }
 
       setReviewed(false);
@@ -231,11 +263,10 @@ export const useReviews = (userId, mediaId, mediaType) => {
       setComment("");
       setReviewId(null);
       setSubmitSuccess(false);
-      
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
+
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
       await loadReviews();
-      
     } catch (error) {
       console.error("Fehler beim Löschen:", error);
     }
@@ -255,6 +286,6 @@ export const useReviews = (userId, mediaId, mediaType) => {
     handleSubmitReview,
     handleEditReview,
     handleDeleteReview,
-    loadReviews
+    loadReviews,
   };
 };

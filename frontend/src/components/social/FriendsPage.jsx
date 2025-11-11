@@ -17,7 +17,7 @@ const FriendsPage = () => {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   /**
    * Load initial data for friends, pending requests, and all users.
@@ -47,7 +47,7 @@ const FriendsPage = () => {
   const loadFriends = async () => {
     try {
       const response = await fetch('http://localhost:8080/api/social/friends', {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       if (response.ok) {
         const data = await response.json();
@@ -66,7 +66,7 @@ const FriendsPage = () => {
   const loadPendingRequests = async () => {
     try {
       const response = await fetch('http://localhost:8080/api/social/friends/requests', {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       if (response.ok) {
         const data = await response.json();
@@ -87,7 +87,7 @@ const FriendsPage = () => {
   const loadAllUsers = async () => {
     try {
       const response = await fetch('http://localhost:8080/api/users', {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       if (response.ok) {
         const data = await response.json();
@@ -114,7 +114,7 @@ const FriendsPage = () => {
     try {
       const response = await fetch(`http://localhost:8080/api/social/friends/request/${userId}`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
 
       if (response.ok) {
@@ -142,7 +142,7 @@ const FriendsPage = () => {
     try {
       const response = await fetch(`http://localhost:8080/api/social/friends/accept/${friendshipId}`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
 
       if (response.ok) {
@@ -167,7 +167,7 @@ const FriendsPage = () => {
     try {
       const response = await fetch(`http://localhost:8080/api/social/friends/decline/${friendshipId}`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
 
       if (response.ok) {
@@ -196,7 +196,7 @@ const FriendsPage = () => {
     try {
       const response = await fetch(`http://localhost:8080/api/social/friends/${friendId}`, {
         method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
 
       if (response.ok) {

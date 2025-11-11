@@ -8,7 +8,7 @@ const StreamingIndicator = ({ mediaId, mediaType, maxProviders = 3 }) => {
     if (mediaId && mediaType) {
       fetchProviders();
     }
-  }, [mediaId, mediaType]);
+  }, [mediaId, mediaType]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /**
    * fetches the streaming providers for the given media ID and type.
@@ -20,8 +20,12 @@ const StreamingIndicator = ({ mediaId, mediaType, maxProviders = 3 }) => {
       setLoading(true);
       // Convert frontend mediaType to backend format
       const backendMediaType = mediaType === 'movies' ? 'movie' : 'series';
+      const token = localStorage.getItem('token');
       const response = await fetch(
-        `http://localhost:8080/api/streaming/availability/${backendMediaType}/${mediaId}/region/DE`
+        `http://localhost:8080/api/streaming/availability/${backendMediaType}/${mediaId}/region/DE`,
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        }
       );
       
       if (response.ok) {

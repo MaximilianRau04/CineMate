@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useToast } from '../toasts';
+import { useToast } from "../toasts";
 import UserMediaTabs from "./UserMediaTabs";
 import CompactNotificationSettings from "./CompactNotificationSettings";
 import UserAchievementBadges from "../achievements/UserAchievementBadges";
@@ -27,10 +27,9 @@ const UserProfile = () => {
    * * @throws {Error} If the user data cannot be fetched.
    */
   useEffect(() => {
+    const token = localStorage.getItem("token");
     fetch("http://localhost:8080/api/users/me", {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
     })
       .then((res) => {
         if (!res.ok) throw new Error("Benutzer konnte nicht geladen werden.");
@@ -57,7 +56,9 @@ const UserProfile = () => {
   useEffect(() => {
     if (!userId) return;
 
-    fetch(`http://localhost:8080/api/reviews/user/${userId}`, {})
+    fetch(`http://localhost:8080/api/reviews/user/${userId}`, {
+      headers: (() => { const token = localStorage.getItem("token"); return token ? { Authorization: `Bearer ${token}` } : {}; })(),
+    })
       .then((res) => {
         if (!res.ok) throw new Error("Konnte Reviews nicht laden.");
         return res.json();
@@ -83,7 +84,7 @@ const UserProfile = () => {
       const formData = new FormData();
       const userData = {
         bio: bio,
-        removeAvatar: true
+        removeAvatar: true,
       };
 
       formData.append(
@@ -91,10 +92,14 @@ const UserProfile = () => {
         new Blob([JSON.stringify(userData)], { type: "application/json" })
       );
 
-      const response = await fetch(`http://localhost:8080/api/users/${userId}`, {
-        method: "PUT",
-        body: formData
-      });
+      const response = await fetch(
+        `http://localhost:8080/api/users/${userId}`,
+        {
+          method: "PUT",
+          body: formData,
+          headers: (() => { const token = localStorage.getItem("token"); return token ? { Authorization: `Bearer ${token}` } : {}; })(),
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`Entfernen fehlgeschlagen: ${response.status}`);
@@ -104,10 +109,10 @@ const UserProfile = () => {
       setUser(updatedUser);
       setAvatarPreview(null);
       setAvatarFile(null);
-      success('Avatar erfolgreich entfernt!');
+      success("Avatar erfolgreich entfernt!");
     } catch (err) {
       console.error("Fehler beim Entfernen des Avatars:", err);
-      showError('Fehler beim Entfernen des Avatars');
+      showError("Fehler beim Entfernen des Avatars");
     } finally {
       setSaving(false);
     }
@@ -120,14 +125,14 @@ const UserProfile = () => {
   };
 
   // save the bio from the modal
-    const saveModalBio = async () => {
+  const saveModalBio = async () => {
     if (!userId) return;
-    
+
     setIsBioLoading(true);
     try {
       const formData = new FormData();
       const userData = {
-        bio: modalBio
+        bio: modalBio,
       };
 
       formData.append(
@@ -135,26 +140,27 @@ const UserProfile = () => {
         new Blob([JSON.stringify(userData)], { type: "application/json" })
       );
 
-      const response = await fetch(`http://localhost:8080/api/users/${userId}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: formData
-      });
+      const response = await fetch(
+        `http://localhost:8080/api/users/${userId}`,
+        {
+          method: "PUT",
+          headers: (() => { const token = localStorage.getItem("token"); return token ? { Authorization: `Bearer ${token}` } : {}; })(),
+          body: formData,
+        }
+      );
 
       if (response.ok) {
         const updatedUser = await response.json();
         setUser(updatedUser);
         setBio(modalBio);
         setShowModal(false);
-        success('Biografie erfolgreich aktualisiert!');
+        success("Biografie erfolgreich aktualisiert!");
       } else {
-        throw new Error('Fehler beim Speichern der Biografie');
+        throw new Error("Fehler beim Speichern der Biografie");
       }
     } catch (error) {
-      console.error('Error saving bio:', error);
-      showError('Fehler beim Speichern der Biografie');
+      console.error("Error saving bio:", error);
+      showError("Fehler beim Speichern der Biografie");
     } finally {
       setIsBioLoading(false);
     }
@@ -186,10 +192,15 @@ const UserProfile = () => {
 
         setSaving(true);
         try {
-          const response = await fetch(`http://localhost:8080/api/users/${userId}`, {
-            method: "PUT",
-            body: formData,
-          });
+          const token = localStorage.getItem("token");
+          const response = await fetch(
+            `http://localhost:8080/api/users/${userId}`,
+            {
+              method: "PUT",
+              body: formData,
+              headers: token ? { Authorization: `Bearer ${token}` } : {},
+            }
+          );
 
           if (!response.ok) {
             throw new Error(`Update fehlgeschlagen: ${response.status}`);
@@ -199,10 +210,10 @@ const UserProfile = () => {
           setUser(updatedUser);
           setAvatarFile(null);
           setAvatarPreview(null);
-          success('Profil erfolgreich aktualisiert!');
+          success("Profil erfolgreich aktualisiert!");
         } catch (err) {
           console.error("Fehler beim Speichern:", err);
-          showError('Fehler beim Aktualisieren des Profils');
+          showError("Fehler beim Aktualisieren des Profils");
         } finally {
           setSaving(false);
         }
@@ -221,7 +232,10 @@ const UserProfile = () => {
         <div className="alert alert-danger" role="alert">
           <h4 className="alert-heading">Fehler</h4>
           <p>{error}</p>
-          <button className="btn btn-outline-danger" onClick={() => window.location.reload()}>
+          <button
+            className="btn btn-outline-danger"
+            onClick={() => window.location.reload()}
+          >
             Erneut versuchen
           </button>
         </div>
@@ -250,17 +264,22 @@ const UserProfile = () => {
               {hasAvatar ? (
                 <>
                   <img
-                    src={
-                      avatarPreview ||
-                      `http://localhost:8080${avatarUrl}`
-                    }
+                    src={avatarPreview || `http://localhost:8080${avatarUrl}`}
                     alt={username}
                     className="img-fluid rounded-circle shadow-sm mb-3"
-                    style={{ width: "150px", height: "150px", objectFit: "cover" }}
+                    style={{
+                      width: "150px",
+                      height: "150px",
+                      objectFit: "cover",
+                    }}
                     onClick={handleAvatarClick}
                     onError={(e) => {
-                      console.log("Bild konnte nicht geladen werden:", e.target.src);
-                      e.target.src = "https://via.placeholder.com/150?text=Kein+Bild";
+                      console.log(
+                        "Bild konnte nicht geladen werden:",
+                        e.target.src
+                      );
+                      e.target.src =
+                        "https://via.placeholder.com/150?text=Kein+Bild";
                     }}
                   />
                   {/* hover-overlay for avatar */}
@@ -281,8 +300,13 @@ const UserProfile = () => {
                     onMouseOut={(e) => (e.currentTarget.style.opacity = 0)}
                   >
                     <div className="text-center">
-                      <i className="bi bi-camera-fill" style={{ fontSize: "1.5rem" }}></i>
-                      <div style={{ fontSize: "0.8rem", marginTop: "5px" }}>Ändern</div>
+                      <i
+                        className="bi bi-camera-fill"
+                        style={{ fontSize: "1.5rem" }}
+                      ></i>
+                      <div style={{ fontSize: "0.8rem", marginTop: "5px" }}>
+                        Ändern
+                      </div>
                     </div>
                   </div>
 
@@ -297,7 +321,7 @@ const UserProfile = () => {
                       padding: "0",
                       display: "flex",
                       alignItems: "center",
-                      justifyContent: "center"
+                      justifyContent: "center",
                     }}
                     onClick={handleRemoveAvatar}
                     title="Avatar entfernen"
@@ -313,7 +337,7 @@ const UserProfile = () => {
                     width: "150px",
                     height: "150px",
                     border: "3px dashed #6c757d",
-                    transition: "all 0.3s ease"
+                    transition: "all 0.3s ease",
                   }}
                   onClick={handleAvatarClick}
                   onMouseOver={(e) => {
@@ -325,7 +349,10 @@ const UserProfile = () => {
                     e.currentTarget.style.borderColor = "#6c757d";
                   }}
                 >
-                  <i className="bi bi-camera-fill" style={{ fontSize: "2rem", marginBottom: "10px" }}></i>
+                  <i
+                    className="bi bi-camera-fill"
+                    style={{ fontSize: "2rem", marginBottom: "10px" }}
+                  ></i>
                   <div className="text-center" style={{ fontSize: "0.9rem" }}>
                     <div>Avatar</div>
                     <div>hinzufügen</div>
@@ -347,7 +374,6 @@ const UserProfile = () => {
               }}
               className="d-none"
             />
-
           </div>
 
           <div className="col-md-8 p-4">
@@ -378,30 +404,46 @@ const UserProfile = () => {
                 Bearbeiten
               </button>
             </div>
-            
+
             {/* Achievements Section */}
             <div className="mb-3">
               <label className="form-label mb-2">
                 <strong>Meine Achievements:</strong>
               </label>
-              {userId && <UserAchievementBadges userId={userId} limit={6} showCount={true} />}
-              <Link to={`/achievements`} className="btn btn-primary btn-sm mt-2">
+              {userId && (
+                <UserAchievementBadges
+                  userId={userId}
+                  limit={6}
+                  showCount={true}
+                />
+              )}
+              <Link
+                to={`/achievements`}
+                className="btn btn-primary btn-sm mt-2"
+              >
                 <i className="bi bi-trophy me-1"></i>
                 Alle Achievements anzeigen
               </Link>
             </div>
-            
+
             <p className="text-muted">
               <strong>Beigetreten:</strong> {formattedDate}
             </p>
 
             {saving && (
               <div className="mt-3 text-center">
-                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                <span>{avatarFile ? "Bild wird gespeichert..." : "Avatar wird entfernt..."}</span>
+                <span
+                  className="spinner-border spinner-border-sm me-2"
+                  role="status"
+                  aria-hidden="true"
+                ></span>
+                <span>
+                  {avatarFile
+                    ? "Bild wird gespeichert..."
+                    : "Avatar wird entfernt..."}
+                </span>
               </div>
             )}
-
           </div>
 
           <div className="card shadow-lg border-0 mt-4">
@@ -412,7 +454,7 @@ const UserProfile = () => {
               className="card-body"
               style={{
                 maxHeight: "350px",
-                overflowY: "auto"
+                overflowY: "auto",
               }}
             >
               <UserMediaTabs userId={userId} />
@@ -467,11 +509,15 @@ const UserProfile = () => {
                 >
                   {isBioLoading ? (
                     <>
-                      <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                      <span
+                        className="spinner-border spinner-border-sm me-2"
+                        role="status"
+                        aria-hidden="true"
+                      ></span>
                       Speichern...
                     </>
                   ) : (
-                    'Speichern'
+                    "Speichern"
                   )}
                 </button>
               </div>

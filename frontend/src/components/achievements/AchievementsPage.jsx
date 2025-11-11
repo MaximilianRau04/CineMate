@@ -31,10 +31,9 @@ const AchievementsPage = ({ userId }) => {
      */
     const loadUserAchievements = async () => {
       try {
+        const token = localStorage.getItem('token');
         const response = await fetch(`http://localhost:8080/api/achievements/user/${userId}`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
         });
         if (response.ok) {
           const data = await response.json();
@@ -50,10 +49,9 @@ const AchievementsPage = ({ userId }) => {
      */
     const loadAchievementStats = async () => {
       try {
+        const token = localStorage.getItem('token');
         const response = await fetch(`http://localhost:8080/api/achievements/user/${userId}/stats`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
         });
         if (response.ok) {
           const data = await response.json();

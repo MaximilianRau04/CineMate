@@ -1,20 +1,29 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import '../../assets/recommendations-page.css';
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import "../../assets/recommendations-page.css";
 
 const RecommendationsPage = () => {
   const [recommendations, setRecommendations] = useState([]);
   const [trending, setTrending] = useState([]);
-  const [selectedGenre, setSelectedGenre] = useState('');
+  const [selectedGenre, setSelectedGenre] = useState("");
   const [genreRecommendations, setGenreRecommendations] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('personal');
+  const [activeTab, setActiveTab] = useState("personal");
   const [userId, setUserId] = useState(null);
   const [error, setError] = useState(null);
 
   const genres = [
-    'Action', 'Drama', 'Comedy', 'Thriller', 'Horror', 'Romance', 
-    'Science Fiction', 'Fantasy', 'Crime', 'Adventure', 'Animation'
+    "Action",
+    "Drama",
+    "Comedy",
+    "Thriller",
+    "Horror",
+    "Romance",
+    "Science Fiction",
+    "Fantasy",
+    "Crime",
+    "Adventure",
+    "Animation",
   ];
 
   useEffect(() => {
@@ -26,49 +35,54 @@ const RecommendationsPage = () => {
       loadPersonalRecommendations();
     }
     loadTrendingRecommendations();
-  }, [userId]);
+  }, [userId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /**
    * fetches the current user from the API
    */
   const fetchCurrentUser = async () => {
     try {
-      const response = await fetch('http://localhost:8080/api/users/me', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:8080/api/users/me", {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
-      
+
       if (response.ok) {
         const user = await response.json();
         setUserId(user.id);
       }
     } catch (error) {
-      console.error('Fehler beim Laden des Benutzers:', error);
+      console.error("Fehler beim Laden des Benutzers:", error);
     }
   };
 
   /**
    * fetches the personal recommendations for the current user
-   * @returns personal recommendations 
+   * @returns personal recommendations
    */
   const loadPersonalRecommendations = async () => {
     if (!userId) return;
-    
+
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:8080/api/recommendations/user/${userId}`);
-      
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `http://localhost:8080/api/recommendations/user/${userId}`,
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        }
+      );
+
       if (response.ok) {
         const data = await response.json();
         setRecommendations(data);
         setError(null);
       } else {
-        setError('Fehler beim Laden der Empfehlungen');
+        setError("Fehler beim Laden der Empfehlungen");
       }
     } catch (error) {
-      console.error('Fehler beim Laden der Empfehlungen:', error);
-      setError('Fehler beim Laden der Empfehlungen');
+      console.error("Fehler beim Laden der Empfehlungen:", error);
+      setError("Fehler beim Laden der Empfehlungen");
     } finally {
       setLoading(false);
     }
@@ -80,37 +94,48 @@ const RecommendationsPage = () => {
    */
   const loadTrendingRecommendations = async () => {
     try {
-      const response = await fetch('http://localhost:8080/api/recommendations/trending');
-      
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:8080/api/recommendations/trending", {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+
       if (response.ok) {
         const data = await response.json();
         setTrending(data);
       }
     } catch (error) {
-      console.error('Fehler beim Laden der Trending-Empfehlungen:', error);
+      console.error("Fehler beim Laden der Trending-Empfehlungen:", error);
     }
   };
 
   /**
    * fetches the genre recommendations based on the selected genre
-   * @param {*} genre 
+   * @param {*} genre
    * @return {Promise<void>}
    */
   const loadGenreRecommendations = async (genre) => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:8080/api/recommendations/genre/${encodeURIComponent(genre)}`);
-      
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `http://localhost:8080/api/recommendations/genre/${encodeURIComponent(
+          genre
+        )}`,
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        }
+      );
+
       if (response.ok) {
         const data = await response.json();
         setGenreRecommendations(data);
         setError(null);
       } else {
-        setError('Fehler beim Laden der Genre-Empfehlungen');
+        setError("Fehler beim Laden der Genre-Empfehlungen");
       }
     } catch (error) {
-      console.error('Fehler beim Laden der Genre-Empfehlungen:', error);
-      setError('Fehler beim Laden der Genre-Empfehlungen');
+      console.error("Fehler beim Laden der Genre-Empfehlungen:", error);
+      setError("Fehler beim Laden der Genre-Empfehlungen");
     } finally {
       setLoading(false);
     }
@@ -131,11 +156,15 @@ const RecommendationsPage = () => {
       <div className="card recommendation-card h-100">
         <div className="recommendation-poster-container">
           <img
-            src={recommendation.posterUrl || 'https://via.placeholder.com/300x450?text=No+Image'}
+            src={
+              recommendation.posterUrl ||
+              "https://via.placeholder.com/300x450?text=No+Image"
+            }
             alt={recommendation.title}
             className="card-img-top recommendation-poster"
             onError={(e) => {
-              e.target.src = 'https://via.placeholder.com/300x450?text=No+Image';
+              e.target.src =
+                "https://via.placeholder.com/300x450?text=No+Image";
             }}
           />
           <div className="recommendation-score">
@@ -143,13 +172,17 @@ const RecommendationsPage = () => {
           </div>
         </div>
         <div className="card-body d-flex flex-column">
-          <h6 className="card-title recommendation-title">{recommendation.title}</h6>
+          <h6 className="card-title recommendation-title">
+            {recommendation.title}
+          </h6>
           <p className="card-text recommendation-reason text-muted small">
             {recommendation.reason}
           </p>
           <div className="mt-auto">
             <Link
-              to={`/${recommendation.type === 'movie' ? 'movies' : 'series'}/${recommendation.id}`}
+              to={`/${recommendation.type === "movie" ? "movies" : "series"}/${
+                recommendation.id
+              }`}
               className="btn btn-primary btn-sm w-100"
             >
               Details ansehen
@@ -160,7 +193,7 @@ const RecommendationsPage = () => {
     </div>
   );
 
-  if (loading && activeTab === 'personal' && recommendations.length === 0) {
+  if (loading && activeTab === "personal" && recommendations.length === 0) {
     return (
       <div className="container py-5">
         <div className="text-center">
@@ -180,8 +213,8 @@ const RecommendationsPage = () => {
         <ul className="nav nav-tabs mb-4" role="tablist">
           <li className="nav-item">
             <button
-              className={`nav-link ${activeTab === 'personal' ? 'active' : ''}`}
-              onClick={() => setActiveTab('personal')}
+              className={`nav-link ${activeTab === "personal" ? "active" : ""}`}
+              onClick={() => setActiveTab("personal")}
             >
               <i className="bi bi-person-heart me-2"></i>
               Persönlich
@@ -189,8 +222,8 @@ const RecommendationsPage = () => {
           </li>
           <li className="nav-item">
             <button
-              className={`nav-link ${activeTab === 'trending' ? 'active' : ''}`}
-              onClick={() => setActiveTab('trending')}
+              className={`nav-link ${activeTab === "trending" ? "active" : ""}`}
+              onClick={() => setActiveTab("trending")}
             >
               <i className="bi bi-fire me-2"></i>
               Trending
@@ -198,8 +231,8 @@ const RecommendationsPage = () => {
           </li>
           <li className="nav-item">
             <button
-              className={`nav-link ${activeTab === 'genre' ? 'active' : ''}`}
-              onClick={() => setActiveTab('genre')}
+              className={`nav-link ${activeTab === "genre" ? "active" : ""}`}
+              onClick={() => setActiveTab("genre")}
             >
               <i className="bi bi-tags me-2"></i>
               Nach Genre
@@ -214,19 +247,29 @@ const RecommendationsPage = () => {
         )}
 
         {/* personal recommendations */}
-        {activeTab === 'personal' && (
+        {activeTab === "personal" && (
           <div className="tab-content">
             {!userId ? (
               <div className="alert alert-info text-center">
                 <h5>Melde dich an für personalisierte Empfehlungen!</h5>
-                <p>Sobald du Filme und Serien bewertest oder als Favoriten markierst, können wir dir passende Inhalte empfehlen.</p>
-                <Link to="/login" className="btn btn-primary">Anmelden</Link>
+                <p>
+                  Sobald du Filme und Serien bewertest oder als Favoriten
+                  markierst, können wir dir passende Inhalte empfehlen.
+                </p>
+                <Link to="/login" className="btn btn-primary">
+                  Anmelden
+                </Link>
               </div>
             ) : recommendations.length === 0 ? (
               <div className="alert alert-light text-center">
                 <h5>Noch keine Empfehlungen verfügbar</h5>
-                <p>Markiere einige Filme oder Serien als Favoriten, um personalisierte Empfehlungen zu erhalten!</p>
-                <Link to="/explore" className="btn btn-outline-primary">Inhalte entdecken</Link>
+                <p>
+                  Markiere einige Filme oder Serien als Favoriten, um
+                  personalisierte Empfehlungen zu erhalten!
+                </p>
+                <Link to="/explore" className="btn btn-outline-primary">
+                  Inhalte entdecken
+                </Link>
               </div>
             ) : (
               <>
@@ -245,7 +288,7 @@ const RecommendationsPage = () => {
         )}
 
         {/* trending recommendations */}
-        {activeTab === 'trending' && (
+        {activeTab === "trending" && (
           <div className="tab-content">
             <h3 className="mb-3">Was gerade angesagt ist</h3>
             <div className="row">
@@ -260,7 +303,7 @@ const RecommendationsPage = () => {
         )}
 
         {/* genre recommendations */}
-        {activeTab === 'genre' && (
+        {activeTab === "genre" && (
           <div className="tab-content">
             <div className="mb-4">
               <h3 className="mb-3">Empfehlungen nach Genre</h3>
@@ -287,7 +330,10 @@ const RecommendationsPage = () => {
                 <h4 className="mb-3">Die besten {selectedGenre}-Titel</h4>
                 {loading ? (
                   <div className="text-center">
-                    <div className="spinner-border text-primary" role="status" />
+                    <div
+                      className="spinner-border text-primary"
+                      role="status"
+                    />
                   </div>
                 ) : (
                   <div className="row">

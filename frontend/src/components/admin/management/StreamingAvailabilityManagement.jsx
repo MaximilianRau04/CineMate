@@ -19,7 +19,7 @@ const StreamingAvailabilityManagement = ({ mediaId, mediaType, mediaTitle, onClo
 
     useEffect(() => {
         fetchData();
-    }, [mediaId, mediaType]);
+    }, [mediaId, mediaType]); // eslint-disable-line react-hooks/exhaustive-deps
 
     /**
      * Loads availabilities and providers
@@ -28,9 +28,14 @@ const StreamingAvailabilityManagement = ({ mediaId, mediaType, mediaTitle, onClo
         try {
             setLoading(true);
 
+
             // Fetch existing availabilities
+            const token = localStorage.getItem('token');
             const availabilityResponse = await fetch(
-                `http://localhost:8080/api/streaming/availability/${mediaType}/${mediaId}`
+                `http://localhost:8080/api/streaming/availability/${mediaType}/${mediaId}`,
+                {
+                    headers: token ? { Authorization: `Bearer ${token}` } : {}
+                }
             );
 
             if (availabilityResponse.ok) {
@@ -39,7 +44,9 @@ const StreamingAvailabilityManagement = ({ mediaId, mediaType, mediaTitle, onClo
             }
 
             // Fetch all providers
-            const providerResponse = await fetch('http://localhost:8080/api/streaming/providers');
+            const providerResponse = await fetch('http://localhost:8080/api/streaming/providers', {
+                headers: token ? { Authorization: `Bearer ${token}` } : {}
+            });
             if (providerResponse.ok) {
                 const providerData = await providerResponse.json();
                 setProviders(providerData);
@@ -80,12 +87,17 @@ const StreamingAvailabilityManagement = ({ mediaId, mediaType, mediaTitle, onClo
             const fetchUrl = editingAvailability ? url : `${url}?${params.toString()}`;
             const body = editingAvailability ? params : undefined;
 
+            const token = localStorage.getItem('token');
+            const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+
+            if (editingAvailability) {
+                headers['Content-Type'] = 'application/x-www-form-urlencoded';
+            }
+
             const response = await fetch(fetchUrl, {
                 method,
-                ...(editingAvailability && {
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: body
-                })
+                headers,
+                ...(editingAvailability && { body: body })
             });
 
             if (!response.ok) {
@@ -128,8 +140,12 @@ const StreamingAvailabilityManagement = ({ mediaId, mediaType, mediaTitle, onClo
         }
 
         try {
+            const token = localStorage.getItem('token');
+            const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+
             const response = await fetch(`http://localhost:8080/api/streaming/availability/${availabilityId}`, {
                 method: 'DELETE',
+                headers
             });
 
             if (!response.ok) {

@@ -13,6 +13,11 @@ export const useMediaDetail = (mediaType = 'movies') => {
   const [director, setDirector] = useState(null);
   const [castLoading, setCastLoading] = useState(true);
 
+  const getHeaders = (extra = {}) => {
+    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    return token ? { Authorization: `Bearer ${token}`, ...extra } : extra;
+  };
+
   /**
    * Fetches the current user from localStorage and sets userId and currentUser state.
    * @returns {void}
@@ -22,7 +27,7 @@ export const useMediaDetail = (mediaType = 'movies') => {
     if (!token) return;
 
     fetch("http://localhost:8080/api/users/me", {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: getHeaders(),
     })
       .then((res) => res.ok ? res.json() : Promise.reject(`HTTP Error: ${res.status}`))
       .then((data) => {
@@ -44,7 +49,9 @@ export const useMediaDetail = (mediaType = 'movies') => {
     setIsLoading(true);
     setError(null);
 
-    fetch(`http://localhost:8080/api/${mediaType}/${mediaId}`)
+    fetch(`http://localhost:8080/api/${mediaType}/${mediaId}`, {
+      headers: getHeaders(),
+    })
       .then((res) => {
         if (!res.ok) {
           throw new Error(
@@ -75,11 +82,17 @@ export const useMediaDetail = (mediaType = 'movies') => {
 
     setCastLoading(true);
 
-    const fetchActors = fetch(`http://localhost:8080/api/${mediaType}/${mediaId}/actors`)
+    // read token inside effect to avoid missing dependency warnings
+
+    const fetchActors = fetch(`http://localhost:8080/api/${mediaType}/${mediaId}/actors`, {
+      headers: getHeaders(),
+    })
       .then((res) => res.ok ? res.json() : [])
       .catch(() => []);
 
-    const fetchDirector = fetch(`http://localhost:8080/api/${mediaType}/${mediaId}/director`)
+    const fetchDirector = fetch(`http://localhost:8080/api/${mediaType}/${mediaId}/director`, {
+      headers: getHeaders(),
+    })
       .then((res) => res.ok ? res.json() : null)
       .catch(() => null);
 

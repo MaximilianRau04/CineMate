@@ -23,12 +23,12 @@ const CustomListsPage = () => {
 
   /**
    * Validate JWT token format
-   * @param {string} token 
+   * @param {string} token
    * @returns {boolean}
    */
   const isValidJWT = (token) => {
-    if (!token || typeof token !== 'string') return false;
-    const parts = token.split('.');
+    if (!token || typeof token !== "string") return false;
+    const parts = token.split(".");
     return parts.length === 3;
   };
 
@@ -43,8 +43,12 @@ const CustomListsPage = () => {
     setLoading(true);
     try {
       const currentPage = isLoadMore ? page : 0;
+      const token = localStorage.getItem("token");
       const response = await fetch(
-        `${API_BASE_URL}/lists/public?page=${currentPage}&size=12&sortBy=${sortBy}`
+        `${API_BASE_URL}/lists/public?page=${currentPage}&size=12&sortBy=${sortBy}`,
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        }
       );
 
       if (response.ok) {
@@ -77,7 +81,7 @@ const CustomListsPage = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      
+
       // Check if token exists and has the correct format
       if (!isValidJWT(token)) {
         console.error("Invalid or missing JWT token");
@@ -142,10 +146,14 @@ const CustomListsPage = () => {
 
     setLoading(true);
     try {
+      const token = localStorage.getItem("token");
       const response = await fetch(
         `${API_BASE_URL}/lists/search?query=${encodeURIComponent(
           searchQuery
-        )}&page=0&size=12`
+        )}&page=0&size=12`,
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        }
       );
 
       if (response.ok) {
@@ -170,7 +178,7 @@ const CustomListsPage = () => {
   const handleCreateList = async (listData) => {
     try {
       const token = localStorage.getItem("token");
-      
+
       // Check if token exists and has the correct format
       if (!isValidJWT(token)) {
         console.error("Invalid or missing JWT token");

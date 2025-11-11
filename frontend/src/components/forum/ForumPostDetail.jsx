@@ -81,8 +81,12 @@ const ForumPostDetail = () => {
    */
   const fetchReplies = async () => {
     try {
+      const token = localStorage.getItem("token");
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
       const response = await fetch(
-        `http://localhost:8080/api/forum/posts/${postId}/replies?page=${currentPage}&size=10`
+        `http://localhost:8080/api/forum/posts/${postId}/replies?page=${currentPage}&size=10`,
+        { headers }
       );
       if (!response.ok) {
         throw new Error("Failed to fetch replies");
@@ -166,13 +170,17 @@ const ForumPostDetail = () => {
     
     try {
       if (post.movieId) {
-        const response = await fetch(`http://localhost:8080/api/movies/${post.movieId}`);
+        const token = localStorage.getItem("token");
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        const response = await fetch(`http://localhost:8080/api/movies/${post.movieId}`, { headers });
         if (response.ok) {
           const movie = await response.json();
           setMediaInfo({ type: 'movie', data: movie });
         }
       } else if (post.seriesId) {
-        const response = await fetch(`http://localhost:8080/api/series/${post.seriesId}`);
+        const token = localStorage.getItem("token");
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        const response = await fetch(`http://localhost:8080/api/series/${post.seriesId}`, { headers });
         if (response.ok) {
           const series = await response.json();
           setMediaInfo({ type: 'series', data: series });
@@ -203,9 +211,7 @@ const ForumPostDetail = () => {
           `http://localhost:8080/api/forum/posts/${postId}/unsubscribe`,
           {
             method: "DELETE",
-            headers: {
-              Authorization: token ? `Bearer ${token}` : undefined,
-            },
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
           }
         );
       } else {
@@ -214,9 +220,7 @@ const ForumPostDetail = () => {
           `http://localhost:8080/api/forum/posts/${postId}/subscribe`,
           {
             method: "POST",
-            headers: {
-              Authorization: token ? `Bearer ${token}` : undefined,
-            },
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
           }
         );
       }
@@ -259,14 +263,15 @@ const ForumPostDetail = () => {
         content: replyContent.trim(),
       };
 
+      const headers = token
+        ? { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
+        : { "Content-Type": "application/json" };
+
       const response = await fetch(
         `http://localhost:8080/api/forum/posts/${postId}/replies`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: token ? `Bearer ${token}` : undefined,
-          },
+          headers,
           body: JSON.stringify(replyData),
         }
       );
@@ -300,9 +305,7 @@ const ForumPostDetail = () => {
         `http://localhost:8080/api/forum/posts/${postId}/like`,
         {
           method: method,
-          headers: {
-            Authorization: token ? `Bearer ${token}` : undefined,
-          },
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
         }
       );
 
@@ -381,14 +384,15 @@ const ForumPostDetail = () => {
   const handleEditPost = async () => {
     try {
       const token = localStorage.getItem("token");
+      const headers = token
+        ? { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
+        : { "Content-Type": "application/json" };
+
       const response = await fetch(
         `http://localhost:8080/api/forum/posts/${postId}`,
         {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+          headers,
           body: JSON.stringify({
             title: post.title,
             content: editPostContent,
@@ -427,9 +431,7 @@ const ForumPostDetail = () => {
       
       const response = await fetch(endpoint, {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
 
       if (response.ok) {
@@ -452,14 +454,15 @@ const ForumPostDetail = () => {
   const handleEditReply = async (replyId) => {
     try {
       const token = localStorage.getItem("token");
+      const headers = token
+        ? { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
+        : { "Content-Type": "application/json" };
+
       const response = await fetch(
         `http://localhost:8080/api/forum/replies/${replyId}`,
         {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+          headers,
           body: JSON.stringify({
             content: editReplyContent,
           }),
@@ -496,9 +499,7 @@ const ForumPostDetail = () => {
         `http://localhost:8080/api/forum/replies/${replyId}`,
         {
           method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
         }
       );
 

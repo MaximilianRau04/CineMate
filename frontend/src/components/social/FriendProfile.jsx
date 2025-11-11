@@ -85,8 +85,8 @@ const FriendProfile = () => {
   const loadUser = async () => {
     try {
       const response = await fetch(`http://localhost:8080/api/users/${userId}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        });
       
       if (!response.ok) {
         throw new Error('Benutzer konnte nicht geladen werden');
@@ -107,7 +107,7 @@ const FriendProfile = () => {
   const loadUserPoints = async () => {
     try {
       const response = await fetch(`http://localhost:8080/api/social/points/${userId}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       
       if (response.ok) {
@@ -127,7 +127,7 @@ const FriendProfile = () => {
   const loadUserFriends = async () => {
     try {
       const response = await fetch(`http://localhost:8080/api/social/friends/${userId}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       
       if (response.ok) {
@@ -147,8 +147,8 @@ const FriendProfile = () => {
   const checkFriendship = async () => {
     try {
       const response = await fetch('http://localhost:8080/api/social/friends', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        });
       
       if (response.ok) {
         const myFriends = await response.json();
@@ -170,7 +170,7 @@ const FriendProfile = () => {
     try {
       const response = await fetch(`http://localhost:8080/api/social/friends/request/${userId}`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       
       if (response.ok) {

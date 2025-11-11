@@ -12,6 +12,11 @@ export const useNotificationSettings = (userId) => {
   const [preferences, setPreferences] = useState([]);
   const [notificationTypes, setNotificationTypes] = useState([]);
   const [user, setUser] = useState(null);
+  const getHeaders = (extra = {}) => {
+    const token = localStorage.getItem('token');
+    return token ? { Authorization: `Bearer ${token}`, ...extra } : extra;
+  };
+
   useEffect(() => {
     if (!userId) return;
 
@@ -27,9 +32,7 @@ export const useNotificationSettings = (userId) => {
         
         // Load user information
         const userResponse = await fetch('http://localhost:8080/api/users/me', {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
+          headers: getHeaders(),
         });
         if (userResponse.ok) {
           const userData = await userResponse.json();
@@ -77,9 +80,7 @@ export const useNotificationSettings = (userId) => {
       
       const response = await fetch(`http://localhost:8080/api/notification-preferences/user/${userId}/global`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(newSettings)
       });
 
@@ -118,9 +119,7 @@ export const useNotificationSettings = (userId) => {
 
       const response = await fetch(`http://localhost:8080/api/notification-preferences/user/${userId}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(updatedPreferences)
       });
 

@@ -7,7 +7,10 @@ const Leaderboard = () => {
   const [myPoints, setMyPoints] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const token = localStorage.getItem('token');
+  const getHeaders = () => {
+    const t = localStorage.getItem('token');
+    return t ? { 'Authorization': `Bearer ${t}` } : {};
+  };
 
   useEffect(() => {
     loadData();
@@ -65,7 +68,7 @@ const Leaderboard = () => {
   const loadLeaderboard = async () => {
     try {
       const response = await fetch('http://localhost:8080/api/social/leaderboard?limit=20', {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: getHeaders()
       });
       if (response.ok) {
         const data = await response.json();
@@ -84,7 +87,7 @@ const Leaderboard = () => {
   const loadMyPoints = async () => {
     try {
       const response = await fetch('http://localhost:8080/api/social/points', {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: getHeaders()
       });
       if (response.ok) {
         const data = await response.json();
