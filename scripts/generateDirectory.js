@@ -1,5 +1,5 @@
-const fs = require("fs");
-const path = require("path");
+import fs from "fs";
+import path from "path";
 
 const OUTPUT_FILE = "DIRECTORY.md";
 const ROOTS = (process.env.PATHS || "backend,frontend").split(",");
@@ -14,7 +14,6 @@ function generateTree(dir, prefix = "") {
     .readdirSync(dir, { withFileTypes: true })
     .filter((entry) => !IGNORE_DIRS.includes(entry.name))
     .sort((a, b) => {
-      // Directories first, then alphabetical
       if (a.isDirectory() && !b.isDirectory()) return -1;
       if (!a.isDirectory() && b.isDirectory()) return 1;
       return a.name.localeCompare(b.name);
