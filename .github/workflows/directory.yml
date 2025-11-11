@@ -12,18 +12,18 @@ permissions:
 jobs:
   generate-directory:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Run Directory Tree Generator
-        uses: MaximilianRau/directory-tree-generator@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          path: "backend,frontend"
-          output-file: "DIRECTORY.md"
-          show-extensions: true
-          include-files: true
-          format: "markdown-tree"
+          node-version: 20
+
+      - name: Run Directory Tree Generator
+        run: node scripts/generateDirectory.js
 
       - name: Commit changes if there are any
         run: |

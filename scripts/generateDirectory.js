@@ -2,9 +2,12 @@ import fs from "fs";
 import path from "path";
 
 const OUTPUT_FILE = "DIRECTORY.md";
-const ROOTS = ["backend", "frontend"]; // Folders to include
-const IGNORE_DIRS = ["node_modules", "build", "dist", "target", ".git"]; // ignored
+const ROOTS = (process.env.PATHS || "backend,frontend").split(",");
+const IGNORE_DIRS = ["node_modules", "build", "dist", "target", ".git"];
 const INDENT = "  ";
+const SHOW_EXTENSIONS = true;
+const INCLUDE_FILES = true;
+const FORMAT = "markdown-tree"; 
 
 function generateTree(dir, prefix = "") {
   let tree = "";
@@ -12,7 +15,6 @@ function generateTree(dir, prefix = "") {
     .readdirSync(dir, { withFileTypes: true })
     .filter((entry) => !IGNORE_DIRS.includes(entry.name))
     .sort((a, b) => {
-      // Directories first, then files alphabetically
       if (a.isDirectory() && !b.isDirectory()) return -1;
       if (!a.isDirectory() && b.isDirectory()) return 1;
       return a.name.localeCompare(b.name);
@@ -20,9 +22,12 @@ function generateTree(dir, prefix = "") {
 
   for (const entry of entries) {
     const fullPath = path.join(dir, entry.name);
-    tree += `${prefix}${entry.isDirectory() ? "📂" : "📄"} ${entry.name}\n`;
     if (entry.isDirectory()) {
+      tree += `${prefix}📂 ${entry.name}/\n`;
       tree += generateTree(fullPath, prefix + INDENT);
+    } else if (INCLUDE_FILES) {
+      const icon = SHOW_EXTENSIONS ? getFileIcon(entry.name) : "📄";
+      tree += `${prefix}${icon} ${entry.name}\n`;
     }
   }
 
@@ -32,13 +37,14 @@ function generateTree(dir, prefix = "") {
 let output = "# 📁 Project Directory\n\n";
 
 for (const root of ROOTS) {
-  if (fs.existsSync(root)) {
-    output += `## ${root}\n\n`;
+  const trimmed = root.trim();
+  if (fs.existsSync(trimmed)) {
+    output += `## ${trimmed}\n\n`;
     output += "```\n";
-    output += generateTree(root);
+    output += generateTree(trimmed);
     output += "```\n\n";
   } else {
-    console.warn(`⚠️ Folder "${root}" not found — skipping.`);
+    console.warn(`⚠️ Folder "${trimmed}" not found — skipping.`);
   }
 }
 
