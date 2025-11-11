@@ -10,12 +10,15 @@ const UserAchievementBadges = ({ userId, limit = 3, showCount = true }) => {
      * Fetch user achievements from the API.
      * @returns {Promise<void>}
      */
+    const getHeaders = () => {
+      const token = localStorage.getItem('token');
+      return token ? { 'Authorization': `Bearer ${token}` } : {};
+    };
+
     const loadUserAchievements = async () => {
       try {
         const response = await fetch(`http://localhost:8080/api/achievements/user/${userId}/unlocked`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
+          headers: getHeaders()
         });
         if (response.ok) {
           const data = await response.json();

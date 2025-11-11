@@ -12,8 +12,13 @@ const UserMediaTabs = ({ userId }) => {
   const [loading, setLoading] = useState({
     favorites: false,
     watched: false,
-    reviews: false
+    reviews: false,
   });
+
+  const getHeaders = (extra = {}) => {
+    const token = localStorage.getItem("token");
+    return token ? { Authorization: `Bearer ${token}`, ...extra } : extra;
+  };
 
   /**
    * Fetches media data for a review
@@ -22,13 +27,18 @@ const UserMediaTabs = ({ userId }) => {
    */
   const fetchMediaForReview = async (reviewId) => {
     try {
-      const response = await fetch(`http://localhost:8080/api/reviews/${reviewId}/media`);
+      const response = await fetch(`http://localhost:8080/api/reviews/${reviewId}/media`, {
+        headers: getHeaders(),
+      });
       if (response.ok) {
         return await response.json();
       }
       return null;
     } catch (error) {
-      console.error(`Fehler beim Laden der Mediendaten für Review ${reviewId}:`, error);
+      console.error(
+        `Fehler beim Laden der Mediendaten für Review ${reviewId}:`,
+        error
+      );
       return null;
     }
   };
@@ -40,27 +50,31 @@ const UserMediaTabs = ({ userId }) => {
   useEffect(() => {
     if (!userId) return;
 
-    setLoading(prev => ({ ...prev, reviews: true }));
-    fetch(`http://localhost:8080/api/reviews/user/${userId}`)
-      .then(res => res.ok ? res.json() : [])
+    setLoading((prev) => ({ ...prev, reviews: true }));
+    fetch(`http://localhost:8080/api/reviews/user/${userId}`, {
+      headers: getHeaders(),
+    })
+      .then((res) => (res.ok ? res.json() : []))
       .then(async (data) => {
-        const validReviews = Array.isArray(data) ? data.filter(review => review && review.id) : [];
+        const validReviews = Array.isArray(data)
+          ? data.filter((review) => review && review.id)
+          : [];
 
         const enrichedReviews = await Promise.all(
           validReviews.map(async (review) => {
             const mediaData = await fetchMediaForReview(review.id);
             return {
               ...review,
-              mediaData: mediaData 
+              mediaData: mediaData,
             };
           })
         );
 
         setReviews(enrichedReviews);
       })
-      .catch(err => console.error("Fehler beim Laden der Reviews:", err))
-      .finally(() => setLoading(prev => ({ ...prev, reviews: false })));
-  }, [userId]);
+      .catch((err) => console.error("Fehler beim Laden der Reviews:", err))
+      .finally(() => setLoading((prev) => ({ ...prev, reviews: false })));
+  }, [userId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /**
    * fetches the user's favorites (movies and series) from the API
@@ -69,39 +83,57 @@ const UserMediaTabs = ({ userId }) => {
   useEffect(() => {
     if (activeTab !== "favorites" || !userId) return;
 
-    setLoading(prev => ({ ...prev, favorites: true }));
+    setLoading((prev) => ({ ...prev, favorites: true }));
     Promise.all([
-      fetch(`http://localhost:8080/api/users/${userId}/favorites/movies`).then(res => res.ok ? res.json() : []),
-      fetch(`http://localhost:8080/api/users/${userId}/favorites/series`).then(res => res.ok ? res.json() : [])
+      fetch(`http://localhost:8080/api/users/${userId}/favorites/movies`, {
+        headers: getHeaders(),
+      }).then((res) => (res.ok ? res.json() : [])),
+      fetch(`http://localhost:8080/api/users/${userId}/favorites/series`, {
+        headers: getHeaders(),
+      }).then((res) => (res.ok ? res.json() : [])),
     ])
       .then(([movies, series]) => {
-        const validMovies = Array.isArray(movies) ? movies.filter(movie => movie && movie.id) : [];
-        const validSeries = Array.isArray(series) ? series.filter(serie => serie && serie.id) : [];
+        const validMovies = Array.isArray(movies)
+          ? movies.filter((movie) => movie && movie.id)
+          : [];
+        const validSeries = Array.isArray(series)
+          ? series.filter((serie) => serie && serie.id)
+          : [];
         setFavorites({ movies: validMovies, series: validSeries });
       })
-      .catch(err => console.error("Fehler beim Laden der Favoriten:", err))
-      .finally(() => setLoading(prev => ({ ...prev, favorites: false })));
+      .catch((err) => console.error("Fehler beim Laden der Favoriten:", err))
+      .finally(() => setLoading((prev) => ({ ...prev, favorites: false })));
   }, [userId, activeTab]);
 
   /**
    * fetches the user's watched movies and series from the API
-   * @returns {void} 
+   * @returns {void}
    */
   useEffect(() => {
     if (activeTab !== "watched" || !userId) return;
 
-    setLoading(prev => ({ ...prev, watched: true }));
+    setLoading((prev) => ({ ...prev, watched: true }));
     Promise.all([
-      fetch(`http://localhost:8080/api/users/${userId}/watched/movies`).then(res => res.ok ? res.json() : []),
-      fetch(`http://localhost:8080/api/users/${userId}/watched/series`).then(res => res.ok ? res.json() : [])
+      fetch(`http://localhost:8080/api/users/${userId}/watched/movies`, {
+        headers: getHeaders(),
+      }).then((res) => (res.ok ? res.json() : [])),
+      fetch(`http://localhost:8080/api/users/${userId}/watched/series`, {
+        headers: getHeaders(),
+      }).then((res) => (res.ok ? res.json() : [])),
     ])
       .then(([movies, series]) => {
-        const validMovies = Array.isArray(movies) ? movies.filter(movie => movie && movie.id) : [];
-        const validSeries = Array.isArray(series) ? series.filter(serie => serie && serie.id) : [];
+        const validMovies = Array.isArray(movies)
+          ? movies.filter((movie) => movie && movie.id)
+          : [];
+        const validSeries = Array.isArray(series)
+          ? series.filter((serie) => serie && serie.id)
+          : [];
         setWatched({ movies: validMovies, series: validSeries });
       })
-      .catch(err => console.error("Fehler beim Laden der gesehenen Medien:", err))
-      .finally(() => setLoading(prev => ({ ...prev, watched: false })));
+      .catch((err) =>
+        console.error("Fehler beim Laden der gesehenen Medien:", err)
+      )
+      .finally(() => setLoading((prev) => ({ ...prev, watched: false })));
   }, [userId, activeTab]);
 
   /**
@@ -113,22 +145,29 @@ const UserMediaTabs = ({ userId }) => {
   const removeFromFavorites = async (mediaId, mediaType) => {
     try {
       const response = await fetch(`http://localhost:8080/api/users/${userId}/favorites/${mediaType}s/${mediaId}`, {
-        method: 'DELETE'
+        method: "DELETE",
+        headers: getHeaders(),
       });
 
       if (response.ok) {
-        setFavorites(prev => ({
+        setFavorites((prev) => ({
           ...prev,
-          [mediaType + 's']: prev[mediaType + 's'].filter(item => item.id !== mediaId)
+          [mediaType + "s"]: prev[mediaType + "s"].filter(
+            (item) => item.id !== mediaId
+          ),
         }));
-        success(`${mediaType === 'movie' ? 'Film' : 'Serie'} aus Favoriten entfernt!`);
+        success(
+          `${mediaType === "movie" ? "Film" : "Serie"} aus Favoriten entfernt!`
+        );
       } else {
-        console.error(`Fehler beim Entfernen aus Favoriten: ${response.status}`);
-        showError('Fehler beim Entfernen aus Favoriten');
+        console.error(
+          `Fehler beim Entfernen aus Favoriten: ${response.status}`
+        );
+        showError("Fehler beim Entfernen aus Favoriten");
       }
     } catch (error) {
-      console.error('Fehler beim Entfernen aus Favoriten:', error);
-      showError('Fehler beim Entfernen aus Favoriten');
+      console.error("Fehler beim Entfernen aus Favoriten:", error);
+      showError("Fehler beim Entfernen aus Favoriten");
     }
   };
 
@@ -141,30 +180,39 @@ const UserMediaTabs = ({ userId }) => {
   const removeFromWatched = async (mediaId, mediaType) => {
     try {
       const response = await fetch(`http://localhost:8080/api/users/${userId}/watched/${mediaType}s/${mediaId}`, {
-        method: 'DELETE'
+        method: "DELETE",
+        headers: getHeaders(),
       });
 
       if (response.ok) {
-        setWatched(prev => ({
+        setWatched((prev) => ({
           ...prev,
-          [mediaType + 's']: prev[mediaType + 's'].filter(item => item.id !== mediaId)
+          [mediaType + "s"]: prev[mediaType + "s"].filter(
+            (item) => item.id !== mediaId
+          ),
         }));
-        success(`${mediaType === 'movie' ? 'Film' : 'Serie'} aus gesehenen Medien entfernt!`);
+        success(
+          `${
+            mediaType === "movie" ? "Film" : "Serie"
+          } aus gesehenen Medien entfernt!`
+        );
       } else {
-        console.error(`Fehler beim Entfernen aus gesehenen Medien: ${response.status}`);
-        showError('Fehler beim Entfernen aus gesehenen Medien');
+        console.error(
+          `Fehler beim Entfernen aus gesehenen Medien: ${response.status}`
+        );
+        showError("Fehler beim Entfernen aus gesehenen Medien");
       }
     } catch (error) {
-      console.error('Fehler beim Entfernen aus gesehenen Medien:', error);
-      showError('Fehler beim Entfernen aus gesehenen Medien');
+      console.error("Fehler beim Entfernen aus gesehenen Medien:", error);
+      showError("Fehler beim Entfernen aus gesehenen Medien");
     }
   };
 
   /**
- * Determines the correct navigation route for a media item based on the review data
- * @param {Object} review - The review object
- * @returns {string|null} The route path or null if no route can be determined
- */
+   * Determines the correct navigation route for a media item based on the review data
+   * @param {Object} review - The review object
+   * @returns {string|null} The route path or null if no route can be determined
+   */
   const getMediaRoute = (review) => {
     if (review.mediaData) {
       const { type, data } = review.mediaData;
@@ -200,31 +248,33 @@ const UserMediaTabs = ({ userId }) => {
    */
   const renderMediaTitle = (review, withLink = true) => {
     if (review.movie) {
-      const content = (
-        <>
-          🎬 {review.movie.title}
-        </>
-      );
+      const content = <>🎬 {review.movie.title}</>;
       return withLink ? (
-        <Link to={`/movies/${review.movie.id}`} className="text-decoration-none">
+        <Link
+          to={`/movies/${review.movie.id}`}
+          className="text-decoration-none"
+        >
           {content}
         </Link>
-      ) : content;
+      ) : (
+        content
+      );
     }
 
     if (review.series) {
-      const content = (
-        <>
-          📺 {review.series.title}
-        </>
-      );
+      const content = <>📺 {review.series.title}</>;
       return withLink ? (
-        <Link to={`/series/${review.series.id}`} className="text-decoration-none">
+        <Link
+          to={`/series/${review.series.id}`}
+          className="text-decoration-none"
+        >
           {content}
         </Link>
-      ) : content;
+      ) : (
+        content
+      );
     }
-    
+
     if (review.mediaData) {
       const { type, data } = review.mediaData;
       const isMovie = type === "movie";
@@ -240,7 +290,9 @@ const UserMediaTabs = ({ userId }) => {
         <Link to={route} className="text-decoration-none">
           {content}
         </Link>
-      ) : content;
+      ) : (
+        content
+      );
     }
 
     return <span>Unbekannter Inhalt</span>;
@@ -251,8 +303,12 @@ const UserMediaTabs = ({ userId }) => {
       <ul className="nav nav-tabs mb-3">
         <li className="nav-item">
           <button
-            className={`nav-link ${activeTab === 'reviews' ? 'active bg-primary text-white' : 'text-dark'}`}
-            onClick={() => setActiveTab('reviews')}
+            className={`nav-link ${
+              activeTab === "reviews"
+                ? "active bg-primary text-white"
+                : "text-dark"
+            }`}
+            onClick={() => setActiveTab("reviews")}
           >
             <i className="bi bi-star-fill me-1"></i>
             Bewertungen
@@ -260,8 +316,12 @@ const UserMediaTabs = ({ userId }) => {
         </li>
         <li className="nav-item">
           <button
-            className={`nav-link ${activeTab === 'favorites' ? 'active bg-primary text-white' : 'text-dark'}`}
-            onClick={() => setActiveTab('favorites')}
+            className={`nav-link ${
+              activeTab === "favorites"
+                ? "active bg-primary text-white"
+                : "text-dark"
+            }`}
+            onClick={() => setActiveTab("favorites")}
           >
             <i className="bi bi-heart-fill me-1"></i>
             Favoriten
@@ -269,8 +329,12 @@ const UserMediaTabs = ({ userId }) => {
         </li>
         <li className="nav-item">
           <button
-            className={`nav-link ${activeTab === 'watched' ? 'active bg-primary text-white' : 'text-dark'}`}
-            onClick={() => setActiveTab('watched')}
+            className={`nav-link ${
+              activeTab === "watched"
+                ? "active bg-primary text-white"
+                : "text-dark"
+            }`}
+            onClick={() => setActiveTab("watched")}
           >
             <i className="bi bi-eye-fill me-1"></i>
             Gesehen
@@ -280,7 +344,7 @@ const UserMediaTabs = ({ userId }) => {
 
       <div className="tab-content">
         {/* Reviews Tab Content */}
-        {activeTab === 'reviews' && (
+        {activeTab === "reviews" && (
           <div className="tab-pane fade show active">
             {loading.reviews ? (
               <div className="text-center py-3">
@@ -290,14 +354,14 @@ const UserMediaTabs = ({ userId }) => {
               </div>
             ) : reviews.length > 0 ? (
               <div className="list-group">
-                {reviews.map(review => {
+                {reviews.map((review) => {
                   const mediaRoute = getMediaRoute(review);
                   return (
                     <Link
                       key={review.id}
-                      to={mediaRoute || '#'}
+                      to={mediaRoute || "#"}
                       className="list-group-item list-group-item-action text-decoration-none"
-                      style={{ cursor: mediaRoute ? 'pointer' : 'default' }}
+                      style={{ cursor: mediaRoute ? "pointer" : "default" }}
                     >
                       <div className="d-flex justify-content-between align-items-center">
                         <h6 className="mb-1">
@@ -307,9 +371,12 @@ const UserMediaTabs = ({ userId }) => {
                           {"⭐".repeat(review.rating)}
                         </span>
                       </div>
-                      <p className="mb-1">{review.comment || "Kein Kommentar"}</p>
+                      <p className="mb-1">
+                        {review.comment || "Kein Kommentar"}
+                      </p>
                       <small className="text-muted">
-                        Bewertet am: {new Date(review.date).toLocaleDateString()}
+                        Bewertet am:{" "}
+                        {new Date(review.date).toLocaleDateString()}
                       </small>
                     </Link>
                   );
@@ -324,7 +391,7 @@ const UserMediaTabs = ({ userId }) => {
         )}
 
         {/* Favorites Tab Content */}
-        {activeTab === 'favorites' && (
+        {activeTab === "favorites" && (
           <div className="tab-pane fade show active">
             {loading.favorites ? (
               <div className="text-center py-3">
@@ -340,13 +407,15 @@ const UserMediaTabs = ({ userId }) => {
                 </h5>
                 {favorites.movies.length > 0 ? (
                   <div className="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3 mb-4">
-                    {favorites.movies.map(movie => (
+                    {favorites.movies.map((movie) => (
                       <div className="col" key={movie.id}>
                         <div className="position-relative">
                           <MediaCard media={movie} type="movie" />
                           <button
                             className="btn btn-danger btn-sm position-absolute top-0 end-0 m-2"
-                            onClick={() => removeFromFavorites(movie.id, 'movie')}
+                            onClick={() =>
+                              removeFromFavorites(movie.id, "movie")
+                            }
                             title="Aus Favoriten entfernen"
                             style={{ zIndex: 10 }}
                           >
@@ -368,13 +437,15 @@ const UserMediaTabs = ({ userId }) => {
                 </h5>
                 {favorites.series.length > 0 ? (
                   <div className="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
-                    {favorites.series.map(series => (
+                    {favorites.series.map((series) => (
                       <div className="col" key={series.id}>
                         <div className="position-relative">
                           <MediaCard media={series} type="series" />
                           <button
                             className="btn btn-danger btn-sm position-absolute top-0 end-0 m-2"
-                            onClick={() => removeFromFavorites(series.id, 'series')}
+                            onClick={() =>
+                              removeFromFavorites(series.id, "series")
+                            }
                             title="Aus Favoriten entfernen"
                             style={{ zIndex: 10 }}
                           >
@@ -395,7 +466,7 @@ const UserMediaTabs = ({ userId }) => {
         )}
 
         {/* Watched Tab Content */}
-        {activeTab === 'watched' && (
+        {activeTab === "watched" && (
           <div className="tab-pane fade show active">
             {loading.watched ? (
               <div className="text-center py-3">
@@ -411,13 +482,13 @@ const UserMediaTabs = ({ userId }) => {
                 </h5>
                 {watched.movies.length > 0 ? (
                   <div className="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3 mb-4">
-                    {watched.movies.map(movie => (
+                    {watched.movies.map((movie) => (
                       <div className="col" key={movie.id}>
                         <div className="position-relative">
                           <MediaCard media={movie} type="movie" />
                           <button
                             className="btn btn-secondary btn-sm position-absolute top-0 end-0 m-2"
-                            onClick={() => removeFromWatched(movie.id, 'movie')}
+                            onClick={() => removeFromWatched(movie.id, "movie")}
                             title="Aus gesehenen Filmen entfernen"
                             style={{ zIndex: 10 }}
                           >
@@ -439,13 +510,15 @@ const UserMediaTabs = ({ userId }) => {
                 </h5>
                 {watched.series.length > 0 ? (
                   <div className="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
-                    {watched.series.map(series => (
+                    {watched.series.map((series) => (
                       <div className="col" key={series.id}>
                         <div className="position-relative">
                           <MediaCard media={series} type="series" />
                           <button
                             className="btn btn-secondary btn-sm position-absolute top-0 end-0 m-2"
-                            onClick={() => removeFromWatched(series.id, 'series')}
+                            onClick={() =>
+                              removeFromWatched(series.id, "series")
+                            }
                             title="Aus gesehenen Serien entfernen"
                             style={{ zIndex: 10 }}
                           >

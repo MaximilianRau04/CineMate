@@ -8,7 +8,7 @@ const StreamingAvailability = ({ mediaId, mediaType, userRegion = 'DE' }) => {
 
   useEffect(() => {
     fetchStreamingAvailability();
-  }, [mediaId, mediaType, userRegion]);
+  }, [mediaId, mediaType, userRegion]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /**
    * fetches the streaming availability for the given media ID and type.
@@ -21,9 +21,12 @@ const StreamingAvailability = ({ mediaId, mediaType, userRegion = 'DE' }) => {
       console.log('Fetching streaming availability for:', { mediaId, mediaType, userRegion });
       
       const url = `http://localhost:8080/api/streaming/availability/${mediaType}/${mediaId}`;
-      
-      const response = await fetch(url);
-      
+
+      const token = localStorage.getItem("token");
+      const response = await fetch(url, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+
       if (!response.ok) {
         throw new Error('Streaming-Verfügbarkeiten konnten nicht geladen werden');
       }

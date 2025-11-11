@@ -43,10 +43,12 @@ const UserStatistics = ({ userId }) => {
   const fetchUserStatistics = async () => {
     setLoading(true);
     try {
+      const getHeaders = (extra = {}) => {
+        const token = localStorage.getItem('token');
+        return token ? { Authorization: `Bearer ${token}`, ...extra } : extra;
+      };
       const response = await fetch(`http://localhost:8080/api/statistics/users/${userId}?period=${selectedPeriod}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+        headers: getHeaders()
       });
 
       if (response.ok) {
@@ -76,10 +78,13 @@ const UserStatistics = ({ userId }) => {
    */
   const fetchFriendsComparison = async () => {
     try {
+      const getHeaders = (extra = {}) => {
+        const token = localStorage.getItem('token');
+        return token ? { Authorization: `Bearer ${token}`, ...extra } : extra;
+      };
+
       const response = await fetch(`http://localhost:8080/api/statistics/users/${userId}/friends-comparison`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+        headers: getHeaders()
       });
 
       if (response.ok) {

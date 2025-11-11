@@ -13,7 +13,10 @@ const SeasonSection = ({ seriesId }) => {
     
     setSeasonsLoading(true);
     try {
-      const response = await fetch(`http://localhost:8080/api/series/${seriesId}/seasons`);
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:8080/api/series/${seriesId}/seasons`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
       if (!response.ok) {
         throw new Error("Staffeln konnten nicht geladen werden");
       }
@@ -28,7 +31,7 @@ const SeasonSection = ({ seriesId }) => {
 
   useEffect(() => {
     fetchSeasons();
-  }, [seriesId]);
+  }, [seriesId]); // eslint-disable-line react-hooks/exhaustive-deps
   
 
   if (seasonsLoading) {

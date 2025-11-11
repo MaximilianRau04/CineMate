@@ -21,9 +21,7 @@ const AdminNotificationPanel = () => {
       try {
         const token = localStorage.getItem('token');
         const response = await fetch('http://localhost:8080/api/admin/notifications/users', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
         });
 
         if (response.ok) {
@@ -60,12 +58,13 @@ const AdminNotificationPanel = () => {
 
     try {
       const token = localStorage.getItem('token');
+      const headers = token
+        ? { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
+        : { 'Content-Type': 'application/json' };
+
       const response = await fetch('http://localhost:8080/api/admin/notifications/send', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
+        headers,
         body: JSON.stringify({
           title: formData.title,
           message: formData.message,

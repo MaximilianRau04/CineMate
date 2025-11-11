@@ -30,7 +30,11 @@ const StreamingProviderManagement = () => {
   const fetchProviders = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:8080/api/streaming/providers/all');
+    const token = localStorage.getItem('token');
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+    const response = await fetch('http://localhost:8080/api/streaming/providers/all', { headers });
+
       if (!response.ok) {
         throw new Error('Anbieter konnten nicht geladen werden');
       }
@@ -61,11 +65,14 @@ const StreamingProviderManagement = () => {
 
       const method = editingProvider ? 'PUT' : 'POST';
 
+      const token = localStorage.getItem('token');
+      const headers = token
+        ? { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
+        : { 'Content-Type': 'application/json' };
+
       const response = await fetch(url, {
         method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify(formData),
       });
 
@@ -115,8 +122,12 @@ const StreamingProviderManagement = () => {
     }
 
     try {
+      const token = localStorage.getItem('token');
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
       const response = await fetch(`http://localhost:8080/api/streaming/providers/${providerId}`, {
         method: 'DELETE',
+        headers,
       });
 
       if (!response.ok) {
@@ -140,8 +151,10 @@ const StreamingProviderManagement = () => {
    */
   const handleToggleStatus = async (providerId) => {
     try {
+      const token = localStorage.getItem('token');
       const response = await fetch(`http://localhost:8080/api/streaming/providers/${providerId}/toggle`, {
         method: 'PATCH',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
 
       if (!response.ok) {

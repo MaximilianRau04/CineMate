@@ -6,12 +6,13 @@ const RecommendationWidget = ({ userId, type = 'personal', maxItems = 4, title =
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     if (userId) {
       loadRecommendations();
     }
-  }, [userId, type]);
+  }, [userId, type]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /**
    * fetches recommendations based on the user ID and type.
@@ -35,8 +36,10 @@ const RecommendationWidget = ({ userId, type = 'personal', maxItems = 4, title =
           url = `http://localhost:8080/api/recommendations/user/${userId}`;
       }
       
-      const response = await fetch(url);
-      
+      const response = await fetch(url, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+
       if (response.ok) {
         const data = await response.json();
         setRecommendations(data.slice(0, maxItems));

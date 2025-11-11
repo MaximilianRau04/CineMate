@@ -17,19 +17,25 @@ const useMediaData = () => {
    */
   const fetchAverageRating = async (itemId, type) => {
     try {
-      const response = await fetch(`http://localhost:8080/api/reviews/${type}/${itemId}`);
+      const token = localStorage.getItem("token");
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+      const response = await fetch(`http://localhost:8080/api/reviews/${type}/${itemId}`, { headers });
       if (!response.ok) {
-        if (response.status === 404) return 0; 
-        return null; 
+        if (response.status === 404) return 0;
+        return null;
       }
-      
+
       const reviews = await response.json();
       if (!reviews || reviews.length === 0) return 0;
-      
+
       const sum = reviews.reduce((acc, review) => acc + review.rating, 0);
       return sum / reviews.length;
     } catch (error) {
-      console.error(`Fehler beim Laden des Ratings für ${type} ${itemId}:`, error);
+      console.error(
+        `Fehler beim Laden des Ratings für ${type} ${itemId}:`,
+        error
+      );
       return null;
     }
   };
@@ -46,11 +52,14 @@ const useMediaData = () => {
     } else {
       setIsRefreshing(true);
     }
-    
+
     try {
+      const token = localStorage.getItem("token");
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
       const [moviesResponse, seriesResponse] = await Promise.all([
-        fetch("http://localhost:8080/api/movies"),
-        fetch("http://localhost:8080/api/series")
+        fetch("http://localhost:8080/api/movies", { headers }),
+        fetch("http://localhost:8080/api/series", { headers }),
       ]);
 
       if (!moviesResponse.ok) {
@@ -62,46 +71,48 @@ const useMediaData = () => {
 
       const [moviesData, seriesData] = await Promise.all([
         moviesResponse.json(),
-        seriesResponse.json()
+        seriesResponse.json(),
       ]);
 
       // Process movies with genres and current ratings
       const processedMovies = await Promise.all(
         moviesData.map(async (movie) => {
           const genreArray = movie.genre ? movie.genre.split(/,\s*/) : [];
-          const currentRating = await fetchAverageRating(movie.id, 'movie');
-          return { 
-            ...movie, 
+          const currentRating = await fetchAverageRating(movie.id, "movie");
+          return {
+            ...movie,
             genreArray,
-            currentRating: currentRating !== null ? currentRating : movie.rating
+            currentRating:
+              currentRating !== null ? currentRating : movie.rating,
           };
         })
       );
-      
+
       // Process series with genres and current ratings
       const processedSeries = await Promise.all(
         seriesData.map(async (series) => {
           const genreArray = series.genre ? series.genre.split(/,\s*/) : [];
-          const currentRating = await fetchAverageRating(series.id, 'series');
-          return { 
-            ...series, 
+          const currentRating = await fetchAverageRating(series.id, "series");
+          return {
+            ...series,
             genreArray,
-            currentRating: currentRating !== null ? currentRating : series.rating
+            currentRating:
+              currentRating !== null ? currentRating : series.rating,
           };
         })
       );
-      
+
       setMovies(processedMovies);
       setSeries(processedSeries);
 
       const allGenres = [
-        ...processedMovies.flatMap(movie => movie.genreArray),
-        ...processedSeries.flatMap(series => series.genreArray)
+        ...processedMovies.flatMap((movie) => movie.genreArray),
+        ...processedSeries.flatMap((series) => series.genreArray),
       ].filter(Boolean);
-      
+
       setAvailableGenres([...new Set(allGenres)]);
       setError(null);
-      
+
       return { movies: processedMovies, series: processedSeries };
     } catch (err) {
       console.error("Fehler beim Laden:", err);
@@ -123,18 +134,18 @@ const useMediaData = () => {
       fetchData(false);
     };
 
-    window.addEventListener('focus', handleFocus);
-    return () => window.removeEventListener('focus', handleFocus);
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
   }, [fetchData]);
 
-  return { 
-    movies, 
-    series, 
-    isLoading, 
-    isRefreshing, 
-    error, 
+  return {
+    movies,
+    series,
+    isLoading,
+    isRefreshing,
+    error,
     availableGenres,
-    fetchData
+    fetchData,
   };
 };
 
