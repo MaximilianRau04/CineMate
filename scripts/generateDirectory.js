@@ -1,5 +1,5 @@
-import fs from "fs";
-import path from "path";
+const fs = require("fs");
+const path = require("path");
 
 const OUTPUT_FILE = "DIRECTORY.md";
 const ROOTS = (process.env.PATHS || "backend,frontend").split(",");
