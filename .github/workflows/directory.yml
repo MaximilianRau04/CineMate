@@ -14,15 +14,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4  
+        uses: actions/checkout@v4
 
       - name: Run Directory Tree Generator
         uses: MaximilianRau/directory-tree-generator@v2
         with:
-          path: "backend,frontend"      
-          extensions: ".java,.html,.js,.css,.jsx"
+          path: "backend,frontend"
+          output-file: "DIRECTORY.md"
           show-extensions: true
-          output-file: "DIRECTORY.md"   
+          include-files: true
+          format: "markdown-tree"
 
       - name: Commit changes if there are any
         run: |
