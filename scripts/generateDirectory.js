@@ -7,7 +7,6 @@ const IGNORE_DIRS = ["node_modules", "build", "dist", "target", ".git"];
 const INDENT = "  ";
 const SHOW_EXTENSIONS = true;
 const INCLUDE_FILES = true;
-const FORMAT = "markdown-tree"; 
 
 function generateTree(dir, prefix = "") {
   let tree = "";
@@ -15,6 +14,7 @@ function generateTree(dir, prefix = "") {
     .readdirSync(dir, { withFileTypes: true })
     .filter((entry) => !IGNORE_DIRS.includes(entry.name))
     .sort((a, b) => {
+      // Directories first, then alphabetical
       if (a.isDirectory() && !b.isDirectory()) return -1;
       if (!a.isDirectory() && b.isDirectory()) return 1;
       return a.name.localeCompare(b.name);
@@ -26,8 +26,7 @@ function generateTree(dir, prefix = "") {
       tree += `${prefix}📂 ${entry.name}/\n`;
       tree += generateTree(fullPath, prefix + INDENT);
     } else if (INCLUDE_FILES) {
-      const icon = SHOW_EXTENSIONS ? getFileIcon(entry.name) : "📄";
-      tree += `${prefix}${icon} ${entry.name}\n`;
+      tree += `${prefix}${entry.name}\n`;
     }
   }
 
