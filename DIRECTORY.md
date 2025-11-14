@@ -202,7 +202,6 @@
 
 ```
 📂 public/
-  📄 index.html
 📂 src/
   📂 assets/
     📄 achievements.css
@@ -239,7 +238,7 @@
         📄 ContentTable.jsx
         📄 PersonList.jsx
       📂 utils/
-        📄 utils.js
+        📄 utils.jsx
       📄 AdminPanel.jsx
       📄 Dashboard.jsx
       📄 Sidebar.jsx
@@ -254,22 +253,22 @@
         📄 ReviewSection.jsx
         📄 SeasonSection.jsx
       📂 utils/
-        📄 useMediaDetail.js
+        📄 useMediaDetail.jsx
         📄 useMediaInteractions.js
-        📄 useReviews.js
+        📄 useReviews.jsx
       📄 MediaHeader.jsx
       📄 MovieDetail.jsx
       📄 SeriesDetail.jsx
     📂 explore/
       📂 calender/
         📂 utils/
-          📄 useCalendarData.js
+          📄 useCalendarData.jsx
         📄 Calendar.jsx
         📄 CalendarItem.jsx
         📄 CalendarList.jsx
       📂 utils/
-        📄 useFilters.js
-        📄 useMediaData.js
+        📄 useFilters.jsx
+        📄 useMediaData.jsx
       📄 ExplorePage.jsx
       📄 FilterPanel.jsx
       📄 MediaCard.jsx
@@ -293,8 +292,8 @@
       📄 NotificationSystem.jsx
     📂 profile/
       📂 utils/
-        📄 notificationUtils.js
-        📄 useNotificationSettings.js
+        📄 notificationUtils.jsx
+        📄 useNotificationSettings.jsx
       📄 CompactNotificationSettings.jsx
       📄 MediaCard.jsx
       📄 NotificationSettings.jsx
@@ -315,15 +314,16 @@
       📄 StreamingAvailability.jsx
       📄 StreamingIndicator.jsx
     📂 toasts/
-      📄 index.js
+      📄 index.jsx
       📄 Toast.jsx
       📄 ToastContainer.jsx
       📄 ToastContext.jsx
   📂 utils/
     📄 api.js
-    📄 AuthContext.js
-  📄 App.js
-  📄 index.js
-  📄 reportWebVitals.js
+    📄 AuthContext.jsx
+  📄 App.jsx
+  📄 index.jsx
+📄 index.html
+📄 vite.config.js
 ```
 
