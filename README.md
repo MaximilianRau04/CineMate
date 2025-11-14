@@ -201,7 +201,7 @@ npm install
 
 ```bash
 # Start development server
-npm start
+npm run dev
 
 # Build for production
 npm run build
