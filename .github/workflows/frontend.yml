@@ -25,9 +25,9 @@ jobs:
         working-directory: frontend
         run: npm ci
 
-      - name: Format code with Prettier
+      - name: Check code formatting with Prettier
         working-directory: frontend
-        run: npx prettier --write "**/*.{js,ts,tsx,json,css,scss,md}"
+        run: npx prettier --check "**/*.{js,ts,jsx,json,css,html,md}"
 
       - name: Build project
         working-directory: frontend
