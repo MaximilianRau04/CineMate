@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { FaTrophy, FaMedal, FaStar, FaLock, FaUnlock } from 'react-icons/fa';
-import '../../assets/achievements.css';
+import React, { useState, useEffect } from "react";
+import { FaTrophy, FaMedal, FaStar, FaLock, FaUnlock } from "react-icons/fa";
+import "../../assets/achievements.css";
 
 const AchievementsPage = ({ userId }) => {
   const [userAchievements, setUserAchievements] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('unlocked');
+  const [activeTab, setActiveTab] = useState("unlocked");
 
   /**
    * Fetch user achievements and stats from the API.
@@ -15,12 +15,9 @@ const AchievementsPage = ({ userId }) => {
     const loadAchievements = async () => {
       setLoading(true);
       try {
-        await Promise.all([
-          loadUserAchievements(),
-          loadAchievementStats()
-        ]);
+        await Promise.all([loadUserAchievements(), loadAchievementStats()]);
       } catch (error) {
-        console.error('Error loading achievements:', error);
+        console.error("Error loading achievements:", error);
       } finally {
         setLoading(false);
       }
@@ -31,16 +28,19 @@ const AchievementsPage = ({ userId }) => {
      */
     const loadUserAchievements = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:8080/api/achievements/user/${userId}`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {}
-        });
+        const token = localStorage.getItem("token");
+        const response = await fetch(
+          `http://localhost:8080/api/achievements/user/${userId}`,
+          {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          },
+        );
         if (response.ok) {
           const data = await response.json();
           setUserAchievements(data);
         }
       } catch (error) {
-        console.error('Error loading user achievements:', error);
+        console.error("Error loading user achievements:", error);
       }
     };
 
@@ -49,16 +49,19 @@ const AchievementsPage = ({ userId }) => {
      */
     const loadAchievementStats = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:8080/api/achievements/user/${userId}/stats`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {}
-        });
+        const token = localStorage.getItem("token");
+        const response = await fetch(
+          `http://localhost:8080/api/achievements/user/${userId}/stats`,
+          {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          },
+        );
         if (response.ok) {
           const data = await response.json();
           setStats(data);
         }
       } catch (error) {
-        console.error('Error loading achievement stats:', error);
+        console.error("Error loading achievement stats:", error);
       }
     };
 
@@ -69,18 +72,18 @@ const AchievementsPage = ({ userId }) => {
 
   /**
    * Get the badge icon for a specific achievement.
-   * @param {*} achievement 
+   * @param {*} achievement
    * @returns {JSX.Element} The icon component for the achievement type.
    */
   const getBadgeIcon = (achievement) => {
     switch (achievement.type) {
-      case 'REVIEWS':
+      case "REVIEWS":
         return <FaStar className="achievement-icon" />;
-      case 'MOVIES_WATCHED':
-      case 'SERIES_WATCHED':
+      case "MOVIES_WATCHED":
+      case "SERIES_WATCHED":
         return <FaTrophy className="achievement-icon" />;
-      case 'FORUM_POSTS':
-      case 'FRIENDS':
+      case "FORUM_POSTS":
+      case "FRIENDS":
         return <FaMedal className="achievement-icon" />;
       default:
         return <FaTrophy className="achievement-icon" />;
@@ -89,34 +92,34 @@ const AchievementsPage = ({ userId }) => {
 
   /**
    * Get the badge class for a specific badge color.
-   * @param {*} badgeColor 
+   * @param {*} badgeColor
    * @returns {string} The CSS class for the badge color.
    */
   const getBadgeClass = (badgeColor) => {
     switch (badgeColor) {
-      case 'badge-warning':
-        return 'achievement-badge-warning';
-      case 'badge-primary':
-        return 'achievement-badge-primary';
-      case 'badge-info':
-        return 'achievement-badge-info';
-      case 'badge-success':
-        return 'achievement-badge-success';
-      case 'badge-danger':
-        return 'achievement-badge-danger';
-      case 'badge-gold':
-        return 'achievement-badge-gold';
+      case "badge-warning":
+        return "achievement-badge-warning";
+      case "badge-primary":
+        return "achievement-badge-primary";
+      case "badge-info":
+        return "achievement-badge-info";
+      case "badge-success":
+        return "achievement-badge-success";
+      case "badge-danger":
+        return "achievement-badge-danger";
+      case "badge-gold":
+        return "achievement-badge-gold";
       default:
-        return 'achievement-badge-secondary';
+        return "achievement-badge-secondary";
     }
   };
 
   const getUnlockedAchievements = () => {
-    return userAchievements.filter(ua => ua.unlocked);
+    return userAchievements.filter((ua) => ua.unlocked);
   };
 
   const getInProgressAchievements = () => {
-    return userAchievements.filter(ua => !ua.unlocked);
+    return userAchievements.filter((ua) => !ua.unlocked);
   };
 
   const renderAchievementCard = (userAchievement, isUnlocked = true) => {
@@ -124,30 +127,40 @@ const AchievementsPage = ({ userId }) => {
     const progressPercentage = userAchievement.progressPercentage || 0;
 
     return (
-      <div key={userAchievement.id} className={`achievement-card ${isUnlocked ? 'unlocked' : 'locked'}`}>
-        <div className={`achievement-badge ${getBadgeClass(achievement.badgeColor)}`}>
-          {isUnlocked ? <FaUnlock className="unlock-icon" /> : <FaLock className="lock-icon" />}
+      <div
+        key={userAchievement.id}
+        className={`achievement-card ${isUnlocked ? "unlocked" : "locked"}`}
+      >
+        <div
+          className={`achievement-badge ${getBadgeClass(achievement.badgeColor)}`}
+        >
+          {isUnlocked ? (
+            <FaUnlock className="unlock-icon" />
+          ) : (
+            <FaLock className="lock-icon" />
+          )}
           {getBadgeIcon(achievement)}
         </div>
-        
+
         <div className="achievement-content">
           <h5 className="achievement-title">{achievement.title}</h5>
           <p className="achievement-description">{achievement.description}</p>
-          
+
           {!isUnlocked && (
             <div className="progress-container">
               <div className="progress">
-                <div 
+                <div
                   className="progress-bar"
                   style={{ width: `${progressPercentage}%` }}
                 ></div>
               </div>
               <small className="progress-text">
-                {userAchievement.progress} / {achievement.threshold} ({progressPercentage.toFixed(1)}%)
+                {userAchievement.progress} / {achievement.threshold} (
+                {progressPercentage.toFixed(1)}%)
               </small>
             </div>
           )}
-          
+
           <div className="achievement-footer">
             <span className="achievement-points">
               <FaTrophy className="me-1" />
@@ -155,7 +168,10 @@ const AchievementsPage = ({ userId }) => {
             </span>
             {isUnlocked && userAchievement.unlockedAt && (
               <small className="text-muted">
-                Freigeschaltet: {new Date(userAchievement.unlockedAt).toLocaleDateString('de-DE')}
+                Freigeschaltet:{" "}
+                {new Date(userAchievement.unlockedAt).toLocaleDateString(
+                  "de-DE",
+                )}
               </small>
             )}
           </div>
@@ -219,18 +235,18 @@ const AchievementsPage = ({ userId }) => {
           <div className="col-12">
             <ul className="nav nav-tabs achievement-tabs">
               <li className="nav-item">
-                <button 
-                  className={`nav-link ${activeTab === 'unlocked' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('unlocked')}
+                <button
+                  className={`nav-link ${activeTab === "unlocked" ? "active" : ""}`}
+                  onClick={() => setActiveTab("unlocked")}
                 >
                   <FaUnlock className="me-2" />
                   Freigeschaltet ({getUnlockedAchievements().length})
                 </button>
               </li>
               <li className="nav-item">
-                <button 
-                  className={`nav-link ${activeTab === 'progress' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('progress')}
+                <button
+                  className={`nav-link ${activeTab === "progress" ? "active" : ""}`}
+                  onClick={() => setActiveTab("progress")}
                 >
                   <FaLock className="me-2" />
                   In Bearbeitung ({getInProgressAchievements().length})
@@ -244,26 +260,33 @@ const AchievementsPage = ({ userId }) => {
         <div className="row">
           <div className="col-12">
             <div className="achievements-grid">
-              {activeTab === 'unlocked' ? (
+              {activeTab === "unlocked" ? (
                 getUnlockedAchievements().length > 0 ? (
-                  getUnlockedAchievements().map(ua => renderAchievementCard(ua, true))
+                  getUnlockedAchievements().map((ua) =>
+                    renderAchievementCard(ua, true),
+                  )
                 ) : (
                   <div className="text-center py-5">
                     <FaTrophy className="text-muted display-1 mb-3" />
                     <h4>Noch keine Achievements freigeschaltet</h4>
-                    <p className="text-muted">Schaue Filme, schreibe Reviews und sammle Freunde, um deine ersten Achievements zu bekommen!</p>
+                    <p className="text-muted">
+                      Schaue Filme, schreibe Reviews und sammle Freunde, um
+                      deine ersten Achievements zu bekommen!
+                    </p>
                   </div>
+                )
+              ) : getInProgressAchievements().length > 0 ? (
+                getInProgressAchievements().map((ua) =>
+                  renderAchievementCard(ua, false),
                 )
               ) : (
-                getInProgressAchievements().length > 0 ? (
-                  getInProgressAchievements().map(ua => renderAchievementCard(ua, false))
-                ) : (
-                  <div className="text-center py-5">
-                    <FaMedal className="text-muted display-1 mb-3" />
-                    <h4>Alle Achievements freigeschaltet!</h4>
-                    <p className="text-muted">Du hast alle verfügbaren Achievements erreicht. Glückwunsch!</p>
-                  </div>
-                )
+                <div className="text-center py-5">
+                  <FaMedal className="text-muted display-1 mb-3" />
+                  <h4>Alle Achievements freigeschaltet!</h4>
+                  <p className="text-muted">
+                    Du hast alle verfügbaren Achievements erreicht. Glückwunsch!
+                  </p>
+                </div>
               )}
             </div>
           </div>

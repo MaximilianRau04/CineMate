@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Line, Bar, Doughnut } from 'react-chartjs-2';
+import React, { useState, useEffect } from "react";
+import { Line, Bar, Doughnut } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -11,9 +11,9 @@ import {
   Tooltip,
   Legend,
   ArcElement,
-} from 'chart.js';
-import { useToast } from '../toasts/ToastContext';
-import '../../assets/statistics.css';
+} from "chart.js";
+import { useToast } from "../toasts/ToastContext";
+import "../../assets/statistics.css";
 
 ChartJS.register(
   CategoryScale,
@@ -24,14 +24,14 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  ArcElement
+  ArcElement,
 );
 
 const UserStatistics = ({ userId }) => {
   const [statistics, setStatistics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedPeriod, setSelectedPeriod] = useState('year'); 
+  const [selectedPeriod, setSelectedPeriod] = useState("year");
   const [compareMode, setCompareMode] = useState(false);
   const [friendsStats, setFriendsStats] = useState([]);
   const { error: showError } = useToast();
@@ -44,23 +44,26 @@ const UserStatistics = ({ userId }) => {
     setLoading(true);
     try {
       const getHeaders = (extra = {}) => {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem("token");
         return token ? { Authorization: `Bearer ${token}`, ...extra } : extra;
       };
-      const response = await fetch(`http://localhost:8080/api/statistics/users/${userId}?period=${selectedPeriod}`, {
-        headers: getHeaders()
-      });
+      const response = await fetch(
+        `http://localhost:8080/api/statistics/users/${userId}?period=${selectedPeriod}`,
+        {
+          headers: getHeaders(),
+        },
+      );
 
       if (response.ok) {
         const data = await response.json();
         setStatistics(data);
       } else {
-        throw new Error('Fehler beim Laden der Statistiken');
+        throw new Error("Fehler beim Laden der Statistiken");
       }
     } catch (err) {
-      console.error('Error fetching statistics:', err);
+      console.error("Error fetching statistics:", err);
       setError(err.message);
-      showError('Fehler beim Laden der Statistiken');
+      showError("Fehler beim Laden der Statistiken");
     } finally {
       setLoading(false);
     }
@@ -79,29 +82,32 @@ const UserStatistics = ({ userId }) => {
   const fetchFriendsComparison = async () => {
     try {
       const getHeaders = (extra = {}) => {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem("token");
         return token ? { Authorization: `Bearer ${token}`, ...extra } : extra;
       };
 
-      const response = await fetch(`http://localhost:8080/api/statistics/users/${userId}/friends-comparison`, {
-        headers: getHeaders()
-      });
+      const response = await fetch(
+        `http://localhost:8080/api/statistics/users/${userId}/friends-comparison`,
+        {
+          headers: getHeaders(),
+        },
+      );
 
       if (response.ok) {
         const data = await response.json();
         setFriendsStats(data);
       } else if (response.status === 404) {
-        console.warn('Friends comparison endpoint not found');
-        showError('Freunde-Vergleich ist momentan nicht verfügbar');
+        console.warn("Friends comparison endpoint not found");
+        showError("Freunde-Vergleich ist momentan nicht verfügbar");
         setFriendsStats([]);
       } else {
-        console.error('Error response:', response.status, response.statusText);
-        showError('Fehler beim Laden der Freunde-Statistiken');
+        console.error("Error response:", response.status, response.statusText);
+        showError("Fehler beim Laden der Freunde-Statistiken");
         setFriendsStats([]);
       }
     } catch (err) {
-      console.error('Error fetching friends stats:', err);
-      showError('Fehler beim Laden der Freunde-Statistiken');
+      console.error("Error fetching friends stats:", err);
+      showError("Fehler beim Laden der Freunde-Statistiken");
       setFriendsStats([]);
     }
   };
@@ -125,7 +131,10 @@ const UserStatistics = ({ userId }) => {
         <div className="alert alert-danger" role="alert">
           <h4 className="alert-heading">Fehler</h4>
           <p>{error}</p>
-          <button className="btn btn-outline-danger" onClick={fetchUserStatistics}>
+          <button
+            className="btn btn-outline-danger"
+            onClick={fetchUserStatistics}
+          >
             Erneut versuchen
           </button>
         </div>
@@ -135,74 +144,77 @@ const UserStatistics = ({ userId }) => {
 
   // Chart data configurations
   const watchTimeData = {
-    labels: statistics?.monthlyActivity?.map(item => item.month) || [],
+    labels: statistics?.monthlyActivity?.map((item) => item.month) || [],
     datasets: [
       {
-        label: 'Stunden geschaut',
-        data: statistics?.monthlyActivity?.map(item => item.hours) || [],
-        borderColor: 'rgb(75, 192, 192)',
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-        tension: 0.1
-      }
-    ]
+        label: "Stunden geschaut",
+        data: statistics?.monthlyActivity?.map((item) => item.hours) || [],
+        borderColor: "rgb(75, 192, 192)",
+        backgroundColor: "rgba(75, 192, 192, 0.2)",
+        tension: 0.1,
+      },
+    ],
   };
 
   // Top genres and actors data
   const genreData = {
-    labels: statistics?.topGenres?.map(genre => genre.name) || [],
+    labels: statistics?.topGenres?.map((genre) => genre.name) || [],
     datasets: [
       {
-        data: statistics?.topGenres?.map(genre => genre.count) || [],
+        data: statistics?.topGenres?.map((genre) => genre.count) || [],
         backgroundColor: [
-          '#FF6384',
-          '#36A2EB',
-          '#FFCE56',
-          '#4BC0C0',
-          '#9966FF',
-          '#FF9F40',
-          '#FF6384',
-          '#C9CBCF'
+          "#FF6384",
+          "#36A2EB",
+          "#FFCE56",
+          "#4BC0C0",
+          "#9966FF",
+          "#FF9F40",
+          "#FF6384",
+          "#C9CBCF",
         ],
         hoverBackgroundColor: [
-          '#FF6384',
-          '#36A2EB',
-          '#FFCE56',
-          '#4BC0C0',
-          '#9966FF',
-          '#FF9F40',
-          '#FF6384',
-          '#C9CBCF'
-        ]
-      }
-    ]
+          "#FF6384",
+          "#36A2EB",
+          "#FFCE56",
+          "#4BC0C0",
+          "#9966FF",
+          "#FF9F40",
+          "#FF6384",
+          "#C9CBCF",
+        ],
+      },
+    ],
   };
 
   // Favorite actors data
   const actorData = {
-    labels: statistics?.favoriteActors?.map(actor => actor.name) || [],
+    labels: statistics?.favoriteActors?.map((actor) => actor.name) || [],
     datasets: [
       {
-        label: 'Anzahl Filme/Serien',
-        data: statistics?.favoriteActors?.map(actor => actor.count) || [],
-        backgroundColor: 'rgba(54, 162, 235, 0.6)',
-        borderColor: 'rgba(54, 162, 235, 1)',
-        borderWidth: 1
-      }
-    ]
+        label: "Anzahl Filme/Serien",
+        data: statistics?.favoriteActors?.map((actor) => actor.count) || [],
+        backgroundColor: "rgba(54, 162, 235, 0.6)",
+        borderColor: "rgba(54, 162, 235, 1)",
+        borderWidth: 1,
+      },
+    ],
   };
 
   // Favorite directors data
   const directorData = {
-    labels: statistics?.favoriteDirectors?.map(director => director.name) || [],
+    labels:
+      statistics?.favoriteDirectors?.map((director) => director.name) || [],
     datasets: [
       {
-        label: 'Anzahl Filme/Serien',
-        data: statistics?.favoriteDirectors?.map(director => director.count) || [],
-        backgroundColor: 'rgba(255, 206, 86, 0.6)',
-        borderColor: 'rgba(255, 206, 86, 1)',
-        borderWidth: 1
-      }
-    ]
+        label: "Anzahl Filme/Serien",
+        data:
+          statistics?.favoriteDirectors?.map((director) => director.count) ||
+          [],
+        backgroundColor: "rgba(255, 206, 86, 0.6)",
+        borderColor: "rgba(255, 206, 86, 1)",
+        borderWidth: 1,
+      },
+    ],
   };
 
   // Chart options
@@ -211,7 +223,7 @@ const UserStatistics = ({ userId }) => {
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: 'top',
+        position: "top",
       },
     },
   };
@@ -222,7 +234,7 @@ const UserStatistics = ({ userId }) => {
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: 'top',
+        position: "top",
       },
     },
     scales: {
@@ -230,10 +242,10 @@ const UserStatistics = ({ userId }) => {
         beginAtZero: true,
         ticks: {
           stepSize: 1,
-          precision: 0
-        }
-      }
-    }
+          precision: 0,
+        },
+      },
+    },
   };
 
   return (
@@ -247,7 +259,7 @@ const UserStatistics = ({ userId }) => {
         </div>
         <div className="col-md-4">
           <div className="d-flex gap-2">
-            <select 
+            <select
               className="form-select"
               value={selectedPeriod}
               onChange={(e) => setSelectedPeriod(e.target.value)}
@@ -256,8 +268,8 @@ const UserStatistics = ({ userId }) => {
               <option value="year">Letztes Jahr</option>
               <option value="all">Insgesamt</option>
             </select>
-            <button 
-              className={`btn ${compareMode ? 'btn-primary' : 'btn-outline-primary'}`}
+            <button
+              className={`btn ${compareMode ? "btn-primary" : "btn-outline-primary"}`}
               onClick={() => {
                 setCompareMode(!compareMode);
                 if (!compareMode) fetchFriendsComparison();
@@ -303,7 +315,7 @@ const UserStatistics = ({ userId }) => {
           <div className="card bg-warning text-dark">
             <div className="card-body text-center">
               <i className="bi bi-star display-4 mb-2"></i>
-              <h3>{statistics?.averageRating?.toFixed(1) || 'N/A'}</h3>
+              <h3>{statistics?.averageRating?.toFixed(1) || "N/A"}</h3>
               <p className="mb-0">Ø Bewertung</p>
             </div>
           </div>
@@ -320,7 +332,7 @@ const UserStatistics = ({ userId }) => {
                 Aktivität über Zeit
               </h5>
             </div>
-            <div className="card-body" style={{ height: '400px' }}>
+            <div className="card-body" style={{ height: "400px" }}>
               <Line data={watchTimeData} options={chartOptions} />
             </div>
           </div>
@@ -333,7 +345,7 @@ const UserStatistics = ({ userId }) => {
                 Top Genres
               </h5>
             </div>
-            <div className="card-body" style={{ height: '400px' }}>
+            <div className="card-body" style={{ height: "400px" }}>
               <Doughnut data={genreData} options={chartOptions} />
             </div>
           </div>
@@ -350,7 +362,7 @@ const UserStatistics = ({ userId }) => {
                 Lieblings-Schauspieler
               </h5>
             </div>
-            <div className="card-body" style={{ height: '400px' }}>
+            <div className="card-body" style={{ height: "400px" }}>
               <Bar data={actorData} options={barChartOptions} />
             </div>
           </div>
@@ -363,7 +375,7 @@ const UserStatistics = ({ userId }) => {
                 Lieblings-Regisseure
               </h5>
             </div>
-            <div className="card-body" style={{ height: '400px' }}>
+            <div className="card-body" style={{ height: "400px" }}>
               <Bar data={directorData} options={barChartOptions} />
             </div>
           </div>
@@ -395,19 +407,23 @@ const UserStatistics = ({ userId }) => {
                     </thead>
                     <tbody>
                       <tr className="table-primary">
-                        <td><strong>Du</strong></td>
+                        <td>
+                          <strong>Du</strong>
+                        </td>
                         <td>{statistics?.totalHoursWatched || 0}</td>
                         <td>{statistics?.totalMoviesWatched || 0}</td>
                         <td>{statistics?.totalSeriesWatched || 0}</td>
-                        <td>{statistics?.averageRating?.toFixed(1) || 'N/A'}</td>
+                        <td>
+                          {statistics?.averageRating?.toFixed(1) || "N/A"}
+                        </td>
                       </tr>
-                      {friendsStats.map(friend => (
+                      {friendsStats.map((friend) => (
                         <tr key={friend.userId}>
                           <td>{friend.username}</td>
                           <td>{friend.totalHoursWatched || 0}</td>
                           <td>{friend.totalMoviesWatched || 0}</td>
                           <td>{friend.totalSeriesWatched || 0}</td>
-                          <td>{friend.averageRating?.toFixed(1) || 'N/A'}</td>
+                          <td>{friend.averageRating?.toFixed(1) || "N/A"}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -431,13 +447,17 @@ const UserStatistics = ({ userId }) => {
             </div>
             <div className="card-body">
               {statistics?.recentActivity?.length > 0 ? (
-                <div className="list-group" style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                <div
+                  className="list-group"
+                  style={{ maxHeight: "400px", overflowY: "auto" }}
+                >
                   {statistics.recentActivity.map((activity, index) => (
                     <div key={index} className="list-group-item">
                       <div className="d-flex justify-content-between align-items-center">
                         <div>
                           <h6 className="mb-1">
-                            {activity.type === 'movie' ? '🎬' : '📺'} {activity.title}
+                            {activity.type === "movie" ? "🎬" : "📺"}{" "}
+                            {activity.title}
                           </h6>
                           <p className="mb-1 text-muted">{activity.action}</p>
                         </div>
@@ -445,33 +465,45 @@ const UserStatistics = ({ userId }) => {
                           {(() => {
                             try {
                               let date;
-                              
+
                               // Handle date formats
                               if (Array.isArray(activity.date)) {
-                                const [year, month, day, hour, minute, second] = activity.date;
-                                date = new Date(year, month - 1, day, hour, minute, second);
-                              } else if (typeof activity.date === 'number') {
+                                const [year, month, day, hour, minute, second] =
+                                  activity.date;
+                                date = new Date(
+                                  year,
+                                  month - 1,
+                                  day,
+                                  hour,
+                                  minute,
+                                  second,
+                                );
+                              } else if (typeof activity.date === "number") {
                                 date = new Date(activity.date);
                               } else {
                                 date = new Date(activity.date);
                               }
-                              
+
                               if (isNaN(date.getTime())) {
-                                console.error('Invalid date:', activity.date);
-                                return 'Datum nicht verfügbar';
+                                console.error("Invalid date:", activity.date);
+                                return "Datum nicht verfügbar";
                               }
-                              
+
                               // Format the date to german locale
-                              return date.toLocaleDateString('de-DE', {
-                                year: 'numeric',
-                                month: '2-digit',
-                                day: '2-digit',
-                                hour: '2-digit',
-                                minute: '2-digit'
+                              return date.toLocaleDateString("de-DE", {
+                                year: "numeric",
+                                month: "2-digit",
+                                day: "2-digit",
+                                hour: "2-digit",
+                                minute: "2-digit",
                               });
                             } catch (error) {
-                              console.error('Date parsing error:', error, activity.date);
-                              return 'Datum nicht verfügbar';
+                              console.error(
+                                "Date parsing error:",
+                                error,
+                                activity.date,
+                              );
+                              return "Datum nicht verfügbar";
                             }
                           })()}
                         </small>

@@ -7,7 +7,7 @@ const PersonForm = ({ person, onChange }) => (
       <input
         type="text"
         className="form-control"
-        value={person.name || ''}
+        value={person.name || ""}
         onChange={(e) => onChange({ ...person, name: e.target.value })}
       />
     </div>
@@ -16,9 +16,11 @@ const PersonForm = ({ person, onChange }) => (
       <input
         type="date"
         className="form-control"
-        value={formatDateForInput(person.birthday) || ''}
+        value={formatDateForInput(person.birthday) || ""}
         onChange={(e) => {
-          const date = e.target.value ? new Date(e.target.value).getTime() : null;
+          const date = e.target.value
+            ? new Date(e.target.value).getTime()
+            : null;
           onChange({ ...person, birthday: date });
         }}
       />
@@ -28,7 +30,7 @@ const PersonForm = ({ person, onChange }) => (
       <input
         type="text"
         className="form-control"
-        value={person.image || ''}
+        value={person.image || ""}
         onChange={(e) => onChange({ ...person, image: e.target.value })}
       />
     </div>
@@ -37,7 +39,7 @@ const PersonForm = ({ person, onChange }) => (
       <textarea
         className="form-control"
         rows="4"
-        value={person.biography || ''}
+        value={person.biography || ""}
         onChange={(e) => onChange({ ...person, biography: e.target.value })}
       />
     </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useToast } from '../toasts';
+import { useToast } from "../toasts";
 import "./css/ForumPostDetail.css";
 
 const ForumPostDetail = () => {
@@ -57,7 +57,7 @@ const ForumPostDetail = () => {
         `http://localhost:8080/api/forum/posts/${postId}`,
         {
           headers,
-        }
+        },
       );
 
       if (!response.ok) {
@@ -86,7 +86,7 @@ const ForumPostDetail = () => {
 
       const response = await fetch(
         `http://localhost:8080/api/forum/posts/${postId}/replies?page=${currentPage}&size=10`,
-        { headers }
+        { headers },
       );
       if (!response.ok) {
         throw new Error("Failed to fetch replies");
@@ -116,7 +116,7 @@ const ForumPostDetail = () => {
         `http://localhost:8080/api/forum/posts/${postId}/subscription-status`,
         {
           headers,
-        }
+        },
       );
 
       if (response.ok) {
@@ -167,23 +167,29 @@ const ForumPostDetail = () => {
    */
   const fetchMediaInfo = async () => {
     if (!post) return;
-    
+
     try {
       if (post.movieId) {
         const token = localStorage.getItem("token");
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        const response = await fetch(`http://localhost:8080/api/movies/${post.movieId}`, { headers });
+        const response = await fetch(
+          `http://localhost:8080/api/movies/${post.movieId}`,
+          { headers },
+        );
         if (response.ok) {
           const movie = await response.json();
-          setMediaInfo({ type: 'movie', data: movie });
+          setMediaInfo({ type: "movie", data: movie });
         }
       } else if (post.seriesId) {
         const token = localStorage.getItem("token");
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        const response = await fetch(`http://localhost:8080/api/series/${post.seriesId}`, { headers });
+        const response = await fetch(
+          `http://localhost:8080/api/series/${post.seriesId}`,
+          { headers },
+        );
         if (response.ok) {
           const series = await response.json();
-          setMediaInfo({ type: 'series', data: series });
+          setMediaInfo({ type: "series", data: series });
         }
       } else {
         setMediaInfo(null);
@@ -212,7 +218,7 @@ const ForumPostDetail = () => {
           {
             method: "DELETE",
             headers: token ? { Authorization: `Bearer ${token}` } : {},
-          }
+          },
         );
       } else {
         // Subscribe
@@ -221,7 +227,7 @@ const ForumPostDetail = () => {
           {
             method: "POST",
             headers: token ? { Authorization: `Bearer ${token}` } : {},
-          }
+          },
         );
       }
 
@@ -237,7 +243,7 @@ const ForumPostDetail = () => {
         console.error(
           "Subscription toggle failed:",
           response.status,
-          errorText
+          errorText,
         );
         showError("Fehler beim Ändern des Abonnement-Status");
       }
@@ -264,7 +270,10 @@ const ForumPostDetail = () => {
       };
 
       const headers = token
-        ? { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
+        ? {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          }
         : { "Content-Type": "application/json" };
 
       const response = await fetch(
@@ -273,7 +282,7 @@ const ForumPostDetail = () => {
           method: "POST",
           headers,
           body: JSON.stringify(replyData),
-        }
+        },
       );
 
       if (response.ok) {
@@ -306,7 +315,7 @@ const ForumPostDetail = () => {
         {
           method: method,
           headers: token ? { Authorization: `Bearer ${token}` } : {},
-        }
+        },
       );
 
       if (response.ok) {
@@ -374,7 +383,7 @@ const ForumPostDetail = () => {
    */
   const canDelete = (author) => {
     if (!currentUser) return false;
-    return currentUser.id === author.id || currentUser.role === 'ADMIN';
+    return currentUser.id === author.id || currentUser.role === "ADMIN";
   };
 
   /**
@@ -385,7 +394,10 @@ const ForumPostDetail = () => {
     try {
       const token = localStorage.getItem("token");
       const headers = token
-        ? { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
+        ? {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          }
         : { "Content-Type": "application/json" };
 
       const response = await fetch(
@@ -398,12 +410,12 @@ const ForumPostDetail = () => {
             content: editPostContent,
             category: post.category,
           }),
-        }
+        },
       );
 
       if (response.ok) {
         setEditingPost(false);
-        fetchPost(); 
+        fetchPost();
         success("Beitrag erfolgreich bearbeitet!");
       } else {
         showError("Fehler beim Bearbeiten des Beitrags");
@@ -425,10 +437,11 @@ const ForumPostDetail = () => {
 
     try {
       const token = localStorage.getItem("token");
-      const endpoint = currentUser.role === 'ADMIN' 
-        ? `http://localhost:8080/api/forum/admin/posts/${postId}`
-        : `http://localhost:8080/api/forum/posts/${postId}`;
-      
+      const endpoint =
+        currentUser.role === "ADMIN"
+          ? `http://localhost:8080/api/forum/admin/posts/${postId}`
+          : `http://localhost:8080/api/forum/posts/${postId}`;
+
       const response = await fetch(endpoint, {
         method: "DELETE",
         headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -455,7 +468,10 @@ const ForumPostDetail = () => {
     try {
       const token = localStorage.getItem("token");
       const headers = token
-        ? { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
+        ? {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          }
         : { "Content-Type": "application/json" };
 
       const response = await fetch(
@@ -466,7 +482,7 @@ const ForumPostDetail = () => {
           body: JSON.stringify({
             content: editReplyContent,
           }),
-        }
+        },
       );
 
       if (response.ok) {
@@ -500,11 +516,11 @@ const ForumPostDetail = () => {
         {
           method: "DELETE",
           headers: token ? { Authorization: `Bearer ${token}` } : {},
-        }
+        },
       );
 
       if (response.ok) {
-        fetchReplies(); 
+        fetchReplies();
         success("Antwort erfolgreich gelöscht!");
       } else {
         showError("Fehler beim Löschen der Antwort");
@@ -654,14 +670,14 @@ const ForumPostDetail = () => {
               <div className="media-card">
                 <div className="media-poster">
                   {mediaInfo.data.posterUrl ? (
-                    <img 
-                      src={mediaInfo.data.posterUrl} 
+                    <img
+                      src={mediaInfo.data.posterUrl}
                       alt={mediaInfo.data.title || mediaInfo.data.name}
                       className="poster-image"
                     />
                   ) : (
                     <div className="poster-placeholder">
-                      {mediaInfo.type === 'movie' ? '🎬' : '📺'}
+                      {mediaInfo.type === "movie" ? "🎬" : "📺"}
                     </div>
                   )}
                 </div>
@@ -670,33 +686,39 @@ const ForumPostDetail = () => {
                     {mediaInfo.data.title || mediaInfo.data.name}
                   </h5>
                   <p className="media-type">
-                    {mediaInfo.type === 'movie' ? 'Film' : 'Serie'}
-                    {mediaInfo.data.releaseYear && ` • ${mediaInfo.data.releaseYear}`}
+                    {mediaInfo.type === "movie" ? "Film" : "Serie"}
+                    {mediaInfo.data.releaseYear &&
+                      ` • ${mediaInfo.data.releaseYear}`}
                   </p>
                   {mediaInfo.data.overview && (
                     <p className="media-description">
-                      {mediaInfo.data.overview.length > 150 
+                      {mediaInfo.data.overview.length > 150
                         ? `${mediaInfo.data.overview.substring(0, 150)}...`
-                        : mediaInfo.data.overview
-                      }
+                        : mediaInfo.data.overview}
                     </p>
                   )}
                   <div className="media-actions">
-                    <button 
+                    <button
                       className="view-media-btn"
-                      onClick={() => navigate(
-                        mediaInfo.type === 'movie' 
-                          ? `/movies/${mediaInfo.data.id}` 
-                          : `/series/${mediaInfo.data.id}`
-                      )}
+                      onClick={() =>
+                        navigate(
+                          mediaInfo.type === "movie"
+                            ? `/movies/${mediaInfo.data.id}`
+                            : `/series/${mediaInfo.data.id}`,
+                        )
+                      }
                     >
-                      {mediaInfo.type === 'movie' ? 'Film ansehen' : 'Serie ansehen'}
+                      {mediaInfo.type === "movie"
+                        ? "Film ansehen"
+                        : "Serie ansehen"}
                     </button>
-                    <button 
+                    <button
                       className="find-similar-btn"
-                      onClick={() => navigate(
-                        `/forum?${mediaInfo.type}Id=${mediaInfo.data.id}`
-                      )}
+                      onClick={() =>
+                        navigate(
+                          `/forum?${mediaInfo.type}Id=${mediaInfo.data.id}`,
+                        )
+                      }
                     >
                       Ähnliche Posts finden
                     </button>
@@ -812,8 +834,8 @@ const ForumPostDetail = () => {
                     {(canEdit(reply.author) || canDelete(reply.author)) && (
                       <div className="reply-actions">
                         {canEdit(reply.author) && (
-                          <button 
-                            onClick={() => startEditingReply(reply)} 
+                          <button
+                            onClick={() => startEditingReply(reply)}
                             className="edit-reply-btn"
                             title="Antwort bearbeiten"
                           >
@@ -821,8 +843,8 @@ const ForumPostDetail = () => {
                           </button>
                         )}
                         {canDelete(reply.author) && (
-                          <button 
-                            onClick={() => handleDeleteReply(reply.id)} 
+                          <button
+                            onClick={() => handleDeleteReply(reply.id)}
                             className="delete-reply-btn"
                             title="Antwort löschen"
                           >
@@ -842,14 +864,14 @@ const ForumPostDetail = () => {
                           rows="3"
                         />
                         <div className="edit-reply-actions">
-                          <button 
-                            onClick={() => handleEditReply(reply.id)} 
+                          <button
+                            onClick={() => handleEditReply(reply.id)}
                             className="save-reply-btn"
                           >
                             Speichern
                           </button>
-                          <button 
-                            onClick={cancelEditing} 
+                          <button
+                            onClick={cancelEditing}
                             className="cancel-reply-btn"
                           >
                             Abbrechen

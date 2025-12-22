@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
 
-export const useMediaDetail = (mediaType = 'movies') => {
+export const useMediaDetail = (mediaType = "movies") => {
   const { id: mediaId } = useParams();
   const [media, setMedia] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -14,7 +14,8 @@ export const useMediaDetail = (mediaType = 'movies') => {
   const [castLoading, setCastLoading] = useState(true);
 
   const getHeaders = (extra = {}) => {
-    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    const token =
+      typeof window !== "undefined" ? localStorage.getItem("token") : null;
     return token ? { Authorization: `Bearer ${token}`, ...extra } : extra;
   };
 
@@ -29,7 +30,9 @@ export const useMediaDetail = (mediaType = 'movies') => {
     fetch("http://localhost:8080/api/users/me", {
       headers: getHeaders(),
     })
-      .then((res) => res.ok ? res.json() : Promise.reject(`HTTP Error: ${res.status}`))
+      .then((res) =>
+        res.ok ? res.json() : Promise.reject(`HTTP Error: ${res.status}`),
+      )
       .then((data) => {
         if (data?.id) {
           setUserId(data.id);
@@ -55,9 +58,9 @@ export const useMediaDetail = (mediaType = 'movies') => {
       .then((res) => {
         if (!res.ok) {
           throw new Error(
-            res.status === 404 
-              ? `${mediaType === 'movies' ? 'Film' : 'Serie'} wurde nicht gefunden`
-              : `${mediaType === 'movies' ? 'Film' : 'Serie'} konnte nicht geladen werden (${res.status})`
+            res.status === 404
+              ? `${mediaType === "movies" ? "Film" : "Serie"} wurde nicht gefunden`
+              : `${mediaType === "movies" ? "Film" : "Serie"} konnte nicht geladen werden (${res.status})`,
           );
         }
         return res.json();
@@ -84,24 +87,31 @@ export const useMediaDetail = (mediaType = 'movies') => {
 
     // read token inside effect to avoid missing dependency warnings
 
-    const fetchActors = fetch(`http://localhost:8080/api/${mediaType}/${mediaId}/actors`, {
-      headers: getHeaders(),
-    })
-      .then((res) => res.ok ? res.json() : [])
+    const fetchActors = fetch(
+      `http://localhost:8080/api/${mediaType}/${mediaId}/actors`,
+      {
+        headers: getHeaders(),
+      },
+    )
+      .then((res) => (res.ok ? res.json() : []))
       .catch(() => []);
 
-    const fetchDirector = fetch(`http://localhost:8080/api/${mediaType}/${mediaId}/director`, {
-      headers: getHeaders(),
-    })
-      .then((res) => res.ok ? res.json() : null)
+    const fetchDirector = fetch(
+      `http://localhost:8080/api/${mediaType}/${mediaId}/director`,
+      {
+        headers: getHeaders(),
+      },
+    )
+      .then((res) => (res.ok ? res.json() : null))
       .catch(() => null);
 
-    Promise.all([fetchActors, fetchDirector])
-      .then(([actorsData, directorData]) => {
+    Promise.all([fetchActors, fetchDirector]).then(
+      ([actorsData, directorData]) => {
         setActors(actorsData || []);
         setDirector(directorData);
         setCastLoading(false);
-      });
+      },
+    );
   }, [mediaId, mediaType]);
 
   return {
@@ -114,13 +124,13 @@ export const useMediaDetail = (mediaType = 'movies') => {
     currentUser,
     actors,
     director,
-    castLoading
+    castLoading,
   };
 };
 
 /**
  * renders stars based on the rating value
- * @param {*} rating 
+ * @param {*} rating
  * @returns stars
  */
 export const renderStars = (rating) => {
@@ -143,7 +153,7 @@ export const renderStars = (rating) => {
 
 /**
  * formats a timestamp to a date string in the format dd.mm.yyyy
- * @param {*} timestamp 
+ * @param {*} timestamp
  * @returns date formatted as dd.mm.yyyy or ""
  */
 export const formatBirthday = (timestamp) => {

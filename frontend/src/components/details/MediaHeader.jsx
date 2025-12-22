@@ -1,4 +1,12 @@
-import { FaPlus, FaCheck, FaArrowLeft, FaEye, FaStar, FaCircle, FaPlay } from "react-icons/fa";
+import {
+  FaPlus,
+  FaCheck,
+  FaArrowLeft,
+  FaEye,
+  FaStar,
+  FaCircle,
+  FaPlay,
+} from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 const MediaHeader = ({
@@ -16,9 +24,8 @@ const MediaHeader = ({
   onAddToWatchlist,
   onMarkAsWatched,
   onAddToFavorites,
-  renderStars
+  renderStars,
 }) => {
-
   if (!media) return null;
 
   if (error) {
@@ -38,43 +45,43 @@ const MediaHeader = ({
 
   const getStatusBadgeStyle = (status) => {
     switch (status?.toLowerCase()) {
-      case 'ongoing':
-      case 'laufend':
-        return 'bg-success';
-      case 'finished':
-      case 'beendet':
-        return 'bg-secondary';
-      case 'cancelled':
-      case 'abgesetzt':
-        return 'bg-danger';
-      case 'returning':
-      case 'zurückkehrend':
-        return 'bg-warning text-dark';
-      case 'in_production':
-      case 'in production':
-      case 'in produktion':
-        return 'bg-info text-dark';
+      case "ongoing":
+      case "laufend":
+        return "bg-success";
+      case "finished":
+      case "beendet":
+        return "bg-secondary";
+      case "cancelled":
+      case "abgesetzt":
+        return "bg-danger";
+      case "returning":
+      case "zurückkehrend":
+        return "bg-warning text-dark";
+      case "in_production":
+      case "in production":
+      case "in produktion":
+        return "bg-info text-dark";
       default:
-        return 'bg-light text-dark';
+        return "bg-light text-dark";
     }
   };
 
   // Helper function to translate status for German display
   const formatStatus = (status) => {
-    if (!status) return '';
+    if (!status) return "";
 
     const statusMap = {
-      'ONGOING': 'Laufend',
-      'ongoing': 'Laufend',
-      'FINISHED': 'Beendet',
-      'finished': 'Beendet',
-      'CANCELLED': 'Abgesetzt',
-      'cancelled': 'Abgesetzt',
-      'RETURNING': 'Zurückkehrend',
-      'returning': 'Zurückkehrend',
-      'IN_PRODUCTION': 'In Produktion',
-      'in_production': 'In Produktion',
-      'in production': 'In Produktion'
+      ONGOING: "Laufend",
+      ongoing: "Laufend",
+      FINISHED: "Beendet",
+      finished: "Beendet",
+      CANCELLED: "Abgesetzt",
+      cancelled: "Abgesetzt",
+      RETURNING: "Zurückkehrend",
+      returning: "Zurückkehrend",
+      IN_PRODUCTION: "In Produktion",
+      in_production: "In Produktion",
+      "in production": "In Produktion",
     };
 
     return statusMap[status] || statusMap[status.toLowerCase()] || status;
@@ -130,7 +137,7 @@ const MediaHeader = ({
             <span className="ms-2">({averageRating.toFixed(1)}/5)</span>
             {reviewCount > 0 && (
               <span className="ms-2 text-muted">
-                ({reviewCount} Bewertung{reviewCount !== 1 ? 'en' : ''})
+                ({reviewCount} Bewertung{reviewCount !== 1 ? "en" : ""})
               </span>
             )}
           </span>
@@ -150,7 +157,7 @@ const MediaHeader = ({
               target="_blank"
               rel="noopener noreferrer"
               className="btn btn-danger"
-              style={{ backgroundColor: '#ff0000', borderColor: '#ff0000' }}
+              style={{ backgroundColor: "#ff0000", borderColor: "#ff0000" }}
             >
               <FaPlay className="me-2" />
               🎬 Trailer ansehen
@@ -180,7 +187,7 @@ const MediaHeader = ({
             <div
               className="alert alert-success d-inline-flex align-items-center px-3 py-2 mb-0"
               role="alert"
-              style={{ color: 'black' }}
+              style={{ color: "black" }}
             >
               <FaCheck className="me-2" />
               In deiner Watchlist!
@@ -208,7 +215,7 @@ const MediaHeader = ({
             <div
               className="alert alert-warning d-inline-flex align-items-center px-3 py-2 mb-0"
               role="alert"
-              style={{ color: 'black' }}
+              style={{ color: "black" }}
             >
               <FaStar className="me-2" />
               In deinen Favoriten!
@@ -236,7 +243,7 @@ const MediaHeader = ({
             <div
               className="alert alert-info d-inline-flex align-items-center px-3 py-2 mb-0"
               role="alert"
-              style={{ color: 'black' }}
+              style={{ color: "black" }}
             >
               <FaEye className="me-2" />
               Als gesehen markiert

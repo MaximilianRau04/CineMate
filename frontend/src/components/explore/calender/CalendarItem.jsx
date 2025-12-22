@@ -1,16 +1,16 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { FaArrowRight } from 'react-icons/fa';
+import React from "react";
+import { Link } from "react-router-dom";
+import { FaArrowRight } from "react-icons/fa";
 
 const CalendarItem = ({ item }) => {
-  const isMovie = item.contentType === 'movie';
+  const isMovie = item.contentType === "movie";
   const linkPath = isMovie ? `/movies/${item.id}` : `/series/${item.id}`;
   const releaseDate = isMovie ? item.releaseDate : item.nextEpisodeDate;
-  
+
   /**
    * formats a date string to "DD.MM.YYYY" format
-   * @param {*} dateString 
-   * @returns {string} - Formatted date string 
+   * @param {*} dateString
+   * @returns {string} - Formatted date string
    */
   const formatDate = (dateString) => {
     if (!dateString) return "Datum unbekannt";
@@ -21,7 +21,7 @@ const CalendarItem = ({ item }) => {
       year: "numeric",
     });
   };
-  
+
   return (
     <Link
       to={linkPath}
@@ -33,7 +33,7 @@ const CalendarItem = ({ item }) => {
             {formatDate(releaseDate)}
           </span>
           <span className="ms-2 badge bg-primary">
-            {isMovie ? 'Film' : 'Serie'}
+            {isMovie ? "Film" : "Serie"}
           </span>
         </div>
 
@@ -49,7 +49,8 @@ const CalendarItem = ({ item }) => {
                 objectFit: "cover",
               }}
               onError={(e) => {
-                e.target.src = "https://via.placeholder.com/50x75?text=No+Image";
+                e.target.src =
+                  "https://via.placeholder.com/50x75?text=No+Image";
               }}
             />
           )}
@@ -57,11 +58,12 @@ const CalendarItem = ({ item }) => {
           <div>
             <h5 className="mb-1">{item.title}</h5>
             <div>
-              {item.genreArray && item.genreArray.map((genre, index) => (
-                <span key={index} className="badge bg-secondary me-2">
-                  {genre}
-                </span>
-              ))}
+              {item.genreArray &&
+                item.genreArray.map((genre, index) => (
+                  <span key={index} className="badge bg-secondary me-2">
+                    {genre}
+                  </span>
+                ))}
 
               {isMovie && item.duration && (
                 <span className="badge bg-light text-dark border me-2">
@@ -71,7 +73,8 @@ const CalendarItem = ({ item }) => {
 
               {!isMovie && item.seasons && (
                 <span className="badge bg-light text-dark border me-2">
-                  {item.seasons.length} Staffel{item.seasons.length !== 1 ? 'n' : ''}
+                  {item.seasons.length} Staffel
+                  {item.seasons.length !== 1 ? "n" : ""}
                 </span>
               )}
 

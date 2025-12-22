@@ -57,7 +57,10 @@ const UserProfile = () => {
     if (!userId) return;
 
     fetch(`http://localhost:8080/api/reviews/user/${userId}`, {
-      headers: (() => { const token = localStorage.getItem("token"); return token ? { Authorization: `Bearer ${token}` } : {}; })(),
+      headers: (() => {
+        const token = localStorage.getItem("token");
+        return token ? { Authorization: `Bearer ${token}` } : {};
+      })(),
     })
       .then((res) => {
         if (!res.ok) throw new Error("Konnte Reviews nicht laden.");
@@ -89,7 +92,7 @@ const UserProfile = () => {
 
       formData.append(
         "user",
-        new Blob([JSON.stringify(userData)], { type: "application/json" })
+        new Blob([JSON.stringify(userData)], { type: "application/json" }),
       );
 
       const response = await fetch(
@@ -97,8 +100,11 @@ const UserProfile = () => {
         {
           method: "PUT",
           body: formData,
-          headers: (() => { const token = localStorage.getItem("token"); return token ? { Authorization: `Bearer ${token}` } : {}; })(),
-        }
+          headers: (() => {
+            const token = localStorage.getItem("token");
+            return token ? { Authorization: `Bearer ${token}` } : {};
+          })(),
+        },
       );
 
       if (!response.ok) {
@@ -137,16 +143,19 @@ const UserProfile = () => {
 
       formData.append(
         "user",
-        new Blob([JSON.stringify(userData)], { type: "application/json" })
+        new Blob([JSON.stringify(userData)], { type: "application/json" }),
       );
 
       const response = await fetch(
         `http://localhost:8080/api/users/${userId}`,
         {
           method: "PUT",
-          headers: (() => { const token = localStorage.getItem("token"); return token ? { Authorization: `Bearer ${token}` } : {}; })(),
+          headers: (() => {
+            const token = localStorage.getItem("token");
+            return token ? { Authorization: `Bearer ${token}` } : {};
+          })(),
           body: formData,
-        }
+        },
       );
 
       if (response.ok) {
@@ -185,7 +194,7 @@ const UserProfile = () => {
 
         formData.append(
           "user",
-          new Blob([JSON.stringify(userData)], { type: "application/json" })
+          new Blob([JSON.stringify(userData)], { type: "application/json" }),
         );
 
         formData.append("avatar", avatarFile);
@@ -199,7 +208,7 @@ const UserProfile = () => {
               method: "PUT",
               body: formData,
               headers: token ? { Authorization: `Bearer ${token}` } : {},
-            }
+            },
           );
 
           if (!response.ok) {
@@ -276,7 +285,7 @@ const UserProfile = () => {
                     onError={(e) => {
                       console.log(
                         "Bild konnte nicht geladen werden:",
-                        e.target.src
+                        e.target.src,
                       );
                       e.target.src =
                         "https://via.placeholder.com/150?text=Kein+Bild";

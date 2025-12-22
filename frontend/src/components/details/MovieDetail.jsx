@@ -10,10 +10,19 @@ import EditReviewModal from "./sections/EditReviewModal";
 import StreamingAvailability from "../streaming/StreamingAvailability";
 
 const MovieDetail = () => {
-  const { mediaId, media, isLoading, error, userId, currentUser, actors, director, castLoading } =
-    useMediaDetail('movies');
+  const {
+    mediaId,
+    media,
+    isLoading,
+    error,
+    userId,
+    currentUser,
+    actors,
+    director,
+    castLoading,
+  } = useMediaDetail("movies");
 
-  // This hook manages user interactions like watchlist, watched, and favorites  
+  // This hook manages user interactions like watchlist, watched, and favorites
   const {
     isInWatchlist,
     addingToWatchlist,
@@ -23,8 +32,8 @@ const MovieDetail = () => {
     markAsWatched,
     isFavorite,
     addingToFavorites,
-    addToFavorites
-  } = useMediaInteractions(userId, mediaId, 'movies');
+    addToFavorites,
+  } = useMediaInteractions(userId, mediaId, "movies");
 
   // This hook manages reviews, ratings, and user interactions
   const {
@@ -40,8 +49,8 @@ const MovieDetail = () => {
     submitSuccess,
     handleSubmitReview,
     handleEditReview,
-    handleDeleteReview
-  } = useReviews(userId, mediaId, 'movies');
+    handleDeleteReview,
+  } = useReviews(userId, mediaId, "movies");
 
   const [showEditModal, setShowEditModal] = useState(false);
 
@@ -56,7 +65,7 @@ const MovieDetail = () => {
     setShowEditModal(true);
   };
 
-  // Handle delete action 
+  // Handle delete action
   const handleDelete = async () => {
     await handleDeleteReview();
   };
@@ -95,10 +104,10 @@ const MovieDetail = () => {
       </div>
 
       <div className="mt-4">
-        <StreamingAvailability 
-          mediaId={mediaId} 
-          mediaType="movie" 
-          userRegion="ALL" 
+        <StreamingAvailability
+          mediaId={mediaId}
+          mediaType="movie"
+          userRegion="ALL"
         />
       </div>
 

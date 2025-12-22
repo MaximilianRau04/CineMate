@@ -167,22 +167,22 @@
     align-items: flex-start;
     gap: 12px;
   }
-  
+
   .availability-options {
     width: 100%;
     justify-content: flex-start;
   }
-  
+
   .availability-badge {
     font-size: 11px;
     padding: 4px 8px;
   }
-  
+
   .provider-logo {
     width: 32px;
     height: 32px;
   }
-  
+
   .provider-name {
     font-size: 14px;
   }
@@ -195,15 +195,15 @@
     border-color: #34495e;
     color: white;
   }
-  
+
   .provider-header:hover {
     background-color: #34495e;
   }
-  
+
   .provider-name {
     color: white;
   }
-  
+
   .streaming-info {
     border-color: #34495e;
   }

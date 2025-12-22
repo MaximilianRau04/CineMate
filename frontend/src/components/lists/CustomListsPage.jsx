@@ -48,7 +48,7 @@ const CustomListsPage = () => {
         `${API_BASE_URL}/lists/public?page=${currentPage}&size=12&sortBy=${sortBy}`,
         {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
-        }
+        },
       );
 
       if (response.ok) {
@@ -149,11 +149,11 @@ const CustomListsPage = () => {
       const token = localStorage.getItem("token");
       const response = await fetch(
         `${API_BASE_URL}/lists/search?query=${encodeURIComponent(
-          searchQuery
+          searchQuery,
         )}&page=0&size=12`,
         {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
-        }
+        },
       );
 
       if (response.ok) {
@@ -264,7 +264,7 @@ const CustomListsPage = () => {
       if (response.ok) {
         const updatedList = await response.json();
         setLists((prev) =>
-          prev.map((list) => (list.id === listId ? updatedList : list))
+          prev.map((list) => (list.id === listId ? updatedList : list)),
         );
       }
     } catch (error) {

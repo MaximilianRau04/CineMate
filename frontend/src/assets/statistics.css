@@ -9,7 +9,9 @@
   border: none;
   border-radius: 15px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .stats-card:hover {
@@ -86,11 +88,11 @@
   .stat-number {
     font-size: 2rem;
   }
-  
+
   .chart-container {
     height: 300px !important;
   }
-  
+
   .stats-card {
     margin-bottom: 1rem;
   }

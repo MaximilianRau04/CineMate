@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
 
 const RatingSection = ({
@@ -13,27 +13,30 @@ const RatingSection = ({
   onSubmitReview,
   onEdit,
   onDelete,
-  renderStars
+  renderStars,
 }) => {
   const [hover, setHover] = useState(null);
 
   // renderStars is a function that can be passed to customize star rendering
-  const displayStars = renderStars || ((value) => (
-    <span>
-      {[1, 2, 3, 4, 5].map((star, i) => {
-        if (value >= star) return <FaStar key={i} color="#ffc107" />;
-        else if (value >= star - 0.5) return <FaStarHalfAlt key={i} color="#ffc107" />;
-        else return <FaRegStar key={i} color="#e4e5e9" />;
-      })}
-    </span>
-  ));
+  const displayStars =
+    renderStars ||
+    ((value) => (
+      <span>
+        {[1, 2, 3, 4, 5].map((star, i) => {
+          if (value >= star) return <FaStar key={i} color="#ffc107" />;
+          else if (value >= star - 0.5)
+            return <FaStarHalfAlt key={i} color="#ffc107" />;
+          else return <FaRegStar key={i} color="#e4e5e9" />;
+        })}
+      </span>
+    ));
 
   if (!userId) return null;
 
   // If the user has already reviewed, show their review details
   if (reviewed) {
     return (
-      <div className="alert alert-info mt-4" style={{ maxWidth: '33%' }}>
+      <div className="alert alert-info mt-4" style={{ maxWidth: "33%" }}>
         <h5>⭐ Deine bisherige Bewertung</h5>
         <p>
           Bewertung: {displayStars(rating)} ({rating}/5)
@@ -45,16 +48,10 @@ const RatingSection = ({
           )}
         </p>
         <div className="d-flex gap-2 mt-3">
-          <button
-            className="btn btn-sm btn-outline-primary"
-            onClick={onEdit}
-          >
+          <button className="btn btn-sm btn-outline-primary" onClick={onEdit}>
             ✏️ Bearbeiten
           </button>
-          <button
-            className="btn btn-sm btn-outline-danger"
-            onClick={onDelete}
-          >
+          <button className="btn btn-sm btn-outline-danger" onClick={onDelete}>
             ❌ Löschen
           </button>
         </div>
@@ -65,9 +62,7 @@ const RatingSection = ({
   // If the user hasn't reviewed yet, show the rating section
   return (
     <div className="mt-4">
-      <h5 className="card-title mb-1 text-white">
-        ⭐ Deine Bewertung
-      </h5>
+      <h5 className="card-title mb-1 text-white">⭐ Deine Bewertung</h5>
       <div className="d-flex mb-3">
         {[1, 2, 3, 4, 5].map((star) => (
           <span
@@ -76,13 +71,23 @@ const RatingSection = ({
             style={{ fontSize: "32px", cursor: "pointer" }}
           >
             <span
-              style={{ position: "absolute", width: "50%", height: "100%", left: 0 }}
+              style={{
+                position: "absolute",
+                width: "50%",
+                height: "100%",
+                left: 0,
+              }}
               onClick={() => onRatingChange(star - 0.5)}
               onMouseEnter={() => setHover(star - 0.5)}
               onMouseLeave={() => setHover(null)}
             />
             <span
-              style={{ position: "absolute", width: "50%", height: "100%", right: 0 }}
+              style={{
+                position: "absolute",
+                width: "50%",
+                height: "100%",
+                right: 0,
+              }}
               onClick={() => onRatingChange(star)}
               onMouseEnter={() => setHover(star)}
               onMouseLeave={() => setHover(null)}

@@ -10,13 +10,16 @@ const SeasonSection = ({ seriesId }) => {
    */
   const fetchSeasons = async () => {
     if (!seriesId) return;
-    
+
     setSeasonsLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:8080/api/series/${seriesId}/seasons`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {}
-      });
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `http://localhost:8080/api/series/${seriesId}/seasons`,
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        },
+      );
       if (!response.ok) {
         throw new Error("Staffeln konnten nicht geladen werden");
       }
@@ -32,7 +35,6 @@ const SeasonSection = ({ seriesId }) => {
   useEffect(() => {
     fetchSeasons();
   }, [seriesId]); // eslint-disable-line react-hooks/exhaustive-deps
-  
 
   if (seasonsLoading) {
     return (
@@ -81,40 +83,39 @@ const SeasonSection = ({ seriesId }) => {
               aria-labelledby={`heading-${season.seasonNumber}`}
             >
               <div className="accordion-body">
-                {season.episodes && season.episodes.map((episode) => (
-                  <div
-                    key={episode.episodeNumber}
-                    className="row mb-4 align-items-center"
-                  >
-                    <div className="col-md-3 text-center">
-                      <img
-                        src={
-                          episode.posterUrl ||
-                          "https://via.placeholder.com/200x300?text=No+Image"
-                        }
-                        alt={episode.title}
-                        className="img-fluid rounded shadow-sm"
-                        style={{ maxHeight: "200px", objectFit: "cover" }}
-                      />
-                    </div>
+                {season.episodes &&
+                  season.episodes.map((episode) => (
+                    <div
+                      key={episode.episodeNumber}
+                      className="row mb-4 align-items-center"
+                    >
+                      <div className="col-md-3 text-center">
+                        <img
+                          src={
+                            episode.posterUrl ||
+                            "https://via.placeholder.com/200x300?text=No+Image"
+                          }
+                          alt={episode.title}
+                          className="img-fluid rounded shadow-sm"
+                          style={{ maxHeight: "200px", objectFit: "cover" }}
+                        />
+                      </div>
 
-                    {/* episode Infos */}
-                    <div className="col-md-9">
-                      <h5 className="text-white">
-                        Episode {episode.episodeNumber}: {episode.title}
-                      </h5>
-                      <p className="small text-light mb-1">
-                        ⏱️ {episode.duration} | 📅{" "}
-                        {new Date(episode.releaseDate).toLocaleDateString()}
-                      </p>
-                      <p className="text-secondary">
-                        {episode.description}
-                      </p>
-                    </div>
+                      {/* episode Infos */}
+                      <div className="col-md-9">
+                        <h5 className="text-white">
+                          Episode {episode.episodeNumber}: {episode.title}
+                        </h5>
+                        <p className="small text-light mb-1">
+                          ⏱️ {episode.duration} | 📅{" "}
+                          {new Date(episode.releaseDate).toLocaleDateString()}
+                        </p>
+                        <p className="text-secondary">{episode.description}</p>
+                      </div>
 
-                    <hr className="border-secondary my-3" />
-                  </div>
-                ))}
+                      <hr className="border-secondary my-3" />
+                    </div>
+                  ))}
               </div>
             </div>
           </div>

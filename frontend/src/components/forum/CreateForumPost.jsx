@@ -34,9 +34,12 @@ const CreateForumPost = () => {
       const token = localStorage.getItem("token");
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-      const response = await fetch("http://localhost:8080/api/forum/categories", {
-        headers,
-      });
+      const response = await fetch(
+        "http://localhost:8080/api/forum/categories",
+        {
+          headers,
+        },
+      );
       if (!response.ok) {
         throw new Error("Failed to fetch categories");
       }
@@ -77,7 +80,10 @@ const CreateForumPost = () => {
 
       const token = localStorage.getItem("token");
       const headers = token
-        ? { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
+        ? {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          }
         : { "Content-Type": "application/json" };
 
       const response = await fetch("http://localhost:8080/api/forum/posts", {

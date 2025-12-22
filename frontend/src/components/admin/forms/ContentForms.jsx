@@ -1,4 +1,6 @@
-{/* ContentForm for movies and series*/ }
+{
+  /* ContentForm for movies and series*/
+}
 export const ContentForm = ({ content, onChange, genres }) => (
   <div>
     <div className="row">
@@ -6,7 +8,7 @@ export const ContentForm = ({ content, onChange, genres }) => (
         <label className="form-label">Typ</label>
         <select
           className="form-control"
-          value={content.type || 'movie'}
+          value={content.type || "movie"}
           onChange={(e) => onChange({ ...content, type: e.target.value })}
         >
           <option value="movie">Film</option>
@@ -18,7 +20,7 @@ export const ContentForm = ({ content, onChange, genres }) => (
         <input
           type="text"
           className="form-control"
-          value={content.title || ''}
+          value={content.title || ""}
           onChange={(e) => onChange({ ...content, title: e.target.value })}
         />
       </div>
@@ -29,7 +31,7 @@ export const ContentForm = ({ content, onChange, genres }) => (
       <textarea
         className="form-control"
         rows="3"
-        value={content.description || ''}
+        value={content.description || ""}
         onChange={(e) => onChange({ ...content, description: e.target.value })}
       />
     </div>
@@ -39,12 +41,14 @@ export const ContentForm = ({ content, onChange, genres }) => (
         <label className="form-label">Genre</label>
         <select
           className="form-control"
-          value={content.genre || ''}
+          value={content.genre || ""}
           onChange={(e) => onChange({ ...content, genre: e.target.value })}
         >
           <option value="">Genre auswählen</option>
-          {genres.map(genre => (
-            <option key={genre} value={genre}>{genre}</option>
+          {genres.map((genre) => (
+            <option key={genre} value={genre}>
+              {genre}
+            </option>
           ))}
         </select>
       </div>
@@ -53,7 +57,7 @@ export const ContentForm = ({ content, onChange, genres }) => (
         <input
           type="text"
           className="form-control"
-          value={content.country || ''}
+          value={content.country || ""}
           onChange={(e) => onChange({ ...content, country: e.target.value })}
         />
       </div>
@@ -65,8 +69,10 @@ export const ContentForm = ({ content, onChange, genres }) => (
         <input
           type="date"
           className="form-control"
-          value={content.releaseDate || ''}
-          onChange={(e) => onChange({ ...content, releaseDate: e.target.value })}
+          value={content.releaseDate || ""}
+          onChange={(e) =>
+            onChange({ ...content, releaseDate: e.target.value })
+          }
         />
       </div>
       {content.type === "series" && (
@@ -74,7 +80,7 @@ export const ContentForm = ({ content, onChange, genres }) => (
           <label className="form-label">Status</label>
           <select
             className="form-control"
-            value={content.status || ''}
+            value={content.status || ""}
             onChange={(e) => onChange({ ...content, status: e.target.value })}
           >
             <option value="">Status auswählen</option>
@@ -92,7 +98,7 @@ export const ContentForm = ({ content, onChange, genres }) => (
           <input
             type="text"
             className="form-control"
-            value={content.duration || ''}
+            value={content.duration || ""}
             onChange={(e) => onChange({ ...content, duration: e.target.value })}
           />
         </div>
@@ -105,7 +111,7 @@ export const ContentForm = ({ content, onChange, genres }) => (
         <input
           type="url"
           className="form-control"
-          value={content.posterUrl || ''}
+          value={content.posterUrl || ""}
           onChange={(e) => onChange({ ...content, posterUrl: e.target.value })}
         />
       </div>
@@ -114,7 +120,7 @@ export const ContentForm = ({ content, onChange, genres }) => (
         <input
           type="url"
           className="form-control"
-          value={content.trailerUrl || ''}
+          value={content.trailerUrl || ""}
           onChange={(e) => onChange({ ...content, trailerUrl: e.target.value })}
         />
       </div>
@@ -122,7 +128,9 @@ export const ContentForm = ({ content, onChange, genres }) => (
   </div>
 );
 
-{/* SeasonForm*/ }
+{
+  /* SeasonForm*/
+}
 export const SeasonForm = ({ season, onChange }) => (
   <div>
     <div className="mb-3">
@@ -130,8 +138,10 @@ export const SeasonForm = ({ season, onChange }) => (
       <input
         type="number"
         className="form-control"
-        value={season.seasonNumber || ''}
-        onChange={(e) => onChange({ ...season, seasonNumber: parseInt(e.target.value) || '' })}
+        value={season.seasonNumber || ""}
+        onChange={(e) =>
+          onChange({ ...season, seasonNumber: parseInt(e.target.value) || "" })
+        }
         min="1"
       />
     </div>
@@ -140,14 +150,16 @@ export const SeasonForm = ({ season, onChange }) => (
       <input
         type="url"
         className="form-control"
-        value={season.trailerUrl || ''}
+        value={season.trailerUrl || ""}
         onChange={(e) => onChange({ ...season, trailerUrl: e.target.value })}
       />
     </div>
   </div>
 );
 
-{/* EpisodeForm */ }
+{
+  /* EpisodeForm */
+}
 export const EpisodeForm = ({ episode, onChange }) => (
   <div>
     <div className="row">
@@ -156,8 +168,13 @@ export const EpisodeForm = ({ episode, onChange }) => (
         <input
           type="number"
           className="form-control"
-          value={episode.episodeNumber || ''}
-          onChange={(e) => onChange({ ...episode, episodeNumber: parseInt(e.target.value) || '' })}
+          value={episode.episodeNumber || ""}
+          onChange={(e) =>
+            onChange({
+              ...episode,
+              episodeNumber: parseInt(e.target.value) || "",
+            })
+          }
           min="1"
         />
       </div>
@@ -166,7 +183,7 @@ export const EpisodeForm = ({ episode, onChange }) => (
         <input
           type="text"
           className="form-control"
-          value={episode.title || ''}
+          value={episode.title || ""}
           onChange={(e) => onChange({ ...episode, title: e.target.value })}
         />
       </div>
@@ -177,7 +194,7 @@ export const EpisodeForm = ({ episode, onChange }) => (
       <textarea
         className="form-control"
         rows="3"
-        value={episode.description || ''}
+        value={episode.description || ""}
         onChange={(e) => onChange({ ...episode, description: e.target.value })}
       />
     </div>
@@ -188,7 +205,7 @@ export const EpisodeForm = ({ episode, onChange }) => (
         <input
           type="text"
           className="form-control"
-          value={episode.duration || ''}
+          value={episode.duration || ""}
           onChange={(e) => onChange({ ...episode, duration: e.target.value })}
         />
       </div>
@@ -197,8 +214,10 @@ export const EpisodeForm = ({ episode, onChange }) => (
         <input
           type="date"
           className="form-control"
-          value={episode.releaseDate || ''}
-          onChange={(e) => onChange({ ...episode, releaseDate: e.target.value })}
+          value={episode.releaseDate || ""}
+          onChange={(e) =>
+            onChange({ ...episode, releaseDate: e.target.value })
+          }
         />
       </div>
     </div>
@@ -208,7 +227,7 @@ export const EpisodeForm = ({ episode, onChange }) => (
       <input
         type="url"
         className="form-control"
-        value={episode.posterUrl || ''}
+        value={episode.posterUrl || ""}
         onChange={(e) => onChange({ ...episode, posterUrl: e.target.value })}
       />
     </div>

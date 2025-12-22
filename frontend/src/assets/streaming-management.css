@@ -52,12 +52,12 @@
   .streaming-provider-management .table-responsive {
     font-size: 14px;
   }
-  
+
   .streaming-provider-management .btn-group {
     flex-direction: column;
     width: 100%;
   }
-  
+
   .streaming-provider-management .btn-group .btn {
     margin-right: 0;
     margin-bottom: 4px;

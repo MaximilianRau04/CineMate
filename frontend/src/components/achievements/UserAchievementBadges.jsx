@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { FaTrophy, FaMedal, FaStar } from 'react-icons/fa';
+import React, { useState, useEffect } from "react";
+import { FaTrophy, FaMedal, FaStar } from "react-icons/fa";
 
 const UserAchievementBadges = ({ userId, limit = 3, showCount = true }) => {
   const [achievements, setAchievements] = useState([]);
@@ -11,15 +11,18 @@ const UserAchievementBadges = ({ userId, limit = 3, showCount = true }) => {
      * @returns {Promise<void>}
      */
     const getHeaders = () => {
-      const token = localStorage.getItem('token');
-      return token ? { 'Authorization': `Bearer ${token}` } : {};
+      const token = localStorage.getItem("token");
+      return token ? { Authorization: `Bearer ${token}` } : {};
     };
 
     const loadUserAchievements = async () => {
       try {
-        const response = await fetch(`http://localhost:8080/api/achievements/user/${userId}/unlocked`, {
-          headers: getHeaders()
-        });
+        const response = await fetch(
+          `http://localhost:8080/api/achievements/user/${userId}/unlocked`,
+          {
+            headers: getHeaders(),
+          },
+        );
         if (response.ok) {
           const data = await response.json();
           const sortedAchievements = data
@@ -28,7 +31,7 @@ const UserAchievementBadges = ({ userId, limit = 3, showCount = true }) => {
           setAchievements(sortedAchievements);
         }
       } catch (error) {
-        console.error('Error loading user achievements:', error);
+        console.error("Error loading user achievements:", error);
       } finally {
         setLoading(false);
       }
@@ -41,18 +44,18 @@ const UserAchievementBadges = ({ userId, limit = 3, showCount = true }) => {
 
   /**
    * Get the badge icon for a specific achievement.
-   * @param {*} type 
+   * @param {*} type
    * @returns {JSX.Element} The icon component for the achievement type.
    */
   const getBadgeIcon = (type) => {
     switch (type) {
-      case 'REVIEWS':
+      case "REVIEWS":
         return <FaStar className="achievement-mini-icon" />;
-      case 'MOVIES_WATCHED':
-      case 'SERIES_WATCHED':
+      case "MOVIES_WATCHED":
+      case "SERIES_WATCHED":
         return <FaTrophy className="achievement-mini-icon" />;
-      case 'FORUM_POSTS':
-      case 'FRIENDS':
+      case "FORUM_POSTS":
+      case "FRIENDS":
         return <FaMedal className="achievement-mini-icon" />;
       default:
         return <FaTrophy className="achievement-mini-icon" />;
@@ -61,25 +64,25 @@ const UserAchievementBadges = ({ userId, limit = 3, showCount = true }) => {
 
   /**
    * Get the badge class for a specific badge color.
-   * @param {*} badgeColor 
+   * @param {*} badgeColor
    * @returns {string} The CSS class for the badge color.
    */
   const getBadgeClass = (badgeColor) => {
     switch (badgeColor) {
-      case 'badge-warning':
-        return 'bg-warning text-dark';
-      case 'badge-primary':
-        return 'bg-primary text-white';
-      case 'badge-info':
-        return 'bg-info text-white';
-      case 'badge-success':
-        return 'bg-success text-white';
-      case 'badge-danger':
-        return 'bg-danger text-white';
-      case 'badge-gold':
-        return 'bg-warning text-dark border-warning';
+      case "badge-warning":
+        return "bg-warning text-dark";
+      case "badge-primary":
+        return "bg-primary text-white";
+      case "badge-info":
+        return "bg-info text-white";
+      case "badge-success":
+        return "bg-success text-white";
+      case "badge-danger":
+        return "bg-danger text-white";
+      case "badge-gold":
+        return "bg-warning text-dark border-warning";
       default:
-        return 'bg-secondary text-white';
+        return "bg-secondary text-white";
     }
   };
 
@@ -115,20 +118,19 @@ const UserAchievementBadges = ({ userId, limit = 3, showCount = true }) => {
             {getBadgeIcon(userAchievement.achievement.type)}
           </div>
         ))}
-        
+
         {showCount && achievements.length >= limit && (
-          <small className="text-muted ms-2">
-            und weitere...
-          </small>
+          <small className="text-muted ms-2">und weitere...</small>
         )}
       </div>
-      
+
       {showCount && (
         <small className="text-muted d-block mt-1">
-          {achievements.length} Achievement{achievements.length !== 1 ? 's' : ''} freigeschaltet
+          {achievements.length} Achievement
+          {achievements.length !== 1 ? "s" : ""} freigeschaltet
         </small>
       )}
-      
+
       <style jsx>{`
         .achievement-mini-badge {
           display: inline-flex;
@@ -142,15 +144,15 @@ const UserAchievementBadges = ({ userId, limit = 3, showCount = true }) => {
           transition: transform 0.2s ease;
           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        
+
         .achievement-mini-badge:hover {
           transform: scale(1.1);
         }
-        
+
         .achievement-mini-icon {
           font-size: 0.8rem;
         }
-        
+
         .user-achievement-badges {
           margin: 0.5rem 0;
         }

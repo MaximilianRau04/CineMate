@@ -1,7 +1,14 @@
 import { FaTrash, FaEdit } from "react-icons/fa";
 import { formatDate } from "../utils/utils";
 
-const ContentTable = ({ items, type, onEdit, onDelete, onSeriesSeasons, onManageStreaming }) => (
+const ContentTable = ({
+  items,
+  type,
+  onEdit,
+  onDelete,
+  onSeriesSeasons,
+  onManageStreaming,
+}) => (
   <div className="table-responsive">
     <table className="table">
       <thead>
@@ -15,12 +22,12 @@ const ContentTable = ({ items, type, onEdit, onDelete, onSeriesSeasons, onManage
       </thead>
       <tbody>
         {items
-          .filter(item => item && item.id)
+          .filter((item) => item && item.id)
           .map((item, index) => (
             <tr key={`${type}-${item.id}-${index}`}>
               <td>{item.title}</td>
               <td>{item.genre}</td>
-              <td>{item.country || 'N/A'}</td>
+              <td>{item.country || "N/A"}</td>
               <td>{formatDate(item.releaseDate)}</td>
               <td>
                 {type === "series" && (
@@ -52,8 +59,7 @@ const ContentTable = ({ items, type, onEdit, onDelete, onSeriesSeasons, onManage
                 </button>
               </td>
             </tr>
-          ))
-        }
+          ))}
       </tbody>
     </table>
   </div>

@@ -1,25 +1,25 @@
 import { FaEdit, FaTrash, FaLink, FaFilm } from "react-icons/fa";
 import { formatDate } from "../utils/utils";
 
-const PersonList = ({ 
-  people,  
-  personType, 
-  onShowFilmography, 
-  onAssign, 
-  onEdit, 
-  onDelete 
+const PersonList = ({
+  people,
+  personType,
+  onShowFilmography,
+  onAssign,
+  onEdit,
+  onDelete,
 }) => {
   const labels = {
     actor: {
       title: "Schauspieler",
       filmography: "Filmografie anzeigen",
-      assign: "Zu Film/Serie hinzufügen"
+      assign: "Zu Film/Serie hinzufügen",
     },
     director: {
       title: "Regisseur",
       filmography: "Filmografie anzeigen",
-      assign: "Als Regisseur zuweisen"
-    }
+      assign: "Als Regisseur zuweisen",
+    },
   };
 
   const label = labels[personType] || labels.actor;
@@ -39,14 +39,18 @@ const PersonList = ({
               </tr>
             </thead>
             <tbody>
-              {people.map(person => (
+              {people.map((person) => (
                 <tr key={person.id}>
                   <td>
                     {person.image && (
                       <img
                         src={person.image}
                         alt={person.name}
-                        style={{ width: '50px', height: '50px', objectFit: 'cover' }}
+                        style={{
+                          width: "50px",
+                          height: "50px",
+                          objectFit: "cover",
+                        }}
                         className="rounded"
                       />
                     )}
@@ -54,7 +58,14 @@ const PersonList = ({
                   <td>{person.name}</td>
                   <td>{formatDate(person.birthday)}</td>
                   <td>
-                    <div style={{ maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <div
+                      style={{
+                        maxWidth: "200px",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
                       {person.biography}
                     </div>
                   </td>
@@ -92,7 +103,9 @@ const PersonList = ({
               ))}
               {people.length === 0 && (
                 <tr>
-                  <td colSpan="5" className="text-center">Keine {label.title} gefunden</td>
+                  <td colSpan="5" className="text-center">
+                    Keine {label.title} gefunden
+                  </td>
                 </tr>
               )}
             </tbody>

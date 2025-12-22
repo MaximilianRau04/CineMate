@@ -1,6 +1,10 @@
-import React from 'react';
-import { useNotificationSettings } from './utils/useNotificationSettings';
-import { getNotificationTypeLabel, sortNotificationTypes, filterNotificationTypesByRole } from './utils/notificationUtils';
+import React from "react";
+import { useNotificationSettings } from "./utils/useNotificationSettings";
+import {
+  getNotificationTypeLabel,
+  sortNotificationTypes,
+  filterNotificationTypesByRole,
+} from "./utils/notificationUtils";
 
 const NotificationSettings = ({ userId }) => {
   const {
@@ -13,11 +17,16 @@ const NotificationSettings = ({ userId }) => {
     updateGlobalSettings,
     updatePreference,
     getPreferenceForType,
-    clearError
+    clearError,
   } = useNotificationSettings(userId);
 
-  const filteredNotificationTypes = filterNotificationTypesByRole(notificationTypes, user);
-  const sortedNotificationTypes = sortNotificationTypes(filteredNotificationTypes);
+  const filteredNotificationTypes = filterNotificationTypesByRole(
+    notificationTypes,
+    user,
+  );
+  const sortedNotificationTypes = sortNotificationTypes(
+    filteredNotificationTypes,
+  );
 
   if (loading) {
     return (
@@ -44,13 +53,13 @@ const NotificationSettings = ({ userId }) => {
         <div className="card-body">
           <div className="alert alert-danger">
             <strong>Fehler:</strong> {error}
-            <button 
+            <button
               className="btn btn-outline-danger btn-sm ms-2"
               onClick={clearError}
             >
               Fehler ausblenden
             </button>
-            <button 
+            <button
               className="btn btn-outline-danger btn-sm ms-2"
               onClick={() => window.location.reload()}
             >
@@ -70,7 +79,10 @@ const NotificationSettings = ({ userId }) => {
       <div className="card-body">
         {saving && (
           <div className="alert alert-info d-flex align-items-center">
-            <div className="spinner-border spinner-border-sm me-2" role="status"></div>
+            <div
+              className="spinner-border spinner-border-sm me-2"
+              role="status"
+            ></div>
             Einstellungen werden gespeichert...
           </div>
         )}
@@ -78,14 +90,19 @@ const NotificationSettings = ({ userId }) => {
         {/* global settings */}
         <div className="mb-4">
           <h6 className="border-bottom pb-2 mb-3">📧 Globale Einstellungen</h6>
-          
+
           <div className="form-check form-switch mb-3">
             <input
               className="form-check-input"
               type="checkbox"
               id="emailGlobal"
               checked={globalSettings.emailNotificationsEnabled}
-              onChange={(e) => updateGlobalSettings('emailNotificationsEnabled', e.target.checked)}
+              onChange={(e) =>
+                updateGlobalSettings(
+                  "emailNotificationsEnabled",
+                  e.target.checked,
+                )
+              }
               disabled={saving}
             />
             <label className="form-check-label" htmlFor="emailGlobal">
@@ -102,7 +119,12 @@ const NotificationSettings = ({ userId }) => {
               type="checkbox"
               id="webGlobal"
               checked={globalSettings.webNotificationsEnabled}
-              onChange={(e) => updateGlobalSettings('webNotificationsEnabled', e.target.checked)}
+              onChange={(e) =>
+                updateGlobalSettings(
+                  "webNotificationsEnabled",
+                  e.target.checked,
+                )
+              }
               disabled={saving}
             />
             <label className="form-check-label" htmlFor="webGlobal">
@@ -119,13 +141,22 @@ const NotificationSettings = ({ userId }) => {
               type="checkbox"
               id="summaryRecommendations"
               checked={globalSettings.summaryRecommendationsEnabled}
-              onChange={(e) => updateGlobalSettings('summaryRecommendationsEnabled', e.target.checked)}
+              onChange={(e) =>
+                updateGlobalSettings(
+                  "summaryRecommendationsEnabled",
+                  e.target.checked,
+                )
+              }
               disabled={saving}
             />
-            <label className="form-check-label" htmlFor="summaryRecommendations">
+            <label
+              className="form-check-label"
+              htmlFor="summaryRecommendations"
+            >
               <strong>📝 Empfehlungen als Zusammenfassung</strong>
               <div className="text-muted small">
-                Erhalte mehrere Empfehlungen in einer einzigen Benachrichtigung anstatt einzeln
+                Erhalte mehrere Empfehlungen in einer einzigen Benachrichtigung
+                anstatt einzeln
               </div>
             </label>
           </div>
@@ -133,9 +164,12 @@ const NotificationSettings = ({ userId }) => {
 
         {/* specific settings */}
         <div>
-          <h6 className="border-bottom pb-2 mb-3">⚙️ Detaillierte Einstellungen</h6>
+          <h6 className="border-bottom pb-2 mb-3">
+            ⚙️ Detaillierte Einstellungen
+          </h6>
           <div className="text-muted small mb-3">
-            Stelle für jeden Benachrichtigungstyp einzeln ein, ob du Email- und/oder Web-Benachrichtigungen erhalten möchtest.
+            Stelle für jeden Benachrichtigungstyp einzeln ein, ob du Email-
+            und/oder Web-Benachrichtigungen erhalten möchtest.
           </div>
 
           <div className="row">
@@ -147,7 +181,9 @@ const NotificationSettings = ({ userId }) => {
                     <div className="card-body py-3">
                       <div className="row align-items-center">
                         <div className="col-md-6">
-                          <h6 className="mb-1">{getNotificationTypeLabel(type)}</h6>
+                          <h6 className="mb-1">
+                            {getNotificationTypeLabel(type)}
+                          </h6>
                         </div>
                         <div className="col-md-3">
                           <div className="form-check form-switch">
@@ -156,10 +192,22 @@ const NotificationSettings = ({ userId }) => {
                               type="checkbox"
                               id={`email-${type}`}
                               checked={pref.emailEnabled}
-                              onChange={(e) => updatePreference(type, 'emailEnabled', e.target.checked)}
-                              disabled={saving || !globalSettings.emailNotificationsEnabled}
+                              onChange={(e) =>
+                                updatePreference(
+                                  type,
+                                  "emailEnabled",
+                                  e.target.checked,
+                                )
+                              }
+                              disabled={
+                                saving ||
+                                !globalSettings.emailNotificationsEnabled
+                              }
                             />
-                            <label className="form-check-label" htmlFor={`email-${type}`}>
+                            <label
+                              className="form-check-label"
+                              htmlFor={`email-${type}`}
+                            >
                               📧 Email
                             </label>
                           </div>
@@ -171,10 +219,22 @@ const NotificationSettings = ({ userId }) => {
                               type="checkbox"
                               id={`web-${type}`}
                               checked={pref.webEnabled}
-                              onChange={(e) => updatePreference(type, 'webEnabled', e.target.checked)}
-                              disabled={saving || !globalSettings.webNotificationsEnabled}
+                              onChange={(e) =>
+                                updatePreference(
+                                  type,
+                                  "webEnabled",
+                                  e.target.checked,
+                                )
+                              }
+                              disabled={
+                                saving ||
+                                !globalSettings.webNotificationsEnabled
+                              }
                             />
-                            <label className="form-check-label" htmlFor={`web-${type}`}>
+                            <label
+                              className="form-check-label"
+                              htmlFor={`web-${type}`}
+                            >
                               🌐 Web
                             </label>
                           </div>
@@ -191,10 +251,18 @@ const NotificationSettings = ({ userId }) => {
         <div className="mt-4 p-3 bg-light rounded">
           <h6 className="mb-2">ℹ️ Hinweise:</h6>
           <ul className="mb-0 small text-muted">
-            <li>Globale Einstellungen überschreiben alle spezifischen Einstellungen</li>
-            <li>Email-Benachrichtigungen werden nur versendet, wenn sowohl global als auch spezifisch aktiviert</li>
+            <li>
+              Globale Einstellungen überschreiben alle spezifischen
+              Einstellungen
+            </li>
+            <li>
+              Email-Benachrichtigungen werden nur versendet, wenn sowohl global
+              als auch spezifisch aktiviert
+            </li>
             <li>Änderungen werden automatisch gespeichert</li>
-            <li>Bei technischen Problemen werden Emails automatisch wiederholt</li>
+            <li>
+              Bei technischen Problemen werden Emails automatisch wiederholt
+            </li>
           </ul>
         </div>
       </div>

@@ -1,19 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { FaUserFriends, FaUserPlus, FaCheck, FaTimes, FaSearch, FaTrash } from 'react-icons/fa';
-import { useToast } from '../toasts';
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import {
+  FaUserFriends,
+  FaUserPlus,
+  FaCheck,
+  FaTimes,
+  FaSearch,
+  FaTrash,
+} from "react-icons/fa";
+import { useToast } from "../toasts";
 
 const FriendsPage = () => {
   const [friends, setFriends] = useState([]);
   const [pendingRequests, setPendingRequests] = useState([]);
   const [searchUsers, setSearchUsers] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState('friends');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState("friends");
   const [loading, setLoading] = useState(true);
   const [allUsers, setAllUsers] = useState([]);
   const { success, error: showError } = useToast();
 
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     loadData();
@@ -27,13 +34,9 @@ const FriendsPage = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      await Promise.all([
-        loadFriends(),
-        loadPendingRequests(),
-        loadAllUsers()
-      ]);
+      await Promise.all([loadFriends(), loadPendingRequests(), loadAllUsers()]);
     } catch (error) {
-      console.error('Error loading data:', error);
+      console.error("Error loading data:", error);
     } finally {
       setLoading(false);
     }
@@ -46,15 +49,15 @@ const FriendsPage = () => {
    */
   const loadFriends = async () => {
     try {
-      const response = await fetch('http://localhost:8080/api/social/friends', {
-        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      const response = await fetch("http://localhost:8080/api/social/friends", {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       if (response.ok) {
         const data = await response.json();
         setFriends(data);
       }
     } catch (error) {
-      console.error('Error loading friends:', error);
+      console.error("Error loading friends:", error);
     }
   };
 
@@ -65,17 +68,24 @@ const FriendsPage = () => {
    */
   const loadPendingRequests = async () => {
     try {
-      const response = await fetch('http://localhost:8080/api/social/friends/requests', {
-        headers: token ? { Authorization: `Bearer ${token}` } : {}
-      });
+      const response = await fetch(
+        "http://localhost:8080/api/social/friends/requests",
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        },
+      );
       if (response.ok) {
         const data = await response.json();
         setPendingRequests(data);
       } else {
-        console.error('Failed to load pending requests:', response.status, response.statusText);
+        console.error(
+          "Failed to load pending requests:",
+          response.status,
+          response.statusText,
+        );
       }
     } catch (error) {
-      console.error('Error loading pending requests:', error);
+      console.error("Error loading pending requests:", error);
     }
   };
 
@@ -86,21 +96,22 @@ const FriendsPage = () => {
    */
   const loadAllUsers = async () => {
     try {
-      const response = await fetch('http://localhost:8080/api/users', {
-        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      const response = await fetch("http://localhost:8080/api/users", {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       if (response.ok) {
         const data = await response.json();
-        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+        const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
         // Filter out current user and existing friends
-        const filteredUsers = data.filter(user =>
-          user.id !== currentUser.id &&
-          !friends.some(friend => friend.id === user.id)
+        const filteredUsers = data.filter(
+          (user) =>
+            user.id !== currentUser.id &&
+            !friends.some((friend) => friend.id === user.id),
         );
         setAllUsers(filteredUsers);
       }
     } catch (error) {
-      console.error('Error loading users:', error);
+      console.error("Error loading users:", error);
     }
   };
 
@@ -108,27 +119,30 @@ const FriendsPage = () => {
    * sends a friend request to the user.
    * @param {*} userId
    * @returns {Promise<void>}
-   * @throws {Error} if the request fails or the user is already a friend 
+   * @throws {Error} if the request fails or the user is already a friend
    */
   const sendFriendRequest = async (userId) => {
     try {
-      const response = await fetch(`http://localhost:8080/api/social/friends/request/${userId}`, {
-        method: 'POST',
-        headers: token ? { Authorization: `Bearer ${token}` } : {}
-      });
+      const response = await fetch(
+        `http://localhost:8080/api/social/friends/request/${userId}`,
+        {
+          method: "POST",
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        },
+      );
 
       if (response.ok) {
-        success('Freundschaftsanfrage gesendet!');
-        setAllUsers(prev => prev.filter(user => user.id !== userId));
+        success("Freundschaftsanfrage gesendet!");
+        setAllUsers((prev) => prev.filter((user) => user.id !== userId));
         loadData();
       } else {
         const error = await response.text();
-        console.error('Failed to send friend request:', error);
+        console.error("Failed to send friend request:", error);
         showError(`Fehler: ${error}`);
       }
     } catch (error) {
-      console.error('Error sending friend request:', error);
-      showError('Fehler beim Senden der Freundschaftsanfrage');
+      console.error("Error sending friend request:", error);
+      showError("Fehler beim Senden der Freundschaftsanfrage");
     }
   };
 
@@ -136,24 +150,27 @@ const FriendsPage = () => {
    * accepts a friend request.
    * @param {*} friendshipId
    * @returns {Promise<void>}
-   * @throws {Error} if the request fails or the friendship ID is invalid 
+   * @throws {Error} if the request fails or the friendship ID is invalid
    */
   const acceptFriendRequest = async (friendshipId) => {
     try {
-      const response = await fetch(`http://localhost:8080/api/social/friends/accept/${friendshipId}`, {
-        method: 'POST',
-        headers: token ? { Authorization: `Bearer ${token}` } : {}
-      });
+      const response = await fetch(
+        `http://localhost:8080/api/social/friends/accept/${friendshipId}`,
+        {
+          method: "POST",
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        },
+      );
 
       if (response.ok) {
-        success('Freundschaftsanfrage akzeptiert!');
+        success("Freundschaftsanfrage akzeptiert!");
         loadData();
       } else {
         const error = await response.text();
         showError(`Fehler: ${error}`);
       }
     } catch (error) {
-      console.error('Error accepting friend request:', error);
+      console.error("Error accepting friend request:", error);
     }
   };
 
@@ -161,53 +178,59 @@ const FriendsPage = () => {
    * declines a friend request.
    * @param {*} friendshipId
    * @returns {Promise<void>}
-   * @throws {Error} if the request fails or the friendship ID is invalid 
+   * @throws {Error} if the request fails or the friendship ID is invalid
    */
   const declineFriendRequest = async (friendshipId) => {
     try {
-      const response = await fetch(`http://localhost:8080/api/social/friends/decline/${friendshipId}`, {
-        method: 'POST',
-        headers: token ? { Authorization: `Bearer ${token}` } : {}
-      });
+      const response = await fetch(
+        `http://localhost:8080/api/social/friends/decline/${friendshipId}`,
+        {
+          method: "POST",
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        },
+      );
 
       if (response.ok) {
-        success('Freundschaftsanfrage abgelehnt');
+        success("Freundschaftsanfrage abgelehnt");
         loadPendingRequests();
       } else {
         const error = await response.text();
         showError(`Fehler: ${error}`);
       }
     } catch (error) {
-      console.error('Error declining friend request:', error);
+      console.error("Error declining friend request:", error);
     }
   };
 
   /**
    * removes a friend.
-   * @param {*} friendId 
+   * @param {*} friendId
    * @returns {Promise<void>}
-   * @throws {Error} if the request fails or the user confirms removal  
+   * @throws {Error} if the request fails or the user confirms removal
    */
   const removeFriend = async (friendId) => {
-    if (!window.confirm('Möchtest du diesen Freund wirklich entfernen?')) {
+    if (!window.confirm("Möchtest du diesen Freund wirklich entfernen?")) {
       return;
     }
 
     try {
-      const response = await fetch(`http://localhost:8080/api/social/friends/${friendId}`, {
-        method: 'DELETE',
-        headers: token ? { Authorization: `Bearer ${token}` } : {}
-      });
+      const response = await fetch(
+        `http://localhost:8080/api/social/friends/${friendId}`,
+        {
+          method: "DELETE",
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        },
+      );
 
       if (response.ok) {
-        success('Freund entfernt');
+        success("Freund entfernt");
         loadFriends();
       } else {
         const error = await response.text();
         showError(`Fehler: ${error}`);
       }
     } catch (error) {
-      console.error('Error removing friend:', error);
+      console.error("Error removing friend:", error);
     }
   };
 
@@ -215,14 +238,15 @@ const FriendsPage = () => {
    * handles search input changes.
    * @param {*} query
    * @returns {void}
-   * @throws {Error} if the search query is invalid or less than 3 characters 
+   * @throws {Error} if the search query is invalid or less than 3 characters
    */
   const handleSearch = (query) => {
     setSearchQuery(query);
     if (query.length > 2) {
-      const filtered = allUsers.filter(user =>
-        user.username.toLowerCase().includes(query.toLowerCase()) ||
-        user.email.toLowerCase().includes(query.toLowerCase())
+      const filtered = allUsers.filter(
+        (user) =>
+          user.username.toLowerCase().includes(query.toLowerCase()) ||
+          user.email.toLowerCase().includes(query.toLowerCase()),
       );
       setSearchUsers(filtered);
     } else {
@@ -238,29 +262,37 @@ const FriendsPage = () => {
    * @param {string} userId - The user's ID for profile link (optional)
    * @returns {JSX.Element} Profile image element
    */
-  const renderProfileImage = (avatarUrl, username, size = 50, userId = null) => {
+  const renderProfileImage = (
+    avatarUrl,
+    username,
+    size = 50,
+    userId = null,
+  ) => {
     const imageElement = avatarUrl ? (
       <img
         src={`http://localhost:8080${avatarUrl}`}
         alt={username}
         className="rounded-circle"
-        style={{ 
-          width: `${size}px`, 
-          height: `${size}px`, 
-          objectFit: 'cover',
-          cursor: userId ? 'pointer' : 'default'
+        style={{
+          width: `${size}px`,
+          height: `${size}px`,
+          objectFit: "cover",
+          cursor: userId ? "pointer" : "default",
         }}
       />
     ) : (
       <div
         className="rounded-circle bg-secondary d-flex align-items-center justify-content-center"
-        style={{ 
-          width: `${size}px`, 
+        style={{
+          width: `${size}px`,
           height: `${size}px`,
-          cursor: userId ? 'pointer' : 'default'
+          cursor: userId ? "pointer" : "default",
         }}
       >
-        <i className="bi bi-person-fill text-white" style={{ fontSize: `${size * 0.6}px` }}></i>
+        <i
+          className="bi bi-person-fill text-white"
+          style={{ fontSize: `${size * 0.6}px` }}
+        ></i>
       </div>
     );
 
@@ -301,24 +333,24 @@ const FriendsPage = () => {
           <ul className="nav nav-tabs mb-4">
             <li className="nav-item">
               <button
-                className={`nav-link ${activeTab === 'friends' ? 'active' : ''}`}
-                onClick={() => setActiveTab('friends')}
+                className={`nav-link ${activeTab === "friends" ? "active" : ""}`}
+                onClick={() => setActiveTab("friends")}
               >
                 Meine Freunde ({friends.length})
               </button>
             </li>
             <li className="nav-item">
               <button
-                className={`nav-link ${activeTab === 'requests' ? 'active' : ''}`}
-                onClick={() => setActiveTab('requests')}
+                className={`nav-link ${activeTab === "requests" ? "active" : ""}`}
+                onClick={() => setActiveTab("requests")}
               >
                 Anfragen ({pendingRequests.length})
               </button>
             </li>
             <li className="nav-item">
               <button
-                className={`nav-link ${activeTab === 'search' ? 'active' : ''}`}
-                onClick={() => setActiveTab('search')}
+                className={`nav-link ${activeTab === "search" ? "active" : ""}`}
+                onClick={() => setActiveTab("search")}
               >
                 Neue Freunde finden
               </button>
@@ -326,27 +358,37 @@ const FriendsPage = () => {
           </ul>
 
           {/* Friends Tab */}
-          {activeTab === 'friends' && (
+          {activeTab === "friends" && (
             <div className="card">
               <div className="card-header">
                 <h5>Meine Freunde</h5>
               </div>
               <div className="card-body">
                 {friends.length === 0 ? (
-                  <p className="text-muted">Du hast noch keine Freunde. Nutze die Suche, um neue Freunde zu finden!</p>
+                  <p className="text-muted">
+                    Du hast noch keine Freunde. Nutze die Suche, um neue Freunde
+                    zu finden!
+                  </p>
                 ) : (
                   <div className="row">
-                    {friends.map(friend => (
+                    {friends.map((friend) => (
                       <div key={friend.id} className="col-md-6 col-lg-4 mb-3">
                         <div className="card h-100">
                           <div className="card-body">
                             <div className="d-flex align-items-center mb-3">
                               <div className="me-3">
-                                {renderProfileImage(friend.avatarUrl, friend.username, 50, friend.id)}
+                                {renderProfileImage(
+                                  friend.avatarUrl,
+                                  friend.username,
+                                  50,
+                                  friend.id,
+                                )}
                               </div>
                               <div>
                                 <h6 className="mb-0">{friend.username}</h6>
-                                <small className="text-muted">{friend.email}</small>
+                                <small className="text-muted">
+                                  {friend.email}
+                                </small>
                               </div>
                             </div>
                             <div className="d-flex justify-content-between">
@@ -368,27 +410,37 @@ const FriendsPage = () => {
           )}
 
           {/* Pending Requests Tab */}
-          {activeTab === 'requests' && (
+          {activeTab === "requests" && (
             <div className="card">
               <div className="card-header">
                 <h5>Freundschaftsanfragen</h5>
               </div>
               <div className="card-body">
                 {pendingRequests.length === 0 ? (
-                  <p className="text-muted">Keine offenen Freundschaftsanfragen.</p>
+                  <p className="text-muted">
+                    Keine offenen Freundschaftsanfragen.
+                  </p>
                 ) : (
                   <div className="list-group">
-                    {pendingRequests.map(request => (
+                    {pendingRequests.map((request) => (
                       <div key={request.id} className="list-group-item">
                         <div className="d-flex align-items-center justify-content-between">
                           <div className="d-flex align-items-center">
                             <div className="me-3">
-                              {renderProfileImage(request.requester.avatarUrl, request.requester.username, 40)}
+                              {renderProfileImage(
+                                request.requester.avatarUrl,
+                                request.requester.username,
+                                40,
+                              )}
                             </div>
                             <div>
-                              <h6 className="mb-0">{request.requester.username}</h6>
+                              <h6 className="mb-0">
+                                {request.requester.username}
+                              </h6>
                               <small className="text-muted">
-                                {new Date(request.requestedAt).toLocaleDateString('de-DE')}
+                                {new Date(
+                                  request.requestedAt,
+                                ).toLocaleDateString("de-DE")}
                               </small>
                             </div>
                           </div>
@@ -416,7 +468,7 @@ const FriendsPage = () => {
           )}
 
           {/* Search Tab */}
-          {activeTab === 'search' && (
+          {activeTab === "search" && (
             <div className="card">
               <div className="card-header">
                 <h5>Neue Freunde finden</h5>
@@ -443,17 +495,24 @@ const FriendsPage = () => {
                       <p className="text-muted">Keine Benutzer gefunden.</p>
                     ) : (
                       <div className="row">
-                        {searchUsers.map(user => (
+                        {searchUsers.map((user) => (
                           <div key={user.id} className="col-md-6 col-lg-4 mb-3">
                             <div className="card h-100">
                               <div className="card-body">
                                 <div className="d-flex align-items-center mb-3">
                                   <div className="me-3">
-                                    {renderProfileImage(user.avatarUrl, user.username, 50, user.id)}
+                                    {renderProfileImage(
+                                      user.avatarUrl,
+                                      user.username,
+                                      50,
+                                      user.id,
+                                    )}
                                   </div>
                                   <div>
                                     <h6 className="mb-0">{user.username}</h6>
-                                    <small className="text-muted">{user.email}</small>
+                                    <small className="text-muted">
+                                      {user.email}
+                                    </small>
                                   </div>
                                 </div>
                                 <div className="d-flex gap-2">
@@ -461,8 +520,13 @@ const FriendsPage = () => {
                                     className="btn btn-primary btn-sm px-3 py-1 d-flex align-items-center"
                                     onClick={() => sendFriendRequest(user.id)}
                                   >
-                                    <FaUserPlus className="me-1" style={{ fontSize: "0.85rem" }} />
-                                    <span style={{ fontSize: "0.85rem" }}>Anfrage senden</span>
+                                    <FaUserPlus
+                                      className="me-1"
+                                      style={{ fontSize: "0.85rem" }}
+                                    />
+                                    <span style={{ fontSize: "0.85rem" }}>
+                                      Anfrage senden
+                                    </span>
                                   </button>
                                 </div>
                               </div>

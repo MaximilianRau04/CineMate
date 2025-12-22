@@ -20,7 +20,10 @@ const useMediaData = () => {
       const token = localStorage.getItem("token");
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-      const response = await fetch(`http://localhost:8080/api/reviews/${type}/${itemId}`, { headers });
+      const response = await fetch(
+        `http://localhost:8080/api/reviews/${type}/${itemId}`,
+        { headers },
+      );
       if (!response.ok) {
         if (response.status === 404) return 0;
         return null;
@@ -34,7 +37,7 @@ const useMediaData = () => {
     } catch (error) {
       console.error(
         `Fehler beim Laden des Ratings für ${type} ${itemId}:`,
-        error
+        error,
       );
       return null;
     }
@@ -85,7 +88,7 @@ const useMediaData = () => {
             currentRating:
               currentRating !== null ? currentRating : movie.rating,
           };
-        })
+        }),
       );
 
       // Process series with genres and current ratings
@@ -99,7 +102,7 @@ const useMediaData = () => {
             currentRating:
               currentRating !== null ? currentRating : series.rating,
           };
-        })
+        }),
       );
 
       setMovies(processedMovies);

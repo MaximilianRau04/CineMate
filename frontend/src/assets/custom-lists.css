@@ -23,7 +23,9 @@
 }
 
 .custom-list-card {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
   background: rgba(255, 255, 255, 0.95);
   border: none;
   border-radius: 12px;
@@ -237,11 +239,11 @@
   .list-preview-image {
     height: 200px;
   }
-  
+
   .custom-list-card .card-body {
     padding: 1rem;
   }
-  
+
   .modal-dialog {
     margin: 10px;
   }
@@ -252,7 +254,7 @@
     font-size: 0.9rem;
     padding: 0.5rem 0.75rem;
   }
-  
+
   .list-preview-image {
     height: 180px;
   }
@@ -346,7 +348,7 @@
   .action-buttons {
     flex-direction: column;
   }
-  
+
   .action-buttons .btn {
     width: 100%;
   }

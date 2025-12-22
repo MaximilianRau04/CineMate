@@ -19,11 +19,11 @@ const NotificationSystem = () => {
     const token = localStorage.getItem("token");
     if (!token) return;
 
-      fetch("http://localhost:8080/api/users/me", {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      })
+    fetch("http://localhost:8080/api/users/me", {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
       .then((res) =>
-        res.ok ? res.json() : Promise.reject(`HTTP Error: ${res.status}`)
+        res.ok ? res.json() : Promise.reject(`HTTP Error: ${res.status}`),
       )
       .then((data) => {
         if (data?.id) {
@@ -50,10 +50,15 @@ const NotificationSystem = () => {
       const url = showUnreadOnly
         ? `${API_BASE}/user/${userId}/unread`
         : `${API_BASE}/user/${userId}`;
-        const headers = token ? { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } : { "Content-Type": "application/json" };
-        const endpointReq = new Request(url, { method: "GET", headers });
+      const headers = token
+        ? {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          }
+        : { "Content-Type": "application/json" };
+      const endpointReq = new Request(url, { method: "GET", headers });
 
-        const response = await fetch(endpointReq);
+      const response = await fetch(endpointReq);
       if (!response.ok) {
         throw new Error(`HTTP Error: ${response.status}`);
       }
@@ -80,23 +85,23 @@ const NotificationSystem = () => {
    */
   const markAsRead = async (notificationId) => {
     try {
-        const token = localStorage.getItem("token");
-        await fetch(`${API_BASE}/${notificationId}/read`, {
-          method: "PUT",
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
+      const token = localStorage.getItem("token");
+      await fetch(`${API_BASE}/${notificationId}/read`, {
+        method: "PUT",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
 
       if (showUnreadOnly) {
         setNotifications((prev) =>
-          prev.filter((notif) => notif.id !== notificationId)
+          prev.filter((notif) => notif.id !== notificationId),
         );
       } else {
         setNotifications((prev) =>
           prev.map((notif) =>
             notif.id === notificationId
               ? { ...notif, read: true, readAt: new Date().toISOString() }
-              : notif
-          )
+              : notif,
+          ),
         );
       }
 
@@ -113,11 +118,11 @@ const NotificationSystem = () => {
    */
   const markAllAsRead = async () => {
     try {
-        const token = localStorage.getItem("token");
-        await fetch(`${API_BASE}/user/${userId}/read-all`, {
-          method: "PUT",
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
+      const token = localStorage.getItem("token");
+      await fetch(`${API_BASE}/user/${userId}/read-all`, {
+        method: "PUT",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
 
       if (showUnreadOnly) {
         setNotifications([]);
@@ -127,7 +132,7 @@ const NotificationSystem = () => {
             ...notif,
             read: true,
             readAt: new Date().toISOString(),
-          }))
+          })),
         );
       }
 
@@ -141,8 +146,11 @@ const NotificationSystem = () => {
     if (!userId) return;
 
     try {
-        const token = localStorage.getItem("token");
-        const countResponse = await fetch(`${API_BASE}/user/${userId}/unread/count`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+      const token = localStorage.getItem("token");
+      const countResponse = await fetch(
+        `${API_BASE}/user/${userId}/unread/count`,
+        { headers: token ? { Authorization: `Bearer ${token}` } : {} },
+      );
       if (!countResponse.ok) {
         throw new Error(`HTTP Error: ${countResponse.status}`);
       }
@@ -159,11 +167,11 @@ const NotificationSystem = () => {
    */
   const deleteAllNotifications = async () => {
     try {
-        const token = localStorage.getItem("token");
-        await fetch(`${API_BASE}/user/${userId}/delete-all`, {
-          method: "DELETE",
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
+      const token = localStorage.getItem("token");
+      await fetch(`${API_BASE}/user/${userId}/delete-all`, {
+        method: "DELETE",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
 
       setNotifications([]);
       setUnreadCount(0);
@@ -179,15 +187,15 @@ const NotificationSystem = () => {
    */
   const deleteNotification = async (notificationId) => {
     try {
-        const token = localStorage.getItem("token");
-        await fetch(`${API_BASE}/${notificationId}`, {
-          method: "DELETE",
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
+      const token = localStorage.getItem("token");
+      await fetch(`${API_BASE}/${notificationId}`, {
+        method: "DELETE",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
 
       const deletedNotif = notifications.find((n) => n.id === notificationId);
       setNotifications((prev) =>
-        prev.filter((notif) => notif.id !== notificationId)
+        prev.filter((notif) => notif.id !== notificationId),
       );
 
       if (deletedNotif && !deletedNotif.read) {

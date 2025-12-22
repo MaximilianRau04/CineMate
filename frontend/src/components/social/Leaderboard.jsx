@@ -1,6 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { FaTrophy, FaMedal, FaAward, FaStar, FaEye, FaHeart } from 'react-icons/fa';
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import {
+  FaTrophy,
+  FaMedal,
+  FaAward,
+  FaStar,
+  FaEye,
+  FaHeart,
+} from "react-icons/fa";
 
 const Leaderboard = () => {
   const [leaderboard, setLeaderboard] = useState([]);
@@ -8,8 +15,8 @@ const Leaderboard = () => {
   const [loading, setLoading] = useState(true);
 
   const getHeaders = () => {
-    const t = localStorage.getItem('token');
-    return t ? { 'Authorization': `Bearer ${t}` } : {};
+    const t = localStorage.getItem("token");
+    return t ? { Authorization: `Bearer ${t}` } : {};
   };
 
   useEffect(() => {
@@ -26,11 +33,15 @@ const Leaderboard = () => {
   const renderProfileImage = (avatarUrl, username, size = 40) => {
     if (avatarUrl) {
       return (
-        <img 
+        <img
           src={`http://localhost:8080${avatarUrl}`}
           alt={username}
           className="rounded-circle"
-          style={{ width: `${size}px`, height: `${size}px`, objectFit: 'cover' }}
+          style={{
+            width: `${size}px`,
+            height: `${size}px`,
+            objectFit: "cover",
+          }}
         />
       );
     } else {
@@ -39,7 +50,10 @@ const Leaderboard = () => {
           className="rounded-circle bg-secondary d-flex align-items-center justify-content-center"
           style={{ width: `${size}px`, height: `${size}px` }}
         >
-          <i className="bi bi-person-fill text-white" style={{ fontSize: `${size * 0.6}px` }}></i>
+          <i
+            className="bi bi-person-fill text-white"
+            style={{ fontSize: `${size * 0.6}px` }}
+          ></i>
         </div>
       );
     }
@@ -51,12 +65,9 @@ const Leaderboard = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      await Promise.all([
-        loadLeaderboard(),
-        loadMyPoints()
-      ]);
+      await Promise.all([loadLeaderboard(), loadMyPoints()]);
     } catch (error) {
-      console.error('Error loading leaderboard data:', error);
+      console.error("Error loading leaderboard data:", error);
     } finally {
       setLoading(false);
     }
@@ -67,17 +78,24 @@ const Leaderboard = () => {
    */
   const loadLeaderboard = async () => {
     try {
-      const response = await fetch('http://localhost:8080/api/social/leaderboard?limit=20', {
-        headers: getHeaders()
-      });
+      const response = await fetch(
+        "http://localhost:8080/api/social/leaderboard?limit=20",
+        {
+          headers: getHeaders(),
+        },
+      );
       if (response.ok) {
         const data = await response.json();
         setLeaderboard(data);
       } else {
-        console.error('Failed to load leaderboard:', response.status, response.statusText);
+        console.error(
+          "Failed to load leaderboard:",
+          response.status,
+          response.statusText,
+        );
       }
     } catch (error) {
-      console.error('Error loading leaderboard:', error);
+      console.error("Error loading leaderboard:", error);
     }
   };
 
@@ -86,15 +104,15 @@ const Leaderboard = () => {
    */
   const loadMyPoints = async () => {
     try {
-      const response = await fetch('http://localhost:8080/api/social/points', {
-        headers: getHeaders()
+      const response = await fetch("http://localhost:8080/api/social/points", {
+        headers: getHeaders(),
       });
       if (response.ok) {
         const data = await response.json();
         setMyPoints(data);
       }
     } catch (error) {
-      console.error('Error loading my points:', error);
+      console.error("Error loading my points:", error);
     }
   };
 
@@ -105,24 +123,34 @@ const Leaderboard = () => {
    */
   const getRankIcon = (rank) => {
     switch (rank) {
-      case 1: return <FaTrophy className="text-warning" />;
-      case 2: return <FaMedal className="text-secondary" />;
-      case 3: return <FaAward className="text-warning" style={{ color: '#CD7F32' }} />;
-      default: return <span className="fw-bold text-muted">#{rank}</span>;
+      case 1:
+        return <FaTrophy className="text-warning" />;
+      case 2:
+        return <FaMedal className="text-secondary" />;
+      case 3:
+        return (
+          <FaAward className="text-warning" style={{ color: "#CD7F32" }} />
+        );
+      default:
+        return <span className="fw-bold text-muted">#{rank}</span>;
     }
   };
 
   /**
    * returns the appropriate CSS class for the user's rank.
-   * @param {*} rank 
-   * @returns {string} The CSS class for the rank. 
+   * @param {*} rank
+   * @returns {string} The CSS class for the rank.
    */
   const getRankClass = (rank) => {
     switch (rank) {
-      case 1: return 'bg-gradient bg-warning text-dark';
-      case 2: return 'bg-gradient bg-secondary text-white';
-      case 3: return 'bg-gradient text-white';
-      default: return '';
+      case 1:
+        return "bg-gradient bg-warning text-dark";
+      case 2:
+        return "bg-gradient bg-secondary text-white";
+      case 3:
+        return "bg-gradient text-white";
+      default:
+        return "";
     }
   };
 
@@ -195,9 +223,11 @@ const Leaderboard = () => {
                     <div className="bg-white bg-opacity-25 rounded p-3">
                       <h6 className="mb-2">Dein Rang</h6>
                       <h2 className="mb-0">
-                        {leaderboard.findIndex(entry => 
-                          entry.userId === JSON.parse(localStorage.getItem('user') || '{}').id
-                        ) + 1 || 'Unranked'}
+                        {leaderboard.findIndex(
+                          (entry) =>
+                            entry.userId ===
+                            JSON.parse(localStorage.getItem("user") || "{}").id,
+                        ) + 1 || "Unranked"}
                       </h2>
                     </div>
                   </div>
@@ -223,52 +253,85 @@ const Leaderboard = () => {
                         <th>Benutzer</th>
                         <th className="text-center">Gesamt</th>
                         <th className="text-center">
-                          <FaStar className="text-warning" title="Bewertungspunkte" />
+                          <FaStar
+                            className="text-warning"
+                            title="Bewertungspunkte"
+                          />
                         </th>
                         <th className="text-center">
                           <FaEye className="text-info" title="Gesehen-Punkte" />
                         </th>
                         <th className="text-center">
-                          <FaHeart className="text-success" title="Soziale Punkte" />
+                          <FaHeart
+                            className="text-success"
+                            title="Soziale Punkte"
+                          />
                         </th>
                         <th className="text-center">
-                          <FaAward className="text-primary" title="Achievement-Punkte" />
+                          <FaAward
+                            className="text-primary"
+                            title="Achievement-Punkte"
+                          />
                         </th>
                       </tr>
                     </thead>
                     <tbody>
                       {leaderboard.map((entry, index) => {
                         const rank = index + 1;
-                        const isCurrentUser = entry.userId === JSON.parse(localStorage.getItem('user') || '{}').id;
-                        
+                        const isCurrentUser =
+                          entry.userId ===
+                          JSON.parse(localStorage.getItem("user") || "{}").id;
+
                         return (
-                          <tr 
-                            key={entry.id} 
-                            className={`${getRankClass(rank)} ${isCurrentUser ? 'table-info' : ''}`}
-                            style={{ 
-                              background: rank <= 3 ? '' : (isCurrentUser ? 'rgba(13, 202, 240, 0.1)' : ''),
-                              fontWeight: isCurrentUser ? 'bold' : 'normal'
+                          <tr
+                            key={entry.id}
+                            className={`${getRankClass(rank)} ${isCurrentUser ? "table-info" : ""}`}
+                            style={{
+                              background:
+                                rank <= 3
+                                  ? ""
+                                  : isCurrentUser
+                                    ? "rgba(13, 202, 240, 0.1)"
+                                    : "",
+                              fontWeight: isCurrentUser ? "bold" : "normal",
                             }}
                           >
-                            <td className="text-center">
-                              {getRankIcon(rank)}
-                            </td>
+                            <td className="text-center">{getRankIcon(rank)}</td>
                             <td>
                               <div className="d-flex align-items-center">
                                 {isCurrentUser ? (
                                   <div className="me-3">
-                                    {renderProfileImage(entry.avatarUrl, entry.username, 40)}
+                                    {renderProfileImage(
+                                      entry.avatarUrl,
+                                      entry.username,
+                                      40,
+                                    )}
                                   </div>
                                 ) : (
-                                  <Link to={`/profile/${entry.userId}`} title="Profil ansehen" className="me-3">
-                                    <div style={{ 
-                                      cursor: 'pointer',
-                                      transition: 'transform 0.2s'
-                                    }}
-                                    onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                                    onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                  <Link
+                                    to={`/profile/${entry.userId}`}
+                                    title="Profil ansehen"
+                                    className="me-3"
+                                  >
+                                    <div
+                                      style={{
+                                        cursor: "pointer",
+                                        transition: "transform 0.2s",
+                                      }}
+                                      onMouseEnter={(e) =>
+                                        (e.currentTarget.style.transform =
+                                          "scale(1.1)")
+                                      }
+                                      onMouseLeave={(e) =>
+                                        (e.currentTarget.style.transform =
+                                          "scale(1)")
+                                      }
                                     >
-                                      {renderProfileImage(entry.avatarUrl, entry.username, 40)}
+                                      {renderProfileImage(
+                                        entry.avatarUrl,
+                                        entry.username,
+                                        40,
+                                      )}
                                     </div>
                                   </Link>
                                 )}
@@ -277,13 +340,15 @@ const Leaderboard = () => {
                                     {isCurrentUser ? (
                                       <>
                                         {entry.username}
-                                        <span className="badge bg-info ms-2">Du</span>
+                                        <span className="badge bg-info ms-2">
+                                          Du
+                                        </span>
                                       </>
                                     ) : (
-                                      <Link 
+                                      <Link
                                         to={`/profile/${entry.userId}`}
                                         className="text-decoration-none fw-bold"
-                                        style={{ color: 'inherit' }}
+                                        style={{ color: "inherit" }}
                                         title="Profil ansehen"
                                       >
                                         {entry.username}
@@ -294,12 +359,20 @@ const Leaderboard = () => {
                               </div>
                             </td>
                             <td className="text-center">
-                              <span className="fs-5 fw-bold">{entry.totalPoints}</span>
+                              <span className="fs-5 fw-bold">
+                                {entry.totalPoints}
+                              </span>
                             </td>
-                            <td className="text-center">{entry.reviewPoints}</td>
+                            <td className="text-center">
+                              {entry.reviewPoints}
+                            </td>
                             <td className="text-center">{entry.watchPoints}</td>
-                            <td className="text-center">{entry.socialPoints}</td>
-                            <td className="text-center">{entry.achievementPoints}</td>
+                            <td className="text-center">
+                              {entry.socialPoints}
+                            </td>
+                            <td className="text-center">
+                              {entry.achievementPoints}
+                            </td>
                           </tr>
                         );
                       })}
@@ -321,28 +394,36 @@ const Leaderboard = () => {
                   <div className="text-center p-3 border rounded">
                     <FaStar className="fs-3 text-warning mb-2" />
                     <h6>Bewertungen</h6>
-                    <p className="small text-muted mb-0">10 Punkte pro Review</p>
+                    <p className="small text-muted mb-0">
+                      10 Punkte pro Review
+                    </p>
                   </div>
                 </div>
                 <div className="col-md-3">
                   <div className="text-center p-3 border rounded">
                     <FaEye className="fs-3 text-info mb-2" />
                     <h6>Gesehen markieren</h6>
-                    <p className="small text-muted mb-0">5 Punkte pro Film/Serie</p>
+                    <p className="small text-muted mb-0">
+                      5 Punkte pro Film/Serie
+                    </p>
                   </div>
                 </div>
                 <div className="col-md-3">
                   <div className="text-center p-3 border rounded">
                     <FaHeart className="fs-3 text-success mb-2" />
                     <h6>Soziale Interaktionen</h6>
-                    <p className="small text-muted mb-0">15 Punkte pro Freundschaft</p>
+                    <p className="small text-muted mb-0">
+                      15 Punkte pro Freundschaft
+                    </p>
                   </div>
                 </div>
                 <div className="col-md-3">
                   <div className="text-center p-3 border rounded">
                     <FaAward className="fs-3 text-primary mb-2" />
                     <h6>Achievements</h6>
-                    <p className="small text-muted mb-0">25 Punkte pro Meilenstein</p>
+                    <p className="small text-muted mb-0">
+                      25 Punkte pro Meilenstein
+                    </p>
                   </div>
                 </div>
               </div>

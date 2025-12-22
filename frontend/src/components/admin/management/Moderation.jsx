@@ -21,7 +21,7 @@ const Moderation = ({ reviews, reviewUsers, onDeleteReview }) => (
               </tr>
             </thead>
             <tbody>
-              {reviews.map(review => (
+              {reviews.map((review) => (
                 <tr key={review.id}>
                   <td>{reviewUsers[review.id]?.username || "Lädt..."}</td>
                   <td>
@@ -30,7 +30,14 @@ const Moderation = ({ reviews, reviewUsers, onDeleteReview }) => (
                     </span>
                   </td>
                   <td>
-                    <div style={{ maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <div
+                      style={{
+                        maxWidth: "200px",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
                       {review.comment}
                     </div>
                   </td>

@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
 
 const AuthContext = createContext();
 
@@ -9,15 +15,15 @@ const AuthContext = createContext();
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
 
 /**
  * AuthProvider component to provide authentication context.
- * @param {*} param0 
- * @returns {JSX.Element} The provider component wrapping its children. 
+ * @param {*} param0
+ * @returns {JSX.Element} The provider component wrapping its children.
  */
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -33,11 +39,11 @@ export const AuthProvider = ({ children }) => {
 
   // Function to log out the user and clear localStorage
   const logout = useCallback(() => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('userRole');
-    localStorage.removeItem('userId');
-    
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    localStorage.removeItem("userRole");
+    localStorage.removeItem("userId");
+
     resetAuthState();
   }, [resetAuthState]);
 
@@ -46,17 +52,17 @@ export const AuthProvider = ({ children }) => {
    * @returns {Promise<void>}
    */
   const validateToken = useCallback(async () => {
-    const token = localStorage.getItem('token');
-    
+    const token = localStorage.getItem("token");
+
     if (!token) {
       resetAuthState();
       return;
     }
 
     try {
-      const response = await fetch('http://localhost:8080/api/users/me', {
+      const response = await fetch("http://localhost:8080/api/users/me", {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -65,15 +71,15 @@ export const AuthProvider = ({ children }) => {
         setUser(userData);
         setIsAuthenticated(true);
         setIsLoading(false);
-        
-        localStorage.setItem('user', JSON.stringify(userData));
-        localStorage.setItem('userRole', userData.role);
-        localStorage.setItem('userId', userData.id);
+
+        localStorage.setItem("user", JSON.stringify(userData));
+        localStorage.setItem("userRole", userData.role);
+        localStorage.setItem("userId", userData.id);
       } else {
         logout();
       }
     } catch (error) {
-      console.error('Token validation failed:', error);
+      console.error("Token validation failed:", error);
       logout();
     }
   }, [logout, resetAuthState]);
@@ -90,12 +96,12 @@ export const AuthProvider = ({ children }) => {
    */
   const login = async (username, password) => {
     try {
-      setIsLoading(true); 
-      
-      const response = await fetch('http://localhost:8080/api/auth/login', {
-        method: 'POST',
+      setIsLoading(true);
+
+      const response = await fetch("http://localhost:8080/api/auth/login", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           username,
@@ -104,15 +110,15 @@ export const AuthProvider = ({ children }) => {
       });
 
       if (!response.ok) {
-        throw new Error('Login fehlgeschlagen');
+        throw new Error("Login fehlgeschlagen");
       }
 
       const data = await response.json();
-      
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      localStorage.setItem('userRole', data.user.role);
-      localStorage.setItem('userId', data.user.id);
+
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      localStorage.setItem("userRole", data.user.role);
+      localStorage.setItem("userId", data.user.id);
 
       setUser(data.user);
       setIsAuthenticated(true);
@@ -120,8 +126,8 @@ export const AuthProvider = ({ children }) => {
 
       return { success: true };
     } catch (error) {
-      console.error('Login error:', error);
-      setIsLoading(false); 
+      console.error("Login error:", error);
+      setIsLoading(false);
       return { success: false, error: error.message };
     }
   };
@@ -133,22 +139,22 @@ export const AuthProvider = ({ children }) => {
    */
   const register = async (userData) => {
     try {
-      const response = await fetch('http://localhost:8080/api/auth/register', {
-        method: 'POST',
+      const response = await fetch("http://localhost:8080/api/auth/register", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(userData),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Registrierung fehlgeschlagen');
+        throw new Error(errorData.message || "Registrierung fehlgeschlagen");
       }
 
       return { success: true };
     } catch (error) {
-      console.error('Registration error:', error);
+      console.error("Registration error:", error);
       return { success: false, error: error.message };
     }
   };
@@ -163,9 +169,5 @@ export const AuthProvider = ({ children }) => {
     validateToken,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

@@ -13,7 +13,7 @@ This is a modern React-based web application for managing and browsing movies an
   ```sh
   node -v
   npm -v
-
+  ```
 
 ## Project Setup
 
@@ -38,6 +38,7 @@ npm run build
 ```
 
 You can preview the production build locally with:
+
 ```sh
 npm run preview
 ```
@@ -47,5 +48,3 @@ Run ESLint to check for code quality issues:
 ```sh
 npm run lint
 ```
-
-

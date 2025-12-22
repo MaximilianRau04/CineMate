@@ -27,9 +27,12 @@ const UserMediaTabs = ({ userId }) => {
    */
   const fetchMediaForReview = async (reviewId) => {
     try {
-      const response = await fetch(`http://localhost:8080/api/reviews/${reviewId}/media`, {
-        headers: getHeaders(),
-      });
+      const response = await fetch(
+        `http://localhost:8080/api/reviews/${reviewId}/media`,
+        {
+          headers: getHeaders(),
+        },
+      );
       if (response.ok) {
         return await response.json();
       }
@@ -37,7 +40,7 @@ const UserMediaTabs = ({ userId }) => {
     } catch (error) {
       console.error(
         `Fehler beim Laden der Mediendaten für Review ${reviewId}:`,
-        error
+        error,
       );
       return null;
     }
@@ -67,7 +70,7 @@ const UserMediaTabs = ({ userId }) => {
               ...review,
               mediaData: mediaData,
             };
-          })
+          }),
         );
 
         setReviews(enrichedReviews);
@@ -131,7 +134,7 @@ const UserMediaTabs = ({ userId }) => {
         setWatched({ movies: validMovies, series: validSeries });
       })
       .catch((err) =>
-        console.error("Fehler beim Laden der gesehenen Medien:", err)
+        console.error("Fehler beim Laden der gesehenen Medien:", err),
       )
       .finally(() => setLoading((prev) => ({ ...prev, watched: false })));
   }, [userId, activeTab]);
@@ -144,24 +147,27 @@ const UserMediaTabs = ({ userId }) => {
    */
   const removeFromFavorites = async (mediaId, mediaType) => {
     try {
-      const response = await fetch(`http://localhost:8080/api/users/${userId}/favorites/${mediaType}s/${mediaId}`, {
-        method: "DELETE",
-        headers: getHeaders(),
-      });
+      const response = await fetch(
+        `http://localhost:8080/api/users/${userId}/favorites/${mediaType}s/${mediaId}`,
+        {
+          method: "DELETE",
+          headers: getHeaders(),
+        },
+      );
 
       if (response.ok) {
         setFavorites((prev) => ({
           ...prev,
           [mediaType + "s"]: prev[mediaType + "s"].filter(
-            (item) => item.id !== mediaId
+            (item) => item.id !== mediaId,
           ),
         }));
         success(
-          `${mediaType === "movie" ? "Film" : "Serie"} aus Favoriten entfernt!`
+          `${mediaType === "movie" ? "Film" : "Serie"} aus Favoriten entfernt!`,
         );
       } else {
         console.error(
-          `Fehler beim Entfernen aus Favoriten: ${response.status}`
+          `Fehler beim Entfernen aus Favoriten: ${response.status}`,
         );
         showError("Fehler beim Entfernen aus Favoriten");
       }
@@ -179,26 +185,29 @@ const UserMediaTabs = ({ userId }) => {
    */
   const removeFromWatched = async (mediaId, mediaType) => {
     try {
-      const response = await fetch(`http://localhost:8080/api/users/${userId}/watched/${mediaType}s/${mediaId}`, {
-        method: "DELETE",
-        headers: getHeaders(),
-      });
+      const response = await fetch(
+        `http://localhost:8080/api/users/${userId}/watched/${mediaType}s/${mediaId}`,
+        {
+          method: "DELETE",
+          headers: getHeaders(),
+        },
+      );
 
       if (response.ok) {
         setWatched((prev) => ({
           ...prev,
           [mediaType + "s"]: prev[mediaType + "s"].filter(
-            (item) => item.id !== mediaId
+            (item) => item.id !== mediaId,
           ),
         }));
         success(
           `${
             mediaType === "movie" ? "Film" : "Serie"
-          } aus gesehenen Medien entfernt!`
+          } aus gesehenen Medien entfernt!`,
         );
       } else {
         console.error(
-          `Fehler beim Entfernen aus gesehenen Medien: ${response.status}`
+          `Fehler beim Entfernen aus gesehenen Medien: ${response.status}`,
         );
         showError("Fehler beim Entfernen aus gesehenen Medien");
       }

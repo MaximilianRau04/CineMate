@@ -1,10 +1,9 @@
-
-const AssignmentForm = ({ 
-  contentType, 
-  setContentType, 
-  selectedContent, 
+const AssignmentForm = ({
+  contentType,
+  setContentType,
+  selectedContent,
   setSelectedContent,
-  contents 
+  contents,
 }) => {
   return (
     <>
@@ -18,10 +17,12 @@ const AssignmentForm = ({
               name="contentType"
               id="movieType"
               value="movie"
-              checked={contentType === 'movie'}
-              onChange={() => setContentType('movie')}
+              checked={contentType === "movie"}
+              onChange={() => setContentType("movie")}
             />
-            <label className="form-check-label" htmlFor="movieType">Film</label>
+            <label className="form-check-label" htmlFor="movieType">
+              Film
+            </label>
           </div>
           <div className="form-check form-check-inline">
             <input
@@ -30,28 +31,30 @@ const AssignmentForm = ({
               name="contentType"
               id="seriesType"
               value="series"
-              checked={contentType === 'series'}
-              onChange={() => setContentType('series')}
+              checked={contentType === "series"}
+              onChange={() => setContentType("series")}
             />
-            <label className="form-check-label" htmlFor="seriesType">Serie</label>
+            <label className="form-check-label" htmlFor="seriesType">
+              Serie
+            </label>
           </div>
         </div>
       </div>
       <div className="mb-3">
         <label className="form-label">
-          {contentType === 'movie' ? 'Film auswählen' : 'Serie auswählen'}
+          {contentType === "movie" ? "Film auswählen" : "Serie auswählen"}
         </label>
         <select
           className="form-control"
-          value={selectedContent?.id || ''}
+          value={selectedContent?.id || ""}
           onChange={(e) => {
             const id = e.target.value;
-            const content = contents.find(item => item.id === id);
+            const content = contents.find((item) => item.id === id);
             setSelectedContent(content);
           }}
         >
           <option value="">Bitte auswählen</option>
-          {contents.map(item => (
+          {contents.map((item) => (
             <option key={item.id} value={item.id}>
               {item.title}
             </option>

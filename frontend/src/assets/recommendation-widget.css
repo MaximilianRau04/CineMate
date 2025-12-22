@@ -139,19 +139,19 @@
   .recommendation-widget-header {
     padding: 1rem 1.25rem;
   }
-  
+
   .recommendation-widget-header h5 {
     font-size: 1rem;
   }
-  
+
   .recommendation-widget-content {
     padding: 1.25rem;
   }
-  
+
   .recommendation-widget-title {
     font-size: 0.85rem;
   }
-  
+
   .recommendation-widget-reason {
     font-size: 0.7rem;
   }
@@ -162,7 +162,7 @@
   .recommendation-widget-item {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
-  
+
   .recommendation-widget-item:hover {
     transform: translateY(-8px);
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
@@ -196,7 +196,15 @@
   animation: fadeInUp 0.6s ease;
 }
 
-.recommendation-widget-item:nth-child(1) { animation-delay: 0.1s; }
-.recommendation-widget-item:nth-child(2) { animation-delay: 0.2s; }
-.recommendation-widget-item:nth-child(3) { animation-delay: 0.3s; }
-.recommendation-widget-item:nth-child(4) { animation-delay: 0.4s; }
+.recommendation-widget-item:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.recommendation-widget-item:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.recommendation-widget-item:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.recommendation-widget-item:nth-child(4) {
+  animation-delay: 0.4s;
+}

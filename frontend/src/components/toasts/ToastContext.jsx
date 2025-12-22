@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback } from "react";
 
 const ToastContext = createContext();
 
@@ -9,22 +9,22 @@ const ToastContext = createContext();
 export const useToast = () => {
   const context = useContext(ToastContext);
   if (!context) {
-    throw new Error('useToast must be used within a ToastProvider');
+    throw new Error("useToast must be used within a ToastProvider");
   }
   return context;
 };
 
 /**
  * Provider component for the toast context.
- * @param {*} param0 
- * @returns {JSX.Element} The provider component wrapping its children. 
+ * @param {*} param0
+ * @returns {JSX.Element} The provider component wrapping its children.
  */
 export const ToastProvider = ({ children }) => {
   const [toasts, setToasts] = useState([]);
 
   const removeToast = useCallback((id) => {
-    setToasts(prev => {
-      const updated = prev.filter(toast => toast.id !== id);
+    setToasts((prev) => {
+      const updated = prev.filter((toast) => toast.id !== id);
       return updated;
     });
   }, []);
@@ -36,41 +36,56 @@ export const ToastProvider = ({ children }) => {
    * @param {number} duration The duration in milliseconds before the toast disappears. Default is 5000ms.
    * @returns {number} The ID of the created toast.
    */
-  const addToast = useCallback((message, type = 'info', duration = 5000) => {
-    const id = Date.now() + Math.random();
-    const toast = {
-      id,
-      message,
-      type,
-      duration
-    };
+  const addToast = useCallback(
+    (message, type = "info", duration = 5000) => {
+      const id = Date.now() + Math.random();
+      const toast = {
+        id,
+        message,
+        type,
+        duration,
+      };
 
-    setToasts(prev => [...prev, toast]);
+      setToasts((prev) => [...prev, toast]);
 
-    if (duration > 0) {
-      setTimeout(() => {
-        removeToast(id);
-      }, duration);
-    }
+      if (duration > 0) {
+        setTimeout(() => {
+          removeToast(id);
+        }, duration);
+      }
 
-    return id;
-  }, [removeToast]);
+      return id;
+    },
+    [removeToast],
+  );
 
-  const success = useCallback((message, duration) => {
-    return addToast(message, 'success', duration);
-  }, [addToast]);
+  const success = useCallback(
+    (message, duration) => {
+      return addToast(message, "success", duration);
+    },
+    [addToast],
+  );
 
-  const error = useCallback((message, duration) => {
-    return addToast(message, 'error', duration);
-  }, [addToast]);
+  const error = useCallback(
+    (message, duration) => {
+      return addToast(message, "error", duration);
+    },
+    [addToast],
+  );
 
-  const warning = useCallback((message, duration) => {
-    return addToast(message, 'warning', duration);
-  }, [addToast]);
+  const warning = useCallback(
+    (message, duration) => {
+      return addToast(message, "warning", duration);
+    },
+    [addToast],
+  );
 
-  const info = useCallback((message, duration) => {
-    return addToast(message, 'info', duration);
-  }, [addToast]);
+  const info = useCallback(
+    (message, duration) => {
+      return addToast(message, "info", duration);
+    },
+    [addToast],
+  );
 
   const value = {
     toasts,
@@ -79,12 +94,10 @@ export const ToastProvider = ({ children }) => {
     success,
     error,
     warning,
-    info
+    info,
   };
 
   return (
-    <ToastContext.Provider value={value}>
-      {children}
-    </ToastContext.Provider>
+    <ToastContext.Provider value={value}>{children}</ToastContext.Provider>
   );
 };

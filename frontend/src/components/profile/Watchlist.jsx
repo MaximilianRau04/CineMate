@@ -68,12 +68,12 @@ const Watchlist = () => {
       {
         method: "DELETE",
         headers: token ? { Authorization: `Bearer ${token}` } : {},
-      }
+      },
     )
       .then((res) => {
         if (!res.ok) throw new Error("Fehler beim Entfernen des Films");
         setMovieWatchlist((prev) =>
-          prev.filter((movie) => movie.id !== movieId)
+          prev.filter((movie) => movie.id !== movieId),
         );
       })
       .catch((err) => {
@@ -95,12 +95,12 @@ const Watchlist = () => {
       {
         method: "DELETE",
         headers: token ? { Authorization: `Bearer ${token}` } : {},
-      }
+      },
     )
       .then((res) => {
         if (!res.ok) throw new Error("Fehler beim Entfernen der Serie");
         setSeriesWatchlist((prev) =>
-          prev.filter((serie) => serie.id !== seriesId)
+          prev.filter((serie) => serie.id !== seriesId),
         );
       })
       .catch((err) => {

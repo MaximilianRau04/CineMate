@@ -70,7 +70,7 @@ const RecommendationsPage = () => {
         `http://localhost:8080/api/recommendations/user/${userId}`,
         {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
-        }
+        },
       );
 
       if (response.ok) {
@@ -95,9 +95,12 @@ const RecommendationsPage = () => {
   const loadTrendingRecommendations = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:8080/api/recommendations/trending", {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
+      const response = await fetch(
+        "http://localhost:8080/api/recommendations/trending",
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        },
+      );
 
       if (response.ok) {
         const data = await response.json();
@@ -119,11 +122,11 @@ const RecommendationsPage = () => {
       const token = localStorage.getItem("token");
       const response = await fetch(
         `http://localhost:8080/api/recommendations/genre/${encodeURIComponent(
-          genre
+          genre,
         )}`,
         {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
-        }
+        },
       );
 
       if (response.ok) {

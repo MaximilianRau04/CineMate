@@ -1,8 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import '../../assets/recommendations-widget.css';
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import "../../assets/recommendations-widget.css";
 
-const RecommendationWidget = ({ userId, type = 'personal', maxItems = 4, title = 'Empfehlungen für dich' }) => {
+const RecommendationWidget = ({
+  userId,
+  type = "personal",
+  maxItems = 4,
+  title = "Empfehlungen für dich",
+}) => {
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -20,22 +25,22 @@ const RecommendationWidget = ({ userId, type = 'personal', maxItems = 4, title =
   const loadRecommendations = async () => {
     try {
       setLoading(true);
-      let url = '';
-      
+      let url = "";
+
       switch (type) {
-        case 'smart':
+        case "smart":
           url = `http://localhost:8080/api/recommendations/user/${userId}/smart`;
           break;
-        case 'trending':
-          url = 'http://localhost:8080/api/recommendations/trending';
+        case "trending":
+          url = "http://localhost:8080/api/recommendations/trending";
           break;
-        case 'hybrid':
+        case "hybrid":
           url = `http://localhost:8080/api/recommendations/user/${userId}/hybrid`;
           break;
         default:
           url = `http://localhost:8080/api/recommendations/user/${userId}`;
       }
-      
+
       const response = await fetch(url, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
@@ -45,11 +50,11 @@ const RecommendationWidget = ({ userId, type = 'personal', maxItems = 4, title =
         setRecommendations(data.slice(0, maxItems));
         setError(null);
       } else {
-        setError('Fehler beim Laden der Empfehlungen');
+        setError("Fehler beim Laden der Empfehlungen");
       }
     } catch (error) {
-      console.error('Fehler beim Laden der Empfehlungen:', error);
-      setError('Fehler beim Laden der Empfehlungen');
+      console.error("Fehler beim Laden der Empfehlungen:", error);
+      setError("Fehler beim Laden der Empfehlungen");
     } finally {
       setLoading(false);
     }
@@ -62,7 +67,10 @@ const RecommendationWidget = ({ userId, type = 'personal', maxItems = 4, title =
           <h5>{title}</h5>
         </div>
         <div className="text-center py-4">
-          <div className="spinner-border spinner-border-sm text-primary" role="status" />
+          <div
+            className="spinner-border spinner-border-sm text-primary"
+            role="status"
+          />
           <p className="mt-2 mb-0 small">Wird geladen...</p>
         </div>
       </div>
@@ -93,21 +101,25 @@ const RecommendationWidget = ({ userId, type = 'personal', maxItems = 4, title =
           Alle anzeigen
         </Link>
       </div>
-      
+
       <div className="recommendation-widget-content">
         <div className="row g-3">
           {recommendations.map((rec) => (
             <div key={`${rec.type}-${rec.id}`} className="col-6 col-lg-3">
-              <Link 
-                to={`/${rec.type === 'movie' ? 'movies' : 'series'}/${rec.id}`}
+              <Link
+                to={`/${rec.type === "movie" ? "movies" : "series"}/${rec.id}`}
                 className="recommendation-widget-item"
               >
                 <div className="recommendation-widget-poster">
                   <img
-                    src={rec.posterUrl || 'https://via.placeholder.com/200x300?text=No+Image'}
+                    src={
+                      rec.posterUrl ||
+                      "https://via.placeholder.com/200x300?text=No+Image"
+                    }
                     alt={rec.title}
                     onError={(e) => {
-                      e.target.src = 'https://via.placeholder.com/200x300?text=No+Image';
+                      e.target.src =
+                        "https://via.placeholder.com/200x300?text=No+Image";
                     }}
                   />
                   <div className="recommendation-widget-overlay">

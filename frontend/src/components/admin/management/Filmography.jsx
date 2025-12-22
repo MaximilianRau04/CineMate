@@ -1,12 +1,12 @@
 import { FaUnlink, FaEdit } from "react-icons/fa";
 
-const Filmography = ({ 
-  person, 
-  personType, 
-  filmography, 
-  isLoading, 
+const Filmography = ({
+  person,
+  personType,
+  filmography,
+  isLoading,
   onRemove,
-  onChangeDirector 
+  onChangeDirector,
 }) => {
   if (isLoading) {
     return (
@@ -18,7 +18,7 @@ const Filmography = ({
     );
   }
 
-  const isDirector = personType === 'director';
+  const isDirector = personType === "director";
 
   return (
     <>
@@ -34,7 +34,7 @@ const Filmography = ({
             </tr>
           </thead>
           <tbody>
-            {filmography.movies.map(movie => (
+            {filmography.movies.map((movie) => (
               <tr key={movie.id}>
                 <td>{movie.title}</td>
                 <td>{movie.genre}</td>
@@ -51,7 +51,7 @@ const Filmography = ({
                   ) : (
                     <button
                       className="btn btn-sm btn-outline-danger"
-                      onClick={() => onRemove(movie.id, person.id, 'movie')}
+                      onClick={() => onRemove(movie.id, person.id, "movie")}
                       title="Entfernen"
                     >
                       <FaUnlink /> Entfernen
@@ -62,7 +62,9 @@ const Filmography = ({
             ))}
             {filmography.movies.length === 0 && (
               <tr>
-                <td colSpan="4" className="text-center">Keine Filme gefunden</td>
+                <td colSpan="4" className="text-center">
+                  Keine Filme gefunden
+                </td>
               </tr>
             )}
           </tbody>
@@ -81,7 +83,7 @@ const Filmography = ({
             </tr>
           </thead>
           <tbody>
-            {filmography.series.map(serie => (
+            {filmography.series.map((serie) => (
               <tr key={serie.id}>
                 <td>{serie.title}</td>
                 <td>{serie.genre}</td>
@@ -89,7 +91,7 @@ const Filmography = ({
                 <td>
                   <button
                     className="btn btn-sm btn-outline-danger"
-                    onClick={() => onRemove(serie.id, person.id, 'series')}
+                    onClick={() => onRemove(serie.id, person.id, "series")}
                     title="Entfernen"
                   >
                     <FaUnlink /> Entfernen
@@ -99,7 +101,9 @@ const Filmography = ({
             ))}
             {filmography.series.length === 0 && (
               <tr>
-                <td colSpan="4" className="text-center">Keine Serien gefunden</td>
+                <td colSpan="4" className="text-center">
+                  Keine Serien gefunden
+                </td>
               </tr>
             )}
           </tbody>

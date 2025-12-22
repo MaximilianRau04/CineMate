@@ -166,7 +166,8 @@
   height: 3rem;
 }
 
-.tab-content h3, .tab-content h4 {
+.tab-content h3,
+.tab-content h4 {
   color: white;
   font-weight: 600;
   margin-bottom: 1.5rem;
@@ -183,16 +184,16 @@
   .recommendation-poster-container {
     height: 250px;
   }
-  
+
   .nav-tabs .nav-link {
     padding: 8px 12px;
     font-size: 0.9rem;
   }
-  
+
   .recommendation-title {
     font-size: 0.95rem;
   }
-  
+
   .recommendation-reason {
     font-size: 0.8rem;
   }
@@ -215,7 +216,15 @@
 }
 
 /* staggered animation for cards */
-.recommendation-card:nth-child(1) { animation-delay: 0.1s; }
-.recommendation-card:nth-child(2) { animation-delay: 0.2s; }
-.recommendation-card:nth-child(3) { animation-delay: 0.3s; }
-.recommendation-card:nth-child(4) { animation-delay: 0.4s; }
+.recommendation-card:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.recommendation-card:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.recommendation-card:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.recommendation-card:nth-child(4) {
+  animation-delay: 0.4s;
+}

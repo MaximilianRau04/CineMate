@@ -1,5 +1,5 @@
-import React from 'react';
-import CalendarItem from './CalendarItem';
+import React from "react";
+import CalendarItem from "./CalendarItem";
 
 const CalendarList = ({ groupedContent, resetFilters }) => {
   if (Object.keys(groupedContent).length === 0) {
@@ -17,12 +17,13 @@ const CalendarList = ({ groupedContent, resetFilters }) => {
     <>
       {Object.entries(groupedContent).map(([month, items]) => (
         <div key={month} className="mb-4">
-          <h4 className="border-bottom pb-2 mb-3">
-            {month}
-          </h4>
+          <h4 className="border-bottom pb-2 mb-3">{month}</h4>
           <div className="list-group">
-            {items.map(item => (
-              <CalendarItem key={`${item.contentType}-${item.id}`} item={item} />
+            {items.map((item) => (
+              <CalendarItem
+                key={`${item.contentType}-${item.id}`}
+                item={item}
+              />
             ))}
           </div>
         </div>

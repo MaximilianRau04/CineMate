@@ -1,37 +1,39 @@
-import React, { useState, useEffect } from 'react';
-import { Send, Users, User, Mail } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { Send, Users, User, Mail } from "lucide-react";
 
 const AdminNotificationPanel = () => {
   const [formData, setFormData] = useState({
-    title: '',
-    message: '',
-    targetUserId: '' 
+    title: "",
+    message: "",
+    targetUserId: "",
   });
   const [users, setUsers] = useState([]);
   const [sending, setSending] = useState(false);
-  const [success, setSuccess] = useState('');
-  const [error, setError] = useState('');
+  const [success, setSuccess] = useState("");
+  const [error, setError] = useState("");
 
-  
   useEffect(() => {
     /**
      * loads the list of users for the notification dropdown
      */
     const loadUsers = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:8080/api/admin/notifications/users', {
-          headers: token ? { Authorization: `Bearer ${token}` } : {}
-        });
+        const token = localStorage.getItem("token");
+        const response = await fetch(
+          "http://localhost:8080/api/admin/notifications/users",
+          {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          },
+        );
 
         if (response.ok) {
           const userData = await response.json();
           setUsers(userData);
         } else {
-          setError('Fehler beim Laden der Benutzerliste');
+          setError("Fehler beim Laden der Benutzerliste");
         }
       } catch (err) {
-        setError('Fehler beim Laden der Benutzerliste: ' + err.message);
+        setError("Fehler beim Laden der Benutzerliste: " + err.message);
       }
     };
 
@@ -40,48 +42,54 @@ const AdminNotificationPanel = () => {
 
   /**
    * handles the form submission for sending notifications
-   * @param {*} e 
+   * @param {*} e
    * @returns {Promise<void>}
    * @throws {Error} if the request fails or validation fails
    */
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!formData.title.trim() || !formData.message.trim()) {
-      setError('Titel und Nachricht sind erforderlich');
+      setError("Titel und Nachricht sind erforderlich");
       return;
     }
 
     setSending(true);
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const headers = token
-        ? { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
-        : { 'Content-Type': 'application/json' };
+        ? {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          }
+        : { "Content-Type": "application/json" };
 
-      const response = await fetch('http://localhost:8080/api/admin/notifications/send', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          title: formData.title,
-          message: formData.message,
-          targetUserId: formData.targetUserId || null
-        })
-      });
+      const response = await fetch(
+        "http://localhost:8080/api/admin/notifications/send",
+        {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            title: formData.title,
+            message: formData.message,
+            targetUserId: formData.targetUserId || null,
+          }),
+        },
+      );
 
       if (response.ok) {
         const result = await response.text();
         setSuccess(result);
-        setFormData({ title: '', message: '', targetUserId: '' });
+        setFormData({ title: "", message: "", targetUserId: "" });
       } else {
         const errorText = await response.text();
         setError(errorText);
       }
     } catch (err) {
-      setError('Fehler beim Senden der Benachrichtigung: ' + err.message);
+      setError("Fehler beim Senden der Benachrichtigung: " + err.message);
     } finally {
       setSending(false);
     }
@@ -90,9 +98,9 @@ const AdminNotificationPanel = () => {
   // handles input changes in the form
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -104,16 +112,30 @@ const AdminNotificationPanel = () => {
       </div>
       <div className="card-body">
         {error && (
-          <div className="alert alert-danger alert-dismissible fade show" role="alert">
+          <div
+            className="alert alert-danger alert-dismissible fade show"
+            role="alert"
+          >
             {error}
-            <button type="button" className="btn-close" onClick={() => setError('')}></button>
+            <button
+              type="button"
+              className="btn-close"
+              onClick={() => setError("")}
+            ></button>
           </div>
         )}
 
         {success && (
-          <div className="alert alert-success alert-dismissible fade show" role="alert">
+          <div
+            className="alert alert-success alert-dismissible fade show"
+            role="alert"
+          >
             {success}
-            <button type="button" className="btn-close" onClick={() => setSuccess('')}></button>
+            <button
+              type="button"
+              className="btn-close"
+              onClick={() => setSuccess("")}
+            ></button>
           </div>
         )}
 
@@ -149,7 +171,7 @@ const AdminNotificationPanel = () => {
                 disabled={sending}
               >
                 <option value="">📢 Alle Benutzer</option>
-                {users.map(user => (
+                {users.map((user) => (
                   <option key={user.id} value={user.id}>
                     👤 {user.username} ({user.email})
                   </option>
@@ -181,20 +203,31 @@ const AdminNotificationPanel = () => {
           <div className="d-flex justify-content-between align-items-center">
             <div className="text-muted small">
               {formData.targetUserId ? (
-                <span><User size={16} className="me-1" />Wird an einen Benutzer gesendet</span>
+                <span>
+                  <User size={16} className="me-1" />
+                  Wird an einen Benutzer gesendet
+                </span>
               ) : (
-                <span><Users size={16} className="me-1" />Wird an alle {users.length} Benutzer gesendet</span>
+                <span>
+                  <Users size={16} className="me-1" />
+                  Wird an alle {users.length} Benutzer gesendet
+                </span>
               )}
             </div>
 
             <button
               type="submit"
               className="btn btn-primary"
-              disabled={sending || !formData.title.trim() || !formData.message.trim()}
+              disabled={
+                sending || !formData.title.trim() || !formData.message.trim()
+              }
             >
               {sending ? (
                 <>
-                  <span className="spinner-border spinner-border-sm me-2" role="status"></span>
+                  <span
+                    className="spinner-border spinner-border-sm me-2"
+                    role="status"
+                  ></span>
                   Wird gesendet...
                 </>
               ) : (
@@ -212,9 +245,17 @@ const AdminNotificationPanel = () => {
         <div className="bg-light p-3 rounded">
           <h6 className="mb-2">ℹ️ Hinweise:</h6>
           <ul className="mb-0 small text-muted">
-            <li>Benachrichtigungen werden sowohl als Web- als auch als Email-Benachrichtigungen versendet</li>
-            <li>Bei "Alle Benutzer" werden alle registrierten Nutzer benachrichtigt</li>
-            <li>Spezifische Benutzer können über das Dropdown ausgewählt werden</li>
+            <li>
+              Benachrichtigungen werden sowohl als Web- als auch als
+              Email-Benachrichtigungen versendet
+            </li>
+            <li>
+              Bei "Alle Benutzer" werden alle registrierten Nutzer
+              benachrichtigt
+            </li>
+            <li>
+              Spezifische Benutzer können über das Dropdown ausgewählt werden
+            </li>
             <li>Der Versand erfolgt asynchron im Hintergrund</li>
           </ul>
         </div>

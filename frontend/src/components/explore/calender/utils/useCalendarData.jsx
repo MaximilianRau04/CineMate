@@ -71,13 +71,16 @@ export const useCalendarData = () => {
       const seriesWithSeasons = await Promise.all(
         seriesList.map(async (seriesItem) => {
           try {
-            const seasonsResponse = await fetch(`http://localhost:8080/api/series/${seriesItem.id}/seasons`, {
-              headers: token ? { Authorization: `Bearer ${token}` } : {},
-            });
+            const seasonsResponse = await fetch(
+              `http://localhost:8080/api/series/${seriesItem.id}/seasons`,
+              {
+                headers: token ? { Authorization: `Bearer ${token}` } : {},
+              },
+            );
 
             if (!seasonsResponse.ok) {
               console.error(
-                `Fehler beim Laden der Staffeln für Serie ${seriesItem.id}`
+                `Fehler beim Laden der Staffeln für Serie ${seriesItem.id}`,
               );
               return { ...seriesItem, seasons: [] };
             }
@@ -91,11 +94,11 @@ export const useCalendarData = () => {
           } catch (error) {
             console.error(
               `Fehler beim Laden der Staffeln für Serie ${seriesItem.id}:`,
-              error
+              error,
             );
             return { ...seriesItem, seasons: [] };
           }
-        })
+        }),
       );
 
       // Filter series to only include those with future episodes
@@ -107,7 +110,7 @@ export const useCalendarData = () => {
             season.episodes?.some((episode) => {
               const episodeDate = new Date(episode.releaseDate);
               return episodeDate >= today;
-            })
+            }),
           );
 
           if (hasFutureEpisode) {
@@ -117,7 +120,7 @@ export const useCalendarData = () => {
           return hasFutureEpisode;
         })
         .sort(
-          (a, b) => new Date(a.nextEpisodeDate) - new Date(b.nextEpisodeDate)
+          (a, b) => new Date(a.nextEpisodeDate) - new Date(b.nextEpisodeDate),
         )
         .map((series) => ({
           ...series,

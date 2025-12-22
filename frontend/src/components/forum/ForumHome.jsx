@@ -48,7 +48,7 @@ const ForumHome = () => {
             `http://localhost:8080/api/movies/${post.movieId}`,
             {
               headers: getHeaders(),
-            }
+            },
           );
           if (response.ok) {
             const movie = await response.json();
@@ -61,7 +61,7 @@ const ForumHome = () => {
             `http://localhost:8080/api/series/${post.seriesId}`,
             {
               headers: getHeaders(),
-            }
+            },
           );
           if (response.ok) {
             const series = await response.json();
@@ -75,7 +75,7 @@ const ForumHome = () => {
       }
       return null;
     },
-    [mediaInfoCache]
+    [mediaInfoCache],
   );
 
   /**
@@ -107,9 +107,12 @@ const ForumHome = () => {
    */
   const fetchCategories = async () => {
     try {
-      const response = await fetch("http://localhost:8080/api/forum/categories", {
-        headers: getHeaders(),
-      });
+      const response = await fetch(
+        "http://localhost:8080/api/forum/categories",
+        {
+          headers: getHeaders(),
+        },
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -127,9 +130,12 @@ const ForumHome = () => {
    */
   const fetchPinnedPosts = async () => {
     try {
-      const response = await fetch("http://localhost:8080/api/forum/posts/pinned", {
-        headers: getHeaders(),
-      });
+      const response = await fetch(
+        "http://localhost:8080/api/forum/posts/pinned",
+        {
+          headers: getHeaders(),
+        },
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -195,7 +201,7 @@ const ForumHome = () => {
     const loadMediaInfo = async () => {
       const allPosts = [...posts, ...pinnedPosts];
       const postsWithMedia = allPosts.filter(
-        (post) => post.movieId || post.seriesId
+        (post) => post.movieId || post.seriesId,
       );
 
       for (const post of postsWithMedia) {
@@ -229,9 +235,9 @@ const ForumHome = () => {
     try {
       const response = await fetch(
         `http://localhost:8080/api/forum/posts/search?query=${encodeURIComponent(
-          searchQuery
+          searchQuery,
         )}&page=${currentPage}&size=10`,
-        { headers: getHeaders() }
+        { headers: getHeaders() },
       );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -374,7 +380,7 @@ const ForumHome = () => {
       if (response.ok) {
         setPosts((prevPosts) => prevPosts.filter((post) => post.id !== postId));
         setPinnedPosts((prevPinned) =>
-          prevPinned.filter((post) => post.id !== postId)
+          prevPinned.filter((post) => post.id !== postId),
         );
         success("Beitrag erfolgreich gelöscht!");
       } else {

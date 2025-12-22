@@ -71,10 +71,10 @@ const LoginForm = () => {
   }, [email, isLogin]);
 
   /**
- * function to handle user login
- * @param {*} e - event object
- * @returns {Promise<void>}
- */
+   * function to handle user login
+   * @param {*} e - event object
+   * @returns {Promise<void>}
+   */
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
@@ -82,7 +82,7 @@ const LoginForm = () => {
 
     try {
       const result = await login(username, password);
-      
+
       if (result.success) {
         success("Login erfolgreich!");
         setTimeout(() => {
@@ -229,9 +229,7 @@ const LoginForm = () => {
                 placeholder="E-Mail"
               />
               {emailError && (
-                <div className="invalid-feedback d-block">
-                  {emailError}
-                </div>
+                <div className="invalid-feedback d-block">{emailError}</div>
               )}
             </div>
           )}
@@ -266,9 +264,7 @@ const LoginForm = () => {
               </span>
             </div>
             {!isLogin && passwordError && (
-              <div className="invalid-feedback d-block">
-                {passwordError}
-              </div>
+              <div className="invalid-feedback d-block">{passwordError}</div>
             )}
           </div>
 
@@ -337,11 +333,17 @@ const LoginForm = () => {
           >
             {isLoggingIn ? (
               <>
-                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                <span
+                  className="spinner-border spinner-border-sm me-2"
+                  role="status"
+                  aria-hidden="true"
+                ></span>
                 Einloggen...
               </>
+            ) : isLogin ? (
+              "Einloggen"
             ) : (
-              isLogin ? "Einloggen" : "Registrieren"
+              "Registrieren"
             )}
           </button>
         </form>

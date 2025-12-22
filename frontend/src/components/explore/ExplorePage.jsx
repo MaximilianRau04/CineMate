@@ -8,14 +8,8 @@ import { applyMediaFilters } from "./utils/useFilters";
 
 const ExplorePage = () => {
   // Data fetching using custom hook
-  const { 
-    movies, 
-    series, 
-    isLoading, 
-    error, 
-    availableGenres, 
-    fetchData 
-  } = useMediaData();
+  const { movies, series, isLoading, error, availableGenres, fetchData } =
+    useMediaData();
 
   // Filter state
   const [filteredMovies, setFilteredMovies] = useState([]);
@@ -26,21 +20,32 @@ const ExplorePage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [dateRange, setDateRange] = useState({
     start: "",
-    end: ""
+    end: "",
   });
   const [sortOrder, setSortOrder] = useState("asc");
 
   // Apply filters when filter criteria change
   useEffect(() => {
-    const { filteredMovies: newMovies, filteredSeries: newSeries } = applyMediaFilters(
-      movies,
-      series,
-      { contentType, selectedGenres, dateRange, searchQuery, sortOrder }
-    );
-    
+    const { filteredMovies: newMovies, filteredSeries: newSeries } =
+      applyMediaFilters(movies, series, {
+        contentType,
+        selectedGenres,
+        dateRange,
+        searchQuery,
+        sortOrder,
+      });
+
     setFilteredMovies(newMovies);
     setFilteredSeries(newSeries);
-  }, [movies, series, contentType, selectedGenres, dateRange, searchQuery, sortOrder]);
+  }, [
+    movies,
+    series,
+    contentType,
+    selectedGenres,
+    dateRange,
+    searchQuery,
+    sortOrder,
+  ]);
 
   /**
    * Reset all filters to their default values.
@@ -59,7 +64,7 @@ const ExplorePage = () => {
    */
   const toggleGenre = (genre) => {
     if (selectedGenres.includes(genre)) {
-      setSelectedGenres(selectedGenres.filter(g => g !== genre));
+      setSelectedGenres(selectedGenres.filter((g) => g !== genre));
     } else {
       setSelectedGenres([...selectedGenres, genre]);
     }
@@ -75,7 +80,10 @@ const ExplorePage = () => {
         <div className="alert alert-danger" role="alert">
           <h4 className="alert-heading">Fehler</h4>
           <p>{error}</p>
-          <button className="btn btn-outline-danger" onClick={() => fetchData()}>
+          <button
+            className="btn btn-outline-danger"
+            onClick={() => fetchData()}
+          >
             Erneut versuchen
           </button>
         </div>
@@ -98,9 +106,12 @@ const ExplorePage = () => {
             <h5 className="mb-0">🔍 Suche und Filter</h5>
           </div>
           <div className="d-flex align-items-center">
-            <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-            <button 
-              className="btn btn-light btn-sm" 
+            <SearchBar
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+            />
+            <button
+              className="btn btn-light btn-sm"
               onClick={() => setShowFilters(!showFilters)}
             >
               <FaFilter className="me-1" />
@@ -129,8 +140,15 @@ const ExplorePage = () => {
       {filteredMovies.length === 0 && filteredSeries.length === 0 && (
         <div className="text-center py-5">
           <p className="lead text-muted">Keine passenden Inhalte gefunden.</p>
-          {(contentType !== "all" || selectedGenres.length > 0 || dateRange.start || dateRange.end || searchQuery) && (
-            <button className="btn btn-outline-primary mt-2" onClick={resetFilters}>
+          {(contentType !== "all" ||
+            selectedGenres.length > 0 ||
+            dateRange.start ||
+            dateRange.end ||
+            searchQuery) && (
+            <button
+              className="btn btn-outline-primary mt-2"
+              onClick={resetFilters}
+            >
               Filter zurücksetzen
             </button>
           )}

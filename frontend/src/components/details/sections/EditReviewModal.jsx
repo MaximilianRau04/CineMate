@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
 
-const EditReviewModal = ({ 
-  showEditModal, 
-  rating, 
-  comment, 
+const EditReviewModal = ({
+  showEditModal,
+  rating,
+  comment,
   submitting,
-  onClose, 
-  onEditReview 
+  onClose,
+  onEditReview,
 }) => {
   const [editRating, setEditRating] = useState(0);
   const [editComment, setEditComment] = useState("");
@@ -36,11 +36,7 @@ const EditReviewModal = ({
         <div className="modal-content">
           <div className="modal-header">
             <h5 className="modal-title">Bewertung bearbeiten</h5>
-            <button
-              type="button"
-              className="btn-close"
-              onClick={onClose}
-            />
+            <button type="button" className="btn-close" onClick={onClose} />
           </div>
           <div className="modal-body">
             <label className="form-label">⭐ Bewertung:</label>

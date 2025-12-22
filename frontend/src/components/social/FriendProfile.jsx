@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { FaUserFriends, FaEye, FaHeart, FaStar, FaLock } from 'react-icons/fa';
-import { useToast } from '../toasts';
-import UserMediaTabs from '../profile/UserMediaTabs';
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import { FaUserFriends, FaEye, FaHeart, FaStar, FaLock } from "react-icons/fa";
+import { useToast } from "../toasts";
+import UserMediaTabs from "../profile/UserMediaTabs";
 
 const FriendProfile = () => {
   const { userId } = useParams();
@@ -15,12 +15,12 @@ const FriendProfile = () => {
   const [isFriend, setIsFriend] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
 
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+    const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
     setCurrentUser(storedUser);
-    
+
     if (userId) {
       loadUserData();
     }
@@ -40,7 +40,11 @@ const FriendProfile = () => {
           src={`http://localhost:8080${avatarUrl}`}
           alt={username}
           className="img-fluid rounded-circle shadow-sm mb-3"
-          style={{ width: `${size}px`, height: `${size}px`, objectFit: "cover" }}
+          style={{
+            width: `${size}px`,
+            height: `${size}px`,
+            objectFit: "cover",
+          }}
         />
       );
     } else {
@@ -49,7 +53,10 @@ const FriendProfile = () => {
           className="rounded-circle bg-secondary d-flex align-items-center justify-content-center shadow-sm mb-3"
           style={{ width: `${size}px`, height: `${size}px` }}
         >
-          <i className="bi bi-person-fill text-white" style={{ fontSize: `${size * 0.6}px` }}></i>
+          <i
+            className="bi bi-person-fill text-white"
+            style={{ fontSize: `${size * 0.6}px` }}
+          ></i>
         </div>
       );
     }
@@ -67,10 +74,10 @@ const FriendProfile = () => {
         loadUser(),
         loadUserPoints(),
         loadUserFriends(),
-        checkFriendship()
+        checkFriendship(),
       ]);
     } catch (error) {
-      console.error('Error loading user data:', error);
+      console.error("Error loading user data:", error);
       setError(error.message);
     } finally {
       setLoading(false);
@@ -84,14 +91,17 @@ const FriendProfile = () => {
    */
   const loadUser = async () => {
     try {
-      const response = await fetch(`http://localhost:8080/api/users/${userId}`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {}
-        });
-      
+      const response = await fetch(
+        `http://localhost:8080/api/users/${userId}`,
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        },
+      );
+
       if (!response.ok) {
-        throw new Error('Benutzer konnte nicht geladen werden');
+        throw new Error("Benutzer konnte nicht geladen werden");
       }
-      
+
       const userData = await response.json();
       setUser(userData);
     } catch (error) {
@@ -106,16 +116,19 @@ const FriendProfile = () => {
    */
   const loadUserPoints = async () => {
     try {
-      const response = await fetch(`http://localhost:8080/api/social/points/${userId}`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {}
-      });
-      
+      const response = await fetch(
+        `http://localhost:8080/api/social/points/${userId}`,
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        },
+      );
+
       if (response.ok) {
         const pointsData = await response.json();
         setUserPoints(pointsData);
       }
     } catch (error) {
-      console.error('Error loading user points:', error);
+      console.error("Error loading user points:", error);
     }
   };
 
@@ -126,16 +139,19 @@ const FriendProfile = () => {
    */
   const loadUserFriends = async () => {
     try {
-      const response = await fetch(`http://localhost:8080/api/social/friends/${userId}`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {}
-      });
-      
+      const response = await fetch(
+        `http://localhost:8080/api/social/friends/${userId}`,
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        },
+      );
+
       if (response.ok) {
         const friendsData = await response.json();
         setFriends(friendsData);
       }
     } catch (error) {
-      console.error('Error loading user friends:', error);
+      console.error("Error loading user friends:", error);
     }
   };
 
@@ -146,17 +162,19 @@ const FriendProfile = () => {
    */
   const checkFriendship = async () => {
     try {
-      const response = await fetch('http://localhost:8080/api/social/friends', {
-          headers: token ? { Authorization: `Bearer ${token}` } : {}
-        });
-      
+      const response = await fetch("http://localhost:8080/api/social/friends", {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+
       if (response.ok) {
         const myFriends = await response.json();
-        const friendshipExists = myFriends.some(friend => friend.id === userId);
+        const friendshipExists = myFriends.some(
+          (friend) => friend.id === userId,
+        );
         setIsFriend(friendshipExists);
       }
     } catch (error) {
-      console.error('Error checking friendship:', error);
+      console.error("Error checking friendship:", error);
     }
   };
 
@@ -168,20 +186,23 @@ const FriendProfile = () => {
    */
   const sendFriendRequest = async () => {
     try {
-      const response = await fetch(`http://localhost:8080/api/social/friends/request/${userId}`, {
-        method: 'POST',
-        headers: token ? { Authorization: `Bearer ${token}` } : {}
-      });
-      
+      const response = await fetch(
+        `http://localhost:8080/api/social/friends/request/${userId}`,
+        {
+          method: "POST",
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        },
+      );
+
       if (response.ok) {
-        success('Freundschaftsanfrage gesendet!');
+        success("Freundschaftsanfrage gesendet!");
       } else {
         const error = await response.text();
         showError(`Fehler: ${error}`);
       }
     } catch (error) {
-      console.error('Error sending friend request:', error);
-      showError('Fehler beim Senden der Freundschaftsanfrage');
+      console.error("Error sending friend request:", error);
+      showError("Fehler beim Senden der Freundschaftsanfrage");
     }
   };
 
@@ -236,18 +257,18 @@ const FriendProfile = () => {
           <div className="col-md-4 d-flex flex-column align-items-center justify-content-center bg-dark text-white p-4">
             {renderProfileImage(user.avatarUrl, user.username, 150)}
             <h3 className="mb-2">{user.username}</h3>
-            
+
             {!isOwnProfile && !isFriend && user.allowFriendRequests && (
-              <button 
+              <button
                 className="btn btn-light mt-2 fw-bold"
                 onClick={sendFriendRequest}
-                style={{ color: '#0d6efd', borderColor: '#0d6efd' }}
+                style={{ color: "#0d6efd", borderColor: "#0d6efd" }}
               >
                 <FaUserFriends className="me-2" />
                 Freundschaftsanfrage senden
               </button>
             )}
-            
+
             {isFriend && (
               <span className="badge bg-success mt-2">
                 <FaUserFriends className="me-1" />
@@ -261,13 +282,14 @@ const FriendProfile = () => {
             <div className="row">
               <div className="col-12">
                 <h2 className="mb-3">{user.username}</h2>
-                
+
                 {!canViewProfile ? (
                   <div className="text-center py-5">
                     <FaLock className="fs-1 text-muted mb-3" />
                     <h4>Privates Profil</h4>
                     <p className="text-muted">
-                      Dieses Profil ist privat. Du musst mit {user.username} befreundet sein, um mehr zu sehen.
+                      Dieses Profil ist privat. Du musst mit {user.username}{" "}
+                      befreundet sein, um mehr zu sehen.
                     </p>
                   </div>
                 ) : (
@@ -295,14 +317,16 @@ const FriendProfile = () => {
                           </div>
                         </div>
                       </div>
-                      
+
                       {userPoints && (
                         <>
                           <div className="col-md-3 col-6">
                             <div className="card text-center">
                               <div className="card-body py-3">
                                 <FaStar className="fs-3 text-warning mb-2" />
-                                <h5 className="mb-0">{userPoints.totalPoints}</h5>
+                                <h5 className="mb-0">
+                                  {userPoints.totalPoints}
+                                </h5>
                                 <small className="text-muted">Punkte</small>
                               </div>
                             </div>
@@ -311,7 +335,9 @@ const FriendProfile = () => {
                             <div className="card text-center">
                               <div className="card-body py-3">
                                 <FaEye className="fs-3 text-info mb-2" />
-                                <h5 className="mb-0">{userPoints.watchPoints}</h5>
+                                <h5 className="mb-0">
+                                  {userPoints.watchPoints}
+                                </h5>
                                 <small className="text-muted">Gesehen</small>
                               </div>
                             </div>
@@ -320,7 +346,9 @@ const FriendProfile = () => {
                             <div className="card text-center">
                               <div className="card-body py-3">
                                 <FaHeart className="fs-3 text-danger mb-2" />
-                                <h5 className="mb-0">{userPoints.reviewPoints}</h5>
+                                <h5 className="mb-0">
+                                  {userPoints.reviewPoints}
+                                </h5>
                                 <small className="text-muted">Reviews</small>
                               </div>
                             </div>
@@ -343,7 +371,7 @@ const FriendProfile = () => {
                           className="card-body"
                           style={{
                             maxHeight: "350px",
-                            overflowY: "auto"
+                            overflowY: "auto",
                           }}
                         >
                           <UserMediaTabs userId={userId} />
@@ -362,20 +390,22 @@ const FriendProfile = () => {
           <div className="card-footer">
             <h6 className="mb-3">Freunde ({friends.length})</h6>
             <div className="row">
-              {friends.slice(0, 6).map(friend => (
+              {friends.slice(0, 6).map((friend) => (
                 <div key={friend.id} className="col-md-2 col-4 mb-2">
                   <div className="text-center">
                     {renderProfileImage(friend.avatarUrl, friend.username, 60)}
-                    <small className="d-block text-truncate">{friend.username}</small>
+                    <small className="d-block text-truncate">
+                      {friend.username}
+                    </small>
                   </div>
                 </div>
               ))}
               {friends.length > 6 && (
                 <div className="col-md-2 col-4 mb-2">
                   <div className="text-center">
-                    <div 
+                    <div
                       className="rounded-circle bg-light d-flex align-items-center justify-content-center mb-1"
-                      style={{ width: '60px', height: '60px' }}
+                      style={{ width: "60px", height: "60px" }}
                     >
                       <span className="text-muted">+{friends.length - 6}</span>
                     </div>

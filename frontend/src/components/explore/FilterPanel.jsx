@@ -1,4 +1,3 @@
-
 import { FaSearch, FaSpinner, FaTimes } from "react-icons/fa";
 
 export const LoadingSpinner = ({ message = "Inhalte werden geladen..." }) => (
@@ -24,40 +23,45 @@ export const SearchBar = ({ searchQuery, setSearchQuery }) => (
   </div>
 );
 
-export const FilterPanel = ({ 
-  contentType, setContentType,
-  sortOrder, setSortOrder,
-  dateRange, setDateRange,
-  availableGenres, selectedGenres, toggleGenre,
+export const FilterPanel = ({
+  contentType,
+  setContentType,
+  sortOrder,
+  setSortOrder,
+  dateRange,
+  setDateRange,
+  availableGenres,
+  selectedGenres,
+  toggleGenre,
   resetFilters,
-  minDate 
+  minDate,
 }) => (
   <div className="card-body bg-light border-bottom">
     <div className="row g-3">
       <div className="col-md-3">
         <label className="form-label fw-bold">Inhaltstyp</label>
         <div className="btn-group w-100">
-          <button 
-            className={`btn ${contentType === "all" ? "btn-primary" : "btn-outline-primary"}`} 
+          <button
+            className={`btn ${contentType === "all" ? "btn-primary" : "btn-outline-primary"}`}
             onClick={() => setContentType("all")}
           >
             Alle
           </button>
-          <button 
-            className={`btn ${contentType === "movies" ? "btn-primary" : "btn-outline-primary"}`} 
+          <button
+            className={`btn ${contentType === "movies" ? "btn-primary" : "btn-outline-primary"}`}
             onClick={() => setContentType("movies")}
           >
             Filme
           </button>
-          <button 
-            className={`btn ${contentType === "series" ? "btn-primary" : "btn-outline-primary"}`} 
+          <button
+            className={`btn ${contentType === "series" ? "btn-primary" : "btn-outline-primary"}`}
             onClick={() => setContentType("series")}
           >
             Serien
           </button>
         </div>
       </div>
-      
+
       {sortOrder !== undefined && setSortOrder && (
         <div className="col-md-3">
           <label className="form-label fw-bold">Sortierung</label>
@@ -71,36 +75,43 @@ export const FilterPanel = ({
           </select>
         </div>
       )}
-      
+
       <div className="col-md-3">
         <label className="form-label fw-bold">Zeitraum</label>
         <div className="row g-2">
           <div className="col-6">
-            <input 
-              type="date" 
-              className="form-control" 
-              placeholder="Von" 
+            <input
+              type="date"
+              className="form-control"
+              placeholder="Von"
               min={minDate || ""}
               value={dateRange.start}
-              onChange={(e) => setDateRange({...dateRange, start: e.target.value})}
+              onChange={(e) =>
+                setDateRange({ ...dateRange, start: e.target.value })
+              }
             />
           </div>
           <div className="col-6">
-            <input 
-              type="date" 
-              className="form-control" 
-              placeholder="Bis" 
+            <input
+              type="date"
+              className="form-control"
+              placeholder="Bis"
               min={dateRange.start || minDate || ""}
               value={dateRange.end}
-              onChange={(e) => setDateRange({...dateRange, end: e.target.value})}
+              onChange={(e) =>
+                setDateRange({ ...dateRange, end: e.target.value })
+              }
             />
           </div>
         </div>
       </div>
-      
+
       <div className="col-md-3 d-flex flex-column">
         <label className="form-label fw-bold">Genres</label>
-        <div className="d-flex flex-wrap gap-2" style={{ maxHeight: "100px", overflowY: "auto" }}>
+        <div
+          className="d-flex flex-wrap gap-2"
+          style={{ maxHeight: "100px", overflowY: "auto" }}
+        >
           {availableGenres.sort().map((genre) => (
             <button
               key={genre}
@@ -113,7 +124,7 @@ export const FilterPanel = ({
         </div>
       </div>
     </div>
-    
+
     <div className="d-flex justify-content-end mt-3">
       <button className="btn btn-secondary" onClick={resetFilters}>
         <FaTimes className="me-1" />

@@ -31,7 +31,7 @@ const SearchableMediaSelect = ({
           `http://localhost:8080/api/${endpoint}/${mediaId}`,
           {
             headers: token ? { Authorization: `Bearer ${token}` } : {},
-          }
+          },
         );
         if (response.ok) {
           const media = await response.json();
@@ -41,7 +41,7 @@ const SearchableMediaSelect = ({
         console.error(`Error fetching ${type} details:`, error);
       }
     },
-    [type]
+    [type],
   );
 
   /**
@@ -58,11 +58,11 @@ const SearchableMediaSelect = ({
         const token = localStorage.getItem("token");
         const response = await fetch(
           `http://localhost:8080/api/${endpoint}/search?query=${encodeURIComponent(
-            query
+            query,
           )}&page=0&size=20`,
           {
             headers: token ? { Authorization: `Bearer ${token}` } : {},
-          }
+          },
         );
         if (response.ok) {
           const data = await response.json();
@@ -75,7 +75,7 @@ const SearchableMediaSelect = ({
         setLoading(false);
       }
     },
-    [type]
+    [type],
   );
 
   /**
@@ -94,7 +94,7 @@ const SearchableMediaSelect = ({
         `http://localhost:8080/api/${endpoint}?page=0&size=100`,
         {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
-        }
+        },
       );
       if (response.ok) {
         const data = await response.json();
