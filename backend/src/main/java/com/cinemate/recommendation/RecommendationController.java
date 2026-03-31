@@ -1,7 +1,7 @@
 package com.cinemate.recommendation;
 
 import com.cinemate.recommendation.DTOs.RecommendationResponseDTO;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -9,16 +9,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/recommendations")
+@RequiredArgsConstructor
 public class RecommendationController {
 
     private final RecommendationService recommendationService;
     private final RecommendationNotificationService recommendationNotificationService;
-
-    @Autowired
-    public RecommendationController(RecommendationService recommendationService, RecommendationNotificationService recommendationNotificationService) {
-        this.recommendationService = recommendationService;
-        this.recommendationNotificationService = recommendationNotificationService;
-    }
 
     /**
      * return personal recommendations for a user

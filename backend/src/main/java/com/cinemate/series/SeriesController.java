@@ -4,7 +4,7 @@ import com.cinemate.actor.DTOs.ActorResponseDTO;
 import com.cinemate.director.DTOs.DirectorResponseDTO;
 import com.cinemate.series.DTOs.SeriesRequestDTO;
 import com.cinemate.series.DTOs.SeriesResponseDTO;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,14 +12,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/series")
+@RequiredArgsConstructor
 public class SeriesController {
 
     private final SeriesService seriesService;
-
-    @Autowired
-    public SeriesController(SeriesService seriesService) {
-        this.seriesService = seriesService;
-    }
 
     /**
      * returns all series

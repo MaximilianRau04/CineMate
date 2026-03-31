@@ -5,7 +5,8 @@ import com.cinemate.social.forum.DTOs.ForumPostDTO;
 import com.cinemate.social.forum.post.ForumPost;
 import com.cinemate.social.forum.reply.ForumReply;
 import com.cinemate.social.forum.subscription.ForumSubscription;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,16 +27,15 @@ import java.util.Optional;
  * @author CineMate Team
  * @version 1.0
  */
+@Slf4j
 @RestController
 @RequestMapping("/api/forum")
 @CrossOrigin(origins = "http://localhost:3000")
+@RequiredArgsConstructor
 public class ForumController {
-    
-    @Autowired
-    private ForumService forumService;
 
-    @Autowired
-    private ForumDTOConverter forumDTOConverter;
+    private final ForumService forumService;
+    private final ForumDTOConverter forumDTOConverter;
 
     /**
      * Handles the creation of a new forum post. The authenticated user is associated
@@ -70,8 +70,7 @@ public class ForumController {
             ForumPostDTO dto = forumDTOConverter.convertToDTO(createdPost);
             return ResponseEntity.status(HttpStatus.CREATED).body(dto);
         } catch (Exception e) {
-            System.err.println("Error creating post: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Error creating post: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
@@ -154,8 +153,7 @@ public class ForumController {
                 return ResponseEntity.notFound().build();
             }
         } catch (Exception e) {
-            System.err.println("Error getting post by ID: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Error getting post by ID: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -305,8 +303,7 @@ public class ForumController {
             ForumPost updatedPost = forumService.updatePost(id, post, userId);
             return ResponseEntity.ok(updatedPost);
         } catch (Exception e) {
-            System.err.println("Error updating post: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Error updating post: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
     }
@@ -342,8 +339,7 @@ public class ForumController {
             forumService.deletePost(id, userId);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
-            System.err.println("Error deleting post: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Error deleting post: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
     }
@@ -380,8 +376,7 @@ public class ForumController {
             ForumPost post = forumService.toggleLike(id, userId);
             return ResponseEntity.ok(post);
         } catch (Exception e) {
-            System.err.println("Error toggling like: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Error toggling like: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
@@ -417,8 +412,7 @@ public class ForumController {
             ForumPost post = forumService.toggleLike(id, userId);
             return ResponseEntity.ok(post);
         } catch (Exception e) {
-            System.err.println("Error removing like: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Error removing like: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
@@ -455,8 +449,7 @@ public class ForumController {
             ForumReply createdReply = forumService.createReply(reply, userId, postId);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdReply);
         } catch (Exception e) {
-            System.err.println("Error creating reply: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Error creating reply: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
@@ -532,8 +525,7 @@ public class ForumController {
             ForumReply updatedReply = forumService.updateReply(id, reply, userId);
             return ResponseEntity.ok(updatedReply);
         } catch (Exception e) {
-            System.err.println("Error updating reply: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Error updating reply: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
     }
@@ -569,8 +561,7 @@ public class ForumController {
             forumService.deleteReply(id, userId);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
-            System.err.println("Error deleting reply: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Error deleting reply: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
     }
@@ -608,8 +599,7 @@ public class ForumController {
             ForumReply reply = forumService.toggleReplyLike(id, userId);
             return ResponseEntity.ok(reply);
         } catch (Exception e) {
-            System.err.println("Error toggling reply like: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Error toggling reply like: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
@@ -645,8 +635,7 @@ public class ForumController {
             ForumSubscription subscription = forumService.subscribeToPost(postId, userId);
             return ResponseEntity.ok(subscription);
         } catch (Exception e) {
-            System.err.println("Error subscribing to post: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Error subscribing to post: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
@@ -684,8 +673,7 @@ public class ForumController {
             forumService.unsubscribeFromPost(postId, userId);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
-            System.err.println("Error unsubscribing from post: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Error unsubscribing from post: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
@@ -726,8 +714,7 @@ public class ForumController {
             
             return ResponseEntity.ok(status);
         } catch (Exception e) {
-            System.err.println("Error getting subscription status: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Error getting subscription status: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
@@ -764,8 +751,7 @@ public class ForumController {
             List<ForumSubscription> subscriptions = forumService.getUserSubscriptions(userId);
             return ResponseEntity.ok(subscriptions);
         } catch (Exception e) {
-            System.err.println("Error getting user subscriptions: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Error getting user subscriptions: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }

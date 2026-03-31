@@ -6,7 +6,8 @@ import com.cinemate.user.UserRepository;
 import com.cinemate.user.User;
 import com.cinemate.user.DTOs.UserRequestDTO;
 import com.cinemate.user.DTOs.UserResponseDTO;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,20 +20,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/auth")
+@RequiredArgsConstructor
 public class AuthController {
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private JwtUtil jwtUtil;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private NotificationService notificationService;
+    private final UserRepository userRepository;
+    private final JwtUtil jwtUtil;
+    private final PasswordEncoder passwordEncoder;
+    private final NotificationService notificationService;
 
     /**
      * registers an user
@@ -76,7 +72,7 @@ public class AuthController {
                     "Viel Spaß beim Stöbern!", savedUser.getUsername())
             );
         } catch (Exception e) {
-            System.err.println("Fehler beim Senden der Benachrichtigungen: " + e.getMessage());
+            log.error("Fehler beim Senden der Benachrichtigungen: " + e.getMessage());
         }
 
         return ResponseEntity.ok(responseDTO);

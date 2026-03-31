@@ -3,7 +3,7 @@ package com.cinemate.streaming;
 import com.cinemate.streaming.DTOs.StreamingAvailabilityResponseDTO;
 import com.cinemate.streaming.DTOs.StreamingProviderRequestDTO;
 import com.cinemate.streaming.DTOs.StreamingProviderResponseDTO;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,18 +11,12 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/streaming")
+@RequiredArgsConstructor
 public class StreamingController {
 
     private final StreamingProviderService providerService;
     private final StreamingAvailabilityService availabilityService;
-    
-    @Autowired
-    public StreamingController(StreamingProviderService providerService,
-                               StreamingAvailabilityService availabilityService) {
-        this.providerService = providerService;
-        this.availabilityService = availabilityService;
-    }
-    
+
     /**
      * Get all active streaming providers
      * @return List of StreamingProviderResponseDTO

@@ -1,19 +1,17 @@
 package com.cinemate.notification;
 
 import com.cinemate.notification.scheduled.ScheduledNotificationService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/notifications")
+@RequiredArgsConstructor
 public class AutoNotificationController {
 
-    @Autowired
-    private AutoNotificationService autoNotificationService;
-
-    @Autowired
-    private ScheduledNotificationService scheduledNotificationService;
+    private final AutoNotificationService autoNotificationService;
+    private final ScheduledNotificationService scheduledNotificationService;
 
     /**
      * Manual trigger for milestone check of a user

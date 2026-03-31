@@ -5,7 +5,7 @@ import com.cinemate.social.friends.FriendService;
 import com.cinemate.social.points.PointsService;
 import com.cinemate.social.points.UserPointsDTO;
 import com.cinemate.user.DTOs.UserResponseDTO;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -15,16 +15,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/social")
 @CrossOrigin(origins = "*")
+@RequiredArgsConstructor
 public class SocialController {
-    
+
     private final FriendService friendService;
     private final PointsService pointsService;
-    
-    @Autowired
-    public SocialController(FriendService friendService, PointsService pointsService) {
-        this.friendService = friendService;
-        this.pointsService = pointsService;
-    }
 
     /**
      * Sends a friend request from the authenticated user to the target user.

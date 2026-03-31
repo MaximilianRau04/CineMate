@@ -9,14 +9,12 @@ import com.cinemate.review.DTOs.ReviewResponseDTO;
 import com.cinemate.series.DTOs.SeriesResponseDTO;
 import com.cinemate.series.Series;
 import com.cinemate.series.SeriesRepository;
-import com.cinemate.user.User;
 import com.cinemate.user.UserRepository;
 import com.cinemate.user.DTOs.UserResponseDTO;
 import com.cinemate.notification.events.ReviewCreatedEvent;
 import com.cinemate.recommendation.utils.RecommendationTriggerUtil;
 import com.cinemate.social.points.PointsEventListener;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -187,17 +185,10 @@ public class ReviewService {
      * @return UserResponseDTO or null if review not found
      */
     public UserResponseDTO getUserByReviewId(String reviewId) {
-        Optional<Review> reviewOpt = reviewRepository.findById(reviewId);
-        if (reviewOpt.isPresent()) {
-            Review review = reviewOpt.get();
-            String userId = review.getUserId();
-
-            Optional<User> userOpt = userRepository.findById(userId);
-            if (userOpt.isPresent()) {
-                return new UserResponseDTO(userOpt.get());
-            }
-        }
-        return null;
+        return reviewRepository.findById(reviewId)
+                .flatMap(review -> userRepository.findById(review.getUserId()))
+                .map(UserResponseDTO::new)
+                .orElse(null);
     }
 
     /**
@@ -207,17 +198,10 @@ public class ReviewService {
      * @return MovieResponseDTO or null if review not found or not a movie review
      */
     public MovieResponseDTO getMovieByReviewId(String reviewId) {
-        Optional<Review> reviewOpt = reviewRepository.findById(reviewId);
-        if (reviewOpt.isPresent()) {
-            Review review = reviewOpt.get();
-            String itemId = review.getItemId();
-
-            Optional<Movie> movieOpt = movieRepository.findById(itemId);
-            if (movieOpt.isPresent()) {
-                return new MovieResponseDTO(movieOpt.get());
-            }
-        }
-        return null;
+        return reviewRepository.findById(reviewId)
+                .flatMap(review -> movieRepository.findById(review.getItemId()))
+                .map(MovieResponseDTO::new)
+                .orElse(null);
     }
 
     /**
@@ -227,17 +211,10 @@ public class ReviewService {
      * @return SeriesResponseDTO or null if review not found or not a series review
      */
     public SeriesResponseDTO getSeriesByReviewId(String reviewId) {
-        Optional<Review> reviewOpt = reviewRepository.findById(reviewId);
-        if (reviewOpt.isPresent()) {
-            Review review = reviewOpt.get();
-            String itemId = review.getItemId();
-
-            Optional<Series> seriesOpt = seriesRepository.findById(itemId);
-            if (seriesOpt.isPresent()) {
-                return new SeriesResponseDTO(seriesOpt.get());
-            }
-        }
-        return null;
+        return reviewRepository.findById(reviewId)
+                .flatMap(review -> seriesRepository.findById(review.getItemId()))
+                .map(SeriesResponseDTO::new)
+                .orElse(null);
     }
 
     /**

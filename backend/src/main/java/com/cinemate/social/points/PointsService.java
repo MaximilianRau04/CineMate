@@ -3,7 +3,7 @@ package com.cinemate.social.points;
 import com.cinemate.user.User;
 import com.cinemate.user.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PointsService {
@@ -154,7 +155,7 @@ public class PointsService {
             return ResponseEntity.ok(leaderboardDTO);
             
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error getting leaderboard", e);
             return ResponseEntity.status(500).build();
         }
     }
@@ -179,7 +180,7 @@ public class PointsService {
             // Delete all others
             for (UserPoints up : allUserPoints) {
                 if (!up.getId().equals(bestUserPoints.getId())) {
-                    System.out.println("DEBUG: Deleting UserPoints with " + up.getTotalPoints() + " points (ID: " + up.getId() + ")");
+                    log.debug("DEBUG: Deleting UserPoints with " + up.getTotalPoints() + " points (ID: " + up.getId() + ")");
                     userPointsRepository.delete(up);
                 }
             }
@@ -187,7 +188,7 @@ public class PointsService {
             return ResponseEntity.ok("Cleaned up " + (allUserPoints.size() - 1) + " duplicate entries");
             
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error during cleanup", e);
             return ResponseEntity.status(500).body("Error during cleanup: " + e.getMessage());
         }
     }

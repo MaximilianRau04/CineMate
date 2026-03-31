@@ -8,7 +8,8 @@ import com.cinemate.movie.Movie;
 import com.cinemate.movie.MovieRepository;
 import com.cinemate.series.Series;
 import com.cinemate.series.SeriesRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -16,23 +17,16 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class ScheduledNotificationService {
 
-    @Autowired
-    private AutoNotificationService autoNotificationService;
-
-    @Autowired
-    private RecommendationNotificationService recommendationNotificationService;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private MovieRepository movieRepository;
-
-    @Autowired
-    private SeriesRepository seriesRepository;
+    private final AutoNotificationService autoNotificationService;
+    private final RecommendationNotificationService recommendationNotificationService;
+    private final UserRepository userRepository;
+    private final MovieRepository movieRepository;
+    private final SeriesRepository seriesRepository;
 
     /**
      * sends weekly notifications about upcoming releases
@@ -46,7 +40,7 @@ public class ScheduledNotificationService {
             try {
                 autoNotificationService.notifyUpcomingReleases(user.getId());
             } catch (Exception e) {
-                System.err.println("Error sending weekly notification to user " + user.getId() + ": " + e.getMessage());
+                log.error("Error sending weekly notification to user " + user.getId() + ": " + e.getMessage());
             }
         });
     }
@@ -57,13 +51,13 @@ public class ScheduledNotificationService {
      */
     @Scheduled(cron = "0 0 14 * * WED")
     public void sendWeeklyRecommendations() {
-        System.out.println("Starting weekly recommendation notifications at " + new java.util.Date());
-        
+        log.info("Starting weekly recommendation notifications at " + new java.util.Date());
+
         try {
             recommendationNotificationService.sendRecommendationNotificationsToAllUsers(3);
-            System.out.println("Weekly recommendation notifications completed successfully");
+            log.info("Weekly recommendation notifications completed successfully");
         } catch (Exception e) {
-            System.err.println("Error sending weekly recommendation notifications: " + e.getMessage());
+            log.error("Error sending weekly recommendation notifications: " + e.getMessage());
         }
     }
 
@@ -73,13 +67,13 @@ public class ScheduledNotificationService {
      */
     @Scheduled(cron = "0 0 18 * * FRI")
     public void sendWeeklyRecommendationSummaries() {
-        System.out.println("Starting weekly recommendation summary notifications at " + new java.util.Date());
-        
+        log.info("Starting weekly recommendation summary notifications at " + new java.util.Date());
+
         try {
             recommendationNotificationService.sendSummaryRecommendationNotificationsToAllUsers(5);
-            System.out.println("Weekly recommendation summary notifications completed successfully");
+            log.info("Weekly recommendation summary notifications completed successfully");
         } catch (Exception e) {
-            System.err.println("Error sending weekly recommendation summary notifications: " + e.getMessage());
+            log.error("Error sending weekly recommendation summary notifications: " + e.getMessage());
         }
     }
 
@@ -89,7 +83,7 @@ public class ScheduledNotificationService {
      */
     @Scheduled(cron = "0 0 9 * * *")
     public void checkDailyReleases() {
-        System.out.println("Starting daily release check at " + new java.util.Date());
+        log.info("Starting daily release check at " + new java.util.Date());
         
         try {
             // Get today's date (beginning of day)
@@ -121,19 +115,19 @@ public class ScheduledNotificationService {
                 .toList();
             
             if (releasingMoviesToday.isEmpty() && releasingSeriesToday.isEmpty()) {
-                System.out.println("No releases found for today");
+                log.info("No releases found for today");
                 return;
             }
             
-            System.out.println("Found " + releasingMoviesToday.size() + " movies and " + 
+            log.info("Found " + releasingMoviesToday.size() + " movies and " +
                               releasingSeriesToday.size() + " series releasing today");
             
             // Notify users using the AutoNotificationService
             autoNotificationService.notifyDailyReleases(releasingMoviesToday, releasingSeriesToday);
             
-            System.out.println("Daily release check completed successfully");
+            log.info("Daily release check completed successfully");
         } catch (Exception e) {
-            System.err.println("Error during daily release check: " + e.getMessage());
+            log.error("Error during daily release check: " + e.getMessage());
         }
     }
 }

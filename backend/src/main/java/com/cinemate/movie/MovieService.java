@@ -10,7 +10,6 @@ import com.cinemate.movie.DTOs.MovieRequestDTO;
 import com.cinemate.movie.DTOs.MovieResponseDTO;
 import com.cinemate.notification.events.MovieReleasedEvent;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;

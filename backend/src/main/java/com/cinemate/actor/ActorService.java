@@ -7,7 +7,6 @@ import com.cinemate.movie.MovieRepository;
 import com.cinemate.series.DTOs.SeriesResponseDTO;
 import com.cinemate.series.SeriesRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

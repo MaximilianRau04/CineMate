@@ -3,11 +3,13 @@ package com.cinemate.statistics;
 import com.cinemate.statistics.DTOs.FriendStatisticsDTO;
 import com.cinemate.statistics.DTOs.UserStatisticsDTO;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/statistics")
 @RequiredArgsConstructor
@@ -31,8 +33,7 @@ public class UserStatisticsController {
             UserStatisticsDTO stats = statisticsService.calculateUserStatistics(userId, period);
             return ResponseEntity.ok(stats);
         } catch (Exception e) {
-            System.err.println("Error in getUserStatistics: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Error in getUserStatistics: " + e.getMessage());
             return ResponseEntity.status(500).build();
         }
     }
@@ -50,12 +51,10 @@ public class UserStatisticsController {
             List<FriendStatisticsDTO> friendsStats = statisticsService.getFriendsStatistics(userId);
             return ResponseEntity.ok(friendsStats);
         } catch (RuntimeException e) {
-            System.err.println("Error in getFriendsComparison: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Error in getFriendsComparison: " + e.getMessage());
             return ResponseEntity.status(500).build();
         } catch (Exception e) {
-            System.err.println("Unexpected error in getFriendsComparison: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Unexpected error in getFriendsComparison: " + e.getMessage());
             return ResponseEntity.status(500).build();
         }
     }

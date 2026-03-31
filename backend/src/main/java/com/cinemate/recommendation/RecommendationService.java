@@ -10,7 +10,6 @@ import com.cinemate.user.User;
 import com.cinemate.user.UserRepository;
 import com.cinemate.recommendation.DTOs.RecommendationResponseDTO;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -171,90 +170,58 @@ public class RecommendationService {
 
     /**
      * Calculates a content score for a given movie based on preferred genres, actors, and directors.
-     *
-     * @param movie the movie for which the content score is calculated
-     * @param preferredGenres a set of genres preferred by the user
-     * @param preferredActors a set of actor IDs preferred by the user
-     * @param preferredDirectors a set of director IDs preferred by the user
-     * @return the calculated content score as a double value
      */
-    private double calculateContentScore(Movie movie, Set<String> preferredGenres, 
-                                       Set<String> preferredActors, Set<String> preferredDirectors) {
-        double score = 0.0;
-        
-        // Genre match (40% weight)
-        if (movie.getGenre() != null) {
-            String[] movieGenres = movie.getGenre().split(",\\s*");
-            long genreMatches = Arrays.stream(movieGenres)
-                .filter(preferredGenres::contains)
-                .count();
-            score += (genreMatches / (double) movieGenres.length) * 0.4;
-        }
-
-        // Director match (30% weight)
-        if (movie.getDirectors() != null) {
-            long directorMatches = movie.getDirectors().stream()
-                    .filter(director -> preferredDirectors.contains(director.getId()))
-                    .count();
-            score += (directorMatches / (double) Math.max(movie.getDirectors().size(), 1)) * 0.3;
-        }
-        
-        // Actor match (20% weight)
-        if (movie.getActors() != null) {
-            long actorMatches = movie.getActors().stream()
-                .filter(actor -> preferredActors.contains(actor.getId()))
-                .count();
-            score += (actorMatches / (double) Math.max(movie.getActors().size(), 1)) * 0.2;
-        }
-        
-        // Rating bonus (10% weight)
-        score += (movie.getRating() / 5.0) * 0.1;
-        
-        return score;
+    private double calculateContentScore(Movie movie, Set<String> preferredGenres,
+                                         Set<String> preferredActors, Set<String> preferredDirectors) {
+        return calculateContentScore(movie.getGenre(), movie.getDirectors(), movie.getActors(),
+                movie.getRating(), 5.0, preferredGenres, preferredActors, preferredDirectors);
     }
 
     /**
-     * Calculates a content score for a series based on the user's preferences for genres,
-     * actors, and directors, as well as the series' rating.
-     *
-     * @param series the Series object containing details about the series, such as genres, actors, directors, and rating
-     * @param preferredGenres a set of genres preferred by the user
-     * @param preferredActors a set of actor IDs preferred by the user
-     * @param preferredDirectors a set of director IDs preferred by the user
-     * @return the calculated content score as a double value based on the matching criteria and weights
+     * Calculates a content score for a given series based on preferred genres, actors, and directors.
      */
-    private double calculateContentScore(Series series, Set<String> preferredGenres, 
-                                       Set<String> preferredActors, Set<String> preferredDirectors) {
+    private double calculateContentScore(Series series, Set<String> preferredGenres,
+                                         Set<String> preferredActors, Set<String> preferredDirectors) {
+        return calculateContentScore(series.getGenre(), series.getDirectors(), series.getActors(),
+                series.getRating(), 10.0, preferredGenres, preferredActors, preferredDirectors);
+    }
+
+    /**
+     * Core scoring logic shared by movie and series overloads.
+     * Genre: 40%, Directors: 30%, Actors: 20%, Rating: 10%
+     */
+    private double calculateContentScore(String genre, List<Director> directors, List<Actor> actors,
+                                         double rating, double maxRating,
+                                         Set<String> preferredGenres, Set<String> preferredActors,
+                                         Set<String> preferredDirectors) {
         double score = 0.0;
-        
+
         // Genre match (40% weight)
-        if (series.getGenre() != null) {
-            String[] seriesGenres = series.getGenre().split(",\\s*");
-            long genreMatches = Arrays.stream(seriesGenres)
-                .filter(preferredGenres::contains)
-                .count();
-            score += (genreMatches / (double) seriesGenres.length) * 0.4;
+        if (genre != null) {
+            String[] genres = genre.split(",\\s*");
+            long genreMatches = Arrays.stream(genres).filter(preferredGenres::contains).count();
+            score += (genreMatches / (double) genres.length) * 0.4;
         }
 
         // Director match (30% weight)
-        if (series.getDirectors() != null) {
-            long directorMatches = series.getDirectors().stream()
+        if (directors != null) {
+            long directorMatches = directors.stream()
                     .filter(director -> preferredDirectors.contains(director.getId()))
                     .count();
-            score += (directorMatches / (double) Math.max(series.getDirectors().size(), 1)) * 0.3;
+            score += (directorMatches / (double) Math.max(directors.size(), 1)) * 0.3;
         }
-        
+
         // Actor match (20% weight)
-        if (series.getActors() != null) {
-            long actorMatches = series.getActors().stream()
-                .filter(actor -> preferredActors.contains(actor.getId()))
-                .count();
-            score += (actorMatches / (double) Math.max(series.getActors().size(), 1)) * 0.2;
+        if (actors != null) {
+            long actorMatches = actors.stream()
+                    .filter(actor -> preferredActors.contains(actor.getId()))
+                    .count();
+            score += (actorMatches / (double) Math.max(actors.size(), 1)) * 0.2;
         }
-        
+
         // Rating bonus (10% weight)
-        score += (series.getRating() / 10.0) * 0.1;
-        
+        score += (rating / maxRating) * 0.1;
+
         return score;
     }
 

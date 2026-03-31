@@ -4,7 +4,7 @@ import com.cinemate.actor.DTOs.ActorRequestDTO;
 import com.cinemate.actor.DTOs.ActorResponseDTO;
 import com.cinemate.movie.DTOs.MovieResponseDTO;
 import com.cinemate.series.DTOs.SeriesResponseDTO;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,14 +13,10 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/actors")
+@RequiredArgsConstructor
 public class ActorController {
 
     private final ActorService actorService;
-
-    @Autowired
-    public ActorController(ActorService actorService) {
-        this.actorService = actorService;
-    }
 
     /**
      * returns all actors

@@ -13,7 +13,7 @@ import com.cinemate.notification.events.UserActivityEvent;
 import com.cinemate.recommendation.utils.RecommendationTriggerUtil;
 import com.cinemate.social.points.PointsEventListener;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +31,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -174,7 +175,7 @@ public class UserService {
                 try {
                     Files.deleteIfExists(oldAvatarPath);
                 } catch (IOException e) {
-                    System.out.println("Fehler beim Löschen des alten Avatars: " + e.getMessage());
+                    log.warn("Fehler beim Löschen des alten Avatars: " + e.getMessage());
                 }
             }
             existingUser.setAvatarUrl(null);

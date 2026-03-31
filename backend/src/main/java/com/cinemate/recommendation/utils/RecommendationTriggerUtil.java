@@ -1,15 +1,15 @@
 package com.cinemate.recommendation.utils;
 
 import com.cinemate.notification.events.UserPreferenceChangedEvent;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class RecommendationTriggerUtil {
 
-    @Autowired
-    private ApplicationEventPublisher eventPublisher;
+    private final ApplicationEventPublisher eventPublisher;
 
     /**
      * Triggers recommendation notifications when a user adds a new favorite

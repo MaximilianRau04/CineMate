@@ -4,7 +4,7 @@ import com.cinemate.director.DTOs.DirectorRequestDTO;
 import com.cinemate.director.DTOs.DirectorResponseDTO;
 import com.cinemate.movie.DTOs.MovieResponseDTO;
 import com.cinemate.series.DTOs.SeriesResponseDTO;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,14 +12,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/directors")
+@RequiredArgsConstructor
 public class DirectorController {
 
     private final DirectorService directorService;
-
-    @Autowired
-    public DirectorController(DirectorService directorService) {
-        this.directorService = directorService;
-    }
 
     /**
      * returns all directors

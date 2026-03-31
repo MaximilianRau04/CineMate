@@ -2,7 +2,7 @@ package com.cinemate.achievement;
 
 import com.cinemate.achievement.DTOs.AchievementDTO;
 import com.cinemate.achievement.DTOs.UserAchievementDTO;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,14 +11,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/achievements")
 @CrossOrigin(origins = "http://localhost:3000")
+@RequiredArgsConstructor
 public class AchievementController {
 
     private final AchievementService achievementService;
-
-    @Autowired
-    public AchievementController(AchievementService achievementService) {
-        this.achievementService = achievementService;
-    }
 
     /**
      * Get all available achievements

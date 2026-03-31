@@ -6,7 +6,8 @@ import com.cinemate.notification.NotificationType;
 import com.cinemate.recommendation.DTOs.RecommendationResponseDTO;
 import com.cinemate.user.User;
 import com.cinemate.user.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -14,17 +15,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class RecommendationNotificationService {
 
-    @Autowired
-    private RecommendationService recommendationService;
-
-    @Autowired
-    private NotificationService notificationService;
-
-    @Autowired
-    private UserRepository userRepository;
+    private final RecommendationService recommendationService;
+    private final NotificationService notificationService;
+    private final UserRepository userRepository;
 
     /**
      * Sends personalized recommendations as notifications to a user
@@ -178,7 +176,7 @@ public class RecommendationNotificationService {
             try {
                 sendRecommendationNotifications(user.getId(), maxRecommendationsPerUser);
             } catch (Exception e) {
-                System.err.println("Error sending recommendation notifications to user " + 
+                log.error("Error sending recommendation notifications to user " +
                         user.getId() + ": " + e.getMessage());
             }
         });
@@ -195,7 +193,7 @@ public class RecommendationNotificationService {
             try {
                 sendSummaryRecommendationNotifications(user.getId(), maxRecommendationsPerUser);
             } catch (Exception e) {
-                System.err.println("Error sending summary recommendation notifications to user " + 
+                log.error("Error sending summary recommendation notifications to user " +
                         user.getId() + ": " + e.getMessage());
             }
         });

@@ -2,7 +2,7 @@ package com.cinemate.notification;
 
 import com.cinemate.user.User;
 import com.cinemate.user.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -13,13 +13,11 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/admin/notifications")
 @CrossOrigin(origins = "*")
+@RequiredArgsConstructor
 public class AdminNotificationController {
 
-    @Autowired
-    private NotificationService notificationService;
-
-    @Autowired
-    private UserRepository userRepository;
+    private final NotificationService notificationService;
+    private final UserRepository userRepository;
 
     /**
      * Send notification to specific user or all users

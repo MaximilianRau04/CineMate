@@ -2,7 +2,7 @@ package com.cinemate.social.forum.DTOs;
 
 import com.cinemate.social.forum.ForumService;
 import com.cinemate.social.forum.post.ForumPost;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Component;
@@ -10,10 +10,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class ForumDTOConverter {
 
-    @Autowired
-    private ForumService forumService;
+    private final ForumService forumService;
 
     public ForumPostDTO convertToDTO(ForumPost post) {
         return new ForumPostDTO(post);

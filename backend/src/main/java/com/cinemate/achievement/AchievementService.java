@@ -12,7 +12,6 @@ import com.cinemate.user.User;
 import com.cinemate.user.UserRepository;
 import com.cinemate.review.ReviewRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;

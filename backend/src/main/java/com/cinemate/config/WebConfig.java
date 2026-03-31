@@ -1,7 +1,8 @@
 package com.cinemate.config;
 
 import jakarta.annotation.PostConstruct;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
@@ -10,7 +11,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.List;
 
+@Slf4j
 @Configuration
+@RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
     private static final String[] CLASSPATH_RESOURCE_LOCATIONS = {
             "classpath:/META-INF/resources/", "classpath:/resources/",
@@ -28,12 +31,11 @@ public class WebConfig implements WebMvcConfigurer {
         configurer.favorPathExtension(false);
     }
 
-    @Autowired
-    private List<HttpMessageConverter<?>> converters;
+    private final List<HttpMessageConverter<?>> converters;
 
     @PostConstruct
     public void printConverters() {
-        converters.forEach(c -> System.out.println(c.getClass().getName()));
+        converters.forEach(c -> log.debug(c.getClass().getName()));
     }
 
 }

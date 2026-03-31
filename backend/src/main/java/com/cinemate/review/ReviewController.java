@@ -5,7 +5,7 @@ import com.cinemate.review.DTOs.ReviewRequestDTO;
 import com.cinemate.review.DTOs.ReviewResponseDTO;
 import com.cinemate.series.DTOs.SeriesResponseDTO;
 import com.cinemate.user.DTOs.UserResponseDTO;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,14 +16,10 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/reviews")
+@RequiredArgsConstructor
 public class ReviewController {
 
     private final ReviewService reviewService;
-
-    @Autowired
-    public ReviewController(ReviewService reviewService) {
-        this.reviewService = reviewService;
-    }
 
     /**
      * returns a review by the given id

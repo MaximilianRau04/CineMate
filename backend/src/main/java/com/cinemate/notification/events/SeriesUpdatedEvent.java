@@ -4,7 +4,6 @@ import com.cinemate.series.Episode;
 import com.cinemate.series.Season;
 import com.cinemate.series.Series;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.springframework.context.ApplicationEvent;
 
 @Getter

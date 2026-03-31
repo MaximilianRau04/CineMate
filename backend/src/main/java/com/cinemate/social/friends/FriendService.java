@@ -9,7 +9,6 @@ import com.cinemate.user.User;
 import com.cinemate.user.UserRepository;
 import com.cinemate.user.DTOs.UserResponseDTO;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;

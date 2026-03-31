@@ -3,10 +3,13 @@ package com.cinemate.notification;
 import com.cinemate.notification.email.EmailService;
 import com.cinemate.user.User;
 import com.cinemate.user.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -15,20 +18,18 @@ import java.util.Optional;
 
 import static com.cinemate.user.Role.ADMIN;
 
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class NotificationService {
 
-    @Autowired
-    private NotificationRepository notificationRepository;
+    private final NotificationRepository notificationRepository;
+    private final UserRepository userRepository;
+    private final EmailService emailService;
+    private final SimpMessagingTemplate messagingTemplate;
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private EmailService emailService;
-
-    @Autowired
-    private SimpMessagingTemplate messagingTemplate;
+    @Value("${cinemate.frontend.url:http://localhost:3000}")
+    private String frontendUrl;
 
     /**
      * check if the notification type is enabled
@@ -154,6 +155,7 @@ public class NotificationService {
      * mark a notification as read
      * @param notificationId
      */
+    @Transactional
     public void markAsRead(String notificationId) {
         Optional<Notification> notificationOpt = notificationRepository.findById(notificationId);
         if (notificationOpt.isPresent()) {
@@ -168,6 +170,7 @@ public class NotificationService {
      * marks all notifications of user as read
      * @param userId
      */
+    @Transactional
     public void markAllAsRead(String userId) {
         List<Notification> unreadNotifications = getUnreadNotifications(userId);
 
@@ -183,6 +186,7 @@ public class NotificationService {
      * deletes a notification by id
      * @param notificationId
      */
+    @Transactional
     public void deleteNotification(String notificationId) {
         notificationRepository.deleteById(notificationId);
     }
@@ -191,6 +195,7 @@ public class NotificationService {
      * deletes all notifications for a specific user
      * @param userId
      */
+    @Transactional
     public void deleteAllUserNotifications(String userId) {
         List<Notification> userNotifications = notificationRepository.findByUserIdOrderByCreatedAtDesc(userId);
         notificationRepository.deleteAll(userNotifications);
@@ -210,7 +215,7 @@ public class NotificationService {
                 case MOVIE_WATCHLIST_RELEASED:
                 case WATCHLIST_ITEM_REVIEWED:
                     if ("movie".equals(notification.getItemType())) {
-                        actionUrl = "http://localhost:3000/movies/" + notification.getItemId();
+                        actionUrl = frontendUrl + "/movies/" + notification.getItemId();
                         actionText = "Film ansehen";
                     }
                     break;
@@ -218,27 +223,27 @@ public class NotificationService {
                 case SERIES_NEW_EPISODE:
                 case SERIES_STATUS_CHANGED:
                     if ("series".equals(notification.getItemType())) {
-                        actionUrl = "http://localhost:3000/series/" + notification.getItemId();
+                        actionUrl = frontendUrl + "/series/" + notification.getItemId();
                         actionText = "Serie ansehen";
                     }
                     break;
                 case MILESTONE_REACHED:
-                    actionUrl = "http://localhost:3000/profile";
+                    actionUrl = frontendUrl + "/profile";
                     actionText = "Profil ansehen";
                     break;
                 case UPCOMING_RELEASES:
-                    actionUrl = "http://localhost:3000/watchlist";
+                    actionUrl = frontendUrl + "/watchlist";
                     actionText = "Zur Watchlist";
                     break;
                 case RECOMMENDATION:
                     if ("movie".equals(notification.getItemType())) {
-                        actionUrl = "http://localhost:3000/movies/" + notification.getItemId();
+                        actionUrl = frontendUrl + "/movies/" + notification.getItemId();
                         actionText = "Film ansehen";
                     } else if ("series".equals(notification.getItemType())) {
-                        actionUrl = "http://localhost:3000/series/" + notification.getItemId();
+                        actionUrl = frontendUrl + "/series/" + notification.getItemId();
                         actionText = "Serie ansehen";
                     } else if ("recommendations".equals(notification.getItemType())) {
-                        actionUrl = "http://localhost:3000/explore";
+                        actionUrl = frontendUrl + "/explore";
                         actionText = "Alle Empfehlungen ansehen";
                     }
                     break;
@@ -320,7 +325,7 @@ public class NotificationService {
             try {
                 sendNotification(admin.getId(), type, title, message);
             } catch (Exception e) {
-                System.err.println("Fehler beim Senden der Benachrichtigung an Admin " + admin.getUsername() + ": " + e.getMessage());
+                log.error("Fehler beim Senden der Benachrichtigung an Admin " + admin.getUsername() + ": " + e.getMessage());
             }
         }
     }
@@ -338,7 +343,7 @@ public class NotificationService {
             try {
                 sendNotification(targetUserId, type, title, message);
             } catch (Exception e) {
-                System.err.println("Fehler beim Senden der Admin-Benachrichtigung an User " + targetUserId + ": " + e.getMessage());
+                log.error("Fehler beim Senden der Admin-Benachrichtigung an User " + targetUserId + ": " + e.getMessage());
             }
         } else {
             List<User> allUsers = userRepository.findAll();
@@ -346,7 +351,7 @@ public class NotificationService {
                 try {
                     sendNotification(user.getId(), type, title, message);
                 } catch (Exception e) {
-                    System.err.println("Fehler beim Senden der Admin-Benachrichtigung an User " + user.getUsername() + ": " + e.getMessage());
+                    log.error("Fehler beim Senden der Admin-Benachrichtigung an User " + user.getUsername() + ": " + e.getMessage());
                 }
             }
         }

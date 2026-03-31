@@ -3,7 +3,7 @@ package com.cinemate.notification.preference;
 import com.cinemate.notification.NotificationType;
 import com.cinemate.user.User;
 import com.cinemate.user.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,10 +15,10 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/notification-preferences")
 @CrossOrigin(origins = "*")
+@RequiredArgsConstructor
 public class NotificationPreferenceController {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     /**
      * Get notification preferences for a user

@@ -3,21 +3,21 @@ package com.cinemate.notification.scheduled;
 import com.cinemate.notification.Notification;
 import com.cinemate.notification.NotificationRepository;
 import com.cinemate.notification.NotificationService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class EmailRetryService {
 
-    @Autowired
-    private NotificationRepository notificationRepository;
-
-    @Autowired
-    private NotificationService notificationService;
+    private final NotificationRepository notificationRepository;
+    private final NotificationService notificationService;
 
     /**
      * Retries failed email notifications
@@ -31,7 +31,7 @@ public class EmailRetryService {
             .findBySentFalseAndCreatedAtBefore(fiveMinutesAgo);
         
         if (!unsentNotifications.isEmpty()) {
-            System.out.println("Retrying " + unsentNotifications.size() + " failed email notifications...");
+            log.info("Retrying " + unsentNotifications.size() + " failed email notifications...");
             
             for (Notification notification : unsentNotifications) {
                 try {
@@ -39,10 +39,10 @@ public class EmailRetryService {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
-                    System.err.println("Email retry interrupted");
+                    log.error("Email retry interrupted");
                     break;
                 } catch (Exception e) {
-                    System.err.println("Failed to retry notification " + notification.getId() + ": " + e.getMessage());
+                    log.error("Failed to retry notification " + notification.getId() + ": " + e.getMessage());
                 }
             }
         }

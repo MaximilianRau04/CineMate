@@ -4,6 +4,8 @@ import com.cinemate.user.User;
 import com.cinemate.user.UserRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
@@ -17,17 +19,16 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class EmailService {
 
     @Autowired(required = false)
     private JavaMailSender mailSender;
 
-    @Autowired
-    private EmailTemplateService emailTemplateService;
-
-    @Autowired
-    private UserRepository userRepository;
+    private final EmailTemplateService emailTemplateService;
+    private final UserRepository userRepository;
 
     @Value("${spring.mail.from:noreply@cinemate.com}")
     private String fromEmail;
@@ -61,7 +62,7 @@ public class EmailService {
         }
         
         if (rateLimit.emailCount >= emailsPerHour) {
-            System.out.println("Rate limit exceeded for " + userEmail + ". Emails sent this hour: " + rateLimit.emailCount);
+            log.info("Rate limit exceeded for " + userEmail + ". Emails sent this hour: " + rateLimit.emailCount);
             return false;
         }
         
@@ -78,12 +79,12 @@ public class EmailService {
     @Async
     public void sendNotificationEmail(String toEmail, String subject, String message) {
         if (!mailEnabled || mailSender == null) {
-            System.out.println("Email service not configured. Would send to " + toEmail + ": " + subject);
+            log.info("Email service not configured. Would send to " + toEmail + ": " + subject);
             return;
         }
 
         if (!isWithinRateLimit(toEmail)) {
-            System.out.println("Rate limit exceeded for " + toEmail + ". Skipping email: " + subject);
+            log.info("Rate limit exceeded for " + toEmail + ". Skipping email: " + subject);
             return;
         }
 
@@ -95,9 +96,9 @@ public class EmailService {
             mailMessage.setText(message);
 
             mailSender.send(mailMessage);
-            System.out.println("Email sent to " + toEmail + ": " + subject);
+            log.info("Email sent to " + toEmail + ": " + subject);
         } catch (Exception e) {
-            System.err.println("Failed to send email to " + toEmail + ": " + e.getMessage());
+            log.error("Failed to send email to " + toEmail + ": " + e.getMessage());
         }
     }
 
@@ -110,12 +111,12 @@ public class EmailService {
     @Async
     public void sendHtmlNotificationEmail(String toEmail, String subject, String htmlContent) {
         if (!mailEnabled || mailSender == null) {
-            System.out.println("Email service not configured. Would send HTML email to " + toEmail + ": " + subject);
+            log.info("Email service not configured. Would send HTML email to " + toEmail + ": " + subject);
             return;
         }
 
         if (!isWithinRateLimit(toEmail)) {
-            System.out.println("Rate limit exceeded for " + toEmail + ". Skipping HTML email: " + subject);
+            log.info("Rate limit exceeded for " + toEmail + ". Skipping HTML email: " + subject);
             return;
         }
 
@@ -129,9 +130,9 @@ public class EmailService {
             helper.setText(htmlContent, true); // true = HTML content
             
             mailSender.send(mimeMessage);
-            System.out.println("HTML Email sent to " + toEmail + ": " + subject);
+            log.info("HTML Email sent to " + toEmail + ": " + subject);
         } catch (MessagingException e) {
-            System.err.println("Failed to send HTML email to " + toEmail + ": " + e.getMessage());
+            log.error("Failed to send HTML email to " + toEmail + ": " + e.getMessage());
         }
     }
 

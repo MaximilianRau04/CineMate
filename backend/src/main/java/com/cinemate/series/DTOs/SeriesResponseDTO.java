@@ -3,10 +3,10 @@ package com.cinemate.series.DTOs;
 import com.cinemate.series.Series;
 import com.cinemate.series.Status;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
 
@@ -14,6 +14,7 @@ import java.util.Date;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class SeriesResponseDTO {
     private String id;
     private String title;

@@ -32,8 +32,8 @@ public class Achievement {
         this.isActive = true;
     }
 
-    public Achievement(String title, String description, String iconClass, String badgeColor, 
-                      AchievementType type, int threshold, int points) {
+    public Achievement(String title, String description, String iconClass, String badgeColor,
+                       AchievementType type, int threshold, int points) {
         this();
         this.title = title;
         this.description = description;

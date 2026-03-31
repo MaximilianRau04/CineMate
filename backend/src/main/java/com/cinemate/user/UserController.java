@@ -4,7 +4,7 @@ import com.cinemate.movie.DTOs.MovieResponseDTO;
 import com.cinemate.series.DTOs.SeriesResponseDTO;
 import com.cinemate.user.DTOs.UserRequestDTO;
 import com.cinemate.user.DTOs.UserResponseDTO;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,14 +15,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
+@RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
-
-    @Autowired
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
 
     /**
      * returns all users

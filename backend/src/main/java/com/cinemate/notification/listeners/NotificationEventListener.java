@@ -3,19 +3,19 @@ package com.cinemate.notification.listeners;
 import com.cinemate.notification.AutoNotificationService;
 import com.cinemate.notification.events.*;
 import com.cinemate.recommendation.RecommendationNotificationService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
+@RequiredArgsConstructor
 public class NotificationEventListener {
 
-    @Autowired
-    private AutoNotificationService autoNotificationService;
-
-    @Autowired
-    private RecommendationNotificationService recommendationNotificationService;
+    private final AutoNotificationService autoNotificationService;
+    private final RecommendationNotificationService recommendationNotificationService;
 
     @EventListener
     @Async
@@ -71,7 +71,7 @@ public class NotificationEventListener {
                 event.getActivityType()
             );
         } catch (Exception e) {
-            System.err.println("Error sending triggered recommendation notifications for user " 
+            log.error("Error sending triggered recommendation notifications for user "
                 + event.getUserId() + ": " + e.getMessage());
         }
     }

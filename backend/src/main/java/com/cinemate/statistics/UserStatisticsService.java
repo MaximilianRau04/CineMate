@@ -15,6 +15,7 @@ import com.cinemate.movie.MovieRepository;
 import com.cinemate.series.Series;
 import com.cinemate.series.SeriesRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -23,6 +24,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserStatisticsService {
@@ -94,15 +96,14 @@ public class UserStatisticsService {
                                     .averageRating(calculateAverageRating(friend.getId(), null))
                                     .build();
                         } catch (Exception e) {
-                            System.err.println("Error building FriendStatisticsDTO for friend: " + friend.getUsername() + " - " + e.getMessage());
+                            log.error("Error building FriendStatisticsDTO for friend: " + friend.getUsername() + " - " + e.getMessage());
                             return null;
                         }
                     })
                     .filter(dto -> dto != null)
                     .collect(Collectors.toList());
         } catch (Exception e) {
-            System.err.println("Error in getFriendsStatistics for userId: " + userId + " - " + e.getMessage());
-            e.printStackTrace();
+            log.error("Error in getFriendsStatistics for userId: " + userId + " - " + e.getMessage());
             throw new RuntimeException("Failed to get friends statistics", e);
         }
     }

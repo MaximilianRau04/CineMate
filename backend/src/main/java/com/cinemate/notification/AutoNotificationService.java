@@ -12,26 +12,20 @@ import com.cinemate.social.forum.subscription.ForumSubscription;
 import com.cinemate.social.forum.subscription.ForumSubscriptionRepository;
 import com.cinemate.user.User;
 import com.cinemate.user.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class AutoNotificationService {
 
-    @Autowired
-    private NotificationService notificationService;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private ReviewRepository reviewRepository;
-    
-    @Autowired
-    private ForumSubscriptionRepository forumSubscriptionRepository;
+    private final NotificationService notificationService;
+    private final UserRepository userRepository;
+    private final ReviewRepository reviewRepository;
+    private final ForumSubscriptionRepository forumSubscriptionRepository;
 
     /**
      * Notifies users when a movie from their watchlist has been released

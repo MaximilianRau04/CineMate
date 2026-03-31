@@ -10,7 +10,6 @@ import com.cinemate.series.DTOs.SeriesRequestDTO;
 import com.cinemate.series.DTOs.SeriesResponseDTO;
 import com.cinemate.notification.events.SeriesUpdatedEvent;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

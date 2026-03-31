@@ -12,7 +12,8 @@ import com.cinemate.social.forum.subscription.ForumSubscription;
 import com.cinemate.social.forum.subscription.ForumSubscriptionRepository;
 import com.cinemate.user.User;
 import com.cinemate.user.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,26 +31,17 @@ import java.util.Optional;
  * @author CineMate Team
  * @version 1.0
  */
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class ForumService {
 
-    @Autowired
-    private ForumPostRepository forumPostRepository;
-
-    @Autowired
-    private ForumReplyRepository forumReplyRepository;
-
-    @Autowired
-    private ForumSubscriptionRepository forumSubscriptionRepository;
-
-    @Autowired
-    private ForumLikeRepository forumLikeRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private ApplicationEventPublisher eventPublisher;
+    private final ForumPostRepository forumPostRepository;
+    private final ForumReplyRepository forumReplyRepository;
+    private final ForumSubscriptionRepository forumSubscriptionRepository;
+    private final ForumLikeRepository forumLikeRepository;
+    private final UserRepository userRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     /**
      * Creates a new forum post with the specified user as the author.
@@ -65,7 +57,7 @@ public class ForumService {
         Optional<User> userOpt = userRepository.findById(userId);
 
         if (!userOpt.isPresent()) {
-            System.err.println("ERROR: User not found with ID: " + userId);
+            log.error("ERROR: User not found with ID: " + userId);
             // Try to find user by username if userId doesn't work
             Optional<User> userByUsername = userRepository.findByUsername(userId);
             if (userByUsername.isPresent()) {

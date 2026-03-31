@@ -1,7 +1,7 @@
 package com.cinemate.notification;
 
 import com.cinemate.notification.DTOs.NotificationRequestDTO;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,10 +11,10 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/notifications")
 @CrossOrigin(origins = "*")
+@RequiredArgsConstructor
 public class NotificationController {
 
-    @Autowired
-    private NotificationService notificationService;
+    private final NotificationService notificationService;
 
     /**
      * returns all notifications of user

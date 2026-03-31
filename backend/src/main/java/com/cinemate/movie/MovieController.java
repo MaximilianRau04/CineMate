@@ -4,7 +4,7 @@ import com.cinemate.actor.DTOs.ActorResponseDTO;
 import com.cinemate.director.DTOs.DirectorResponseDTO;
 import com.cinemate.movie.DTOs.MovieRequestDTO;
 import com.cinemate.movie.DTOs.MovieResponseDTO;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,14 +12,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/movies")
+@RequiredArgsConstructor
 public class MovieController {
 
     private final MovieService movieService;
-
-    @Autowired
-    public MovieController(MovieService movieService) {
-        this.movieService = movieService;
-    }
 
     /**
      * returns all movies

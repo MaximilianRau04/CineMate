@@ -1,21 +1,17 @@
 package com.cinemate.social.points;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 /**
  * Event listener that automatically awards points for various user actions
  */
 @Component
+@RequiredArgsConstructor
 public class PointsEventListener {
-    
+
     private final PointsService pointsService;
-    
-    @Autowired
-    public PointsEventListener(PointsService pointsService) {
-        this.pointsService = pointsService;
-    }
-    
+
     /**
      * Award points when a user writes a review
      */
