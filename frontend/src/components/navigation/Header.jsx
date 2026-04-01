@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import NotificationSystem from "../notifications/NotificationSystem";
@@ -8,6 +8,18 @@ import { useAuth } from "../../utils/AuthContext";
 const Header = () => {
   const navigate = useNavigate();
   const { logout, user, isAuthenticated } = useAuth();
+  const [socialOpen, setSocialOpen] = useState(false);
+  const socialRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (socialRef.current && !socialRef.current.contains(e.target)) {
+        setSocialOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const userRole = user?.role;
   const isAdmin = userRole === "ADMIN";
@@ -101,31 +113,25 @@ const Header = () => {
                 </li>
 
                 {/* Social Dropdown */}
-                <li className="nav-item dropdown">
-                  <a
-                    className="nav-link dropdown-toggle px-2 px-lg-3"
-                    href="#"
-                    id="socialDropdown"
-                    role="button"
-                    data-bs-toggle="dropdown"
-                    aria-expanded="false"
+                <li className="nav-item dropdown" ref={socialRef}>
+                  <button
+                    className="nav-link dropdown-toggle px-2 px-lg-3 bg-transparent border-0"
+                    onClick={() => setSocialOpen((o) => !o)}
+                    aria-expanded={socialOpen}
                   >
                     <i className="bi bi-people-fill me-1"></i>
                     <span className="d-none d-lg-inline">Social</span>
                     <span className="d-lg-none">Social</span>
-                  </a>
-                  <ul
-                    className="dropdown-menu dropdown-menu-end dropdown-menu-lg-start"
-                    aria-labelledby="socialDropdown"
-                  >
+                  </button>
+                  <ul className={`dropdown-menu dropdown-menu-end dropdown-menu-lg-start${socialOpen ? " show" : ""}`}>
                     <li>
-                      <Link className="dropdown-item" to="/friends">
+                      <Link className="dropdown-item" to="/friends" onClick={() => setSocialOpen(false)}>
                         <i className="bi bi-person-hearts me-2"></i>
                         Freunde
                       </Link>
                     </li>
                     <li>
-                      <Link className="dropdown-item" to="/leaderboard">
+                      <Link className="dropdown-item" to="/leaderboard" onClick={() => setSocialOpen(false)}>
                         <i className="bi bi-trophy-fill me-2"></i>
                         Rangliste
                       </Link>
@@ -134,7 +140,7 @@ const Header = () => {
                       <hr className="dropdown-divider" />
                     </li>
                     <li>
-                      <Link className="dropdown-item" to="/forum">
+                      <Link className="dropdown-item" to="/forum" onClick={() => setSocialOpen(false)}>
                         <i className="bi bi-chat-square-text me-2"></i>
                         Forum
                       </Link>
