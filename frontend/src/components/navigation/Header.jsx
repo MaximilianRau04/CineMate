@@ -123,15 +123,25 @@ const Header = () => {
                     <span className="d-none d-lg-inline">Social</span>
                     <span className="d-lg-none">Social</span>
                   </button>
-                  <ul className={`dropdown-menu dropdown-menu-end dropdown-menu-lg-start${socialOpen ? " show" : ""}`}>
+                  <ul
+                    className={`dropdown-menu dropdown-menu-end dropdown-menu-lg-start${socialOpen ? " show" : ""}`}
+                  >
                     <li>
-                      <Link className="dropdown-item" to="/friends" onClick={() => setSocialOpen(false)}>
+                      <Link
+                        className="dropdown-item"
+                        to="/friends"
+                        onClick={() => setSocialOpen(false)}
+                      >
                         <i className="bi bi-person-hearts me-2"></i>
                         Freunde
                       </Link>
                     </li>
                     <li>
-                      <Link className="dropdown-item" to="/leaderboard" onClick={() => setSocialOpen(false)}>
+                      <Link
+                        className="dropdown-item"
+                        to="/leaderboard"
+                        onClick={() => setSocialOpen(false)}
+                      >
                         <i className="bi bi-trophy-fill me-2"></i>
                         Rangliste
                       </Link>
@@ -140,7 +150,11 @@ const Header = () => {
                       <hr className="dropdown-divider" />
                     </li>
                     <li>
-                      <Link className="dropdown-item" to="/forum" onClick={() => setSocialOpen(false)}>
+                      <Link
+                        className="dropdown-item"
+                        to="/forum"
+                        onClick={() => setSocialOpen(false)}
+                      >
                         <i className="bi bi-chat-square-text me-2"></i>
                         Forum
                       </Link>

@@ -136,9 +136,7 @@ const UserMediaTabs = ({ userId }) => {
    */
   const removeFromFavorites = async (mediaId, mediaType) => {
     try {
-      await api.delete(
-        `/users/${userId}/favorites/${mediaType}s/${mediaId}`,
-      );
+      await api.delete(`/users/${userId}/favorites/${mediaType}s/${mediaId}`);
       setFavorites((prev) => ({
         ...prev,
         [mediaType + "s"]: prev[mediaType + "s"].filter(
@@ -162,9 +160,7 @@ const UserMediaTabs = ({ userId }) => {
    */
   const removeFromWatched = async (mediaId, mediaType) => {
     try {
-      await api.delete(
-        `/users/${userId}/watched/${mediaType}s/${mediaId}`,
-      );
+      await api.delete(`/users/${userId}/watched/${mediaType}s/${mediaId}`);
       setWatched((prev) => ({
         ...prev,
         [mediaType + "s"]: prev[mediaType + "s"].filter(

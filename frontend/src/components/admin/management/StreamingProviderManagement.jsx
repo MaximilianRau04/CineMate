@@ -53,10 +53,7 @@ const StreamingProviderManagement = () => {
     e.preventDefault();
     try {
       if (editingProvider) {
-        await api.put(
-          `/streaming/providers/${editingProvider.id}`,
-          formData,
-        );
+        await api.put(`/streaming/providers/${editingProvider.id}`, formData);
       } else {
         await api.post("/streaming/providers", formData);
       }
@@ -67,7 +64,11 @@ const StreamingProviderManagement = () => {
       handleCloseModal();
     } catch (err) {
       console.error("Fehler beim Speichern:", err);
-      showError(err.response?.data?.message || err.message || "Fehler beim Speichern des Anbieters");
+      showError(
+        err.response?.data?.message ||
+          err.message ||
+          "Fehler beim Speichern des Anbieters",
+      );
       setError(err.response?.data?.message || err.message);
     }
   };
@@ -108,7 +109,11 @@ const StreamingProviderManagement = () => {
       await fetchProviders();
     } catch (err) {
       console.error("Fehler beim Löschen:", err);
-      showError(err.response?.data?.message || err.message || "Fehler beim Löschen des Anbieters");
+      showError(
+        err.response?.data?.message ||
+          err.message ||
+          "Fehler beim Löschen des Anbieters",
+      );
       setError(err.response?.data?.message || err.message);
     }
   };

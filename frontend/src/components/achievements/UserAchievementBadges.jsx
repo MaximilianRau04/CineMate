@@ -9,9 +9,7 @@ const UserAchievementBadges = ({ userId, limit = 3, showCount = true }) => {
   useEffect(() => {
     const loadUserAchievements = async () => {
       try {
-        const { data } = await api.get(
-          `/achievements/user/${userId}/unlocked`,
-        );
+        const { data } = await api.get(`/achievements/user/${userId}/unlocked`);
         const sortedAchievements = data
           .sort((a, b) => new Date(b.unlockedAt) - new Date(a.unlockedAt))
           .slice(0, limit);

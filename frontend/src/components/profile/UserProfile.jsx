@@ -82,10 +82,7 @@ const UserProfile = () => {
         new Blob([JSON.stringify(userData)], { type: "application/json" }),
       );
 
-      const { data: updatedUser } = await api.put(
-        `/users/${userId}`,
-        formData,
-      );
+      const { data: updatedUser } = await api.put(`/users/${userId}`, formData);
 
       setUser(updatedUser);
       setAvatarPreview(null);
@@ -221,7 +218,10 @@ const UserProfile = () => {
               {hasAvatar ? (
                 <>
                   <img
-                    src={avatarPreview || `${import.meta.env.VITE_BASE_URL}${avatarUrl}`}
+                    src={
+                      avatarPreview ||
+                      `${import.meta.env.VITE_BASE_URL}${avatarUrl}`
+                    }
                     alt={username}
                     className="img-fluid rounded-circle shadow-sm mb-3"
                     style={{

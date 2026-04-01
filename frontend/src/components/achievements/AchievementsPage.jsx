@@ -177,101 +177,99 @@ const AchievementsPage = ({ userId }) => {
   }
 
   return (
-    <div className="achievements-container">
-      <div className="container py-5">
-        {/* Header */}
-        <div className="row mb-4">
-          <div className="col-12">
-            <h1 className="achievements-title">
-              <FaTrophy className="me-3" />
-              Meine Achievements
-            </h1>
-            {stats && (
-              <div className="achievement-stats">
-                <div className="row">
-                  <div className="col-md-4">
-                    <div className="stat-card">
-                      <h3>{stats.unlockedAchievements}</h3>
-                      <p>Freigeschaltet</p>
-                    </div>
+    <div className="container py-5">
+      {/* Header */}
+      <div className="row mb-4">
+        <div className="col-12">
+          <h1 className="achievements-title">
+            <FaTrophy className="me-3" />
+            Meine Achievements
+          </h1>
+          {stats && (
+            <div className="achievement-stats">
+              <div className="row">
+                <div className="col-md-4">
+                  <div className="stat-card">
+                    <h3>{stats.unlockedAchievements}</h3>
+                    <p>Freigeschaltet</p>
                   </div>
-                  <div className="col-md-4">
-                    <div className="stat-card">
-                      <h3>{stats.totalAchievements}</h3>
-                      <p>Gesamt verfügbar</p>
-                    </div>
+                </div>
+                <div className="col-md-4">
+                  <div className="stat-card">
+                    <h3>{stats.totalAchievements}</h3>
+                    <p>Gesamt verfügbar</p>
                   </div>
-                  <div className="col-md-4">
-                    <div className="stat-card">
-                      <h3>{stats.progressPercentage.toFixed(1)}%</h3>
-                      <p>Fortschritt</p>
-                    </div>
+                </div>
+                <div className="col-md-4">
+                  <div className="stat-card">
+                    <h3>{stats.progressPercentage.toFixed(1)}%</h3>
+                    <p>Fortschritt</p>
                   </div>
                 </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
+      </div>
 
-        {/* Tabs */}
-        <div className="row mb-4">
-          <div className="col-12">
-            <ul className="nav nav-tabs achievement-tabs">
-              <li className="nav-item">
-                <button
-                  className={`nav-link ${activeTab === "unlocked" ? "active" : ""}`}
-                  onClick={() => setActiveTab("unlocked")}
-                >
-                  <FaUnlock className="me-2" />
-                  Freigeschaltet ({getUnlockedAchievements().length})
-                </button>
-              </li>
-              <li className="nav-item">
-                <button
-                  className={`nav-link ${activeTab === "progress" ? "active" : ""}`}
-                  onClick={() => setActiveTab("progress")}
-                >
-                  <FaLock className="me-2" />
-                  In Bearbeitung ({getInProgressAchievements().length})
-                </button>
-              </li>
-            </ul>
-          </div>
+      {/* Tabs */}
+      <div className="row mb-4">
+        <div className="col-12">
+          <ul className="nav nav-tabs achievement-tabs">
+            <li className="nav-item">
+              <button
+                className={`nav-link ${activeTab === "unlocked" ? "active" : ""}`}
+                onClick={() => setActiveTab("unlocked")}
+              >
+                <FaUnlock className="me-2" />
+                Freigeschaltet ({getUnlockedAchievements().length})
+              </button>
+            </li>
+            <li className="nav-item">
+              <button
+                className={`nav-link ${activeTab === "progress" ? "active" : ""}`}
+                onClick={() => setActiveTab("progress")}
+              >
+                <FaLock className="me-2" />
+                In Bearbeitung ({getInProgressAchievements().length})
+              </button>
+            </li>
+          </ul>
         </div>
+      </div>
 
-        {/* Achievement Grid */}
-        <div className="row">
-          <div className="col-12">
-            <div className="achievements-grid">
-              {activeTab === "unlocked" ? (
-                getUnlockedAchievements().length > 0 ? (
-                  getUnlockedAchievements().map((ua) =>
-                    renderAchievementCard(ua, true),
-                  )
-                ) : (
-                  <div className="text-center py-5">
-                    <FaTrophy className="text-muted display-1 mb-3" />
-                    <h4>Noch keine Achievements freigeschaltet</h4>
-                    <p className="text-muted">
-                      Schaue Filme, schreibe Reviews und sammle Freunde, um
-                      deine ersten Achievements zu bekommen!
-                    </p>
-                  </div>
-                )
-              ) : getInProgressAchievements().length > 0 ? (
-                getInProgressAchievements().map((ua) =>
-                  renderAchievementCard(ua, false),
+      {/* Achievement Grid */}
+      <div className="row">
+        <div className="col-12">
+          <div className="achievements-grid">
+            {activeTab === "unlocked" ? (
+              getUnlockedAchievements().length > 0 ? (
+                getUnlockedAchievements().map((ua) =>
+                  renderAchievementCard(ua, true),
                 )
               ) : (
                 <div className="text-center py-5">
-                  <FaMedal className="text-muted display-1 mb-3" />
-                  <h4>Alle Achievements freigeschaltet!</h4>
+                  <FaTrophy className="text-muted display-1 mb-3" />
+                  <h4>Noch keine Achievements freigeschaltet</h4>
                   <p className="text-muted">
-                    Du hast alle verfügbaren Achievements erreicht. Glückwunsch!
+                    Schaue Filme, schreibe Reviews und sammle Freunde, um deine
+                    ersten Achievements zu bekommen!
                   </p>
                 </div>
-              )}
-            </div>
+              )
+            ) : getInProgressAchievements().length > 0 ? (
+              getInProgressAchievements().map((ua) =>
+                renderAchievementCard(ua, false),
+              )
+            ) : (
+              <div className="text-center py-5">
+                <FaMedal className="text-muted display-1 mb-3" />
+                <h4>Alle Achievements freigeschaltet!</h4>
+                <p className="text-muted">
+                  Du hast alle verfügbaren Achievements erreicht. Glückwunsch!
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>

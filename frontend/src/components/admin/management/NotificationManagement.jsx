@@ -19,9 +19,7 @@ const AdminNotificationPanel = () => {
      */
     const loadUsers = async () => {
       try {
-        const { data: userData } = await api.get(
-          "/admin/notifications/users",
-        );
+        const { data: userData } = await api.get("/admin/notifications/users");
         setUsers(userData);
       } catch (err) {
         setError("Fehler beim Laden der Benutzerliste: " + err.message);
@@ -50,19 +48,17 @@ const AdminNotificationPanel = () => {
     setSuccess("");
 
     try {
-      const { data: result } = await api.post(
-        "/admin/notifications/send",
-        {
-          title: formData.title,
-          message: formData.message,
-          targetUserId: formData.targetUserId || null,
-        },
-      );
+      const { data: result } = await api.post("/admin/notifications/send", {
+        title: formData.title,
+        message: formData.message,
+        targetUserId: formData.targetUserId || null,
+      });
       setSuccess(result);
       setFormData({ title: "", message: "", targetUserId: "" });
     } catch (err) {
       setError(
-        err.response?.data || "Fehler beim Senden der Benachrichtigung: " + err.message,
+        err.response?.data ||
+          "Fehler beim Senden der Benachrichtigung: " + err.message,
       );
     } finally {
       setSending(false);
