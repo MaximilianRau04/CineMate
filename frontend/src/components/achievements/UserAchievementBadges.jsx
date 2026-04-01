@@ -1,35 +1,21 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { FaTrophy, FaMedal, FaStar } from "react-icons/fa";
+import api from "../../utils/api";
 
 const UserAchievementBadges = ({ userId, limit = 3, showCount = true }) => {
   const [achievements, setAchievements] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    /**
-     * Fetch user achievements from the API.
-     * @returns {Promise<void>}
-     */
-    const getHeaders = () => {
-      const token = localStorage.getItem("token");
-      return token ? { Authorization: `Bearer ${token}` } : {};
-    };
-
     const loadUserAchievements = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:8080/api/achievements/user/${userId}/unlocked`,
-          {
-            headers: getHeaders(),
-          },
+        const { data } = await api.get(
+          `/achievements/user/${userId}/unlocked`,
         );
-        if (response.ok) {
-          const data = await response.json();
-          const sortedAchievements = data
-            .sort((a, b) => new Date(b.unlockedAt) - new Date(a.unlockedAt))
-            .slice(0, limit);
-          setAchievements(sortedAchievements);
-        }
+        const sortedAchievements = data
+          .sort((a, b) => new Date(b.unlockedAt) - new Date(a.unlockedAt))
+          .slice(0, limit);
+        setAchievements(sortedAchievements);
       } catch (error) {
         console.error("Error loading user achievements:", error);
       } finally {

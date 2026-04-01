@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import api from "../../../utils/api";
 
 const SeasonSection = ({ seriesId }) => {
   const [seasons, setSeasons] = useState([]);
@@ -13,17 +14,7 @@ const SeasonSection = ({ seriesId }) => {
 
     setSeasonsLoading(true);
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(
-        `http://localhost:8080/api/series/${seriesId}/seasons`,
-        {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        },
-      );
-      if (!response.ok) {
-        throw new Error("Staffeln konnten nicht geladen werden");
-      }
-      const data = await response.json();
+      const { data } = await api.get(`/series/${seriesId}/seasons`);
       setSeasons(data);
       setSeasonsLoading(false);
     } catch (err) {

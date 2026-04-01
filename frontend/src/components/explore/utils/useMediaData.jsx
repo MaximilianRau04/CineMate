@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
+import api from "../../../utils/api";
 
 const useMediaData = () => {
   const [movies, setMovies] = useState([]);
@@ -17,24 +18,13 @@ const useMediaData = () => {
    */
   const fetchAverageRating = async (itemId, type) => {
     try {
-      const token = localStorage.getItem("token");
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
-      const response = await fetch(
-        `http://localhost:8080/api/reviews/${type}/${itemId}`,
-        { headers },
-      );
-      if (!response.ok) {
-        if (response.status === 404) return 0;
-        return null;
-      }
-
-      const reviews = await response.json();
+      const { data: reviews } = await api.get(`/reviews/${type}/${itemId}`);
       if (!reviews || reviews.length === 0) return 0;
 
       const sum = reviews.reduce((acc, review) => acc + review.rating, 0);
       return sum / reviews.length;
     } catch (error) {
+      if (error.response?.status === 404) return 0;
       console.error(
         `Fehler beim Laden des Ratings für ${type} ${itemId}:`,
         error,
@@ -57,25 +47,13 @@ const useMediaData = () => {
     }
 
     try {
-      const token = localStorage.getItem("token");
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
       const [moviesResponse, seriesResponse] = await Promise.all([
-        fetch("http://localhost:8080/api/movies", { headers }),
-        fetch("http://localhost:8080/api/series", { headers }),
+        api.get("/movies"),
+        api.get("/series"),
       ]);
 
-      if (!moviesResponse.ok) {
-        throw new Error("Filme konnten nicht geladen werden");
-      }
-      if (!seriesResponse.ok) {
-        throw new Error("Serien konnten nicht geladen werden");
-      }
-
-      const [moviesData, seriesData] = await Promise.all([
-        moviesResponse.json(),
-        seriesResponse.json(),
-      ]);
+      const moviesData = moviesResponse.data;
+      const seriesData = seriesResponse.data;
 
       // Process movies with genres and current ratings
       const processedMovies = await Promise.all(

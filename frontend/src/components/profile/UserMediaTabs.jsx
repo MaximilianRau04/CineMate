@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useToast } from "../toasts";
 import MediaCard from "./MediaCard";
+import api from "../../utils/api";
 
 const UserMediaTabs = ({ userId }) => {
   const [activeTab, setActiveTab] = useState("reviews");
@@ -15,11 +16,6 @@ const UserMediaTabs = ({ userId }) => {
     reviews: false,
   });
 
-  const getHeaders = (extra = {}) => {
-    const token = localStorage.getItem("token");
-    return token ? { Authorization: `Bearer ${token}`, ...extra } : extra;
-  };
-
   /**
    * Fetches media data for a review
    * @param {string} reviewId - The ID of the review
@@ -27,16 +23,8 @@ const UserMediaTabs = ({ userId }) => {
    */
   const fetchMediaForReview = async (reviewId) => {
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/reviews/${reviewId}/media`,
-        {
-          headers: getHeaders(),
-        },
-      );
-      if (response.ok) {
-        return await response.json();
-      }
-      return null;
+      const { data } = await api.get(`/reviews/${reviewId}/media`);
+      return data;
     } catch (error) {
       console.error(
         `Fehler beim Laden der Mediendaten für Review ${reviewId}:`,
@@ -54,14 +42,11 @@ const UserMediaTabs = ({ userId }) => {
     if (!userId) return;
 
     setLoading((prev) => ({ ...prev, reviews: true }));
-    fetch(`http://localhost:8080/api/reviews/user/${userId}`, {
-      headers: getHeaders(),
-    })
-      .then((res) => (res.ok ? res.json() : []))
+    api
+      .get(`/reviews/user/${userId}`)
+      .then((res) => (Array.isArray(res.data) ? res.data : []))
       .then(async (data) => {
-        const validReviews = Array.isArray(data)
-          ? data.filter((review) => review && review.id)
-          : [];
+        const validReviews = data.filter((review) => review && review.id);
 
         const enrichedReviews = await Promise.all(
           validReviews.map(async (review) => {
@@ -88,12 +73,14 @@ const UserMediaTabs = ({ userId }) => {
 
     setLoading((prev) => ({ ...prev, favorites: true }));
     Promise.all([
-      fetch(`http://localhost:8080/api/users/${userId}/favorites/movies`, {
-        headers: getHeaders(),
-      }).then((res) => (res.ok ? res.json() : [])),
-      fetch(`http://localhost:8080/api/users/${userId}/favorites/series`, {
-        headers: getHeaders(),
-      }).then((res) => (res.ok ? res.json() : [])),
+      api
+        .get(`/users/${userId}/favorites/movies`)
+        .then((res) => res.data)
+        .catch(() => []),
+      api
+        .get(`/users/${userId}/favorites/series`)
+        .then((res) => res.data)
+        .catch(() => []),
     ])
       .then(([movies, series]) => {
         const validMovies = Array.isArray(movies)
@@ -117,12 +104,14 @@ const UserMediaTabs = ({ userId }) => {
 
     setLoading((prev) => ({ ...prev, watched: true }));
     Promise.all([
-      fetch(`http://localhost:8080/api/users/${userId}/watched/movies`, {
-        headers: getHeaders(),
-      }).then((res) => (res.ok ? res.json() : [])),
-      fetch(`http://localhost:8080/api/users/${userId}/watched/series`, {
-        headers: getHeaders(),
-      }).then((res) => (res.ok ? res.json() : [])),
+      api
+        .get(`/users/${userId}/watched/movies`)
+        .then((res) => res.data)
+        .catch(() => []),
+      api
+        .get(`/users/${userId}/watched/series`)
+        .then((res) => res.data)
+        .catch(() => []),
     ])
       .then(([movies, series]) => {
         const validMovies = Array.isArray(movies)
@@ -147,30 +136,18 @@ const UserMediaTabs = ({ userId }) => {
    */
   const removeFromFavorites = async (mediaId, mediaType) => {
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/users/${userId}/favorites/${mediaType}s/${mediaId}`,
-        {
-          method: "DELETE",
-          headers: getHeaders(),
-        },
+      await api.delete(
+        `/users/${userId}/favorites/${mediaType}s/${mediaId}`,
       );
-
-      if (response.ok) {
-        setFavorites((prev) => ({
-          ...prev,
-          [mediaType + "s"]: prev[mediaType + "s"].filter(
-            (item) => item.id !== mediaId,
-          ),
-        }));
-        success(
-          `${mediaType === "movie" ? "Film" : "Serie"} aus Favoriten entfernt!`,
-        );
-      } else {
-        console.error(
-          `Fehler beim Entfernen aus Favoriten: ${response.status}`,
-        );
-        showError("Fehler beim Entfernen aus Favoriten");
-      }
+      setFavorites((prev) => ({
+        ...prev,
+        [mediaType + "s"]: prev[mediaType + "s"].filter(
+          (item) => item.id !== mediaId,
+        ),
+      }));
+      success(
+        `${mediaType === "movie" ? "Film" : "Serie"} aus Favoriten entfernt!`,
+      );
     } catch (error) {
       console.error("Fehler beim Entfernen aus Favoriten:", error);
       showError("Fehler beim Entfernen aus Favoriten");
@@ -185,32 +162,20 @@ const UserMediaTabs = ({ userId }) => {
    */
   const removeFromWatched = async (mediaId, mediaType) => {
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/users/${userId}/watched/${mediaType}s/${mediaId}`,
-        {
-          method: "DELETE",
-          headers: getHeaders(),
-        },
+      await api.delete(
+        `/users/${userId}/watched/${mediaType}s/${mediaId}`,
       );
-
-      if (response.ok) {
-        setWatched((prev) => ({
-          ...prev,
-          [mediaType + "s"]: prev[mediaType + "s"].filter(
-            (item) => item.id !== mediaId,
-          ),
-        }));
-        success(
-          `${
-            mediaType === "movie" ? "Film" : "Serie"
-          } aus gesehenen Medien entfernt!`,
-        );
-      } else {
-        console.error(
-          `Fehler beim Entfernen aus gesehenen Medien: ${response.status}`,
-        );
-        showError("Fehler beim Entfernen aus gesehenen Medien");
-      }
+      setWatched((prev) => ({
+        ...prev,
+        [mediaType + "s"]: prev[mediaType + "s"].filter(
+          (item) => item.id !== mediaId,
+        ),
+      }));
+      success(
+        `${
+          mediaType === "movie" ? "Film" : "Serie"
+        } aus gesehenen Medien entfernt!`,
+      );
     } catch (error) {
       console.error("Fehler beim Entfernen aus gesehenen Medien:", error);
       showError("Fehler beim Entfernen aus gesehenen Medien");

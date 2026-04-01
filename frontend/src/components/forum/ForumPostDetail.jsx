@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useToast } from "../toasts";
 import "./css/ForumPostDetail.css";
+import api from "../../utils/api";
 
 const ForumPostDetail = () => {
   const { postId } = useParams();
@@ -47,23 +48,7 @@ const ForumPostDetail = () => {
    */
   const fetchPost = async () => {
     try {
-      const token = localStorage.getItem("token");
-      const headers = {};
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
-      }
-
-      const response = await fetch(
-        `http://localhost:8080/api/forum/posts/${postId}`,
-        {
-          headers,
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch post");
-      }
-      const data = await response.json();
+      const { data } = await api.get(`/forum/posts/${postId}`);
       setPost(data);
     } catch (error) {
       console.error("Error fetching post:", error);
@@ -75,23 +60,14 @@ const ForumPostDetail = () => {
 
   /**
    * Fetches replies for the post
-   * @param {number} currentPage - The current page number
    * @returns {Promise<void>} - Resolves when replies are fetched
    * @throws {Error} - If fetching replies fails
    */
   const fetchReplies = async () => {
     try {
-      const token = localStorage.getItem("token");
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
-      const response = await fetch(
-        `http://localhost:8080/api/forum/posts/${postId}/replies?page=${currentPage}&size=10`,
-        { headers },
+      const { data } = await api.get(
+        `/forum/posts/${postId}/replies?page=${currentPage}&size=10`,
       );
-      if (!response.ok) {
-        throw new Error("Failed to fetch replies");
-      }
-      const data = await response.json();
       setReplies(data.content);
       setTotalPages(data.totalPages);
     } catch (error) {
@@ -106,32 +82,17 @@ const ForumPostDetail = () => {
    */
   const fetchSubscriptionStatus = async () => {
     try {
-      const token = localStorage.getItem("token");
-      const headers = {};
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
-      }
-
-      const response = await fetch(
-        `http://localhost:8080/api/forum/posts/${postId}/subscription-status`,
-        {
-          headers,
-        },
+      const { data } = await api.get(
+        `/forum/posts/${postId}/subscription-status`,
       );
 
-      if (response.ok) {
-        const data = await response.json();
+      // Handle different possible field names from backend
+      const normalizedData = {
+        isSubscribed: data.isSubscribed ?? data.subscribed ?? false,
+        subscriberCount: data.subscriberCount ?? data.subscriber_count ?? 0,
+      };
 
-        // Handle different possible field names from backend
-        const normalizedData = {
-          isSubscribed: data.isSubscribed ?? data.subscribed ?? false,
-          subscriberCount: data.subscriberCount ?? data.subscriber_count ?? 0,
-        };
-
-        setSubscriptionStatus(normalizedData);
-      } else {
-        console.error("Failed to fetch subscription status:", response.status);
-      }
+      setSubscriptionStatus(normalizedData);
     } catch (error) {
       console.error("Error fetching subscription status:", error);
     }
@@ -147,15 +108,8 @@ const ForumPostDetail = () => {
       const token = localStorage.getItem("token");
       if (!token) return;
 
-      const response = await fetch("http://localhost:8080/api/users/me", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (response.ok) {
-        const userData = await response.json();
-        setCurrentUser(userData);
-      }
+      const { data: userData } = await api.get("/users/me");
+      setCurrentUser(userData);
     } catch (error) {
       console.error("Error fetching current user:", error);
     }
@@ -170,27 +124,11 @@ const ForumPostDetail = () => {
 
     try {
       if (post.movieId) {
-        const token = localStorage.getItem("token");
-        const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        const response = await fetch(
-          `http://localhost:8080/api/movies/${post.movieId}`,
-          { headers },
-        );
-        if (response.ok) {
-          const movie = await response.json();
-          setMediaInfo({ type: "movie", data: movie });
-        }
+        const { data: movie } = await api.get(`/movies/${post.movieId}`);
+        setMediaInfo({ type: "movie", data: movie });
       } else if (post.seriesId) {
-        const token = localStorage.getItem("token");
-        const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        const response = await fetch(
-          `http://localhost:8080/api/series/${post.seriesId}`,
-          { headers },
-        );
-        if (response.ok) {
-          const series = await response.json();
-          setMediaInfo({ type: "series", data: series });
-        }
+        const { data: series } = await api.get(`/series/${post.seriesId}`);
+        setMediaInfo({ type: "series", data: series });
       } else {
         setMediaInfo(null);
       }
@@ -207,46 +145,17 @@ const ForumPostDetail = () => {
    */
   const handleSubscribe = async () => {
     try {
-      const token = localStorage.getItem("token");
       const wasSubscribed = subscriptionStatus.isSubscribed;
-      let response;
 
       if (wasSubscribed) {
-        // Unsubscribe
-        response = await fetch(
-          `http://localhost:8080/api/forum/posts/${postId}/unsubscribe`,
-          {
-            method: "DELETE",
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
-          },
-        );
+        await api.delete(`/forum/posts/${postId}/unsubscribe`);
       } else {
-        // Subscribe
-        response = await fetch(
-          `http://localhost:8080/api/forum/posts/${postId}/subscribe`,
-          {
-            method: "POST",
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
-          },
-        );
+        await api.post(`/forum/posts/${postId}/subscribe`);
       }
 
-      if (response.ok) {
-        // Show success message
-        const action = wasSubscribed ? "abbestellt" : "abonniert";
-        success(`Beitrag erfolgreich ${action}!`);
-
-        // Refresh subscription status
-        await fetchSubscriptionStatus();
-      } else {
-        const errorText = await response.text();
-        console.error(
-          "Subscription toggle failed:",
-          response.status,
-          errorText,
-        );
-        showError("Fehler beim Ändern des Abonnement-Status");
-      }
+      const action = wasSubscribed ? "abbestellt" : "abonniert";
+      success(`Beitrag erfolgreich ${action}!`);
+      await fetchSubscriptionStatus();
     } catch (error) {
       console.error("Error toggling subscription:", error);
       showError("Fehler beim Ändern des Abonnement-Status");
@@ -264,36 +173,12 @@ const ForumPostDetail = () => {
 
     setSubmittingReply(true);
     try {
-      const token = localStorage.getItem("token");
-      const replyData = {
+      await api.post(`/forum/posts/${postId}/replies`, {
         content: replyContent.trim(),
-      };
-
-      const headers = token
-        ? {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          }
-        : { "Content-Type": "application/json" };
-
-      const response = await fetch(
-        `http://localhost:8080/api/forum/posts/${postId}/replies`,
-        {
-          method: "POST",
-          headers,
-          body: JSON.stringify(replyData),
-        },
-      );
-
-      if (response.ok) {
-        setReplyContent("");
-        fetchReplies();
-        fetchPost();
-      } else {
-        const errorText = await response.text();
-        console.error("Reply submission failed:", response.status, errorText);
-        throw new Error("Failed to submit reply");
-      }
+      });
+      setReplyContent("");
+      fetchReplies();
+      fetchPost();
     } catch (error) {
       console.error("Error submitting reply:", error);
     } finally {
@@ -308,19 +193,12 @@ const ForumPostDetail = () => {
    */
   const handleLike = async () => {
     try {
-      const token = localStorage.getItem("token");
-      const method = post.likedByCurrentUser ? "DELETE" : "POST";
-      const response = await fetch(
-        `http://localhost:8080/api/forum/posts/${postId}/like`,
-        {
-          method: method,
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        },
-      );
-
-      if (response.ok) {
-        fetchPost();
+      if (post.likedByCurrentUser) {
+        await api.delete(`/forum/posts/${postId}/like`);
+      } else {
+        await api.post(`/forum/posts/${postId}/like`);
       }
+      fetchPost();
     } catch (error) {
       console.error("Error toggling like:", error);
     }
@@ -392,34 +270,14 @@ const ForumPostDetail = () => {
    */
   const handleEditPost = async () => {
     try {
-      const token = localStorage.getItem("token");
-      const headers = token
-        ? {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          }
-        : { "Content-Type": "application/json" };
-
-      const response = await fetch(
-        `http://localhost:8080/api/forum/posts/${postId}`,
-        {
-          method: "PUT",
-          headers,
-          body: JSON.stringify({
-            title: post.title,
-            content: editPostContent,
-            category: post.category,
-          }),
-        },
-      );
-
-      if (response.ok) {
-        setEditingPost(false);
-        fetchPost();
-        success("Beitrag erfolgreich bearbeitet!");
-      } else {
-        showError("Fehler beim Bearbeiten des Beitrags");
-      }
+      await api.put(`/forum/posts/${postId}`, {
+        title: post.title,
+        content: editPostContent,
+        category: post.category,
+      });
+      setEditingPost(false);
+      fetchPost();
+      success("Beitrag erfolgreich bearbeitet!");
     } catch (error) {
       console.error("Error editing post:", error);
       showError("Fehler beim Bearbeiten des Beitrags");
@@ -436,23 +294,14 @@ const ForumPostDetail = () => {
     }
 
     try {
-      const token = localStorage.getItem("token");
       const endpoint =
         currentUser.role === "ADMIN"
-          ? `http://localhost:8080/api/forum/admin/posts/${postId}`
-          : `http://localhost:8080/api/forum/posts/${postId}`;
+          ? `/forum/admin/posts/${postId}`
+          : `/forum/posts/${postId}`;
 
-      const response = await fetch(endpoint, {
-        method: "DELETE",
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-
-      if (response.ok) {
-        success("Beitrag erfolgreich gelöscht!");
-        navigate("/forum");
-      } else {
-        showError("Fehler beim Löschen des Beitrags");
-      }
+      await api.delete(endpoint);
+      success("Beitrag erfolgreich gelöscht!");
+      navigate("/forum");
     } catch (error) {
       console.error("Error deleting post:", error);
       showError("Fehler beim Löschen des Beitrags");
@@ -466,33 +315,13 @@ const ForumPostDetail = () => {
    */
   const handleEditReply = async (replyId) => {
     try {
-      const token = localStorage.getItem("token");
-      const headers = token
-        ? {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          }
-        : { "Content-Type": "application/json" };
-
-      const response = await fetch(
-        `http://localhost:8080/api/forum/replies/${replyId}`,
-        {
-          method: "PUT",
-          headers,
-          body: JSON.stringify({
-            content: editReplyContent,
-          }),
-        },
-      );
-
-      if (response.ok) {
-        setEditingReplyId(null);
-        setEditReplyContent("");
-        fetchReplies(); // Refresh the replies
-        success("Antwort erfolgreich bearbeitet!");
-      } else {
-        showError("Fehler beim Bearbeiten der Antwort");
-      }
+      await api.put(`/forum/replies/${replyId}`, {
+        content: editReplyContent,
+      });
+      setEditingReplyId(null);
+      setEditReplyContent("");
+      fetchReplies();
+      success("Antwort erfolgreich bearbeitet!");
     } catch (error) {
       console.error("Error editing reply:", error);
       showError("Fehler beim Bearbeiten der Antwort");
@@ -510,21 +339,9 @@ const ForumPostDetail = () => {
     }
 
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(
-        `http://localhost:8080/api/forum/replies/${replyId}`,
-        {
-          method: "DELETE",
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        },
-      );
-
-      if (response.ok) {
-        fetchReplies();
-        success("Antwort erfolgreich gelöscht!");
-      } else {
-        showError("Fehler beim Löschen der Antwort");
-      }
+      await api.delete(`/forum/replies/${replyId}`);
+      fetchReplies();
+      success("Antwort erfolgreich gelöscht!");
     } catch (error) {
       console.error("Error deleting reply:", error);
       showError("Fehler beim Löschen der Antwort");

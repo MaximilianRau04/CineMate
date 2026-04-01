@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import api from "../../utils/api";
 
 const StreamingIndicator = ({ mediaId, mediaType, maxProviders = 3 }) => {
   const [providers, setProviders] = useState([]);
@@ -20,27 +21,18 @@ const StreamingIndicator = ({ mediaId, mediaType, maxProviders = 3 }) => {
       setLoading(true);
       // Convert frontend mediaType to backend format
       const backendMediaType = mediaType === "movies" ? "movie" : "series";
-      const token = localStorage.getItem("token");
-      const response = await fetch(
-        `http://localhost:8080/api/streaming/availability/${backendMediaType}/${mediaId}/region/DE`,
-        {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        },
+      const { data } = await api.get(
+        `/streaming/availability/${backendMediaType}/${mediaId}/region/DE`,
       );
-
-      if (response.ok) {
-        const data = await response.json();
-        // Group by provider and take only unique providers
-        const uniqueProviders = data.reduce((acc, availability) => {
-          const providerId = availability.provider.id;
-          if (!acc.find((p) => p.id === providerId)) {
-            acc.push(availability.provider);
-          }
-          return acc;
-        }, []);
-
-        setProviders(uniqueProviders.slice(0, maxProviders));
-      }
+      // Group by provider and take only unique providers
+      const uniqueProviders = data.reduce((acc, availability) => {
+        const providerId = availability.provider.id;
+        if (!acc.find((p) => p.id === providerId)) {
+          acc.push(availability.provider);
+        }
+        return acc;
+      }, []);
+      setProviders(uniqueProviders.slice(0, maxProviders));
     } catch (error) {
       console.error("Fehler beim Laden der Streaming-Anbieter:", error);
     } finally {

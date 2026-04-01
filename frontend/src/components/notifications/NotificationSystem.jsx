@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Bell, Check, CheckCheck, Trash2, Clock } from "lucide-react";
+import api from "../../utils/api";
 
 const NotificationSystem = () => {
   const [notifications, setNotifications] = useState([]);
@@ -9,8 +10,6 @@ const NotificationSystem = () => {
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState(null);
 
-  const API_BASE = "http://localhost:8080/api/notifications";
-
   /**
    * Fetches the current user from localStorage and sets userId and currentUser state.
    * @returns {void}
@@ -19,13 +18,9 @@ const NotificationSystem = () => {
     const token = localStorage.getItem("token");
     if (!token) return;
 
-    fetch("http://localhost:8080/api/users/me", {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    })
-      .then((res) =>
-        res.ok ? res.json() : Promise.reject(`HTTP Error: ${res.status}`),
-      )
-      .then((data) => {
+    api
+      .get("/users/me")
+      .then(({ data }) => {
         if (data?.id) {
           setUserId(data.id);
         }
@@ -46,23 +41,11 @@ const NotificationSystem = () => {
 
       await fetchUnreadCount();
 
-      const token = localStorage.getItem("token");
       const url = showUnreadOnly
-        ? `${API_BASE}/user/${userId}/unread`
-        : `${API_BASE}/user/${userId}`;
-      const headers = token
-        ? {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          }
-        : { "Content-Type": "application/json" };
-      const endpointReq = new Request(url, { method: "GET", headers });
+        ? `/notifications/user/${userId}/unread`
+        : `/notifications/user/${userId}`;
 
-      const response = await fetch(endpointReq);
-      if (!response.ok) {
-        throw new Error(`HTTP Error: ${response.status}`);
-      }
-      const data = await response.json();
+      const { data } = await api.get(url);
 
       const processedData = data.map((notification) => ({
         ...notification,
@@ -85,11 +68,7 @@ const NotificationSystem = () => {
    */
   const markAsRead = async (notificationId) => {
     try {
-      const token = localStorage.getItem("token");
-      await fetch(`${API_BASE}/${notificationId}/read`, {
-        method: "PUT",
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
+      await api.put(`/notifications/${notificationId}/read`);
 
       if (showUnreadOnly) {
         setNotifications((prev) =>
@@ -118,11 +97,7 @@ const NotificationSystem = () => {
    */
   const markAllAsRead = async () => {
     try {
-      const token = localStorage.getItem("token");
-      await fetch(`${API_BASE}/user/${userId}/read-all`, {
-        method: "PUT",
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
+      await api.put(`/notifications/user/${userId}/read-all`);
 
       if (showUnreadOnly) {
         setNotifications([]);
@@ -146,15 +121,9 @@ const NotificationSystem = () => {
     if (!userId) return;
 
     try {
-      const token = localStorage.getItem("token");
-      const countResponse = await fetch(
-        `${API_BASE}/user/${userId}/unread/count`,
-        { headers: token ? { Authorization: `Bearer ${token}` } : {} },
+      const { data: countData } = await api.get(
+        `/notifications/user/${userId}/unread/count`,
       );
-      if (!countResponse.ok) {
-        throw new Error(`HTTP Error: ${countResponse.status}`);
-      }
-      const countData = await countResponse.json();
       setUnreadCount(countData.count);
     } catch (error) {
       console.error("Error fetching unread count:", error);
@@ -167,11 +136,7 @@ const NotificationSystem = () => {
    */
   const deleteAllNotifications = async () => {
     try {
-      const token = localStorage.getItem("token");
-      await fetch(`${API_BASE}/user/${userId}/delete-all`, {
-        method: "DELETE",
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
+      await api.delete(`/notifications/user/${userId}/delete-all`);
 
       setNotifications([]);
       setUnreadCount(0);
@@ -187,11 +152,7 @@ const NotificationSystem = () => {
    */
   const deleteNotification = async (notificationId) => {
     try {
-      const token = localStorage.getItem("token");
-      await fetch(`${API_BASE}/${notificationId}`, {
-        method: "DELETE",
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
+      await api.delete(`/notifications/${notificationId}`);
 
       const deletedNotif = notifications.find((n) => n.id === notificationId);
       setNotifications((prev) =>

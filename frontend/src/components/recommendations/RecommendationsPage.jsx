@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import "../../assets/recommendations-page.css";
+import api from "../../utils/api";
 
 const RecommendationsPage = () => {
   const [recommendations, setRecommendations] = useState([]);
@@ -42,15 +43,8 @@ const RecommendationsPage = () => {
    */
   const fetchCurrentUser = async () => {
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:8080/api/users/me", {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-
-      if (response.ok) {
-        const user = await response.json();
-        setUserId(user.id);
-      }
+      const { data: user } = await api.get("/users/me");
+      setUserId(user.id);
     } catch (error) {
       console.error("Fehler beim Laden des Benutzers:", error);
     }
@@ -65,21 +59,9 @@ const RecommendationsPage = () => {
 
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
-      const response = await fetch(
-        `http://localhost:8080/api/recommendations/user/${userId}`,
-        {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        },
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        setRecommendations(data);
-        setError(null);
-      } else {
-        setError("Fehler beim Laden der Empfehlungen");
-      }
+      const { data } = await api.get(`/recommendations/user/${userId}`);
+      setRecommendations(data);
+      setError(null);
     } catch (error) {
       console.error("Fehler beim Laden der Empfehlungen:", error);
       setError("Fehler beim Laden der Empfehlungen");
@@ -94,18 +76,8 @@ const RecommendationsPage = () => {
    */
   const loadTrendingRecommendations = async () => {
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(
-        "http://localhost:8080/api/recommendations/trending",
-        {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        },
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        setTrending(data);
-      }
+      const { data } = await api.get("/recommendations/trending");
+      setTrending(data);
     } catch (error) {
       console.error("Fehler beim Laden der Trending-Empfehlungen:", error);
     }
@@ -119,23 +91,11 @@ const RecommendationsPage = () => {
   const loadGenreRecommendations = async (genre) => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
-      const response = await fetch(
-        `http://localhost:8080/api/recommendations/genre/${encodeURIComponent(
-          genre,
-        )}`,
-        {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        },
+      const { data } = await api.get(
+        `/recommendations/genre/${encodeURIComponent(genre)}`,
       );
-
-      if (response.ok) {
-        const data = await response.json();
-        setGenreRecommendations(data);
-        setError(null);
-      } else {
-        setError("Fehler beim Laden der Genre-Empfehlungen");
-      }
+      setGenreRecommendations(data);
+      setError(null);
     } catch (error) {
       console.error("Fehler beim Laden der Genre-Empfehlungen:", error);
       setError("Fehler beim Laden der Genre-Empfehlungen");

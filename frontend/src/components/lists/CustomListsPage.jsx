@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import ListCard from "./ListCard";
 import CreateListModal from "./CreateListModal";
 import { useAuth } from "../../utils/AuthContext";
 import { useToast } from "../toasts";
 import "../../assets/custom-lists.css";
+import api from "../../utils/api";
 
 const CustomListsPage = () => {
   const [lists, setLists] = useState([]);
@@ -19,19 +20,6 @@ const CustomListsPage = () => {
   const { isAuthenticated } = useAuth();
   const { success, error: showError } = useToast();
 
-  const API_BASE_URL = "http://localhost:8080/api";
-
-  /**
-   * Validate JWT token format
-   * @param {string} token
-   * @returns {boolean}
-   */
-  const isValidJWT = (token) => {
-    if (!token || typeof token !== "string") return false;
-    const parts = token.split(".");
-    return parts.length === 3;
-  };
-
   /**
    * Load public lists from the API.
    * @param {boolean} isLoadMore - Whether to load more lists or reset the list.
@@ -43,26 +31,16 @@ const CustomListsPage = () => {
     setLoading(true);
     try {
       const currentPage = isLoadMore ? page : 0;
-      const token = localStorage.getItem("token");
-      const response = await fetch(
-        `${API_BASE_URL}/lists/public?page=${currentPage}&size=12&sortBy=${sortBy}`,
-        {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        },
+      const { data } = await api.get(
+        `/lists/public?page=${currentPage}&size=12&sortBy=${sortBy}`,
       );
-
-      if (response.ok) {
-        const data = await response.json();
-        if (isLoadMore) {
-          setLists((prev) => [...prev, ...data.content]);
-        } else {
-          setLists(data.content);
-        }
-        setHasMore(!data.last);
-        setPage(currentPage + 1);
+      if (isLoadMore) {
+        setLists((prev) => [...prev, ...data.content]);
       } else {
-        showError("Fehler beim Laden der öffentlichen Listen");
+        setLists(data.content);
       }
+      setHasMore(!data.last);
+      setPage(currentPage + 1);
     } catch (error) {
       console.error("Error loading public lists:", error);
       showError("Fehler beim Laden der öffentlichen Listen");
@@ -80,33 +58,15 @@ const CustomListsPage = () => {
 
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
-
-      // Check if token exists and has the correct format
-      if (!isValidJWT(token)) {
-        console.error("Invalid or missing JWT token");
-        showError("Ungültiges Token. Bitte loggen Sie sich erneut ein.");
-        return;
-      }
-
-      const response = await fetch(`${API_BASE_URL}/lists/my-lists`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setMyLists(data);
-      } else if (response.status === 401) {
+      const { data } = await api.get("/lists/my-lists");
+      setMyLists(data);
+    } catch (error) {
+      if (error.response?.status === 401) {
         showError("Session abgelaufen. Bitte loggen Sie sich erneut ein.");
-        // Optionally redirect to login or clear invalid token
       } else {
+        console.error("Error loading my lists:", error);
         showError("Fehler beim Laden deiner Listen");
       }
-    } catch (error) {
-      console.error("Error loading my lists:", error);
-      showError("Fehler beim Laden deiner Listen");
     } finally {
       setLoading(false);
     }
@@ -146,22 +106,12 @@ const CustomListsPage = () => {
 
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(
-        `${API_BASE_URL}/lists/search?query=${encodeURIComponent(
-          searchQuery,
-        )}&page=0&size=12`,
-        {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        },
+      const { data } = await api.get(
+        `/lists/search?query=${encodeURIComponent(searchQuery)}&page=0&size=12`,
       );
-
-      if (response.ok) {
-        const data = await response.json();
-        setLists(data.content);
-        setHasMore(!data.last);
-        setPage(1);
-      }
+      setLists(data.content);
+      setHasMore(!data.last);
+      setPage(1);
     } catch (error) {
       console.error("Error searching lists:", error);
       showError("Fehler beim Suchen der Listen");
@@ -177,40 +127,20 @@ const CustomListsPage = () => {
    */
   const handleCreateList = async (listData) => {
     try {
-      const token = localStorage.getItem("token");
+      const { data: newList } = await api.post("/lists", listData);
+      success("Liste erfolgreich erstellt!");
+      setShowCreateModal(false);
 
-      // Check if token exists and has the correct format
-      if (!isValidJWT(token)) {
-        console.error("Invalid or missing JWT token");
-        showError("Ungültiges Token. Bitte loggen Sie sich erneut ein.");
-        return;
-      }
-
-      const response = await fetch(`${API_BASE_URL}/lists`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(listData),
-      });
-
-      if (response.ok) {
-        const newList = await response.json();
-        success("Liste erfolgreich erstellt!");
-        setShowCreateModal(false);
-
-        if (activeTab === "my-lists") {
-          setMyLists((prev) => [newList, ...prev]);
-        }
-      } else if (response.status === 401) {
-        showError("Session abgelaufen. Bitte loggen Sie sich erneut ein.");
-      } else {
-        showError("Fehler beim Erstellen der Liste");
+      if (activeTab === "my-lists") {
+        setMyLists((prev) => [newList, ...prev]);
       }
     } catch (error) {
-      console.error("Error creating list:", error);
-      showError("Fehler beim Erstellen der Liste");
+      if (error.response?.status === 401) {
+        showError("Session abgelaufen. Bitte loggen Sie sich erneut ein.");
+      } else {
+        console.error("Error creating list:", error);
+        showError("Fehler beim Erstellen der Liste");
+      }
     }
   };
 
@@ -223,21 +153,10 @@ const CustomListsPage = () => {
     if (!window.confirm("Möchtest du diese Liste wirklich löschen?")) return;
 
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(`${API_BASE_URL}/lists/${listId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        success("Liste erfolgreich gelöscht!");
-        setMyLists((prev) => prev.filter((list) => list.id !== listId));
-        setLists((prev) => prev.filter((list) => list.id !== listId));
-      } else {
-        showError("Fehler beim Löschen der Liste");
-      }
+      await api.delete(`/lists/${listId}`);
+      success("Liste erfolgreich gelöscht!");
+      setMyLists((prev) => prev.filter((list) => list.id !== listId));
+      setLists((prev) => prev.filter((list) => list.id !== listId));
     } catch (error) {
       console.error("Error deleting list:", error);
       showError("Fehler beim Löschen der Liste");
@@ -253,20 +172,10 @@ const CustomListsPage = () => {
     if (!isAuthenticated) return;
 
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(`${API_BASE_URL}/lists/${listId}/like`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        const updatedList = await response.json();
-        setLists((prev) =>
-          prev.map((list) => (list.id === listId ? updatedList : list)),
-        );
-      }
+      const { data: updatedList } = await api.post(`/lists/${listId}/like`);
+      setLists((prev) =>
+        prev.map((list) => (list.id === listId ? updatedList : list)),
+      );
     } catch (error) {
       console.error("Error liking list:", error);
       showError("Fehler beim Liken der Liste");

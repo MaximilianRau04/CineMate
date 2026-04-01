@@ -1,9 +1,10 @@
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useToast } from "../toasts";
 import UserMediaTabs from "./UserMediaTabs";
 import CompactNotificationSettings from "./CompactNotificationSettings";
 import UserAchievementBadges from "../achievements/UserAchievementBadges";
 import { Link } from "react-router-dom";
+import api from "../../utils/api";
 
 const UserProfile = () => {
   const [user, setUser] = useState(null);
@@ -27,15 +28,9 @@ const UserProfile = () => {
    * * @throws {Error} If the user data cannot be fetched.
    */
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    fetch("http://localhost:8080/api/users/me", {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Benutzer konnte nicht geladen werden.");
-        return res.json();
-      })
-      .then((data) => {
+    api
+      .get("/users/me")
+      .then(({ data }) => {
         setUser(data);
         setBio(data.bio || "");
         setModalBio(data.bio || "");
@@ -43,7 +38,7 @@ const UserProfile = () => {
         setUserId(data.id);
       })
       .catch((err) => {
-        setError(err.message);
+        setError(err.response?.data?.message || err.message);
         setLoading(false);
       });
   }, []);
@@ -56,17 +51,9 @@ const UserProfile = () => {
   useEffect(() => {
     if (!userId) return;
 
-    fetch(`http://localhost:8080/api/reviews/user/${userId}`, {
-      headers: (() => {
-        const token = localStorage.getItem("token");
-        return token ? { Authorization: `Bearer ${token}` } : {};
-      })(),
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Konnte Reviews nicht laden.");
-        return res.json();
-      })
-      .then((data) => {
+    api
+      .get(`/reviews/user/${userId}`)
+      .then(({ data }) => {
         setReviews(data);
       })
       .catch((err) => {
@@ -95,23 +82,11 @@ const UserProfile = () => {
         new Blob([JSON.stringify(userData)], { type: "application/json" }),
       );
 
-      const response = await fetch(
-        `http://localhost:8080/api/users/${userId}`,
-        {
-          method: "PUT",
-          body: formData,
-          headers: (() => {
-            const token = localStorage.getItem("token");
-            return token ? { Authorization: `Bearer ${token}` } : {};
-          })(),
-        },
+      const { data: updatedUser } = await api.put(
+        `/users/${userId}`,
+        formData,
       );
 
-      if (!response.ok) {
-        throw new Error(`Entfernen fehlgeschlagen: ${response.status}`);
-      }
-
-      const updatedUser = await response.json();
       setUser(updatedUser);
       setAvatarPreview(null);
       setAvatarFile(null);
@@ -146,27 +121,11 @@ const UserProfile = () => {
         new Blob([JSON.stringify(userData)], { type: "application/json" }),
       );
 
-      const response = await fetch(
-        `http://localhost:8080/api/users/${userId}`,
-        {
-          method: "PUT",
-          headers: (() => {
-            const token = localStorage.getItem("token");
-            return token ? { Authorization: `Bearer ${token}` } : {};
-          })(),
-          body: formData,
-        },
-      );
-
-      if (response.ok) {
-        const updatedUser = await response.json();
-        setUser(updatedUser);
-        setBio(modalBio);
-        setShowModal(false);
-        success("Biografie erfolgreich aktualisiert!");
-      } else {
-        throw new Error("Fehler beim Speichern der Biografie");
-      }
+      const { data: updatedUser } = await api.put(`/users/${userId}`, formData);
+      setUser(updatedUser);
+      setBio(modalBio);
+      setShowModal(false);
+      success("Biografie erfolgreich aktualisiert!");
     } catch (error) {
       console.error("Error saving bio:", error);
       showError("Fehler beim Speichern der Biografie");
@@ -201,21 +160,10 @@ const UserProfile = () => {
 
         setSaving(true);
         try {
-          const token = localStorage.getItem("token");
-          const response = await fetch(
-            `http://localhost:8080/api/users/${userId}`,
-            {
-              method: "PUT",
-              body: formData,
-              headers: token ? { Authorization: `Bearer ${token}` } : {},
-            },
+          const { data: updatedUser } = await api.put(
+            `/users/${userId}`,
+            formData,
           );
-
-          if (!response.ok) {
-            throw new Error(`Update fehlgeschlagen: ${response.status}`);
-          }
-
-          const updatedUser = await response.json();
           setUser(updatedUser);
           setAvatarFile(null);
           setAvatarPreview(null);
@@ -273,7 +221,7 @@ const UserProfile = () => {
               {hasAvatar ? (
                 <>
                   <img
-                    src={avatarPreview || `http://localhost:8080${avatarUrl}`}
+                    src={avatarPreview || `${process.env.REACT_APP_BASE_URL}${avatarUrl}`}
                     alt={username}
                     className="img-fluid rounded-circle shadow-sm mb-3"
                     style={{
@@ -283,10 +231,6 @@ const UserProfile = () => {
                     }}
                     onClick={handleAvatarClick}
                     onError={(e) => {
-                      console.log(
-                        "Bild konnte nicht geladen werden:",
-                        e.target.src,
-                      );
                       e.target.src =
                         "https://via.placeholder.com/150?text=Kein+Bild";
                     }}

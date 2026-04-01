@@ -1,53 +1,5 @@
 import { useState } from "react";
-
-/**
- * A custom hook to handle API calls with token-based authentication.
- * It provides methods for GET, POST, PUT, and DELETE requests.
- * @returns {Object}
- */
-export const useApi = () => {
-  const token = localStorage.getItem("token");
-  const baseURL = "http://localhost:8080/api";
-
-  const apiCall = async (endpoint, options = {}) => {
-    const url = `${baseURL}${endpoint}`;
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        ...(token && { Authorization: `Bearer ${token}` }),
-        ...options.headers,
-      },
-      ...options,
-    };
-
-    const response = await fetch(url, config);
-    if (!response.ok) throw new Error(`API Error: ${response.status}`);
-
-    const text = await response.text();
-    if (!text) return null;
-
-    try {
-      return JSON.parse(text);
-    } catch {
-      return text;
-    }
-  };
-
-  return {
-    get: (endpoint) => apiCall(endpoint),
-    post: (endpoint, data) =>
-      apiCall(endpoint, {
-        method: "POST",
-        body: JSON.stringify(data),
-      }),
-    put: (endpoint, data) =>
-      apiCall(endpoint, {
-        method: "PUT",
-        body: JSON.stringify(data),
-      }),
-    delete: (endpoint) => apiCall(endpoint, { method: "DELETE" }),
-  };
-};
+import api from "../../../utils/api";
 
 /**
  * A custom hook to manage application data.
@@ -68,28 +20,33 @@ export const useAppData = () => {
     directors: [],
   });
   const [loading, setLoading] = useState(false);
-  const api = useApi();
 
   // Load initial data from the API
   const loadData = async () => {
     setLoading(true);
     try {
-      const [movies, series, users, reviews, actors, directors] =
-        await Promise.all([
-          api.get("/movies"),
-          api.get("/series"),
-          api.get("/users"),
-          api.get("/reviews"),
-          api.get("/actors"),
-          api.get("/directors"),
-        ]);
+      const [
+        { data: movies },
+        { data: series },
+        { data: users },
+        { data: reviews },
+        { data: actors },
+        { data: directors },
+      ] = await Promise.all([
+        api.get("/movies"),
+        api.get("/series"),
+        api.get("/users"),
+        api.get("/reviews"),
+        api.get("/actors"),
+        api.get("/directors"),
+      ]);
 
       // Load review users
       const reviewUsers = {};
       await Promise.all(
         reviews.map(async (review) => {
           try {
-            const user = await api.get(`/reviews/${review.id}/user`);
+            const { data: user } = await api.get(`/reviews/${review.id}/user`);
             reviewUsers[review.id] = user;
           } catch (error) {
             console.error(`Error loading user for review ${review.id}:`, error);
@@ -120,7 +77,7 @@ export const useAppData = () => {
    */
   const loadSeasons = async (seriesId) => {
     try {
-      const seasons = await api.get(`/series/${seriesId}/seasons`);
+      const { data: seasons } = await api.get(`/series/${seriesId}/seasons`);
       setData((prev) => ({ ...prev, seasons }));
     } catch (error) {
       console.error("Error loading seasons:", error);
@@ -134,7 +91,7 @@ export const useAppData = () => {
    */
   const loadEpisodes = async (seriesId, seasonNumber) => {
     try {
-      const episodes = await api.get(
+      const { data: episodes } = await api.get(
         `/series/${seriesId}/seasons/${seasonNumber}/episodes`,
       );
       setData((prev) => ({ ...prev, episodes }));
@@ -240,8 +197,8 @@ export const useAppData = () => {
   };
 
   /**
-   * removes a director from a movie.
-   * @param {*} movieId
+   * removes a director from a series.
+   * @param {*} seriesId
    * @param {*} directorId
    * @returns {boolean}
    */

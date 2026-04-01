@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./StreamingAvailability.css";
+import api from "../../utils/api";
 
 const StreamingAvailability = ({ mediaId, mediaType, userRegion = "DE" }) => {
   const [availabilities, setAvailabilities] = useState([]);
@@ -18,27 +19,9 @@ const StreamingAvailability = ({ mediaId, mediaType, userRegion = "DE" }) => {
   const fetchStreamingAvailability = async () => {
     try {
       setLoading(true);
-      console.log("Fetching streaming availability for:", {
-        mediaId,
-        mediaType,
-        userRegion,
-      });
-
-      const url = `http://localhost:8080/api/streaming/availability/${mediaType}/${mediaId}`;
-
-      const token = localStorage.getItem("token");
-      const response = await fetch(url, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-
-      if (!response.ok) {
-        throw new Error(
-          "Streaming-Verfügbarkeiten konnten nicht geladen werden",
-        );
-      }
-
-      const data = await response.json();
-
+      const { data } = await api.get(
+        `/streaming/availability/${mediaType}/${mediaId}`,
+      );
       setAvailabilities(data);
       setError(null);
     } catch (err) {
@@ -116,8 +99,6 @@ const StreamingAvailability = ({ mediaId, mediaType, userRegion = "DE" }) => {
       // Ensure URL has protocol
       const fullUrl = url.startsWith("http") ? url : `https://${url}`;
       window.open(fullUrl, "_blank", "noopener,noreferrer");
-    } else {
-      console.log(`Keine URL verfügbar für ${provider?.name}`);
     }
   };
 

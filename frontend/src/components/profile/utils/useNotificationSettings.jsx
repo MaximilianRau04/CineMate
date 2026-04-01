@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import api from "../../../utils/api";
 
 export const useNotificationSettings = (userId) => {
   const [loading, setLoading] = useState(true);
@@ -12,10 +13,6 @@ export const useNotificationSettings = (userId) => {
   const [preferences, setPreferences] = useState([]);
   const [notificationTypes, setNotificationTypes] = useState([]);
   const [user, setUser] = useState(null);
-  const getHeaders = (extra = {}) => {
-    const token = localStorage.getItem("token");
-    return token ? { Authorization: `Bearer ${token}`, ...extra } : extra;
-  };
 
   useEffect(() => {
     if (!userId) return;
@@ -31,36 +28,38 @@ export const useNotificationSettings = (userId) => {
         setError(null);
 
         // Load user information
-        const userResponse = await fetch("http://localhost:8080/api/users/me", {
-          headers: getHeaders(),
-        });
-        if (userResponse.ok) {
-          const userData = await userResponse.json();
+        try {
+          const { data: userData } = await api.get("/users/me");
           setUser(userData);
+        } catch (e) {
+          // ignore user load error, proceed with other settings
         }
 
-        const globalResponse = await fetch(
-          `http://localhost:8080/api/notification-preferences/user/${userId}/global`,
-        );
-        if (globalResponse.ok) {
-          const globalData = await globalResponse.json();
+        try {
+          const { data: globalData } = await api.get(
+            `/notification-preferences/user/${userId}/global`,
+          );
           setGlobalSettings(globalData);
+        } catch (e) {
+          // ignore, keep defaults
         }
 
-        const typesResponse = await fetch(
-          "http://localhost:8080/api/notification-preferences/types",
-        );
-        if (typesResponse.ok) {
-          const typesData = await typesResponse.json();
+        try {
+          const { data: typesData } = await api.get(
+            "/notification-preferences/types",
+          );
           setNotificationTypes(typesData);
+        } catch (e) {
+          // ignore
         }
 
-        const prefsResponse = await fetch(
-          `http://localhost:8080/api/notification-preferences/user/${userId}`,
-        );
-        if (prefsResponse.ok) {
-          const prefsData = await prefsResponse.json();
+        try {
+          const { data: prefsData } = await api.get(
+            `/notification-preferences/user/${userId}`,
+          );
           setPreferences(prefsData);
+        } catch (e) {
+          // ignore
         }
       } catch (err) {
         setError("Fehler beim Laden der Einstellungen: " + err.message);
@@ -87,21 +86,13 @@ export const useNotificationSettings = (userId) => {
       setSaving(true);
       const newSettings = { ...globalSettings, [setting]: value };
 
-      const response = await fetch(
-        `http://localhost:8080/api/notification-preferences/user/${userId}/global`,
-        {
-          method: "PUT",
-          headers: getHeaders({ "Content-Type": "application/json" }),
-          body: JSON.stringify(newSettings),
-        },
+      await api.put(
+        `/notification-preferences/user/${userId}/global`,
+        newSettings,
       );
 
-      if (response.ok) {
-        setGlobalSettings(newSettings);
-        return true;
-      } else {
-        throw new Error("Fehler beim Speichern der globalen Einstellungen");
-      }
+      setGlobalSettings(newSettings);
+      return true;
     } catch (err) {
       setError(err.message);
       console.error("Fehler beim Speichern:", err);
@@ -129,23 +120,13 @@ export const useNotificationSettings = (userId) => {
         return pref;
       });
 
-      const response = await fetch(
-        `http://localhost:8080/api/notification-preferences/user/${userId}`,
-        {
-          method: "PUT",
-          headers: getHeaders({ "Content-Type": "application/json" }),
-          body: JSON.stringify(updatedPreferences),
-        },
+      await api.put(
+        `/notification-preferences/user/${userId}`,
+        updatedPreferences,
       );
 
-      if (response.ok) {
-        setPreferences(updatedPreferences);
-        return true;
-      } else {
-        throw new Error(
-          "Fehler beim Speichern der Benachrichtigungseinstellungen",
-        );
-      }
+      setPreferences(updatedPreferences);
+      return true;
     } catch (err) {
       setError(err.message);
       console.error(

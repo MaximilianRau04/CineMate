@@ -5,6 +5,7 @@ import React, {
   useEffect,
   useCallback,
 } from "react";
+import api from "./api";
 
 const AuthContext = createContext();
 
@@ -60,24 +61,14 @@ export const AuthProvider = ({ children }) => {
     }
 
     try {
-      const response = await fetch("http://localhost:8080/api/users/me", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const { data: userData } = await api.get("/users/me");
+      setUser(userData);
+      setIsAuthenticated(true);
+      setIsLoading(false);
 
-      if (response.ok) {
-        const userData = await response.json();
-        setUser(userData);
-        setIsAuthenticated(true);
-        setIsLoading(false);
-
-        localStorage.setItem("user", JSON.stringify(userData));
-        localStorage.setItem("userRole", userData.role);
-        localStorage.setItem("userId", userData.id);
-      } else {
-        logout();
-      }
+      localStorage.setItem("user", JSON.stringify(userData));
+      localStorage.setItem("userRole", userData.role);
+      localStorage.setItem("userId", userData.id);
     } catch (error) {
       console.error("Token validation failed:", error);
       logout();
@@ -98,22 +89,7 @@ export const AuthProvider = ({ children }) => {
     try {
       setIsLoading(true);
 
-      const response = await fetch("http://localhost:8080/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username,
-          password,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Login fehlgeschlagen");
-      }
-
-      const data = await response.json();
+      const { data } = await api.post("/auth/login", { username, password });
 
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
@@ -139,23 +115,14 @@ export const AuthProvider = ({ children }) => {
    */
   const register = async (userData) => {
     try {
-      const response = await fetch("http://localhost:8080/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(userData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Registrierung fehlgeschlagen");
-      }
-
+      await api.post("/auth/register", userData);
       return { success: true };
     } catch (error) {
       console.error("Registration error:", error);
-      return { success: false, error: error.message };
+      return {
+        success: false,
+        error: error.response?.data?.message || error.message,
+      };
     }
   };
 

@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import "../../assets/recommendations-widget.css";
+import api from "../../utils/api";
 
 const RecommendationWidget = ({
   userId,
@@ -11,7 +12,6 @@ const RecommendationWidget = ({
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const token = localStorage.getItem("token");
 
   useEffect(() => {
     if (userId) {
@@ -25,33 +25,25 @@ const RecommendationWidget = ({
   const loadRecommendations = async () => {
     try {
       setLoading(true);
-      let url = "";
+      let endpoint = "";
 
       switch (type) {
         case "smart":
-          url = `http://localhost:8080/api/recommendations/user/${userId}/smart`;
+          endpoint = `/recommendations/user/${userId}/smart`;
           break;
         case "trending":
-          url = "http://localhost:8080/api/recommendations/trending";
+          endpoint = "/recommendations/trending";
           break;
         case "hybrid":
-          url = `http://localhost:8080/api/recommendations/user/${userId}/hybrid`;
+          endpoint = `/recommendations/user/${userId}/hybrid`;
           break;
         default:
-          url = `http://localhost:8080/api/recommendations/user/${userId}`;
+          endpoint = `/recommendations/user/${userId}`;
       }
 
-      const response = await fetch(url, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setRecommendations(data.slice(0, maxItems));
-        setError(null);
-      } else {
-        setError("Fehler beim Laden der Empfehlungen");
-      }
+      const { data } = await api.get(endpoint);
+      setRecommendations(data.slice(0, maxItems));
+      setError(null);
     } catch (error) {
       console.error("Fehler beim Laden der Empfehlungen:", error);
       setError("Fehler beim Laden der Empfehlungen");

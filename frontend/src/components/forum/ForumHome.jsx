@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../toasts";
 import "./css/ForumHome.css";
+import api from "../../utils/api";
 
 const ForumHome = () => {
   const [posts, setPosts] = useState([]);
@@ -17,11 +18,6 @@ const ForumHome = () => {
   const [error, setError] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [mediaInfoCache, setMediaInfoCache] = useState({});
-
-  const getHeaders = (extra = {}) => {
-    const token = localStorage.getItem("token");
-    return token ? { Authorization: `Bearer ${token}`, ...extra } : extra;
-  };
 
   const navigate = useNavigate();
   const { success, error: showError } = useToast();
@@ -44,31 +40,15 @@ const ForumHome = () => {
 
       try {
         if (post.movieId) {
-          const response = await fetch(
-            `http://localhost:8080/api/movies/${post.movieId}`,
-            {
-              headers: getHeaders(),
-            },
-          );
-          if (response.ok) {
-            const movie = await response.json();
-            const mediaInfo = { type: "movie", data: movie };
-            setMediaInfoCache((prev) => ({ ...prev, [cacheKey]: mediaInfo }));
-            return mediaInfo;
-          }
+          const { data: movie } = await api.get(`/movies/${post.movieId}`);
+          const mediaInfo = { type: "movie", data: movie };
+          setMediaInfoCache((prev) => ({ ...prev, [cacheKey]: mediaInfo }));
+          return mediaInfo;
         } else if (post.seriesId) {
-          const response = await fetch(
-            `http://localhost:8080/api/series/${post.seriesId}`,
-            {
-              headers: getHeaders(),
-            },
-          );
-          if (response.ok) {
-            const series = await response.json();
-            const mediaInfo = { type: "series", data: series };
-            setMediaInfoCache((prev) => ({ ...prev, [cacheKey]: mediaInfo }));
-            return mediaInfo;
-          }
+          const { data: series } = await api.get(`/series/${post.seriesId}`);
+          const mediaInfo = { type: "series", data: series };
+          setMediaInfoCache((prev) => ({ ...prev, [cacheKey]: mediaInfo }));
+          return mediaInfo;
         }
       } catch (error) {
         console.error("Error fetching media info:", error);
@@ -88,13 +68,8 @@ const ForumHome = () => {
       const token = localStorage.getItem("token");
       if (!token) return;
 
-      const response = await fetch("http://localhost:8080/api/users/me", {
-        headers: getHeaders(),
-      });
-      if (response.ok) {
-        const userData = await response.json();
-        setCurrentUser(userData);
-      }
+      const { data: userData } = await api.get("/users/me");
+      setCurrentUser(userData);
     } catch (error) {
       console.error("Error fetching current user:", error);
     }
@@ -107,16 +82,7 @@ const ForumHome = () => {
    */
   const fetchCategories = async () => {
     try {
-      const response = await fetch(
-        "http://localhost:8080/api/forum/categories",
-        {
-          headers: getHeaders(),
-        },
-      );
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
+      const { data } = await api.get("/forum/categories");
       setCategories(data);
     } catch (error) {
       console.error("Error fetching categories:", error);
@@ -130,16 +96,7 @@ const ForumHome = () => {
    */
   const fetchPinnedPosts = async () => {
     try {
-      const response = await fetch(
-        "http://localhost:8080/api/forum/posts/pinned",
-        {
-          headers: getHeaders(),
-        },
-      );
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
+      const { data } = await api.get("/forum/posts/pinned");
       setPinnedPosts(data);
     } catch (error) {
       console.error("Error fetching pinned posts:", error);
@@ -148,16 +105,13 @@ const ForumHome = () => {
 
   /**
    * Fetches the forum posts
-   * @param {number} currentPage - The current page number
-   * @param {string} selectedCategory - The selected category filter
-   * @param {string} sortBy - The sorting criteria
    * @returns {Promise<void>} - Resolves when posts are fetched
    * @throws {Error} - If fetching posts fails
    */
   const fetchPosts = useCallback(async () => {
     setLoading(true);
     try {
-      let url = `http://localhost:8080/api/forum/posts?page=${currentPage}&size=10`;
+      let url = `/forum/posts?page=${currentPage}&size=10`;
       if (selectedCategory) {
         url += `&category=${selectedCategory}`;
       }
@@ -168,14 +122,7 @@ const ForumHome = () => {
         url += `&mediaType=${selectedMediaType}`;
       }
 
-      const response = await fetch(url, {
-        headers: getHeaders(),
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-
+      const { data } = await api.get(url);
       setPosts(data.content);
       setTotalPages(data.totalPages);
       setLoading(false);
@@ -221,7 +168,6 @@ const ForumHome = () => {
 
   /**
    * Handles the search functionality
-   * @param {string} searchQuery - The query to search for
    * @returns {Promise<void>} - Resolves when search results are fetched
    * @throws {Error} - If searching posts fails
    */
@@ -233,17 +179,9 @@ const ForumHome = () => {
 
     setLoading(true);
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/forum/posts/search?query=${encodeURIComponent(
-          searchQuery,
-        )}&page=${currentPage}&size=10`,
-        { headers: getHeaders() },
+      const { data } = await api.get(
+        `/forum/posts/search?query=${encodeURIComponent(searchQuery)}&page=${currentPage}&size=10`,
       );
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-
       setPosts(data.content);
       setTotalPages(data.totalPages);
       setLoading(false);
@@ -364,28 +302,17 @@ const ForumHome = () => {
     }
 
     try {
-      const token = localStorage.getItem("token");
       const endpoint =
         currentUser.role === "ADMIN"
-          ? `http://localhost:8080/api/forum/admin/posts/${postId}`
-          : `http://localhost:8080/api/forum/posts/${postId}`;
+          ? `/forum/admin/posts/${postId}`
+          : `/forum/posts/${postId}`;
 
-      const response = await fetch(endpoint, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        setPosts((prevPosts) => prevPosts.filter((post) => post.id !== postId));
-        setPinnedPosts((prevPinned) =>
-          prevPinned.filter((post) => post.id !== postId),
-        );
-        success("Beitrag erfolgreich gelöscht!");
-      } else {
-        showError("Fehler beim Löschen des Beitrags");
-      }
+      await api.delete(endpoint);
+      setPosts((prevPosts) => prevPosts.filter((post) => post.id !== postId));
+      setPinnedPosts((prevPinned) =>
+        prevPinned.filter((post) => post.id !== postId),
+      );
+      success("Beitrag erfolgreich gelöscht!");
     } catch (error) {
       console.error("Error deleting post:", error);
       showError("Fehler beim Löschen des Beitrags");

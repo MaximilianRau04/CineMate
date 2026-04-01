@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import "./css/SearchableMediaSelect.css";
+import api from "../../utils/api";
 
 const SearchableMediaSelect = ({
   type,
@@ -26,17 +27,8 @@ const SearchableMediaSelect = ({
     async (mediaId) => {
       try {
         const endpoint = type === "movie" ? "movies" : "series";
-        const token = localStorage.getItem("token");
-        const response = await fetch(
-          `http://localhost:8080/api/${endpoint}/${mediaId}`,
-          {
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
-          },
-        );
-        if (response.ok) {
-          const media = await response.json();
-          setSelectedMedia(media);
-        }
+        const { data: media } = await api.get(`/${endpoint}/${mediaId}`);
+        setSelectedMedia(media);
       } catch (error) {
         console.error(`Error fetching ${type} details:`, error);
       }
@@ -55,19 +47,10 @@ const SearchableMediaSelect = ({
       setLoading(true);
       try {
         const endpoint = type === "movie" ? "movies" : "series";
-        const token = localStorage.getItem("token");
-        const response = await fetch(
-          `http://localhost:8080/api/${endpoint}/search?query=${encodeURIComponent(
-            query,
-          )}&page=0&size=20`,
-          {
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
-          },
+        const { data } = await api.get(
+          `/${endpoint}/search?query=${encodeURIComponent(query)}&page=0&size=20`,
         );
-        if (response.ok) {
-          const data = await response.json();
-          setOptions(data.content || data);
-        }
+        setOptions(data.content || data);
       } catch (error) {
         console.error(`Error searching ${type}:`, error);
         setOptions([]);
@@ -89,18 +72,9 @@ const SearchableMediaSelect = ({
     setLoading(true);
     try {
       const endpoint = type === "movie" ? "movies" : "series";
-      const token = localStorage.getItem("token");
-      const response = await fetch(
-        `http://localhost:8080/api/${endpoint}?page=0&size=100`,
-        {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        },
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setOptions(data.content || data);
-        setAllMediaLoaded(true);
-      }
+      const { data } = await api.get(`/${endpoint}?page=0&size=100`);
+      setOptions(data.content || data);
+      setAllMediaLoaded(true);
     } catch (error) {
       console.error(`Error loading all ${type}:`, error);
     } finally {
@@ -211,7 +185,7 @@ const SearchableMediaSelect = ({
           <div className="selected-media">
             {selectedMedia.posterPath && (
               <img
-                src={`http://localhost:8080/api/media/image/${selectedMedia.posterPath}`}
+                src={`${process.env.REACT_APP_API_URL}/media/image/${selectedMedia.posterPath}`}
                 alt={getMediaTitle(selectedMedia)}
                 className="media-poster-small"
               />
@@ -252,7 +226,7 @@ const SearchableMediaSelect = ({
               className="search-icon"
               onClick={() => !disabled && setIsOpen(!isOpen)}
             >
-              {disabled ? "�" : "�🔍"}
+              {disabled ? "🔒" : "🔍"}
             </div>
           </div>
         )}
@@ -280,7 +254,7 @@ const SearchableMediaSelect = ({
                 >
                   {media.posterPath && (
                     <img
-                      src={`http://localhost:8080/api/media/image/${media.posterPath}`}
+                      src={`${process.env.REACT_APP_API_URL}/media/image/${media.posterPath}`}
                       alt={getMediaTitle(media)}
                       className="media-poster-tiny"
                     />

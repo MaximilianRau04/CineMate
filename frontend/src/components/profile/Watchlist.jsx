@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FaTrashAlt, FaFilm, FaInfoCircle } from "react-icons/fa";
+import api from "../../utils/api";
 
 const Watchlist = () => {
   const [movieWatchlist, setMovieWatchlist] = useState([]);
@@ -13,13 +14,10 @@ const Watchlist = () => {
    * @returns {void}
    */
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    fetch("http://localhost:8080/api/users/me", {
-      method: "GET",
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    })
-      .then((res) => res.json())
-      .then((data) => {
+    api
+      .get("/users/me")
+      .then((res) => {
+        const data = res.data;
         if (data?.id) setUserId(data.id);
       })
       .catch((err) => console.error("Fehler beim Abrufen des Benutzers:", err));
@@ -32,16 +30,9 @@ const Watchlist = () => {
    */
   useEffect(() => {
     if (!userId) return;
-    const token = localStorage.getItem("token");
     Promise.all([
-      fetch(`http://localhost:8080/api/users/${userId}/watchlist/movies`, {
-        method: "GET",
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      }).then((res) => res.json()),
-      fetch(`http://localhost:8080/api/users/${userId}/watchlist/series`, {
-        method: "GET",
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      }).then((res) => res.json()),
+      api.get(`/users/${userId}/watchlist/movies`).then((res) => res.data),
+      api.get(`/users/${userId}/watchlist/series`).then((res) => res.data),
     ])
       .then(([movies, series]) => {
         setMovieWatchlist(movies);
@@ -62,16 +53,9 @@ const Watchlist = () => {
   const removeMovieFromWatchlist = (movieId) => {
     if (!window.confirm("Möchtest du diesen Film wirklich entfernen?")) return;
 
-    const token = localStorage.getItem("token");
-    fetch(
-      `http://localhost:8080/api/users/${userId}/watchlist/movies/${movieId}`,
-      {
-        method: "DELETE",
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      },
-    )
-      .then((res) => {
-        if (!res.ok) throw new Error("Fehler beim Entfernen des Films");
+    api
+      .delete(`/users/${userId}/watchlist/movies/${movieId}`)
+      .then(() => {
         setMovieWatchlist((prev) =>
           prev.filter((movie) => movie.id !== movieId),
         );
@@ -89,16 +73,9 @@ const Watchlist = () => {
   const removeSeriesFromWatchlist = (seriesId) => {
     if (!window.confirm("Möchtest du diese Serie wirklich entfernen?")) return;
 
-    const token = localStorage.getItem("token");
-    fetch(
-      `http://localhost:8080/api/users/${userId}/watchlist/series/${seriesId}`,
-      {
-        method: "DELETE",
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      },
-    )
-      .then((res) => {
-        if (!res.ok) throw new Error("Fehler beim Entfernen der Serie");
+    api
+      .delete(`/users/${userId}/watchlist/series/${seriesId}`)
+      .then(() => {
         setSeriesWatchlist((prev) =>
           prev.filter((serie) => serie.id !== seriesId),
         );

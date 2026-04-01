@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { FaUserFriends, FaEye, FaHeart, FaStar, FaLock } from "react-icons/fa";
 import { useToast } from "../toasts";
 import UserMediaTabs from "../profile/UserMediaTabs";
+import api from "../../utils/api";
 
 const FriendProfile = () => {
   const { userId } = useParams();
@@ -14,8 +15,6 @@ const FriendProfile = () => {
   const [error, setError] = useState(null);
   const [isFriend, setIsFriend] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
-
-  const token = localStorage.getItem("token");
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
@@ -37,7 +36,7 @@ const FriendProfile = () => {
     if (avatarUrl) {
       return (
         <img
-          src={`http://localhost:8080${avatarUrl}`}
+          src={`${process.env.REACT_APP_BASE_URL}${avatarUrl}`}
           alt={username}
           className="img-fluid rounded-circle shadow-sm mb-3"
           style={{
@@ -90,23 +89,8 @@ const FriendProfile = () => {
    * @throws {Error} if the request fails
    */
   const loadUser = async () => {
-    try {
-      const response = await fetch(
-        `http://localhost:8080/api/users/${userId}`,
-        {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error("Benutzer konnte nicht geladen werden");
-      }
-
-      const userData = await response.json();
-      setUser(userData);
-    } catch (error) {
-      throw error;
-    }
+    const { data: userData } = await api.get(`/users/${userId}`);
+    setUser(userData);
   };
 
   /**
@@ -116,17 +100,8 @@ const FriendProfile = () => {
    */
   const loadUserPoints = async () => {
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/social/points/${userId}`,
-        {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        },
-      );
-
-      if (response.ok) {
-        const pointsData = await response.json();
-        setUserPoints(pointsData);
-      }
+      const { data: pointsData } = await api.get(`/social/points/${userId}`);
+      setUserPoints(pointsData);
     } catch (error) {
       console.error("Error loading user points:", error);
     }
@@ -139,17 +114,8 @@ const FriendProfile = () => {
    */
   const loadUserFriends = async () => {
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/social/friends/${userId}`,
-        {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        },
-      );
-
-      if (response.ok) {
-        const friendsData = await response.json();
-        setFriends(friendsData);
-      }
+      const { data: friendsData } = await api.get(`/social/friends/${userId}`);
+      setFriends(friendsData);
     } catch (error) {
       console.error("Error loading user friends:", error);
     }
@@ -162,17 +128,9 @@ const FriendProfile = () => {
    */
   const checkFriendship = async () => {
     try {
-      const response = await fetch("http://localhost:8080/api/social/friends", {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-
-      if (response.ok) {
-        const myFriends = await response.json();
-        const friendshipExists = myFriends.some(
-          (friend) => friend.id === userId,
-        );
-        setIsFriend(friendshipExists);
-      }
+      const { data: myFriends } = await api.get("/social/friends");
+      const friendshipExists = myFriends.some((friend) => friend.id === userId);
+      setIsFriend(friendshipExists);
     } catch (error) {
       console.error("Error checking friendship:", error);
     }
@@ -180,29 +138,20 @@ const FriendProfile = () => {
 
   /**
    * Send a friend request to the user.
-   * @param {string} userId - The ID of the user to send a friend request to.
    * @returns {Promise<void>} Resolves when the request is sent.
    * @throws {Error} if the request fails
    */
   const sendFriendRequest = async () => {
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/social/friends/request/${userId}`,
-        {
-          method: "POST",
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        },
-      );
-
-      if (response.ok) {
-        success("Freundschaftsanfrage gesendet!");
-      } else {
-        const error = await response.text();
-        showError(`Fehler: ${error}`);
-      }
+      await api.post(`/social/friends/request/${userId}`);
+      success("Freundschaftsanfrage gesendet!");
     } catch (error) {
       console.error("Error sending friend request:", error);
-      showError("Fehler beim Senden der Freundschaftsanfrage");
+      showError(
+        error.response?.data
+          ? `Fehler: ${error.response.data}`
+          : "Fehler beim Senden der Freundschaftsanfrage",
+      );
     }
   };
 

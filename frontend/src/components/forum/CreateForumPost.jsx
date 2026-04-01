@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../toasts";
 import SearchableMediaSelect from "./SearchableMediaSelect";
 import "./css/CreateForumPost.css";
+import api from "../../utils/api";
 
 const CreateForumPost = () => {
   const [title, setTitle] = useState("");
@@ -31,19 +32,7 @@ const CreateForumPost = () => {
    */
   const fetchCategories = async () => {
     try {
-      const token = localStorage.getItem("token");
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
-      const response = await fetch(
-        "http://localhost:8080/api/forum/categories",
-        {
-          headers,
-        },
-      );
-      if (!response.ok) {
-        throw new Error("Failed to fetch categories");
-      }
-      const data = await response.json();
+      const { data } = await api.get("/forum/categories");
       setCategories(data);
     } catch (error) {
       console.error("Error fetching categories:", error);
@@ -78,35 +67,18 @@ const CreateForumPost = () => {
         seriesId: finalSeriesId || null,
       };
 
-      const token = localStorage.getItem("token");
-      const headers = token
-        ? {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          }
-        : { "Content-Type": "application/json" };
-
-      const response = await fetch("http://localhost:8080/api/forum/posts", {
-        method: "POST",
-        headers,
-        body: JSON.stringify(postData),
-      });
-
-      if (response.ok) {
-        const createdPost = await response.json();
-        success("Beitrag erfolgreich erstellt!");
-        navigate(`/forum/post/${createdPost.id}`);
-      } else if (response.status === 401) {
+      const { data: createdPost } = await api.post("/forum/posts", postData);
+      success("Beitrag erfolgreich erstellt!");
+      navigate(`/forum/post/${createdPost.id}`);
+    } catch (error) {
+      if (error.response?.status === 401) {
         setError("Sie müssen sich anmelden, um einen Beitrag zu erstellen");
         setTimeout(() => navigate("/"), 2000);
       } else {
-        const errorData = await response.text();
-        throw new Error(errorData || "Error creating post");
+        console.error("Error creating post:", error);
+        showError("Fehler beim Erstellen des Beitrags");
+        setError("Fehler beim Erstellen des Beitrags");
       }
-    } catch (error) {
-      console.error("Error creating post:", error);
-      showError("Fehler beim Erstellen des Beitrags");
-      setError("Fehler beim Erstellen des Beitrags");
     } finally {
       setLoading(false);
     }

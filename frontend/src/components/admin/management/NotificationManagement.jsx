@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Send, Users, User, Mail } from "lucide-react";
+import api from "../../../utils/api";
 
 const AdminNotificationPanel = () => {
   const [formData, setFormData] = useState({
@@ -18,20 +19,10 @@ const AdminNotificationPanel = () => {
      */
     const loadUsers = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const response = await fetch(
-          "http://localhost:8080/api/admin/notifications/users",
-          {
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
-          },
+        const { data: userData } = await api.get(
+          "/admin/notifications/users",
         );
-
-        if (response.ok) {
-          const userData = await response.json();
-          setUsers(userData);
-        } else {
-          setError("Fehler beim Laden der Benutzerliste");
-        }
+        setUsers(userData);
       } catch (err) {
         setError("Fehler beim Laden der Benutzerliste: " + err.message);
       }
@@ -59,37 +50,20 @@ const AdminNotificationPanel = () => {
     setSuccess("");
 
     try {
-      const token = localStorage.getItem("token");
-      const headers = token
-        ? {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          }
-        : { "Content-Type": "application/json" };
-
-      const response = await fetch(
-        "http://localhost:8080/api/admin/notifications/send",
+      const { data: result } = await api.post(
+        "/admin/notifications/send",
         {
-          method: "POST",
-          headers,
-          body: JSON.stringify({
-            title: formData.title,
-            message: formData.message,
-            targetUserId: formData.targetUserId || null,
-          }),
+          title: formData.title,
+          message: formData.message,
+          targetUserId: formData.targetUserId || null,
         },
       );
-
-      if (response.ok) {
-        const result = await response.text();
-        setSuccess(result);
-        setFormData({ title: "", message: "", targetUserId: "" });
-      } else {
-        const errorText = await response.text();
-        setError(errorText);
-      }
+      setSuccess(result);
+      setFormData({ title: "", message: "", targetUserId: "" });
     } catch (err) {
-      setError("Fehler beim Senden der Benachrichtigung: " + err.message);
+      setError(
+        err.response?.data || "Fehler beim Senden der Benachrichtigung: " + err.message,
+      );
     } finally {
       setSending(false);
     }

@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "../../toasts";
+import api from "../../../utils/api";
 
 const StreamingProviderManagement = () => {
   const [providers, setProviders] = useState([]);
@@ -30,23 +31,12 @@ const StreamingProviderManagement = () => {
   const fetchProviders = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
-      const response = await fetch(
-        "http://localhost:8080/api/streaming/providers/all",
-        { headers },
-      );
-
-      if (!response.ok) {
-        throw new Error("Anbieter konnten nicht geladen werden");
-      }
-      const data = await response.json();
+      const { data } = await api.get("/streaming/providers/all");
       setProviders(data);
       setError(null);
     } catch (err) {
       console.error("Fehler beim Laden der Anbieter:", err);
-      setError(err.message);
+      setError(err.response?.data?.message || err.message);
     } finally {
       setLoading(false);
     }
@@ -62,28 +52,13 @@ const StreamingProviderManagement = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const url = editingProvider
-        ? `http://localhost:8080/api/streaming/providers/${editingProvider.id}`
-        : "http://localhost:8080/api/streaming/providers";
-
-      const method = editingProvider ? "PUT" : "POST";
-
-      const token = localStorage.getItem("token");
-      const headers = token
-        ? {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          }
-        : { "Content-Type": "application/json" };
-
-      const response = await fetch(url, {
-        method,
-        headers,
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        throw new Error("Anbieter konnte nicht gespeichert werden");
+      if (editingProvider) {
+        await api.put(
+          `/streaming/providers/${editingProvider.id}`,
+          formData,
+        );
+      } else {
+        await api.post("/streaming/providers", formData);
       }
 
       const action = editingProvider ? "aktualisiert" : "erstellt";
@@ -92,8 +67,8 @@ const StreamingProviderManagement = () => {
       handleCloseModal();
     } catch (err) {
       console.error("Fehler beim Speichern:", err);
-      showError(err.message || "Fehler beim Speichern des Anbieters");
-      setError(err.message);
+      showError(err.response?.data?.message || err.message || "Fehler beim Speichern des Anbieters");
+      setError(err.response?.data?.message || err.message);
     }
   };
 
@@ -128,27 +103,13 @@ const StreamingProviderManagement = () => {
     }
 
     try {
-      const token = localStorage.getItem("token");
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
-      const response = await fetch(
-        `http://localhost:8080/api/streaming/providers/${providerId}`,
-        {
-          method: "DELETE",
-          headers,
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error("Anbieter konnte nicht gelöscht werden");
-      }
-
+      await api.delete(`/streaming/providers/${providerId}`);
       success("Streaming-Anbieter erfolgreich gelöscht!");
       await fetchProviders();
     } catch (err) {
       console.error("Fehler beim Löschen:", err);
-      showError(err.message || "Fehler beim Löschen des Anbieters");
-      setError(err.message);
+      showError(err.response?.data?.message || err.message || "Fehler beim Löschen des Anbieters");
+      setError(err.response?.data?.message || err.message);
     }
   };
 
@@ -160,20 +121,9 @@ const StreamingProviderManagement = () => {
    */
   const handleToggleStatus = async (providerId) => {
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(
-        `http://localhost:8080/api/streaming/providers/${providerId}/toggle`,
-        {
-          method: "PATCH",
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        },
+      const { data: updatedProvider } = await api.patch(
+        `/streaming/providers/${providerId}/toggle`,
       );
-
-      if (!response.ok) {
-        throw new Error("Status konnte nicht geändert werden");
-      }
-
-      const updatedProvider = await response.json();
 
       setProviders((prevProviders) =>
         prevProviders.map((provider) =>
@@ -182,7 +132,7 @@ const StreamingProviderManagement = () => {
       );
     } catch (err) {
       console.error("Fehler beim Ändern des Status:", err);
-      setError(err.message);
+      setError(err.response?.data?.message || err.message);
     }
   };
 

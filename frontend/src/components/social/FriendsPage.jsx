@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   FaUserFriends,
@@ -9,6 +9,7 @@ import {
   FaTrash,
 } from "react-icons/fa";
 import { useToast } from "../toasts";
+import api from "../../utils/api";
 
 const FriendsPage = () => {
   const [friends, setFriends] = useState([]);
@@ -19,8 +20,6 @@ const FriendsPage = () => {
   const [loading, setLoading] = useState(true);
   const [allUsers, setAllUsers] = useState([]);
   const { success, error: showError } = useToast();
-
-  const token = localStorage.getItem("token");
 
   useEffect(() => {
     loadData();
@@ -49,13 +48,8 @@ const FriendsPage = () => {
    */
   const loadFriends = async () => {
     try {
-      const response = await fetch("http://localhost:8080/api/social/friends", {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setFriends(data);
-      }
+      const { data } = await api.get("/social/friends");
+      setFriends(data);
     } catch (error) {
       console.error("Error loading friends:", error);
     }
@@ -68,22 +62,8 @@ const FriendsPage = () => {
    */
   const loadPendingRequests = async () => {
     try {
-      const response = await fetch(
-        "http://localhost:8080/api/social/friends/requests",
-        {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        },
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setPendingRequests(data);
-      } else {
-        console.error(
-          "Failed to load pending requests:",
-          response.status,
-          response.statusText,
-        );
-      }
+      const { data } = await api.get("/social/friends/requests");
+      setPendingRequests(data);
     } catch (error) {
       console.error("Error loading pending requests:", error);
     }
@@ -96,20 +76,15 @@ const FriendsPage = () => {
    */
   const loadAllUsers = async () => {
     try {
-      const response = await fetch("http://localhost:8080/api/users", {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      if (response.ok) {
-        const data = await response.json();
-        const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
-        // Filter out current user and existing friends
-        const filteredUsers = data.filter(
-          (user) =>
-            user.id !== currentUser.id &&
-            !friends.some((friend) => friend.id === user.id),
-        );
-        setAllUsers(filteredUsers);
-      }
+      const { data } = await api.get("/users");
+      const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+      // Filter out current user and existing friends
+      const filteredUsers = data.filter(
+        (user) =>
+          user.id !== currentUser.id &&
+          !friends.some((friend) => friend.id === user.id),
+      );
+      setAllUsers(filteredUsers);
     } catch (error) {
       console.error("Error loading users:", error);
     }
@@ -123,26 +98,17 @@ const FriendsPage = () => {
    */
   const sendFriendRequest = async (userId) => {
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/social/friends/request/${userId}`,
-        {
-          method: "POST",
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        },
-      );
-
-      if (response.ok) {
-        success("Freundschaftsanfrage gesendet!");
-        setAllUsers((prev) => prev.filter((user) => user.id !== userId));
-        loadData();
-      } else {
-        const error = await response.text();
-        console.error("Failed to send friend request:", error);
-        showError(`Fehler: ${error}`);
-      }
+      await api.post(`/social/friends/request/${userId}`);
+      success("Freundschaftsanfrage gesendet!");
+      setAllUsers((prev) => prev.filter((user) => user.id !== userId));
+      loadData();
     } catch (error) {
       console.error("Error sending friend request:", error);
-      showError("Fehler beim Senden der Freundschaftsanfrage");
+      showError(
+        error.response?.data
+          ? `Fehler: ${error.response.data}`
+          : "Fehler beim Senden der Freundschaftsanfrage",
+      );
     }
   };
 
@@ -154,23 +120,16 @@ const FriendsPage = () => {
    */
   const acceptFriendRequest = async (friendshipId) => {
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/social/friends/accept/${friendshipId}`,
-        {
-          method: "POST",
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        },
-      );
-
-      if (response.ok) {
-        success("Freundschaftsanfrage akzeptiert!");
-        loadData();
-      } else {
-        const error = await response.text();
-        showError(`Fehler: ${error}`);
-      }
+      await api.post(`/social/friends/accept/${friendshipId}`);
+      success("Freundschaftsanfrage akzeptiert!");
+      loadData();
     } catch (error) {
       console.error("Error accepting friend request:", error);
+      showError(
+        error.response?.data
+          ? `Fehler: ${error.response.data}`
+          : "Fehler beim Akzeptieren der Freundschaftsanfrage",
+      );
     }
   };
 
@@ -182,23 +141,16 @@ const FriendsPage = () => {
    */
   const declineFriendRequest = async (friendshipId) => {
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/social/friends/decline/${friendshipId}`,
-        {
-          method: "POST",
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        },
-      );
-
-      if (response.ok) {
-        success("Freundschaftsanfrage abgelehnt");
-        loadPendingRequests();
-      } else {
-        const error = await response.text();
-        showError(`Fehler: ${error}`);
-      }
+      await api.post(`/social/friends/decline/${friendshipId}`);
+      success("Freundschaftsanfrage abgelehnt");
+      loadPendingRequests();
     } catch (error) {
       console.error("Error declining friend request:", error);
+      showError(
+        error.response?.data
+          ? `Fehler: ${error.response.data}`
+          : "Fehler beim Ablehnen der Freundschaftsanfrage",
+      );
     }
   };
 
@@ -214,23 +166,16 @@ const FriendsPage = () => {
     }
 
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/social/friends/${friendId}`,
-        {
-          method: "DELETE",
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        },
-      );
-
-      if (response.ok) {
-        success("Freund entfernt");
-        loadFriends();
-      } else {
-        const error = await response.text();
-        showError(`Fehler: ${error}`);
-      }
+      await api.delete(`/social/friends/${friendId}`);
+      success("Freund entfernt");
+      loadFriends();
     } catch (error) {
       console.error("Error removing friend:", error);
+      showError(
+        error.response?.data
+          ? `Fehler: ${error.response.data}`
+          : "Fehler beim Entfernen des Freundes",
+      );
     }
   };
 
@@ -270,7 +215,7 @@ const FriendsPage = () => {
   ) => {
     const imageElement = avatarUrl ? (
       <img
-        src={`http://localhost:8080${avatarUrl}`}
+        src={`${process.env.REACT_APP_BASE_URL}${avatarUrl}`}
         alt={username}
         className="rounded-circle"
         style={{

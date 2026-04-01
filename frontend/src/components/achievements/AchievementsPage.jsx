@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { FaTrophy, FaMedal, FaStar, FaLock, FaUnlock } from "react-icons/fa";
 import "../../assets/achievements.css";
+import api from "../../utils/api";
 
 const AchievementsPage = ({ userId }) => {
   const [userAchievements, setUserAchievements] = useState([]);
@@ -28,17 +29,8 @@ const AchievementsPage = ({ userId }) => {
      */
     const loadUserAchievements = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const response = await fetch(
-          `http://localhost:8080/api/achievements/user/${userId}`,
-          {
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
-          },
-        );
-        if (response.ok) {
-          const data = await response.json();
-          setUserAchievements(data);
-        }
+        const { data } = await api.get(`/achievements/user/${userId}`);
+        setUserAchievements(data);
       } catch (error) {
         console.error("Error loading user achievements:", error);
       }
@@ -49,17 +41,8 @@ const AchievementsPage = ({ userId }) => {
      */
     const loadAchievementStats = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const response = await fetch(
-          `http://localhost:8080/api/achievements/user/${userId}/stats`,
-          {
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
-          },
-        );
-        if (response.ok) {
-          const data = await response.json();
-          setStats(data);
-        }
+        const { data } = await api.get(`/achievements/user/${userId}/stats`);
+        setStats(data);
       } catch (error) {
         console.error("Error loading achievement stats:", error);
       }

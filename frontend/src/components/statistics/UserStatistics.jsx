@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Line, Bar, Doughnut } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -14,6 +14,7 @@ import {
 } from "chart.js";
 import { useToast } from "../toasts/ToastContext";
 import "../../assets/statistics.css";
+import api from "../../utils/api";
 
 ChartJS.register(
   CategoryScale,
@@ -43,23 +44,10 @@ const UserStatistics = ({ userId }) => {
   const fetchUserStatistics = async () => {
     setLoading(true);
     try {
-      const getHeaders = (extra = {}) => {
-        const token = localStorage.getItem("token");
-        return token ? { Authorization: `Bearer ${token}`, ...extra } : extra;
-      };
-      const response = await fetch(
-        `http://localhost:8080/api/statistics/users/${userId}?period=${selectedPeriod}`,
-        {
-          headers: getHeaders(),
-        },
+      const { data } = await api.get(
+        `/statistics/users/${userId}?period=${selectedPeriod}`,
       );
-
-      if (response.ok) {
-        const data = await response.json();
-        setStatistics(data);
-      } else {
-        throw new Error("Fehler beim Laden der Statistiken");
-      }
+      setStatistics(data);
     } catch (err) {
       console.error("Error fetching statistics:", err);
       setError(err.message);
@@ -81,33 +69,17 @@ const UserStatistics = ({ userId }) => {
    */
   const fetchFriendsComparison = async () => {
     try {
-      const getHeaders = (extra = {}) => {
-        const token = localStorage.getItem("token");
-        return token ? { Authorization: `Bearer ${token}`, ...extra } : extra;
-      };
-
-      const response = await fetch(
-        `http://localhost:8080/api/statistics/users/${userId}/friends-comparison`,
-        {
-          headers: getHeaders(),
-        },
+      const { data } = await api.get(
+        `/statistics/users/${userId}/friends-comparison`,
       );
-
-      if (response.ok) {
-        const data = await response.json();
-        setFriendsStats(data);
-      } else if (response.status === 404) {
-        console.warn("Friends comparison endpoint not found");
-        showError("Freunde-Vergleich ist momentan nicht verfügbar");
-        setFriendsStats([]);
-      } else {
-        console.error("Error response:", response.status, response.statusText);
-        showError("Fehler beim Laden der Freunde-Statistiken");
-        setFriendsStats([]);
-      }
+      setFriendsStats(data);
     } catch (err) {
-      console.error("Error fetching friends stats:", err);
-      showError("Fehler beim Laden der Freunde-Statistiken");
+      if (err.response?.status === 404) {
+        showError("Freunde-Vergleich ist momentan nicht verfügbar");
+      } else {
+        console.error("Error fetching friends stats:", err);
+        showError("Fehler beim Laden der Freunde-Statistiken");
+      }
       setFriendsStats([]);
     }
   };

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
+import api from "../../../utils/api";
 
 const StreamingAvailabilityManagement = ({
   mediaId,
@@ -33,30 +34,20 @@ const StreamingAvailabilityManagement = ({
     try {
       setLoading(true);
 
-      // Fetch existing availabilities
-      const token = localStorage.getItem("token");
-      const availabilityResponse = await fetch(
-        `http://localhost:8080/api/streaming/availability/${mediaType}/${mediaId}`,
-        {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        },
-      );
-
-      if (availabilityResponse.ok) {
-        const availabilityData = await availabilityResponse.json();
+      try {
+        const { data: availabilityData } = await api.get(
+          `/streaming/availability/${mediaType}/${mediaId}`,
+        );
         setAvailabilities(availabilityData);
+      } catch (err) {
+        // non-critical, keep existing state
       }
 
-      // Fetch all providers
-      const providerResponse = await fetch(
-        "http://localhost:8080/api/streaming/providers",
-        {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        },
-      );
-      if (providerResponse.ok) {
-        const providerData = await providerResponse.json();
+      try {
+        const { data: providerData } = await api.get("/streaming/providers");
         setProviders(providerData);
+      } catch (err) {
+        // non-critical
       }
 
       setError(null);
@@ -75,12 +66,6 @@ const StreamingAvailabilityManagement = ({
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const url = editingAvailability
-        ? `http://localhost:8080/api/streaming/availability/${editingAvailability.id}`
-        : `http://localhost:8080/api/streaming/availability/${mediaType}/${mediaId}`;
-
-      const method = editingAvailability ? "PUT" : "POST";
-
       const params = new URLSearchParams({
         providerId: formData.providerId,
         availabilityType: formData.availabilityType,
@@ -91,33 +76,23 @@ const StreamingAvailabilityManagement = ({
         ...(formData.url && { url: formData.url }),
       });
 
-      const fetchUrl = editingAvailability
-        ? url
-        : `${url}?${params.toString()}`;
-      const body = editingAvailability ? params : undefined;
-
-      const token = localStorage.getItem("token");
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
       if (editingAvailability) {
-        headers["Content-Type"] = "application/x-www-form-urlencoded";
-      }
-
-      const response = await fetch(fetchUrl, {
-        method,
-        headers,
-        ...(editingAvailability && { body: body }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Verfügbarkeit konnte nicht gespeichert werden");
+        await api.put(
+          `/streaming/availability/${editingAvailability.id}?${params.toString()}`,
+          params.toString(),
+          { headers: { "Content-Type": "application/x-www-form-urlencoded" } },
+        );
+      } else {
+        await api.post(
+          `/streaming/availability/${mediaType}/${mediaId}?${params.toString()}`,
+        );
       }
 
       await fetchData();
       handleCloseModal();
     } catch (err) {
       console.error("Fehler beim Speichern:", err);
-      setError(err.message);
+      setError(err.response?.data?.message || err.message);
     }
   };
 
@@ -149,25 +124,11 @@ const StreamingAvailabilityManagement = ({
     }
 
     try {
-      const token = localStorage.getItem("token");
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
-      const response = await fetch(
-        `http://localhost:8080/api/streaming/availability/${availabilityId}`,
-        {
-          method: "DELETE",
-          headers,
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error("Verfügbarkeit konnte nicht gelöscht werden");
-      }
-
+      await api.delete(`/streaming/availability/${availabilityId}`);
       await fetchData();
     } catch (err) {
       console.error("Fehler beim Löschen:", err);
-      setError(err.message);
+      setError(err.response?.data?.message || err.message);
     }
   };
 

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import api from "../../../../utils/api";
 
 export const useCalendarData = () => {
   const [movies, setMovies] = useState([]);
@@ -29,16 +30,9 @@ export const useCalendarData = () => {
     setIsLoading(true);
 
     try {
-      const token = localStorage.getItem("token");
       // Fetch movies
-      const moviesResponse = await fetch("http://localhost:8080/api/movies", {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      if (!moviesResponse.ok) {
-        throw new Error("Filme konnten nicht geladen werden");
-      }
-
-      const moviesData = await moviesResponse.json();
+      const moviesResponse = await api.get("/movies");
+      const moviesData = moviesResponse.data;
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
@@ -58,34 +52,17 @@ export const useCalendarData = () => {
       setMovies(upcomingMovies);
 
       // Fetch series
-      const seriesResponse = await fetch("http://localhost:8080/api/series", {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      if (!seriesResponse.ok) {
-        throw new Error("Serien konnten nicht geladen werden");
-      }
-
-      const seriesList = await seriesResponse.json();
+      const seriesResponse = await api.get("/series");
+      const seriesList = seriesResponse.data;
 
       // Fetch seasons for each series
       const seriesWithSeasons = await Promise.all(
         seriesList.map(async (seriesItem) => {
           try {
-            const seasonsResponse = await fetch(
-              `http://localhost:8080/api/series/${seriesItem.id}/seasons`,
-              {
-                headers: token ? { Authorization: `Bearer ${token}` } : {},
-              },
+            const seasonsResponse = await api.get(
+              `/series/${seriesItem.id}/seasons`,
             );
-
-            if (!seasonsResponse.ok) {
-              console.error(
-                `Fehler beim Laden der Staffeln für Serie ${seriesItem.id}`,
-              );
-              return { ...seriesItem, seasons: [] };
-            }
-
-            const seasons = await seasonsResponse.json();
+            const seasons = seasonsResponse.data;
             const genreArray = seriesItem.genre
               ? seriesItem.genre.split(/,\s*/)
               : [];

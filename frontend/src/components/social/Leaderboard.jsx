@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   FaTrophy,
@@ -8,16 +8,12 @@ import {
   FaEye,
   FaHeart,
 } from "react-icons/fa";
+import api from "../../utils/api";
 
 const Leaderboard = () => {
   const [leaderboard, setLeaderboard] = useState([]);
   const [myPoints, setMyPoints] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  const getHeaders = () => {
-    const t = localStorage.getItem("token");
-    return t ? { Authorization: `Bearer ${t}` } : {};
-  };
 
   useEffect(() => {
     loadData();
@@ -34,7 +30,7 @@ const Leaderboard = () => {
     if (avatarUrl) {
       return (
         <img
-          src={`http://localhost:8080${avatarUrl}`}
+          src={`${process.env.REACT_APP_BASE_URL}${avatarUrl}`}
           alt={username}
           className="rounded-circle"
           style={{
@@ -78,22 +74,8 @@ const Leaderboard = () => {
    */
   const loadLeaderboard = async () => {
     try {
-      const response = await fetch(
-        "http://localhost:8080/api/social/leaderboard?limit=20",
-        {
-          headers: getHeaders(),
-        },
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setLeaderboard(data);
-      } else {
-        console.error(
-          "Failed to load leaderboard:",
-          response.status,
-          response.statusText,
-        );
-      }
+      const { data } = await api.get("/social/leaderboard?limit=20");
+      setLeaderboard(data);
     } catch (error) {
       console.error("Error loading leaderboard:", error);
     }
@@ -104,13 +86,8 @@ const Leaderboard = () => {
    */
   const loadMyPoints = async () => {
     try {
-      const response = await fetch("http://localhost:8080/api/social/points", {
-        headers: getHeaders(),
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setMyPoints(data);
-      }
+      const { data } = await api.get("/social/points");
+      setMyPoints(data);
     } catch (error) {
       console.error("Error loading my points:", error);
     }
