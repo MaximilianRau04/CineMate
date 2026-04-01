@@ -221,7 +221,7 @@ const UserProfile = () => {
               {hasAvatar ? (
                 <>
                   <img
-                    src={avatarPreview || `${process.env.REACT_APP_BASE_URL}${avatarUrl}`}
+                    src={avatarPreview || `${import.meta.env.VITE_BASE_URL}${avatarUrl}`}
                     alt={username}
                     className="img-fluid rounded-circle shadow-sm mb-3"
                     style={{

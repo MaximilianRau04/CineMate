@@ -30,7 +30,7 @@ const Leaderboard = () => {
     if (avatarUrl) {
       return (
         <img
-          src={`${process.env.REACT_APP_BASE_URL}${avatarUrl}`}
+          src={`${import.meta.env.VITE_BASE_URL}${avatarUrl}`}
           alt={username}
           className="rounded-circle"
           style={{

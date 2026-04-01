@@ -121,7 +121,7 @@ export const AuthProvider = ({ children }) => {
       console.error("Registration error:", error);
       return {
         success: false,
-        error: error.response?.data?.message || error.message,
+        error: error.response?.data || error.message,
       };
     }
   };

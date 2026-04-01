@@ -185,7 +185,7 @@ const SearchableMediaSelect = ({
           <div className="selected-media">
             {selectedMedia.posterPath && (
               <img
-                src={`${process.env.REACT_APP_API_URL}/media/image/${selectedMedia.posterPath}`}
+                src={`${import.meta.env.VITE_API_URL}/media/image/${selectedMedia.posterPath}`}
                 alt={getMediaTitle(selectedMedia)}
                 className="media-poster-small"
               />
@@ -254,7 +254,7 @@ const SearchableMediaSelect = ({
                 >
                   {media.posterPath && (
                     <img
-                      src={`${process.env.REACT_APP_API_URL}/media/image/${media.posterPath}`}
+                      src={`${import.meta.env.VITE_API_URL}/media/image/${media.posterPath}`}
                       alt={getMediaTitle(media)}
                       className="media-poster-tiny"
                     />
