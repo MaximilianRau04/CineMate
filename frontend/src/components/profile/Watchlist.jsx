@@ -134,10 +134,7 @@ const Watchlist = () => {
             {item.title}
           </h6>
           {item.genre && (
-            <p
-              className="text-muted mb-2"
-              style={{ fontSize: "0.75rem" }}
-            >
+            <p className="text-muted mb-2" style={{ fontSize: "0.75rem" }}>
               {item.genre}
             </p>
           )}
@@ -176,7 +173,9 @@ const Watchlist = () => {
             onClick={() => setActiveTab("movies")}
           >
             🎬 Filme
-            <span className="badge bg-secondary ms-2">{movieWatchlist.length}</span>
+            <span className="badge bg-secondary ms-2">
+              {movieWatchlist.length}
+            </span>
           </button>
         </li>
         <li className="nav-item">
@@ -185,14 +184,16 @@ const Watchlist = () => {
             onClick={() => setActiveTab("series")}
           >
             📺 Serien
-            <span className="badge bg-secondary ms-2">{seriesWatchlist.length}</span>
+            <span className="badge bg-secondary ms-2">
+              {seriesWatchlist.length}
+            </span>
           </button>
         </li>
       </ul>
 
       {/* Movies */}
-      {activeTab === "movies" && (
-        movieWatchlist.length === 0 ? (
+      {activeTab === "movies" &&
+        (movieWatchlist.length === 0 ? (
           <div className="text-center py-5 text-muted">
             <FaFilm size={36} className="mb-3 opacity-50" />
             <p>Noch keine Filme in deiner Watchlist.</p>
@@ -208,12 +209,11 @@ const Watchlist = () => {
               />
             ))}
           </div>
-        )
-      )}
+        ))}
 
       {/* Series */}
-      {activeTab === "series" && (
-        seriesWatchlist.length === 0 ? (
+      {activeTab === "series" &&
+        (seriesWatchlist.length === 0 ? (
           <div className="text-center py-5 text-muted">
             <FaFilm size={36} className="mb-3 opacity-50" />
             <p>Noch keine Serien in deiner Watchlist.</p>
@@ -229,8 +229,7 @@ const Watchlist = () => {
               />
             ))}
           </div>
-        )
-      )}
+        ))}
     </div>
   );
 };

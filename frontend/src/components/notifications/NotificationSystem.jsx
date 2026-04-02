@@ -337,10 +337,7 @@ const NotificationSystem = () => {
           }}
         >
           {/* Header */}
-          <div
-            className="p-3 border-bottom"
-            style={{ background: "#f8f9fa" }}
-          >
+          <div className="p-3 border-bottom" style={{ background: "#f8f9fa" }}>
             <div className="d-flex justify-content-between align-items-center">
               <h6
                 className="mb-0 fw-bold"
