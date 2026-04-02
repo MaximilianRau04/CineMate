@@ -38,7 +38,7 @@ const Filmography = ({
               <tr key={movie.id}>
                 <td>{movie.title}</td>
                 <td>{movie.genre}</td>
-                <td>{new Date(parseInt(movie.releaseDate)).getFullYear()}</td>
+                <td>{new Date(movie.releaseDate).getFullYear()}</td>
                 <td>
                   {isDirector ? (
                     <button
@@ -87,7 +87,7 @@ const Filmography = ({
               <tr key={serie.id}>
                 <td>{serie.title}</td>
                 <td>{serie.genre}</td>
-                <td>{new Date(parseInt(serie.releaseDate)).getFullYear()}</td>
+                <td>{new Date(serie.releaseDate).getFullYear()}</td>
                 <td>
                   <button
                     className="btn btn-sm btn-outline-danger"

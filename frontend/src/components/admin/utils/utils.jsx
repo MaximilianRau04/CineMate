@@ -253,14 +253,14 @@ export const useAppData = () => {
 // Formats a timestamp to a human-readable date string
 export const formatDate = (timestamp) => {
   if (!timestamp) return "";
-  const date = new Date(parseInt(timestamp));
+  const date = new Date(timestamp);
   return date.toLocaleDateString("de-DE");
 };
 
 // Formats a timestamp for use in an input field
 export const formatDateForInput = (timestamp) => {
   if (!timestamp) return "";
-  const date = new Date(parseInt(timestamp));
+  const date = new Date(timestamp);
   return date.toISOString().split("T")[0];
 };
 

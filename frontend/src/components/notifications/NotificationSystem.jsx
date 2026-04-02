@@ -339,48 +339,29 @@ const NotificationSystem = () => {
           {/* Header */}
           <div
             className="p-3 border-bottom"
-            style={{
-              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-              borderBottom: "none",
-            }}
+            style={{ background: "#f8f9fa" }}
           >
             <div className="d-flex justify-content-between align-items-center">
               <h6
                 className="mb-0 fw-bold"
-                style={{ color: "white", fontSize: "1rem" }}
+                style={{ color: "#212529", fontSize: "1rem" }}
               >
                 Benachrichtigungen
               </h6>
               <button
-                className="btn-close btn-close-white"
+                className="btn-close"
                 onClick={() => setIsOpen(false)}
-                style={{
-                  fontSize: "0.8rem",
-                  filter: "brightness(0) invert(1)",
-                  opacity: 0.8,
-                }}
+                style={{ fontSize: "0.8rem" }}
               ></button>
             </div>
 
             {/* Controls */}
-            <div className="d-flex justify-content-between align-items-center mt-3">
+            <div className="d-flex justify-content-between align-items-center mt-2">
               <div>
                 <button
-                  className={`btn btn-sm ${
-                    showUnreadOnly ? "btn-light" : "btn-outline-light"
-                  }`}
+                  className={`btn btn-sm ${showUnreadOnly ? "btn-primary" : "btn-outline-secondary"}`}
                   onClick={handleFilterToggle}
-                  style={{
-                    borderRadius: "20px",
-                    fontSize: "0.75rem",
-                    padding: "4px 12px",
-                    border: showUnreadOnly
-                      ? "none"
-                      : "1px solid rgba(255, 255, 255, 0.3)",
-                    background: showUnreadOnly ? "white" : "transparent",
-                    color: showUnreadOnly ? "#667eea" : "white",
-                    transition: "all 0.2s ease",
-                  }}
+                  style={{ fontSize: "0.75rem", padding: "3px 10px" }}
                 >
                   {showUnreadOnly ? "Alle anzeigen" : "Nur ungelesene"}
                 </button>
@@ -389,24 +370,9 @@ const NotificationSystem = () => {
               <div className="d-flex gap-2">
                 {unreadCount > 0 && (
                   <button
-                    className="btn btn-sm btn-outline-light"
+                    className="btn btn-sm btn-outline-secondary"
                     onClick={markAllAsRead}
-                    style={{
-                      borderRadius: "20px",
-                      fontSize: "0.75rem",
-                      padding: "4px 12px",
-                      border: "1px solid rgba(255, 255, 255, 0.3)",
-                      color: "white",
-                      transition: "all 0.2s ease",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.target.style.background = "rgba(255, 255, 255, 0.15)";
-                      e.target.style.borderColor = "rgba(255, 255, 255, 0.5)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.background = "transparent";
-                      e.target.style.borderColor = "rgba(255, 255, 255, 0.3)";
-                    }}
+                    style={{ fontSize: "0.75rem", padding: "3px 10px" }}
                   >
                     <CheckCheck size={12} className="me-1" />
                     Alle lesen
@@ -415,24 +381,9 @@ const NotificationSystem = () => {
 
                 {notifications.length > 0 && (
                   <button
-                    className="btn btn-sm btn-outline-light"
+                    className="btn btn-sm btn-outline-danger"
                     onClick={deleteAllNotifications}
-                    style={{
-                      borderRadius: "20px",
-                      fontSize: "0.75rem",
-                      padding: "4px 12px",
-                      border: "1px solid rgba(255, 182, 193, 0.5)",
-                      color: "white",
-                      transition: "all 0.2s ease",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.target.style.background = "rgba(255, 99, 132, 0.2)";
-                      e.target.style.borderColor = "rgba(255, 99, 132, 0.7)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.background = "transparent";
-                      e.target.style.borderColor = "rgba(255, 182, 193, 0.5)";
-                    }}
+                    style={{ fontSize: "0.75rem", padding: "3px 10px" }}
                   >
                     <Trash2 size={12} className="me-1" />
                     Alle löschen
@@ -498,8 +449,7 @@ const NotificationSystem = () => {
                           style={{
                             width: "40px",
                             height: "40px",
-                            background:
-                              "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                            background: "#0d6efd",
                             fontSize: "1.1rem",
                           }}
                         >

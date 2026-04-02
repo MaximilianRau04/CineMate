@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 const MediaCard = ({ media, type }) => {
   const year = media.releaseDate
-    ? new Date(parseInt(media.releaseDate)).getFullYear()
+    ? new Date(media.releaseDate).getFullYear()
     : "N/A";
 
   if (!media) return null;
