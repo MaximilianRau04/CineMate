@@ -7,6 +7,7 @@ import {
   FaComments,
   FaUserTie,
   FaBell,
+  FaCloudDownloadAlt,
 } from "react-icons/fa";
 
 import {
@@ -27,6 +28,7 @@ import CastManagement from "./management/CastManagement";
 import StreamingProviderManagement from "./management/StreamingProviderManagement";
 import StreamingAvailabilityManagement from "./management/StreamingAvailabilityManagement";
 import AdminNotificationPanel from "./management/NotificationManagement";
+import TmdbImport from "./management/TmdbImport";
 
 import { SeasonForm, EpisodeForm, ContentForm } from "./forms/ContentForms";
 
@@ -469,6 +471,11 @@ const AdminPanel = () => {
                   icon: FaBell,
                   label: "Benachrichtigungen",
                 },
+                {
+                  key: "tmdb",
+                  icon: FaCloudDownloadAlt,
+                  label: "TMDB Import",
+                },
               ].map(({ key, icon: Icon, label }) => (
                 <button
                   key={key}
@@ -561,6 +568,8 @@ const AdminPanel = () => {
           {activeTab === "streaming" && <StreamingProviderManagement />}
 
           {activeTab === "notifications" && <AdminNotificationPanel />}
+
+          {activeTab === "tmdb" && <TmdbImport />}
         </div>
       </div>
 
