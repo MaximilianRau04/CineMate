@@ -40,5 +40,7 @@ com.cinemate.statistics.DTOs
 com.cinemate.statistics.DTOs.activities
 com.cinemate.streaming
 com.cinemate.streaming.DTOs
+com.cinemate.tmdb
+com.cinemate.tmdb.dto
 com.cinemate.user
 com.cinemate.user.DTOs
