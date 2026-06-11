@@ -22,6 +22,7 @@ public class Movie {
 
     @Id
     private String id;
+    private Integer tmdbId;
     @NotNull
     private String title;
     private String description;

@@ -723,20 +723,6 @@ public class SeriesService {
      * @return
      */
     private Series buildSeriesFromDTO(String id, SeriesRequestDTO dto) {
-        SeriesResponseDTO responseDTO = new SeriesResponseDTO(
-                id,
-                dto.getTitle(),
-                dto.getDescription(),
-                dto.getGenre(),
-                0.0,
-                0,
-                dto.getReleaseDate(),
-                dto.getPosterUrl(),
-                dto.getCountry(),
-                dto.getTrailerUrl(),
-                dto.getStatus()
-        );
-
         return new Series(dto);
     }
 }

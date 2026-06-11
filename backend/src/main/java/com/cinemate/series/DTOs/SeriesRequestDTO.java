@@ -18,6 +18,7 @@ import java.util.Date;
 public class SeriesRequestDTO {
 
     private String id;
+    private Integer tmdbId;
     @NotNull
     private String title;
     private String description;

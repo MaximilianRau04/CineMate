@@ -4,6 +4,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface SeriesRepository extends MongoRepository<Series, String> {
     @Query("{ 'actors._id': ?0 }")
@@ -13,4 +14,6 @@ public interface SeriesRepository extends MongoRepository<Series, String> {
     
     @Query("{ 'name': { $regex: ?0, $options: 'i' } }")
     List<Series> findByNameContainingIgnoreCase(String name);
+
+    Optional<Series> findByTmdbId(Integer tmdbId);
 }

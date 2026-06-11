@@ -17,6 +17,7 @@ import java.util.Date;
 public class MovieResponseDTO {
 
     private String id;
+    private Integer tmdbId;
     private String title;
     private String description;
     private String genre;
@@ -30,6 +31,7 @@ public class MovieResponseDTO {
 
     public MovieResponseDTO(Movie movie) {
         this.id = movie.getId();
+        this.tmdbId = movie.getTmdbId();
         this.title = movie.getTitle();
         this.description = movie.getDescription();
         this.genre = movie.getGenre();

@@ -17,6 +17,7 @@ import java.util.Date;
 @Builder
 public class SeriesResponseDTO {
     private String id;
+    private Integer tmdbId;
     private String title;
     private String description;
     private String genre;
@@ -30,6 +31,7 @@ public class SeriesResponseDTO {
 
     public SeriesResponseDTO(Series series) {
         this.id = series.getId();
+        this.tmdbId = series.getTmdbId();
         this.title = series.getTitle();
         this.description = series.getDescription();
         this.genre = series.getGenre();
