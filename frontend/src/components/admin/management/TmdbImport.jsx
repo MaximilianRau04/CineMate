@@ -130,10 +130,7 @@ const TmdbImport = () => {
         {error && (
           <div className="alert alert-danger alert-dismissible">
             {error}
-            <button
-              className="btn-close"
-              onClick={() => setError(null)}
-            />
+            <button className="btn-close" onClick={() => setError(null)} />
           </div>
         )}
 
@@ -171,7 +168,10 @@ const TmdbImport = () => {
                           <p className="card-title fw-semibold mb-1 small">
                             {title}
                           </p>
-                          <p className="text-muted mb-1" style={{ fontSize: "0.75rem" }}>
+                          <p
+                            className="text-muted mb-1"
+                            style={{ fontSize: "0.75rem" }}
+                          >
                             {year}
                           </p>
                           {item.voteAverage > 0 && (
@@ -210,12 +210,15 @@ const TmdbImport = () => {
         )}
 
         {!loading && results.length === 0 && query && (
-          <p className="text-muted text-center mt-3">Keine Ergebnisse gefunden.</p>
+          <p className="text-muted text-center mt-3">
+            Keine Ergebnisse gefunden.
+          </p>
         )}
 
         {!query && !loading && (
           <p className="text-muted text-center mt-3">
-            Suche nach einem Film oder einer Serie um Inhalte von TMDB zu importieren.
+            Suche nach einem Film oder einer Serie um Inhalte von TMDB zu
+            importieren.
           </p>
         )}
       </div>
