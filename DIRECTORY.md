@@ -184,6 +184,12 @@
             📄 StreamingProvider.java
             📄 StreamingProviderRepository.java
             📄 StreamingProviderService.java
+          📂 tmdb/
+            📂 dto/
+              📄 TmdbMovieResult.java
+              📄 TmdbSeriesResult.java
+            📄 TmdbController.java
+            📄 TmdbService.java
           📂 user/
             📂 DTOs/
               📄 UserRequestDTO.java
@@ -230,6 +236,7 @@
         📄 NotificationManagement.jsx
         📄 StreamingAvailabilityManagement.jsx
         📄 StreamingProviderManagement.jsx
+        📄 TmdbImport.jsx
         📄 UserManagement.jsx
       📂 modals/
         📄 ContentModals.jsx
