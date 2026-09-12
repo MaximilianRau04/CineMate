@@ -126,6 +126,10 @@ See [`DIRECTORY.md`](DIRECTORY.md) for the full generated file tree.
 4. Push the branch: `git push origin feature/your-feature`
 5. Open a pull request
 
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
 ## Support
 
 For questions or issues, please open an issue on GitHub.

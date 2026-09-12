@@ -9,9 +9,10 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Vue.js build outputs
-/dist
-/.cache
+# Build outputs
+dist/
+build/
+.cache
 
 # Compiled Java classes
 *.class
