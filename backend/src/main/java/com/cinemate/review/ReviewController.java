@@ -5,6 +5,7 @@ import com.cinemate.review.DTOs.ReviewRequestDTO;
 import com.cinemate.review.DTOs.ReviewResponseDTO;
 import com.cinemate.series.DTOs.SeriesResponseDTO;
 import com.cinemate.user.DTOs.UserResponseDTO;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -176,7 +177,7 @@ public class ReviewController {
     public ResponseEntity<ReviewResponseDTO> createMovieReview(
             @PathVariable String movieId,
             @PathVariable String userId,
-            @RequestBody ReviewRequestDTO reviewDTO) {
+            @Valid @RequestBody ReviewRequestDTO reviewDTO) {
 
         reviewDTO.setItemId(movieId);
         reviewDTO.setUserId(userId);
@@ -196,7 +197,7 @@ public class ReviewController {
     public ResponseEntity<ReviewResponseDTO> createSeriesReview(
             @PathVariable String seriesId,
             @PathVariable String userId,
-            @RequestBody ReviewRequestDTO reviewDTO) {
+            @Valid @RequestBody ReviewRequestDTO reviewDTO) {
 
         reviewDTO.setItemId(seriesId);
         reviewDTO.setUserId(userId);
@@ -212,7 +213,7 @@ public class ReviewController {
      * @return ReviewResponseDTO
      */
     @PutMapping("/{id}")
-    public ResponseEntity<ReviewResponseDTO> updateReview(@PathVariable String id, @RequestBody ReviewRequestDTO reviewRequestDTO) {
+    public ResponseEntity<ReviewResponseDTO> updateReview(@PathVariable String id, @Valid @RequestBody ReviewRequestDTO reviewRequestDTO) {
         Optional<ReviewResponseDTO> updatedReview = reviewService.updateReview(id, reviewRequestDTO);
         return updatedReview.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));

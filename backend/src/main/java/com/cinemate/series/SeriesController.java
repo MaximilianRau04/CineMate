@@ -4,6 +4,7 @@ import com.cinemate.actor.DTOs.ActorResponseDTO;
 import com.cinemate.director.DTOs.DirectorResponseDTO;
 import com.cinemate.series.DTOs.SeriesRequestDTO;
 import com.cinemate.series.DTOs.SeriesResponseDTO;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -54,7 +55,7 @@ public class SeriesController {
      * @return SeriesResponseDTO
      */
     @PostMapping
-    public ResponseEntity<SeriesResponseDTO> createSeries(@RequestBody SeriesRequestDTO series) {
+    public ResponseEntity<SeriesResponseDTO> createSeries(@Valid @RequestBody SeriesRequestDTO series) {
         return seriesService.createSeries(series);
     }
 
@@ -65,7 +66,7 @@ public class SeriesController {
      * @return SeriesResponseDTO
      */
     @PutMapping("/{id}")
-    public ResponseEntity<SeriesResponseDTO> updateSeries(@PathVariable String id, @RequestBody SeriesRequestDTO series) {
+    public ResponseEntity<SeriesResponseDTO> updateSeries(@PathVariable String id, @Valid @RequestBody SeriesRequestDTO series) {
         return seriesService.updateSeries(id, series);
     }
 

@@ -1,6 +1,7 @@
 package com.cinemate.notification;
 
 import com.cinemate.notification.DTOs.NotificationRequestDTO;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,7 +11,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/notifications")
-@CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 public class NotificationController {
 
@@ -55,7 +55,7 @@ public class NotificationController {
      * @return Notification
      */
     @PostMapping
-    public ResponseEntity<Notification> createNotification(@RequestBody NotificationRequestDTO request) {
+    public ResponseEntity<Notification> createNotification(@Valid @RequestBody NotificationRequestDTO request) {
         Notification notification = notificationService.createNotificationWithMetadata(
                 request.getUserId(),
                 request.getType(),

@@ -3,17 +3,14 @@ package com.cinemate.statistics;
 import com.cinemate.statistics.DTOs.FriendStatisticsDTO;
 import com.cinemate.statistics.DTOs.UserStatisticsDTO;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Slf4j
 @RestController
 @RequestMapping("/api/statistics")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000")
 public class UserStatisticsController {
 
     private final UserStatisticsService statisticsService;
@@ -29,13 +26,8 @@ public class UserStatisticsController {
             @PathVariable String userId,
             @RequestParam(defaultValue = "year") String period) {
 
-        try {
-            UserStatisticsDTO stats = statisticsService.calculateUserStatistics(userId, period);
-            return ResponseEntity.ok(stats);
-        } catch (Exception e) {
-            log.error("Error in getUserStatistics: " + e.getMessage());
-            return ResponseEntity.status(500).build();
-        }
+        UserStatisticsDTO stats = statisticsService.calculateUserStatistics(userId, period);
+        return ResponseEntity.ok(stats);
     }
 
     /**
@@ -46,16 +38,8 @@ public class UserStatisticsController {
     @GetMapping("/users/{userId}/friends-comparison")
     public ResponseEntity<List<FriendStatisticsDTO>> getFriendsComparison(
             @PathVariable String userId) {
-        
-        try {
-            List<FriendStatisticsDTO> friendsStats = statisticsService.getFriendsStatistics(userId);
-            return ResponseEntity.ok(friendsStats);
-        } catch (RuntimeException e) {
-            log.error("Error in getFriendsComparison: " + e.getMessage());
-            return ResponseEntity.status(500).build();
-        } catch (Exception e) {
-            log.error("Unexpected error in getFriendsComparison: " + e.getMessage());
-            return ResponseEntity.status(500).build();
-        }
+
+        List<FriendStatisticsDTO> friendsStats = statisticsService.getFriendsStatistics(userId);
+        return ResponseEntity.ok(friendsStats);
     }
 }

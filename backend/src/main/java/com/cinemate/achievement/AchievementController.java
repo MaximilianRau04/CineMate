@@ -10,7 +10,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/achievements")
-@CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 public class AchievementController {
 
@@ -63,12 +62,8 @@ public class AchievementController {
      */
     @PostMapping("/user/{userId}/check")
     public ResponseEntity<String> checkUserAchievements(@PathVariable String userId) {
-        try {
-            achievementService.checkUserAchievements(userId);
-            return ResponseEntity.ok("Achievements checked successfully");
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error checking achievements: " + e.getMessage());
-        }
+        achievementService.checkUserAchievements(userId);
+        return ResponseEntity.ok("Achievements checked successfully");
     }
 
     /**
@@ -79,11 +74,7 @@ public class AchievementController {
      */
     @PostMapping("/initialize")
     public ResponseEntity<String> initializeDefaultAchievements() {
-        try {
-            achievementService.initializeDefaultAchievements();
-            return ResponseEntity.ok("Default achievements initialized successfully");
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error initializing achievements: " + e.getMessage());
-        }
+        achievementService.initializeDefaultAchievements();
+        return ResponseEntity.ok("Default achievements initialized successfully");
     }
 }

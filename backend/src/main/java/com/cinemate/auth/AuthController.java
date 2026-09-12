@@ -6,6 +6,7 @@ import com.cinemate.user.UserRepository;
 import com.cinemate.user.User;
 import com.cinemate.user.DTOs.UserRequestDTO;
 import com.cinemate.user.DTOs.UserResponseDTO;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -36,7 +37,7 @@ public class AuthController {
      * @return ResponseEntity
      */
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody UserRequestDTO userDTO) {
+    public ResponseEntity<?> registerUser(@Valid @RequestBody UserRequestDTO userDTO) {
         if (userRepository.findByUsername(userDTO.getUsername()).isPresent()) {
             return ResponseEntity.badRequest().body("Username already exists");
         }
@@ -84,7 +85,7 @@ public class AuthController {
      * @return ResponseEntity
      */
     @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody UserRequestDTO userDTO) {
+    public ResponseEntity<?> loginUser(@Valid @RequestBody UserRequestDTO userDTO) {
         Optional<User> existingUserOpt = userRepository.findByUsername(userDTO.getUsername());
 
         if (existingUserOpt.isEmpty() ||

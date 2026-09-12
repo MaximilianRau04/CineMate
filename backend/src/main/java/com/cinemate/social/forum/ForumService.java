@@ -1,5 +1,8 @@
 package com.cinemate.social.forum;
 
+import com.cinemate.exceptions.BadRequestException;
+import com.cinemate.exceptions.ForbiddenActionException;
+import com.cinemate.exceptions.ResourceNotFoundException;
 import com.cinemate.notification.events.ForumPostCreatedEvent;
 import com.cinemate.notification.events.ForumReplyCreatedEvent;
 import com.cinemate.social.forum.like.ForumLike;
@@ -50,7 +53,7 @@ public class ForumService {
      * @param post the forum post to create
      * @param userId the ID of the user creating the post
      * @return the created ForumPost entity
-     * @throws RuntimeException if the user is not found
+     * @throws ResourceNotFoundException if the user is not found
      */
     public ForumPost createPost(ForumPost post, String userId) {
 
@@ -63,7 +66,7 @@ public class ForumService {
             if (userByUsername.isPresent()) {
                 userOpt = userByUsername;
             } else {
-                throw new RuntimeException("User not found with ID or username: " + userId);
+                throw new ResourceNotFoundException("User not found with ID or username: " + userId);
             }
         }
 
@@ -208,19 +211,20 @@ public class ForumService {
      * @param updatedPost the updated post data
      * @param userId the ID of the user attempting to update the post
      * @return the updated ForumPost entity
-     * @throws RuntimeException if the post is not found or user is not authorized
+     * @throws ResourceNotFoundException if the post is not found
+     * @throws ForbiddenActionException if the user is not authorized
      */
     public ForumPost updatePost(String postId, ForumPost updatedPost, String userId) {
         Optional<ForumPost> existingPostOpt = forumPostRepository.findById(postId);
         if (!existingPostOpt.isPresent()) {
-            throw new RuntimeException("Post not found");
+            throw new ResourceNotFoundException("Post not found");
         }
 
         ForumPost existingPost = existingPostOpt.get();
 
         // Check if user is the author (only authors can edit, not admins)
         if (!existingPost.getAuthor().getId().equals(userId)) {
-            throw new RuntimeException("Only the author can edit this post");
+            throw new ForbiddenActionException("Only the author can edit this post");
         }
 
         existingPost.setTitle(updatedPost.getTitle());
@@ -236,19 +240,20 @@ public class ForumService {
      *
      * @param postId the ID of the post to delete
      * @param userId the ID of the user attempting to delete the post
-     * @throws RuntimeException if the post is not found or user is not authorized
+     * @throws ResourceNotFoundException if the post is not found
+     * @throws ForbiddenActionException if the user is not authorized
      */
     public void deletePost(String postId, String userId) {
         Optional<ForumPost> postOpt = forumPostRepository.findById(postId);
         if (!postOpt.isPresent()) {
-            throw new RuntimeException("Post not found");
+            throw new ResourceNotFoundException("Post not found");
         }
 
         ForumPost post = postOpt.get();
 
         // Check if user is the author or has admin privileges
         if (!post.getAuthor().getId().equals(userId)) {
-            throw new RuntimeException("Not authorized to delete this post");
+            throw new ForbiddenActionException("Not authorized to delete this post");
         }
 
         post.setDeleted(true);
@@ -260,12 +265,12 @@ public class ForumService {
      * Useful for cleaning up posts from deleted users.
      *
      * @param postId the ID of the post to delete
-     * @throws RuntimeException if the post is not found
+     * @throws ResourceNotFoundException if the post is not found
      */
     public void adminDeletePost(String postId) {
         Optional<ForumPost> postOpt = forumPostRepository.findById(postId);
         if (!postOpt.isPresent()) {
-            throw new RuntimeException("Post not found");
+            throw new ResourceNotFoundException("Post not found");
         }
 
         ForumPost post = postOpt.get();
@@ -278,10 +283,10 @@ public class ForumService {
         Optional<User> userOpt = userRepository.findById(userId);
         
         if (!postOpt.isPresent()) {
-            throw new RuntimeException("Post not found");
+            throw new ResourceNotFoundException("Post not found");
         }
         if (!userOpt.isPresent()) {
-            throw new RuntimeException("User not found");
+            throw new ResourceNotFoundException("User not found");
         }
 
         ForumPost post = postOpt.get();
@@ -341,26 +346,26 @@ public class ForumService {
      * @param userId the ID of the user creating the reply
      * @param postId the ID of the post being replied to
      * @return the created ForumReply entity
-     * @throws RuntimeException if the user or post is not found
+     * @throws ResourceNotFoundException if the user or post is not found
      */
     public ForumReply createReply(ForumReply reply, String userId, String postId) {
         Optional<User> userOpt = userRepository.findById(userId);
         Optional<ForumPost> postOpt = forumPostRepository.findById(postId);
 
         if (!userOpt.isPresent()) {
-            throw new RuntimeException("User not found with ID: " + userId);
+            throw new ResourceNotFoundException("User not found with ID: " + userId);
         }
         if (!postOpt.isPresent()) {
-            throw new RuntimeException("Post not found with ID: " + postId);
+            throw new ResourceNotFoundException("Post not found with ID: " + postId);
         }
 
         ForumPost post = postOpt.get();
 
         if (post.isLocked()) {
-            throw new RuntimeException("Cannot reply to a locked post");
+            throw new BadRequestException("Cannot reply to a locked post");
         }
         if (post.isDeleted()) {
-            throw new RuntimeException("Cannot reply to a deleted post");
+            throw new BadRequestException("Cannot reply to a deleted post");
         }
 
         User user = userOpt.get();
@@ -413,19 +418,20 @@ public class ForumService {
      * @param updatedReply the updated reply data
      * @param userId the ID of the user attempting to update the reply
      * @return the updated ForumReply entity
-     * @throws RuntimeException if the reply is not found or user is not authorized
+     * @throws ResourceNotFoundException if the reply is not found
+     * @throws ForbiddenActionException if the user is not authorized
      */
     public ForumReply updateReply(String replyId, ForumReply updatedReply, String userId) {
         Optional<ForumReply> existingReplyOpt = forumReplyRepository.findById(replyId);
         if (!existingReplyOpt.isPresent()) {
-            throw new RuntimeException("Reply not found");
+            throw new ResourceNotFoundException("Reply not found");
         }
 
         ForumReply existingReply = existingReplyOpt.get();
 
         // Check if user is the author (only authors can edit, not admins)
         if (!existingReply.getAuthor().getId().equals(userId)) {
-            throw new RuntimeException("Only the author can edit this reply");
+            throw new ForbiddenActionException("Only the author can edit this reply");
         }
 
         existingReply.setContent(updatedReply.getContent());
@@ -440,12 +446,13 @@ public class ForumService {
      *
      * @param replyId the ID of the reply to delete
      * @param userId the ID of the user attempting to delete the reply
-     * @throws RuntimeException if the reply is not found or user is not authorized
+     * @throws ResourceNotFoundException if the reply is not found
+     * @throws ForbiddenActionException if the user is not authorized
      */
     public void deleteReply(String replyId, String userId) {
         Optional<ForumReply> replyOpt = forumReplyRepository.findById(replyId);
         if (!replyOpt.isPresent()) {
-            throw new RuntimeException("Reply not found");
+            throw new ResourceNotFoundException("Reply not found");
         }
 
         ForumReply reply = replyOpt.get();
@@ -456,7 +463,7 @@ public class ForumService {
         boolean isAdmin = user != null && "ADMIN".equals(user.getRole().toString());
         
         if (!isAuthor && !isAdmin) {
-            throw new RuntimeException("Not authorized to delete this reply");
+            throw new ForbiddenActionException("Not authorized to delete this reply");
         }
 
         reply.setDeleted(true);
@@ -474,12 +481,12 @@ public class ForumService {
      * @param replyId the ID of the reply to like/unlike
      * @param userId the ID of the user toggling the like
      * @return the updated ForumReply entity
-     * @throws RuntimeException if the reply is not found
+     * @throws ResourceNotFoundException if the reply is not found
      */
     public ForumReply toggleReplyLike(String replyId, String userId) {
         Optional<ForumReply> replyOpt = forumReplyRepository.findById(replyId);
         if (!replyOpt.isPresent()) {
-            throw new RuntimeException("Reply not found");
+            throw new ResourceNotFoundException("Reply not found");
         }
 
         ForumReply reply = replyOpt.get();
@@ -525,12 +532,12 @@ public class ForumService {
      * @param postId the ID of the post to pin/unpin
      * @param pinned true to pin the post, false to unpin
      * @return the updated ForumPost entity
-     * @throws RuntimeException if the post is not found
+     * @throws ResourceNotFoundException if the post is not found
      */
     public ForumPost pinPost(String postId, boolean pinned) {
         Optional<ForumPost> postOpt = forumPostRepository.findById(postId);
         if (!postOpt.isPresent()) {
-            throw new RuntimeException("Post not found");
+            throw new ResourceNotFoundException("Post not found");
         }
 
         ForumPost post = postOpt.get();
@@ -545,12 +552,12 @@ public class ForumService {
      * @param postId the ID of the post to lock/unlock
      * @param locked true to lock the post, false to unlock
      * @return the updated ForumPost entity
-     * @throws RuntimeException if the post is not found
+     * @throws ResourceNotFoundException if the post is not found
      */
     public ForumPost lockPost(String postId, boolean locked) {
         Optional<ForumPost> postOpt = forumPostRepository.findById(postId);
         if (!postOpt.isPresent()) {
-            throw new RuntimeException("Post not found");
+            throw new ResourceNotFoundException("Post not found");
         }
 
         ForumPost post = postOpt.get();
@@ -565,22 +572,22 @@ public class ForumService {
      * @param postId the ID of the post to subscribe to
      * @param userId the ID of the user subscribing
      * @return the ForumSubscription entity
-     * @throws RuntimeException if the user or post is not found
+     * @throws ResourceNotFoundException if the user or post is not found
      */
     public ForumSubscription subscribeToPost(String postId, String userId) {
         Optional<User> userOpt = userRepository.findById(userId);
         Optional<ForumPost> postOpt = forumPostRepository.findById(postId);
 
         if (!userOpt.isPresent()) {
-            throw new RuntimeException("User not found with ID: " + userId);
+            throw new ResourceNotFoundException("User not found with ID: " + userId);
         }
         if (!postOpt.isPresent()) {
-            throw new RuntimeException("Post not found with ID: " + postId);
+            throw new ResourceNotFoundException("Post not found with ID: " + postId);
         }
 
         ForumPost post = postOpt.get();
         if (post.isDeleted()) {
-            throw new RuntimeException("Cannot subscribe to a deleted post");
+            throw new BadRequestException("Cannot subscribe to a deleted post");
         }
 
         // Check if already subscribed

@@ -12,6 +12,7 @@ import com.cinemate.user.User;
 import com.cinemate.user.UserRepository;
 import com.cinemate.review.ReviewRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AchievementService {
@@ -174,9 +176,9 @@ public class AchievementService {
             checkAndUpdateAchievements(user, AchievementType.FORUM_POSTS, (int) forumPostCount);
 
             // TODO: Add more achievement checks based on statistics service
-            
+
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error checking achievements for user {}", userId, e);
         }
     }
 

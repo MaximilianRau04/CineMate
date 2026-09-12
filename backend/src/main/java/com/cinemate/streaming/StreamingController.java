@@ -3,6 +3,7 @@ package com.cinemate.streaming;
 import com.cinemate.streaming.DTOs.StreamingAvailabilityResponseDTO;
 import com.cinemate.streaming.DTOs.StreamingProviderRequestDTO;
 import com.cinemate.streaming.DTOs.StreamingProviderResponseDTO;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -63,7 +64,7 @@ public class StreamingController {
      * @return StreamingProviderResponseDTO
      */
     @PostMapping("/providers")
-    public ResponseEntity<StreamingProviderResponseDTO> createProvider(@RequestBody StreamingProviderRequestDTO providerDTO) {
+    public ResponseEntity<StreamingProviderResponseDTO> createProvider(@Valid @RequestBody StreamingProviderRequestDTO providerDTO) {
         return providerService.createProvider(providerDTO);
     }
     
@@ -75,7 +76,7 @@ public class StreamingController {
      */
     @PutMapping("/providers/{id}")
     public ResponseEntity<StreamingProviderResponseDTO> updateProvider(@PathVariable String id,
-                                                                     @RequestBody StreamingProviderRequestDTO providerDTO) {
+                                                                     @Valid @RequestBody StreamingProviderRequestDTO providerDTO) {
         return providerService.updateProvider(id, providerDTO);
     }
     

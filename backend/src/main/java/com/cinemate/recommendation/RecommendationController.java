@@ -90,12 +90,8 @@ public class RecommendationController {
             @PathVariable String userId,
             @RequestParam(defaultValue = "3") int maxRecommendations) {
 
-        try {
-            recommendationNotificationService.sendRecommendationNotifications(userId, maxRecommendations);
-            return ResponseEntity.ok("Empfehlungsbenachrichtigungen erfolgreich gesendet für Benutzer: " + userId);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Fehler beim Senden der Empfehlungsbenachrichtigungen: " + e.getMessage());
-        }
+        recommendationNotificationService.sendRecommendationNotifications(userId, maxRecommendations);
+        return ResponseEntity.ok("Empfehlungsbenachrichtigungen erfolgreich gesendet für Benutzer: " + userId);
     }
 
     /**
@@ -108,12 +104,8 @@ public class RecommendationController {
             @PathVariable String userId,
             @RequestParam(defaultValue = "5") int maxRecommendations) {
 
-        try {
-            recommendationNotificationService.sendSummaryRecommendationNotifications(userId, maxRecommendations);
-            return ResponseEntity.ok("Zusammenfassungsbenachrichtigung erfolgreich gesendet für Benutzer: " + userId);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Fehler beim Senden der Zusammenfassungsbenachrichtigung: " + e.getMessage());
-        }
+        recommendationNotificationService.sendSummaryRecommendationNotifications(userId, maxRecommendations);
+        return ResponseEntity.ok("Zusammenfassungsbenachrichtigung erfolgreich gesendet für Benutzer: " + userId);
     }
 
     /**
@@ -125,12 +117,8 @@ public class RecommendationController {
     public ResponseEntity<String> sendRecommendationNotificationsToAll(
             @RequestParam(defaultValue = "3") int maxRecommendations) {
 
-        try {
-            recommendationNotificationService.sendRecommendationNotificationsToAllUsers(maxRecommendations);
-            return ResponseEntity.ok("Empfehlungsbenachrichtigungen erfolgreich an alle Benutzer gesendet");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Fehler beim Senden der Empfehlungsbenachrichtigungen: " + e.getMessage());
-        }
+        recommendationNotificationService.sendRecommendationNotificationsToAllUsers(maxRecommendations);
+        return ResponseEntity.ok("Empfehlungsbenachrichtigungen erfolgreich an alle Benutzer gesendet");
     }
 
     /**
@@ -142,12 +130,8 @@ public class RecommendationController {
     public ResponseEntity<String> sendSummaryRecommendationNotificationsToAll(
             @RequestParam(defaultValue = "5") int maxRecommendations) {
 
-        try {
-            recommendationNotificationService.sendSummaryRecommendationNotificationsToAllUsers(maxRecommendations);
-            return ResponseEntity.ok("Zusammenfassungsbenachrichtigungen erfolgreich an alle Benutzer gesendet");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Fehler beim Senden der Zusammenfassungsbenachrichtigungen: " + e.getMessage());
-        }
+        recommendationNotificationService.sendSummaryRecommendationNotificationsToAllUsers(maxRecommendations);
+        return ResponseEntity.ok("Zusammenfassungsbenachrichtigungen erfolgreich an alle Benutzer gesendet");
     }
 
     /**
@@ -161,11 +145,7 @@ public class RecommendationController {
             @PathVariable String userId,
             @RequestParam String trigger) {
 
-        try {
-            recommendationNotificationService.sendTriggeredRecommendations(userId, trigger);
-            return ResponseEntity.ok("Getriggerte Empfehlungsbenachrichtigungen erfolgreich gesendet für Benutzer: " + userId);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Fehler beim Senden der getriggerten Empfehlungsbenachrichtigungen: " + e.getMessage());
-        }
+        recommendationNotificationService.sendTriggeredRecommendations(userId, trigger);
+        return ResponseEntity.ok("Getriggerte Empfehlungsbenachrichtigungen erfolgreich gesendet für Benutzer: " + userId);
     }
 }

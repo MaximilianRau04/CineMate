@@ -12,7 +12,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin/notifications")
-@CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 public class AdminNotificationController {
 
@@ -31,19 +30,15 @@ public class AdminNotificationController {
             return ResponseEntity.status(403).body("Nur Admins können Benachrichtigungen senden");
         }
 
-        try {
-            notificationService.sendAdminNotification(
-                NotificationType.ADMIN_NOTIFICATION,
-                request.getTitle(),
-                request.getMessage(),
-                request.getTargetUserId()
-            );
+        notificationService.sendAdminNotification(
+            NotificationType.ADMIN_NOTIFICATION,
+            request.getTitle(),
+            request.getMessage(),
+            request.getTargetUserId()
+        );
 
-            String target = request.getTargetUserId() != null ? "an einen Benutzer" : "an alle Benutzer";
-            return ResponseEntity.ok().body("Benachrichtigung erfolgreich " + target + " gesendet");
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Fehler beim Senden der Benachrichtigung: " + e.getMessage());
-        }
+        String target = request.getTargetUserId() != null ? "an einen Benutzer" : "an alle Benutzer";
+        return ResponseEntity.ok().body("Benachrichtigung erfolgreich " + target + " gesendet");
     }
 
     /**
@@ -57,19 +52,15 @@ public class AdminNotificationController {
             return ResponseEntity.status(403).body("Nur Admins können Benutzerlisten abrufen");
         }
 
-        try {
-            List<User> users = userRepository.findAll();
-            return ResponseEntity.ok(users.stream()
-                .map(user -> Map.of(
-                    "id", user.getId(),
-                    "username", user.getUsername(),
-                    "email", user.getEmail(),
-                    "role", user.getRole()
-                ))
-                .toList());
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Fehler beim Laden der Benutzerliste: " + e.getMessage());
-        }
+        List<User> users = userRepository.findAll();
+        return ResponseEntity.ok(users.stream()
+            .map(user -> Map.of(
+                "id", user.getId(),
+                "username", user.getUsername(),
+                "email", user.getEmail(),
+                "role", user.getRole()
+            ))
+            .toList());
     }
 
     /**

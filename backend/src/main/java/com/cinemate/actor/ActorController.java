@@ -4,6 +4,7 @@ import com.cinemate.actor.DTOs.ActorRequestDTO;
 import com.cinemate.actor.DTOs.ActorResponseDTO;
 import com.cinemate.movie.DTOs.MovieResponseDTO;
 import com.cinemate.series.DTOs.SeriesResponseDTO;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -45,7 +46,7 @@ public class ActorController {
      * @return the created actor
      */
     @PostMapping
-    public ResponseEntity<ActorResponseDTO> createActor(@RequestBody ActorRequestDTO actorRequestDTO) {
+    public ResponseEntity<ActorResponseDTO> createActor(@Valid @RequestBody ActorRequestDTO actorRequestDTO) {
         ActorResponseDTO actorResponseDTO = actorService.createActor(actorRequestDTO);
         return ResponseEntity.ok(actorResponseDTO);
     }
@@ -57,7 +58,7 @@ public class ActorController {
      * @return the updated actor
      */
     @PutMapping("{id}")
-    public ResponseEntity<ActorResponseDTO> updateActor(@PathVariable String id, @RequestBody ActorRequestDTO updatedActorDTO) {
+    public ResponseEntity<ActorResponseDTO> updateActor(@PathVariable String id, @Valid @RequestBody ActorRequestDTO updatedActorDTO) {
         Optional<ActorResponseDTO> updatedActor = actorService.updateActor(id, updatedActorDTO);
         return updatedActor.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }

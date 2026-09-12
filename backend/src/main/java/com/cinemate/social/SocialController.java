@@ -14,7 +14,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/social")
-@CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 public class SocialController {
 

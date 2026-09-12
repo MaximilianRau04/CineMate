@@ -14,7 +14,6 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/notification-preferences")
-@CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 public class NotificationPreferenceController {
 

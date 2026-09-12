@@ -4,6 +4,7 @@ import com.cinemate.director.DTOs.DirectorRequestDTO;
 import com.cinemate.director.DTOs.DirectorResponseDTO;
 import com.cinemate.movie.DTOs.MovieResponseDTO;
 import com.cinemate.series.DTOs.SeriesResponseDTO;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -44,7 +45,7 @@ public class DirectorController {
      * @return the created director
      */
     @PostMapping
-    public ResponseEntity<DirectorResponseDTO> createDirector(@RequestBody DirectorRequestDTO dto) {
+    public ResponseEntity<DirectorResponseDTO> createDirector(@Valid @RequestBody DirectorRequestDTO dto) {
         return ResponseEntity.ok(directorService.createDirector(dto));
     }
 
@@ -55,7 +56,7 @@ public class DirectorController {
      * @return the updated director
      */
     @PutMapping("/{id}")
-    public ResponseEntity<DirectorResponseDTO> updateDirector(@PathVariable String id, @RequestBody DirectorRequestDTO dto) {
+    public ResponseEntity<DirectorResponseDTO> updateDirector(@PathVariable String id, @Valid @RequestBody DirectorRequestDTO dto) {
         return directorService.updateDirector(id, dto)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());

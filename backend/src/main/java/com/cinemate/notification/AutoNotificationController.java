@@ -20,12 +20,8 @@ public class AutoNotificationController {
      */
     @PostMapping("/check-milestones/{userId}")
     public ResponseEntity<String> checkMilestones(@PathVariable String userId) {
-        try {
-            autoNotificationService.checkAndNotifyMilestones(userId);
-            return ResponseEntity.ok("Meilenstein-Überprüfung für User " + userId + " durchgeführt.");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Fehler bei Meilenstein-Überprüfung: " + e.getMessage());
-        }
+        autoNotificationService.checkAndNotifyMilestones(userId);
+        return ResponseEntity.ok("Meilenstein-Überprüfung für User " + userId + " durchgeführt.");
     }
 
     /**
@@ -35,12 +31,8 @@ public class AutoNotificationController {
      */
     @PostMapping("/upcoming-releases/{userId}")
     public ResponseEntity<String> sendUpcomingReleases(@PathVariable String userId) {
-        try {
-            autoNotificationService.notifyUpcomingReleases(userId);
-            return ResponseEntity.ok("Wöchentliche Release-Benachrichtigung für User " + userId + " gesendet.");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Fehler bei Release-Benachrichtigung: " + e.getMessage());
-        }
+        autoNotificationService.notifyUpcomingReleases(userId);
+        return ResponseEntity.ok("Wöchentliche Release-Benachrichtigung für User " + userId + " gesendet.");
     }
 
     /**
@@ -49,12 +41,8 @@ public class AutoNotificationController {
      */
     @PostMapping("/trigger-weekly")
     public ResponseEntity<String> triggerWeeklyNotifications() {
-        try {
-            scheduledNotificationService.sendWeeklyUpcomingReleases();
-            return ResponseEntity.ok("Wöchentliche Benachrichtigungen für alle User gesendet.");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Fehler bei wöchentlichen Benachrichtigungen: " + e.getMessage());
-        }
+        scheduledNotificationService.sendWeeklyUpcomingReleases();
+        return ResponseEntity.ok("Wöchentliche Benachrichtigungen für alle User gesendet.");
     }
 
     /**
@@ -63,11 +51,7 @@ public class AutoNotificationController {
      */
     @PostMapping("/trigger-daily")
     public ResponseEntity<String> triggerDailyReleaseCheck() {
-        try {
-            scheduledNotificationService.checkDailyReleases();
-            return ResponseEntity.ok("Tägliche Release-Überprüfung durchgeführt.");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Fehler bei täglicher Release-Überprüfung: " + e.getMessage());
-        }
+        scheduledNotificationService.checkDailyReleases();
+        return ResponseEntity.ok("Tägliche Release-Überprüfung durchgeführt.");
     }
 }

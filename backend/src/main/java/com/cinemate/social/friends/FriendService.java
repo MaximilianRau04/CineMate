@@ -9,6 +9,7 @@ import com.cinemate.user.User;
 import com.cinemate.user.UserRepository;
 import com.cinemate.user.DTOs.UserResponseDTO;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FriendService {
@@ -128,7 +130,7 @@ public class FriendService {
             return ResponseEntity.ok("Friend request accepted");
             
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error accepting friend request", e);
             return ResponseEntity.status(500).body("Error accepting friend request: " + e.getMessage());
         }
     }
@@ -192,9 +194,9 @@ public class FriendService {
                 .collect(Collectors.toList());
             
             return ResponseEntity.ok(friends);
-            
+
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error retrieving friends for user {}", userId, e);
             return ResponseEntity.status(500).build();
         }
     }
@@ -222,9 +224,9 @@ public class FriendService {
                 .collect(Collectors.toList());
             
             return ResponseEntity.ok(requests);
-            
+
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error retrieving pending friend requests for user {}", userId, e);
             return ResponseEntity.status(500).build();
         }
     }

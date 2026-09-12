@@ -4,6 +4,7 @@ import com.cinemate.actor.DTOs.ActorResponseDTO;
 import com.cinemate.director.DTOs.DirectorResponseDTO;
 import com.cinemate.movie.DTOs.MovieRequestDTO;
 import com.cinemate.movie.DTOs.MovieResponseDTO;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -54,7 +55,7 @@ public class MovieController {
      * @return Movie
      */
     @PostMapping
-    public ResponseEntity<MovieResponseDTO> createMovie(@RequestBody MovieRequestDTO movie) {
+    public ResponseEntity<MovieResponseDTO> createMovie(@Valid @RequestBody MovieRequestDTO movie) {
         return movieService.createMovie(movie);
     }
 
@@ -65,7 +66,7 @@ public class MovieController {
      * @return Movie
      */
     @PutMapping("/{id}")
-    public ResponseEntity<MovieResponseDTO> updateMovie(@PathVariable String id, @RequestBody MovieRequestDTO movie) {
+    public ResponseEntity<MovieResponseDTO> updateMovie(@PathVariable String id, @Valid @RequestBody MovieRequestDTO movie) {
         return movieService.updateMovie(id, movie);
     }
 
