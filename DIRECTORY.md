@@ -201,7 +201,6 @@
             📄 UserService.java
           📄 CineMateApplication.java
     📂 resources/
-📂 uploads/
 ```
 
 ## frontend
