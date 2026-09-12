@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import api from "../../../utils/api";
+import { useToast } from "../../toasts";
 
 const SeasonSection = ({ seriesId }) => {
+  const { error: showError } = useToast();
   const [seasons, setSeasons] = useState([]);
   const [seasonsLoading, setSeasonsLoading] = useState(true);
 
@@ -19,6 +21,7 @@ const SeasonSection = ({ seriesId }) => {
       setSeasonsLoading(false);
     } catch (err) {
       console.error("Fehler beim Laden der Staffeln:", err);
+      showError("Staffeln konnten nicht geladen werden");
       setSeasonsLoading(false);
     }
   };

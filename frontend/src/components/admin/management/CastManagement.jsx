@@ -5,6 +5,7 @@ import Modal from "../modals/Modal";
 import PersonList from "../tables/PersonList";
 import Filmography from "./Filmography";
 import AssignmentForm from "../forms/AssignmentForm";
+import { useToast } from "../../toasts";
 
 const CastManagement = ({
   actors,
@@ -22,6 +23,7 @@ const CastManagement = ({
   removeDirectorFromSeries,
   loadData,
 }) => {
+  const { error: showError } = useToast();
   const [activeTab, setActiveTab] = useState("actors");
   const [modals, setModals] = useState({
     addActor: false,
@@ -73,6 +75,7 @@ const CastManagement = ({
       setActorFilmography({ movies, series });
     } catch (error) {
       console.error("Error fetching actor filmography:", error);
+      showError("Fehler beim Laden der Filmografie");
       setActorFilmography({ movies: [], series: [] });
     } finally {
       setFilmographyLoading(false);
@@ -93,6 +96,7 @@ const CastManagement = ({
       setDirectorFilmography({ movies, series });
     } catch (error) {
       console.error("Error fetching director filmography:", error);
+      showError("Fehler beim Laden der Filmografie");
       setDirectorFilmography({ movies: [], series: [] });
     } finally {
       setFilmographyLoading(false);
@@ -111,6 +115,7 @@ const CastManagement = ({
       setNewActor({ name: "", birthday: null, image: "", biography: "" });
     } catch (error) {
       console.error("Error adding actor:", error);
+      showError("Fehler beim Hinzufügen des Schauspielers");
     }
   };
 
@@ -127,6 +132,7 @@ const CastManagement = ({
       setSelectedPerson(null);
     } catch (error) {
       console.error("Error updating actor:", error);
+      showError("Fehler beim Aktualisieren des Schauspielers");
     }
   };
 
@@ -148,6 +154,7 @@ const CastManagement = ({
       await loadData();
     } catch (error) {
       console.error("Error deleting actor:", error);
+      showError("Fehler beim Löschen des Schauspielers");
     }
   };
 
@@ -163,6 +170,7 @@ const CastManagement = ({
       setNewDirector({ name: "", birthday: null, image: "", biography: "" });
     } catch (error) {
       console.error("Error adding director:", error);
+      showError("Fehler beim Hinzufügen des Regisseurs");
     }
   };
 
@@ -179,6 +187,7 @@ const CastManagement = ({
       setSelectedPerson(null);
     } catch (error) {
       console.error("Error updating director:", error);
+      showError("Fehler beim Aktualisieren des Regisseurs");
     }
   };
 
@@ -200,6 +209,7 @@ const CastManagement = ({
       await loadData();
     } catch (error) {
       console.error("Error deleting director:", error);
+      showError("Fehler beim Löschen des Regisseurs");
     }
   };
 
@@ -211,17 +221,23 @@ const CastManagement = ({
     if (!selectedPerson || !selectedContent) return;
 
     try {
-      if (contentType === "movie") {
-        await assignActorToMovie(selectedContent.id, selectedPerson.id);
-      } else {
-        await assignActorToSeries(selectedContent.id, selectedPerson.id);
+      const assigned =
+        contentType === "movie"
+          ? await assignActorToMovie(selectedContent.id, selectedPerson.id)
+          : await assignActorToSeries(selectedContent.id, selectedPerson.id);
+
+      if (!assigned) {
+        showError("Fehler beim Zuweisen des Schauspielers");
+        return;
       }
+
       await loadData();
       setModals((prev) => ({ ...prev, assignActor: false }));
       setSelectedPerson(null);
       setSelectedContent(null);
     } catch (error) {
       console.error("Error assigning actor:", error);
+      showError("Fehler beim Zuweisen des Schauspielers");
     }
   };
 
@@ -236,14 +252,20 @@ const CastManagement = ({
     if (!window.confirm("Möchten Sie diesen Schauspieler entfernen?")) return;
 
     try {
-      if (type === "movie") {
-        await removeActorFromMovie(contentId, actorId);
-      } else {
-        await removeActorFromSeries(contentId, actorId);
+      const removed =
+        type === "movie"
+          ? await removeActorFromMovie(contentId, actorId)
+          : await removeActorFromSeries(contentId, actorId);
+
+      if (!removed) {
+        showError("Fehler beim Entfernen des Schauspielers");
+        return;
       }
+
       await loadData();
     } catch (error) {
       console.error("Error removing actor:", error);
+      showError("Fehler beim Entfernen des Schauspielers");
     }
   };
 
@@ -255,17 +277,26 @@ const CastManagement = ({
     if (!selectedPerson || !selectedContent) return;
 
     try {
-      if (contentType === "movie") {
-        await assignDirectorToMovie(selectedContent.id, selectedPerson.id);
-      } else {
-        await assignDirectorToSeries(selectedContent.id, selectedPerson.id);
+      const assigned =
+        contentType === "movie"
+          ? await assignDirectorToMovie(selectedContent.id, selectedPerson.id)
+          : await assignDirectorToSeries(
+              selectedContent.id,
+              selectedPerson.id,
+            );
+
+      if (!assigned) {
+        showError("Fehler beim Zuweisen des Regisseurs");
+        return;
       }
+
       await loadData();
       setModals((prev) => ({ ...prev, assignDirector: false }));
       setSelectedPerson(null);
       setSelectedContent(null);
     } catch (error) {
       console.error("Error assigning director:", error);
+      showError("Fehler beim Zuweisen des Regisseurs");
     }
   };
   /**
@@ -279,14 +310,20 @@ const CastManagement = ({
     if (!window.confirm("Möchten Sie diesen Regisseur entfernen?")) return;
 
     try {
-      if (type === "movie") {
-        await removeDirectorFromMovie(contentId, directorId);
-      } else {
-        await removeDirectorFromSeries(contentId, directorId);
+      const removed =
+        type === "movie"
+          ? await removeDirectorFromMovie(contentId, directorId)
+          : await removeDirectorFromSeries(contentId, directorId);
+
+      if (!removed) {
+        showError("Fehler beim Entfernen des Regisseurs");
+        return;
       }
+
       await loadData();
     } catch (error) {
       console.error("Error removing director:", error);
+      showError("Fehler beim Entfernen des Regisseurs");
     }
   };
 

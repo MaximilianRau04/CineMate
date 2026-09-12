@@ -3,8 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "../toasts";
 import "./css/ForumHome.css";
 import api from "../../utils/api";
+import { useAuth } from "../../utils/AuthContext";
 
 const ForumHome = () => {
+  const { user: currentUser, isAuthenticated } = useAuth();
   const [posts, setPosts] = useState([]);
   const [pinnedPosts, setPinnedPosts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -16,7 +18,6 @@ const ForumHome = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [currentUser, setCurrentUser] = useState(null);
   const [mediaInfoCache, setMediaInfoCache] = useState({});
 
   const navigate = useNavigate();
@@ -59,23 +60,6 @@ const ForumHome = () => {
   );
 
   /**
-   * Fetches the current user information
-   * @returns {Promise<void>} - Resolves when the user data is fetched
-   * @throws {Error} - If fetching user data fails
-   */
-  const fetchCurrentUser = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) return;
-
-      const { data: userData } = await api.get("/users/me");
-      setCurrentUser(userData);
-    } catch (error) {
-      console.error("Error fetching current user:", error);
-    }
-  };
-
-  /**
    * Fetches the available forum categories
    * @returns {Promise<void>} - Resolves when categories are fetched
    * @throws {Error} - If fetching categories fails
@@ -86,6 +70,7 @@ const ForumHome = () => {
       setCategories(data);
     } catch (error) {
       console.error("Error fetching categories:", error);
+      showError("Kategorien konnten nicht geladen werden");
     }
   };
 
@@ -100,6 +85,7 @@ const ForumHome = () => {
       setPinnedPosts(data);
     } catch (error) {
       console.error("Error fetching pinned posts:", error);
+      showError("Angepinnte Beiträge konnten nicht geladen werden");
     }
   };
 
@@ -136,7 +122,6 @@ const ForumHome = () => {
   useEffect(() => {
     fetchCategories();
     fetchPinnedPosts();
-    fetchCurrentUser();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
@@ -270,8 +255,7 @@ const ForumHome = () => {
    * @returns {void}
    */
   const handleCreatePost = () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
+    if (!isAuthenticated) {
       navigate("/");
       return;
     }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "../../assets/login.css";
+import "./Login.css";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useAuth } from "../../utils/AuthContext";
 import { useNavigate } from "react-router-dom";

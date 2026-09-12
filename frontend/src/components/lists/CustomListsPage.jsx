@@ -3,7 +3,7 @@ import ListCard from "./ListCard";
 import CreateListModal from "./CreateListModal";
 import { useAuth } from "../../utils/AuthContext";
 import { useToast } from "../toasts";
-import "../../assets/custom-lists.css";
+import "./CustomListsPage.css";
 import api from "../../utils/api";
 
 const CustomListsPage = () => {

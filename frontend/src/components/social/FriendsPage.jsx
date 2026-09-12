@@ -10,6 +10,7 @@ import {
 } from "react-icons/fa";
 import { useToast } from "../toasts";
 import api from "../../utils/api";
+import { useAuth } from "../../utils/AuthContext";
 
 const FriendsPage = () => {
   const [friends, setFriends] = useState([]);
@@ -20,6 +21,7 @@ const FriendsPage = () => {
   const [loading, setLoading] = useState(true);
   const [allUsers, setAllUsers] = useState([]);
   const { success, error: showError } = useToast();
+  const { user: currentUser } = useAuth();
 
   useEffect(() => {
     loadData();
@@ -52,6 +54,7 @@ const FriendsPage = () => {
       setFriends(data);
     } catch (error) {
       console.error("Error loading friends:", error);
+      showError("Freunde konnten nicht geladen werden");
     }
   };
 
@@ -66,6 +69,7 @@ const FriendsPage = () => {
       setPendingRequests(data);
     } catch (error) {
       console.error("Error loading pending requests:", error);
+      showError("Anfragen konnten nicht geladen werden");
     }
   };
 
@@ -77,16 +81,16 @@ const FriendsPage = () => {
   const loadAllUsers = async () => {
     try {
       const { data } = await api.get("/users");
-      const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
       // Filter out current user and existing friends
       const filteredUsers = data.filter(
         (user) =>
-          user.id !== currentUser.id &&
+          user.id !== currentUser?.id &&
           !friends.some((friend) => friend.id === user.id),
       );
       setAllUsers(filteredUsers);
     } catch (error) {
       console.error("Error loading users:", error);
+      showError("Benutzer konnten nicht geladen werden");
     }
   };
 

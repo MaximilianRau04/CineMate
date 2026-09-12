@@ -13,7 +13,7 @@ import {
   ArcElement,
 } from "chart.js";
 import { useToast } from "../toasts/ToastContext";
-import "../../assets/statistics.css";
+import "./UserStatistics.css";
 import api from "../../utils/api";
 
 ChartJS.register(

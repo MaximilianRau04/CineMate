@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import api from "../../../utils/api";
+import { useToast } from "../../toasts";
 
 export const useReviews = (userId, mediaId, mediaType) => {
+  const { error: showError } = useToast();
   const [reviews, setReviews] = useState([]);
   const [averageRating, setAverageRating] = useState(0);
   const [reviewUsers, setReviewUsers] = useState({});
@@ -146,6 +148,7 @@ export const useReviews = (userId, mediaId, mediaType) => {
       await loadReviews();
     } catch (error) {
       console.error("Fehler beim Speichern der Bewertung:", error);
+      showError("Bewertung konnte nicht gespeichert werden");
     } finally {
       setSubmitting(false);
     }
@@ -176,6 +179,7 @@ export const useReviews = (userId, mediaId, mediaType) => {
       await loadReviews();
     } catch (error) {
       console.error("Fehler beim Bearbeiten der Bewertung:", error);
+      showError("Bewertung konnte nicht bearbeitet werden");
     } finally {
       setSubmitting(false);
     }
@@ -205,6 +209,7 @@ export const useReviews = (userId, mediaId, mediaType) => {
       await loadReviews();
     } catch (error) {
       console.error("Fehler beim Löschen:", error);
+      showError("Bewertung konnte nicht gelöscht werden");
     }
   };
 

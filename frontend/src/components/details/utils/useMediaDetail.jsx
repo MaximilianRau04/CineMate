@@ -2,37 +2,18 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
 import api from "../../../utils/api";
+import { useAuth } from "../../../utils/AuthContext";
 
 export const useMediaDetail = (mediaType = "movies") => {
   const { id: mediaId } = useParams();
+  const { user: currentUser } = useAuth();
+  const userId = currentUser?.id ?? null;
   const [media, setMedia] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [userId, setUserId] = useState(null);
-  const [currentUser, setCurrentUser] = useState(null);
   const [actors, setActors] = useState([]);
   const [director, setDirector] = useState(null);
   const [castLoading, setCastLoading] = useState(true);
-
-  /**
-   * Fetches the current user from localStorage and sets userId and currentUser state.
-   * @returns {void}
-   */
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
-
-    api
-      .get("/users/me")
-      .then((res) => {
-        const data = res.data;
-        if (data?.id) {
-          setUserId(data.id);
-          setCurrentUser(data);
-        }
-      })
-      .catch((err) => console.error("Fehler beim Laden des Users:", err));
-  }, []);
 
   /**
    * Fetches media details based on mediaId and mediaType.

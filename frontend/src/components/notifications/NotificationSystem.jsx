@@ -1,32 +1,18 @@
 import { useState, useEffect } from "react";
 import { Bell, Check, CheckCheck, Trash2, Clock } from "lucide-react";
 import api from "../../utils/api";
+import { useAuth } from "../../utils/AuthContext";
+import { useToast } from "../toasts";
 
 const NotificationSystem = () => {
+  const { user } = useAuth();
+  const { error: showError } = useToast();
+  const userId = user?.id ?? null;
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const [showUnreadOnly, setShowUnreadOnly] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [userId, setUserId] = useState(null);
-
-  /**
-   * Fetches the current user from localStorage and sets userId and currentUser state.
-   * @returns {void}
-   */
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
-
-    api
-      .get("/users/me")
-      .then(({ data }) => {
-        if (data?.id) {
-          setUserId(data.id);
-        }
-      })
-      .catch((err) => console.error("Fehler beim Laden des Users:", err));
-  }, []);
 
   /**
    * Fetches notifications for the current user.
@@ -56,6 +42,7 @@ const NotificationSystem = () => {
       setNotifications(processedData);
     } catch (error) {
       console.error("Error fetching notifications:", error);
+      showError("Benachrichtigungen konnten nicht geladen werden");
     } finally {
       setLoading(false);
     }
@@ -87,6 +74,7 @@ const NotificationSystem = () => {
       setUnreadCount((prev) => Math.max(0, prev - 1));
     } catch (error) {
       console.error("Error marking notification as read:", error);
+      showError("Konnte nicht als gelesen markiert werden");
     }
   };
 
@@ -114,6 +102,7 @@ const NotificationSystem = () => {
       setUnreadCount(0);
     } catch (error) {
       console.error("Error marking all notifications as read:", error);
+      showError("Konnte nicht alle als gelesen markieren");
     }
   };
 
@@ -142,6 +131,7 @@ const NotificationSystem = () => {
       setUnreadCount(0);
     } catch (error) {
       console.error("Error deleting all notifications:", error);
+      showError("Benachrichtigungen konnten nicht gelöscht werden");
     }
   };
 
@@ -164,6 +154,7 @@ const NotificationSystem = () => {
       }
     } catch (error) {
       console.error("Error deleting notification:", error);
+      showError("Benachrichtigung konnte nicht gelöscht werden");
     }
   };
 

@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { FaTrophy, FaMedal, FaStar, FaLock, FaUnlock } from "react-icons/fa";
-import "../../assets/achievements.css";
+import "./AchievementsPage.css";
 import api from "../../utils/api";
+import { useToast } from "../toasts";
 
 const AchievementsPage = ({ userId }) => {
+  const { error: showError } = useToast();
   const [userAchievements, setUserAchievements] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -33,6 +35,7 @@ const AchievementsPage = ({ userId }) => {
         setUserAchievements(data);
       } catch (error) {
         console.error("Error loading user achievements:", error);
+        showError("Erfolge konnten nicht geladen werden");
       }
     };
 
@@ -45,6 +48,7 @@ const AchievementsPage = ({ userId }) => {
         setStats(data);
       } catch (error) {
         console.error("Error loading achievement stats:", error);
+        showError("Statistiken konnten nicht geladen werden");
       }
     };
 

@@ -31,8 +31,10 @@ import AdminNotificationPanel from "./management/NotificationManagement";
 import TmdbImport from "./management/TmdbImport";
 
 import { SeasonForm, EpisodeForm, ContentForm } from "./forms/ContentForms";
+import { useToast } from "../toasts";
 
 const AdminPanel = () => {
+  const { error: showError } = useToast();
   const [activeTab, setActiveTab] = useState("dashboard");
   const {
     data,
@@ -48,6 +50,7 @@ const AdminPanel = () => {
     removeActorFromSeries,
     assignDirectorToMovie,
     assignDirectorToSeries,
+    removeDirectorFromMovie,
     removeDirectorFromSeries,
     deleteUser,
   } = useAppData();
@@ -132,6 +135,7 @@ const AdminPanel = () => {
       }));
     } catch (error) {
       console.error("Error adding content:", error);
+      showError("Fehler beim Hinzufügen des Inhalts");
     }
   };
 
@@ -174,6 +178,7 @@ const AdminPanel = () => {
       setForms((prev) => ({ ...prev, editingContent: null }));
     } catch (error) {
       console.error("Error updating content:", error);
+      showError("Fehler beim Aktualisieren des Inhalts");
     }
   };
 
@@ -197,6 +202,7 @@ const AdminPanel = () => {
       await loadData();
     } catch (error) {
       console.error("Error deleting content:", error);
+      showError("Fehler beim Löschen des Inhalts");
     }
   };
 
@@ -218,6 +224,7 @@ const AdminPanel = () => {
       await loadData();
     } catch (error) {
       console.error("Error deleting review:", error);
+      showError("Fehler beim Löschen der Bewertung");
     }
   };
 
@@ -245,6 +252,7 @@ const AdminPanel = () => {
       }));
     } catch (error) {
       console.error("Error adding season:", error);
+      showError("Fehler beim Hinzufügen der Staffel");
     }
   };
 
@@ -274,6 +282,7 @@ const AdminPanel = () => {
       setForms((prev) => ({ ...prev, editingSeason: null }));
     } catch (error) {
       console.error("Error updating season:", error);
+      showError("Fehler beim Aktualisieren der Staffel");
     }
   };
 
@@ -297,6 +306,7 @@ const AdminPanel = () => {
       await loadSeasons(forms.selectedSeries.id);
     } catch (error) {
       console.error("Error deleting season:", error);
+      showError("Fehler beim Löschen der Staffel");
     }
   };
 
@@ -341,6 +351,7 @@ const AdminPanel = () => {
       }));
     } catch (error) {
       console.error("Error adding episode:", error);
+      showError("Fehler beim Hinzufügen der Episode");
     }
   };
 
@@ -385,6 +396,7 @@ const AdminPanel = () => {
       setForms((prev) => ({ ...prev, editingEpisode: null }));
     } catch (error) {
       console.error("Error updating episode:", error);
+      showError("Fehler beim Aktualisieren der Episode");
     }
   };
 
@@ -411,11 +423,15 @@ const AdminPanel = () => {
       );
     } catch (error) {
       console.error("Error deleting episode:", error);
+      showError("Fehler beim Löschen der Episode");
     }
   };
 
   const handleDeleteUser = async (userId) => {
-    deleteUser(userId);
+    const deleted = await deleteUser(userId);
+    if (!deleted) {
+      showError("Fehler beim Löschen des Benutzers");
+    }
   };
 
   /**
@@ -560,6 +576,7 @@ const AdminPanel = () => {
               removeActorFromSeries={removeActorFromSeries}
               assignDirectorToMovie={assignDirectorToMovie}
               assignDirectorToSeries={assignDirectorToSeries}
+              removeDirectorFromMovie={removeDirectorFromMovie}
               removeDirectorFromSeries={removeDirectorFromSeries}
               loadData={loadData}
             />

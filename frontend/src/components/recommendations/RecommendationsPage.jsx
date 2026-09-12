@@ -1,16 +1,20 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import "../../assets/recommendations-page.css";
+import "./RecommendationsPage.css";
 import api from "../../utils/api";
+import { useAuth } from "../../utils/AuthContext";
+import { useToast } from "../toasts";
 
 const RecommendationsPage = () => {
+  const { user } = useAuth();
+  const { error: showError } = useToast();
+  const userId = user?.id ?? null;
   const [recommendations, setRecommendations] = useState([]);
   const [trending, setTrending] = useState([]);
   const [selectedGenre, setSelectedGenre] = useState("");
   const [genreRecommendations, setGenreRecommendations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("personal");
-  const [userId, setUserId] = useState(null);
   const [error, setError] = useState(null);
 
   const genres = [
@@ -28,27 +32,11 @@ const RecommendationsPage = () => {
   ];
 
   useEffect(() => {
-    fetchCurrentUser();
-  }, []);
-
-  useEffect(() => {
     if (userId) {
       loadPersonalRecommendations();
     }
     loadTrendingRecommendations();
   }, [userId]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  /**
-   * fetches the current user from the API
-   */
-  const fetchCurrentUser = async () => {
-    try {
-      const { data: user } = await api.get("/users/me");
-      setUserId(user.id);
-    } catch (error) {
-      console.error("Fehler beim Laden des Benutzers:", error);
-    }
-  };
 
   /**
    * fetches the personal recommendations for the current user
@@ -80,6 +68,7 @@ const RecommendationsPage = () => {
       setTrending(data);
     } catch (error) {
       console.error("Fehler beim Laden der Trending-Empfehlungen:", error);
+      showError("Trending-Empfehlungen konnten nicht geladen werden");
     }
   };
 

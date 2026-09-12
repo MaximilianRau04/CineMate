@@ -9,8 +9,12 @@ import {
   FaHeart,
 } from "react-icons/fa";
 import api from "../../utils/api";
+import { useAuth } from "../../utils/AuthContext";
+import { useToast } from "../toasts";
 
 const Leaderboard = () => {
+  const { user: currentUser } = useAuth();
+  const { error: showError } = useToast();
   const [leaderboard, setLeaderboard] = useState([]);
   const [myPoints, setMyPoints] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -78,6 +82,7 @@ const Leaderboard = () => {
       setLeaderboard(data);
     } catch (error) {
       console.error("Error loading leaderboard:", error);
+      showError("Bestenliste konnte nicht geladen werden");
     }
   };
 
@@ -90,6 +95,7 @@ const Leaderboard = () => {
       setMyPoints(data);
     } catch (error) {
       console.error("Error loading my points:", error);
+      showError("Punkte konnten nicht geladen werden");
     }
   };
 
@@ -201,9 +207,7 @@ const Leaderboard = () => {
                       <h6 className="mb-2">Dein Rang</h6>
                       <h2 className="mb-0">
                         {leaderboard.findIndex(
-                          (entry) =>
-                            entry.userId ===
-                            JSON.parse(localStorage.getItem("user") || "{}").id,
+                          (entry) => entry.userId === currentUser?.id,
                         ) + 1 || "Unranked"}
                       </h2>
                     </div>
@@ -255,9 +259,7 @@ const Leaderboard = () => {
                     <tbody>
                       {leaderboard.map((entry, index) => {
                         const rank = index + 1;
-                        const isCurrentUser =
-                          entry.userId ===
-                          JSON.parse(localStorage.getItem("user") || "{}").id;
+                        const isCurrentUser = entry.userId === currentUser?.id;
 
                         return (
                           <tr

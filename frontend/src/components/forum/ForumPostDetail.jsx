@@ -3,11 +3,13 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useToast } from "../toasts";
 import "./css/ForumPostDetail.css";
 import api from "../../utils/api";
+import { useAuth } from "../../utils/AuthContext";
 
 const ForumPostDetail = () => {
   const { postId } = useParams();
   const navigate = useNavigate();
   const { success, error: showError } = useToast();
+  const { user: currentUser } = useAuth();
   const [post, setPost] = useState(null);
   const [replies, setReplies] = useState([]);
   const [subscriptionStatus, setSubscriptionStatus] = useState({
@@ -15,7 +17,6 @@ const ForumPostDetail = () => {
     subscriberCount: 0,
   });
   const [replyContent, setReplyContent] = useState("");
-  const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
@@ -31,7 +32,6 @@ const ForumPostDetail = () => {
     fetchPost();
     fetchReplies();
     fetchSubscriptionStatus();
-    fetchCurrentUser();
   }, [postId, currentPage]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Fetch media info when post is loaded
@@ -72,6 +72,7 @@ const ForumPostDetail = () => {
       setTotalPages(data.totalPages);
     } catch (error) {
       console.error("Error fetching replies:", error);
+      showError("Antworten konnten nicht geladen werden");
     }
   };
 
@@ -95,23 +96,6 @@ const ForumPostDetail = () => {
       setSubscriptionStatus(normalizedData);
     } catch (error) {
       console.error("Error fetching subscription status:", error);
-    }
-  };
-
-  /**
-   * Fetches current user information
-   * @return {Promise<void>} - Resolves when current user data is fetched
-   * @throws {Error} - If fetching current user fails
-   */
-  const fetchCurrentUser = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) return;
-
-      const { data: userData } = await api.get("/users/me");
-      setCurrentUser(userData);
-    } catch (error) {
-      console.error("Error fetching current user:", error);
     }
   };
 
@@ -181,6 +165,7 @@ const ForumPostDetail = () => {
       fetchPost();
     } catch (error) {
       console.error("Error submitting reply:", error);
+      showError("Antwort konnte nicht gesendet werden");
     } finally {
       setSubmittingReply(false);
     }
@@ -201,6 +186,7 @@ const ForumPostDetail = () => {
       fetchPost();
     } catch (error) {
       console.error("Error toggling like:", error);
+      showError("Like konnte nicht verarbeitet werden");
     }
   };
 

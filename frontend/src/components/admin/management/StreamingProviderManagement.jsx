@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useToast } from "../../toasts";
 import api from "../../../utils/api";
+import "./StreamingProviderManagement.css";
 
 const StreamingProviderManagement = () => {
   const [providers, setProviders] = useState([]);

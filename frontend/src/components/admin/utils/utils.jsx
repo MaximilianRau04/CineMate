@@ -197,6 +197,22 @@ export const useAppData = () => {
   };
 
   /**
+   * removes a director from a movie.
+   * @param {*} movieId
+   * @param {*} directorId
+   * @returns {boolean}
+   */
+  const removeDirectorFromMovie = async (movieId, directorId) => {
+    try {
+      await api.delete(`/movies/${movieId}/directors/${directorId}`);
+      return true;
+    } catch (error) {
+      console.error("Error removing director from movie:", error);
+      return false;
+    }
+  };
+
+  /**
    * removes a director from a series.
    * @param {*} seriesId
    * @param {*} directorId
@@ -245,6 +261,7 @@ export const useAppData = () => {
     removeActorFromSeries,
     assignDirectorToMovie,
     assignDirectorToSeries,
+    removeDirectorFromMovie,
     removeDirectorFromSeries,
     deleteUser,
   };

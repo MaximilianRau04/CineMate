@@ -4,22 +4,20 @@ import { FaUserFriends, FaEye, FaHeart, FaStar, FaLock } from "react-icons/fa";
 import { useToast } from "../toasts";
 import UserMediaTabs from "../profile/UserMediaTabs";
 import api from "../../utils/api";
+import { useAuth } from "../../utils/AuthContext";
 
 const FriendProfile = () => {
   const { userId } = useParams();
   const { success, error: showError } = useToast();
+  const { user: currentUser } = useAuth();
   const [user, setUser] = useState(null);
   const [userPoints, setUserPoints] = useState(null);
   const [friends, setFriends] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isFriend, setIsFriend] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-    setCurrentUser(storedUser);
-
     if (userId) {
       loadUserData();
     }
@@ -104,6 +102,7 @@ const FriendProfile = () => {
       setUserPoints(pointsData);
     } catch (error) {
       console.error("Error loading user points:", error);
+      showError("Punkte konnten nicht geladen werden");
     }
   };
 
@@ -118,6 +117,7 @@ const FriendProfile = () => {
       setFriends(friendsData);
     } catch (error) {
       console.error("Error loading user friends:", error);
+      showError("Freunde konnten nicht geladen werden");
     }
   };
 
@@ -133,6 +133,7 @@ const FriendProfile = () => {
       setIsFriend(friendshipExists);
     } catch (error) {
       console.error("Error checking friendship:", error);
+      showError("Freundschaftsstatus konnte nicht geprüft werden");
     }
   };
 

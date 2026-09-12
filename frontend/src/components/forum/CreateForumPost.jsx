@@ -18,13 +18,8 @@ const CreateForumPost = () => {
   const { success, error: showError } = useToast();
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      navigate("/");
-      return;
-    }
     fetchCategories();
-  }, [navigate]);
+  }, []);
 
   /**
    * Fetches the list of forum categories
@@ -36,6 +31,7 @@ const CreateForumPost = () => {
       setCategories(data);
     } catch (error) {
       console.error("Error fetching categories:", error);
+      showError("Kategorien konnten nicht geladen werden");
     }
   };
 
