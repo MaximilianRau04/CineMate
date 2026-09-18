@@ -43,6 +43,17 @@
             📄 SecurityConfig.java
             📄 WebConfig.java
             📄 WebSocketConfig.java
+          📂 customlist/
+            📂 dtos/
+              📄 CustomListRequestDTO.java
+              📄 CustomListResponseDTO.java
+              📄 ListCommentResponseDTO.java
+            📄 CustomList.java
+            📄 CustomListController.java
+            📄 CustomListRepository.java
+            📄 CustomListService.java
+            📄 ListComment.java
+            📄 ListCommentRepository.java
           📂 director/
             📂 DTOs/
               📄 DirectorRequestDTO.java
@@ -287,8 +298,14 @@
       📄 ForumPostDetail.jsx
       📄 SearchableMediaSelect.jsx
     📂 lists/
+      📄 AddContentModal.jsx
+      📄 AddToListModal.jsx
+      📄 CreateListModal.jsx
       📄 CustomListsPage.css
       📄 CustomListsPage.jsx
+      📄 EditListModal.jsx
+      📄 ListCard.jsx
+      📄 ListDetailView.jsx
     📂 login/
       📄 Login.css
       📄 Login.jsx
