@@ -24,6 +24,7 @@ const MediaHeader = ({
   onAddToWatchlist,
   onMarkAsWatched,
   onAddToFavorites,
+  onShowAddToListModal,
   renderStars,
 }) => {
   if (!media) return null;
@@ -220,6 +221,17 @@ const MediaHeader = ({
               <FaStar className="me-2" />
               In deinen Favoriten!
             </div>
+          )}
+
+          {userId && onShowAddToListModal && (
+            <button
+              className="btn btn-outline-secondary"
+              onClick={onShowAddToListModal}
+              title="Zu Liste hinzufügen"
+            >
+              <FaPlus className="me-2" />
+              Zu Liste hinzufügen
+            </button>
           )}
 
           {userId && !watched && (

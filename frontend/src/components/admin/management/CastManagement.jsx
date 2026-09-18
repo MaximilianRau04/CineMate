@@ -280,10 +280,7 @@ const CastManagement = ({
       const assigned =
         contentType === "movie"
           ? await assignDirectorToMovie(selectedContent.id, selectedPerson.id)
-          : await assignDirectorToSeries(
-              selectedContent.id,
-              selectedPerson.id,
-            );
+          : await assignDirectorToSeries(selectedContent.id, selectedPerson.id);
 
       if (!assigned) {
         showError("Fehler beim Zuweisen des Regisseurs");

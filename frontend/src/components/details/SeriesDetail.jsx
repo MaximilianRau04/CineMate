@@ -9,6 +9,7 @@ import ReviewSection from "./sections/ReviewSection";
 import EditReviewModal from "./sections/EditReviewModal";
 import SeasonSection from "./sections/SeasonSection";
 import StreamingAvailability from "../streaming/StreamingAvailability";
+import AddToListModal from "../lists/AddToListModal";
 
 const SeriesDetail = () => {
   const {
@@ -54,6 +55,7 @@ const SeriesDetail = () => {
   } = useReviews(userId, mediaId, "series");
 
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showAddToListModal, setShowAddToListModal] = useState(false);
 
   // Handle edit review with modal close
   const handleEditReviewWithClose = async (rating, comment) => {
@@ -100,6 +102,7 @@ const SeriesDetail = () => {
           favorite={isFavorite}
           favoriting={addingToFavorites}
           onAddToFavorites={addToFavorites}
+          onShowAddToListModal={() => setShowAddToListModal(true)}
           renderStars={renderStars}
         />
       </div>
@@ -154,6 +157,14 @@ const SeriesDetail = () => {
         onDeleteReview={handleDeleteReview}
         renderStars={renderStars}
       />
+
+      {showAddToListModal && (
+        <AddToListModal
+          mediaId={mediaId}
+          mediaType="series"
+          onClose={() => setShowAddToListModal(false)}
+        />
+      )}
     </div>
   );
 };

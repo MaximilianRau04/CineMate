@@ -104,7 +104,11 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error("Login error:", error);
       setIsLoading(false);
-      return { success: false, error: error.message };
+      const message =
+        error.response?.status === 401
+          ? "Benutzername oder Passwort falsch."
+          : error.message;
+      return { success: false, error: message };
     }
   };
 

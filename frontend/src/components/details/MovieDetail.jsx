@@ -8,6 +8,7 @@ import CastSection from "./sections/CastSection";
 import ReviewSection from "./sections/ReviewSection";
 import EditReviewModal from "./sections/EditReviewModal";
 import StreamingAvailability from "../streaming/StreamingAvailability";
+import AddToListModal from "../lists/AddToListModal";
 
 const MovieDetail = () => {
   const {
@@ -53,6 +54,7 @@ const MovieDetail = () => {
   } = useReviews(userId, mediaId, "movies");
 
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showAddToListModal, setShowAddToListModal] = useState(false);
 
   // Handle edit review with modal close
   const handleEditReviewWithClose = async (rating, comment) => {
@@ -99,6 +101,7 @@ const MovieDetail = () => {
           favorite={isFavorite}
           favoriting={addingToFavorites}
           onAddToFavorites={addToFavorites}
+          onShowAddToListModal={() => setShowAddToListModal(true)}
           renderStars={renderStars}
         />
       </div>
@@ -151,6 +154,14 @@ const MovieDetail = () => {
         onDeleteReview={handleDeleteReview}
         renderStars={renderStars}
       />
+
+      {showAddToListModal && (
+        <AddToListModal
+          mediaId={mediaId}
+          mediaType="movies"
+          onClose={() => setShowAddToListModal(false)}
+        />
+      )}
     </div>
   );
 };
