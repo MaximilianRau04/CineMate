@@ -7,6 +7,8 @@ com.cinemate.actor
 com.cinemate.actor.DTOs
 com.cinemate.auth
 com.cinemate.config
+com.cinemate.customlist
+com.cinemate.customlist.dtos
 com.cinemate.director
 com.cinemate.director.DTOs
 com.cinemate.exceptions

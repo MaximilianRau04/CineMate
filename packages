@@ -17,6 +17,8 @@ com.cinemate.tmdb.dto
 com.cinemate.exceptions
 com.cinemate.streaming
 com.cinemate.streaming.DTOs
+com.cinemate.customlist.dtos
+com.cinemate.customlist
 com.cinemate.user
 com.cinemate.user.DTOs
 com.cinemate
