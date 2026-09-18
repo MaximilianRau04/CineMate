@@ -53,7 +53,10 @@
             📄 DirectorService.java
           📂 exceptions/
             📄 AlreadyInWatchlistException.java
+            📄 BadRequestException.java
+            📄 ForbiddenActionException.java
             📄 GlobalExceptionHandler.java
+            📄 ResourceNotFoundException.java
           📂 movie/
             📂 DTOs/
               📄 MovieRequestDTO.java
@@ -209,17 +212,11 @@
 📂 public/
 📂 src/
   📂 assets/
-    📄 achievements.css
     📄 App.css
-    📄 custom-lists.css
     📄 index.css
-    📄 login.css
-    📄 recommendation-widget.css
-    📄 recommendations-page.css
-    📄 statistics.css
-    📄 streaming-management.css
   📂 components/
     📂 achievements/
+      📄 AchievementsPage.css
       📄 AchievementsPage.jsx
       📄 UserAchievementBadges.jsx
     📂 admin/
@@ -234,6 +231,7 @@
         📄 Moderation.jsx
         📄 NotificationManagement.jsx
         📄 StreamingAvailabilityManagement.jsx
+        📄 StreamingProviderManagement.css
         📄 StreamingProviderManagement.jsx
         📄 TmdbImport.jsx
         📄 UserManagement.jsx
@@ -289,8 +287,10 @@
       📄 ForumPostDetail.jsx
       📄 SearchableMediaSelect.jsx
     📂 lists/
+      📄 CustomListsPage.css
       📄 CustomListsPage.jsx
     📂 login/
+      📄 Login.css
       📄 Login.jsx
     📂 navigation/
       📄 Header.jsx
@@ -307,13 +307,14 @@
       📄 UserProfile.jsx
       📄 Watchlist.jsx
     📂 recommendations/
+      📄 RecommendationsPage.css
       📄 RecommendationsPage.jsx
-      📄 RecommendationWidget.jsx
     📂 social/
       📄 FriendProfile.jsx
       📄 FriendsPage.jsx
       📄 Leaderboard.jsx
     📂 statistics/
+      📄 UserStatistics.css
       📄 UserStatistics.jsx
     📂 streaming/
       📄 StreamingAvailability.css
