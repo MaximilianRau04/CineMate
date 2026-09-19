@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MonthlyActivityDTO {
-    private String month;
-    private Integer hours;
-    private Integer moviesCount;
-    private Integer seriesCount;
+  private String month;
+  private Integer hours;
+  private Integer moviesCount;
+  private Integer seriesCount;
 }

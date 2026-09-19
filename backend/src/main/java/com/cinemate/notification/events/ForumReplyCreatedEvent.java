@@ -7,13 +7,12 @@ import org.springframework.context.ApplicationEvent;
 
 @Getter
 public class ForumReplyCreatedEvent extends ApplicationEvent {
-    private final ForumReply forumReply;
-    private final ForumPost forumPost;
-    
-    public ForumReplyCreatedEvent(Object source, ForumReply forumReply, ForumPost forumPost) {
-        super(source);
-        this.forumReply = forumReply;
-        this.forumPost = forumPost;
-    }
+  private final ForumReply forumReply;
+  private final ForumPost forumPost;
 
+  public ForumReplyCreatedEvent(Object source, ForumReply forumReply, ForumPost forumPost) {
+    super(source);
+    this.forumReply = forumReply;
+    this.forumPost = forumPost;
+  }
 }

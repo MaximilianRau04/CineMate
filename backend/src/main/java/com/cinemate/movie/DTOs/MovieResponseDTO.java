@@ -1,13 +1,12 @@
 package com.cinemate.movie.DTOs;
 
 import com.cinemate.movie.Movie;
+import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.Date;
 
 @Getter
 @Setter
@@ -16,31 +15,31 @@ import java.util.Date;
 @Builder
 public class MovieResponseDTO {
 
-    private String id;
-    private Integer tmdbId;
-    private String title;
-    private String description;
-    private String genre;
-    private double rating ;
-    private int reviewCount;
-    private Date releaseDate;
-    private String duration;
-    private String posterUrl;
-    private String country;
-    private String trailerUrl;
+  private String id;
+  private Integer tmdbId;
+  private String title;
+  private String description;
+  private String genre;
+  private double rating;
+  private int reviewCount;
+  private Date releaseDate;
+  private String duration;
+  private String posterUrl;
+  private String country;
+  private String trailerUrl;
 
-    public MovieResponseDTO(Movie movie) {
-        this.id = movie.getId();
-        this.tmdbId = movie.getTmdbId();
-        this.title = movie.getTitle();
-        this.description = movie.getDescription();
-        this.genre = movie.getGenre();
-        this.rating = movie.getRating();
-        this.reviewCount = movie.getReviewCount();
-        this.releaseDate = movie.getReleaseDate();
-        this.duration = movie.getDuration();
-        this.posterUrl = movie.getPosterUrl();
-        this.country = movie.getCountry();
-        this.trailerUrl = movie.getTrailerUrl();
-    }
+  public MovieResponseDTO(Movie movie) {
+    this.id = movie.getId();
+    this.tmdbId = movie.getTmdbId();
+    this.title = movie.getTitle();
+    this.description = movie.getDescription();
+    this.genre = movie.getGenre();
+    this.rating = movie.getRating();
+    this.reviewCount = movie.getReviewCount();
+    this.releaseDate = movie.getReleaseDate();
+    this.duration = movie.getDuration();
+    this.posterUrl = movie.getPosterUrl();
+    this.country = movie.getCountry();
+    this.trailerUrl = movie.getTrailerUrl();
+  }
 }

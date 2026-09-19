@@ -13,33 +13,44 @@ import org.springframework.data.mongodb.core.mapping.Field;
 @Setter
 @NoArgsConstructor
 public class StreamingProvider {
-    
-    @Id
-    private String id;
-    @NotNull
-    private String name;
-    @Field("logo_url")
-    private String logoUrl;
-    @Field("website_url")
-    private String websiteUrl;
-    private String country;
-    @Field("subscription_required")
-    private boolean subscriptionRequired;
-    @Field("rental_available")
-    private boolean rentalAvailable;
-    @Field("purchase_available")
-    private boolean purchaseAvailable;
-    @Field("active")
-    private boolean active = true;
 
-    public StreamingProvider(String name, String logoUrl, String websiteUrl, String country, 
-                           boolean subscriptionRequired, boolean rentalAvailable, boolean purchaseAvailable) {
-        this.name = name;
-        this.logoUrl = logoUrl;
-        this.websiteUrl = websiteUrl;
-        this.country = country;
-        this.subscriptionRequired = subscriptionRequired;
-        this.rentalAvailable = rentalAvailable;
-        this.purchaseAvailable = purchaseAvailable;
-    }
+  @Id private String id;
+  @NotNull private String name;
+
+  @Field("logo_url")
+  private String logoUrl;
+
+  @Field("website_url")
+  private String websiteUrl;
+
+  private String country;
+
+  @Field("subscription_required")
+  private boolean subscriptionRequired;
+
+  @Field("rental_available")
+  private boolean rentalAvailable;
+
+  @Field("purchase_available")
+  private boolean purchaseAvailable;
+
+  @Field("active")
+  private boolean active = true;
+
+  public StreamingProvider(
+      String name,
+      String logoUrl,
+      String websiteUrl,
+      String country,
+      boolean subscriptionRequired,
+      boolean rentalAvailable,
+      boolean purchaseAvailable) {
+    this.name = name;
+    this.logoUrl = logoUrl;
+    this.websiteUrl = websiteUrl;
+    this.country = country;
+    this.subscriptionRequired = subscriptionRequired;
+    this.rentalAvailable = rentalAvailable;
+    this.purchaseAvailable = purchaseAvailable;
+  }
 }

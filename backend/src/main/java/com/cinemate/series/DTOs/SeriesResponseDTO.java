@@ -2,13 +2,12 @@ package com.cinemate.series.DTOs;
 
 import com.cinemate.series.Series;
 import com.cinemate.series.Status;
+import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.Date;
 
 @Getter
 @Setter
@@ -16,31 +15,31 @@ import java.util.Date;
 @AllArgsConstructor
 @Builder
 public class SeriesResponseDTO {
-    private String id;
-    private Integer tmdbId;
-    private String title;
-    private String description;
-    private String genre;
-    private double rating;
-    private int reviewCount;
-    private Date releaseDate;
-    private String posterUrl;
-    private String country;
-    private String trailerUrl;
-    private Status status;
+  private String id;
+  private Integer tmdbId;
+  private String title;
+  private String description;
+  private String genre;
+  private double rating;
+  private int reviewCount;
+  private Date releaseDate;
+  private String posterUrl;
+  private String country;
+  private String trailerUrl;
+  private Status status;
 
-    public SeriesResponseDTO(Series series) {
-        this.id = series.getId();
-        this.tmdbId = series.getTmdbId();
-        this.title = series.getTitle();
-        this.description = series.getDescription();
-        this.genre = series.getGenre();
-        this.rating = series.getRating();
-        this.reviewCount = series.getReviewCount();
-        this.releaseDate = series.getReleaseDate();
-        this.posterUrl = series.getPosterUrl();
-        this.country = series.getCountry();
-        this.trailerUrl = series.getTrailerUrl();
-        this.status = series.getStatus();
-    }
+  public SeriesResponseDTO(Series series) {
+    this.id = series.getId();
+    this.tmdbId = series.getTmdbId();
+    this.title = series.getTitle();
+    this.description = series.getDescription();
+    this.genre = series.getGenre();
+    this.rating = series.getRating();
+    this.reviewCount = series.getReviewCount();
+    this.releaseDate = series.getReleaseDate();
+    this.posterUrl = series.getPosterUrl();
+    this.country = series.getCountry();
+    this.trailerUrl = series.getTrailerUrl();
+    this.status = series.getStatus();
+  }
 }

@@ -6,67 +6,67 @@ import jakarta.validation.constraints.Size;
 import java.util.List;
 
 public class CustomListRequestDTO {
-    
-    @NotNull
-    @Size(min = 1, max = 100)
-    private String title;
-    
-    @Size(max = 500)
-    private String description;
 
-    @JsonProperty("isPublic")
-    private boolean isPublic = true;
-    
-    private String coverImageUrl;
-    
-    private List<String> tags;
+  @NotNull
+  @Size(min = 1, max = 100)
+  private String title;
 
-    public CustomListRequestDTO() {}
+  @Size(max = 500)
+  private String description;
 
-    public CustomListRequestDTO(String title, String description, boolean isPublic) {
-        this.title = title;
-        this.description = description;
-        this.isPublic = isPublic;
-    }
+  @JsonProperty("isPublic")
+  private boolean isPublic = true;
 
-    // Getters and Setters
-    public String getTitle() {
-        return title;
-    }
+  private String coverImageUrl;
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+  private List<String> tags;
 
-    public String getDescription() {
-        return description;
-    }
+  public CustomListRequestDTO() {}
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+  public CustomListRequestDTO(String title, String description, boolean isPublic) {
+    this.title = title;
+    this.description = description;
+    this.isPublic = isPublic;
+  }
 
-    public boolean isPublic() {
-        return isPublic;
-    }
+  // Getters and Setters
+  public String getTitle() {
+    return title;
+  }
 
-    public void setPublic(boolean isPublic) {
-        this.isPublic = isPublic;
-    }
+  public void setTitle(String title) {
+    this.title = title;
+  }
 
-    public String getCoverImageUrl() {
-        return coverImageUrl;
-    }
+  public String getDescription() {
+    return description;
+  }
 
-    public void setCoverImageUrl(String coverImageUrl) {
-        this.coverImageUrl = coverImageUrl;
-    }
+  public void setDescription(String description) {
+    this.description = description;
+  }
 
-    public List<String> getTags() {
-        return tags;
-    }
+  public boolean isPublic() {
+    return isPublic;
+  }
 
-    public void setTags(List<String> tags) {
-        this.tags = tags;
-    }
+  public void setPublic(boolean isPublic) {
+    this.isPublic = isPublic;
+  }
+
+  public String getCoverImageUrl() {
+    return coverImageUrl;
+  }
+
+  public void setCoverImageUrl(String coverImageUrl) {
+    this.coverImageUrl = coverImageUrl;
+  }
+
+  public List<String> getTags() {
+    return tags;
+  }
+
+  public void setTags(List<String> tags) {
+    this.tags = tags;
+  }
 }

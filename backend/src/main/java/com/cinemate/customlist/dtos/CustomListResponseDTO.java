@@ -4,161 +4,163 @@ import com.cinemate.customlist.CustomList;
 import com.cinemate.movie.DTOs.MovieResponseDTO;
 import com.cinemate.series.DTOs.SeriesResponseDTO;
 import com.cinemate.user.DTOs.UserResponseDTO;
-
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class CustomListResponseDTO {
-    
-    private String id;
-    private String title;
-    private String description;
-    private UserResponseDTO creator;
-    private List<MovieResponseDTO> movies;
-    private List<SeriesResponseDTO> series;
-    private boolean isPublic;
-    private Date createdAt;
-    private Date updatedAt;
-    private int likesCount;
-    private String coverImageUrl;
-    private List<String> tags;
-    private int totalItemsCount;
-    private boolean isLikedByCurrentUser;
 
-    public CustomListResponseDTO() {}
+  private String id;
+  private String title;
+  private String description;
+  private UserResponseDTO creator;
+  private List<MovieResponseDTO> movies;
+  private List<SeriesResponseDTO> series;
+  private boolean isPublic;
+  private Date createdAt;
+  private Date updatedAt;
+  private int likesCount;
+  private String coverImageUrl;
+  private List<String> tags;
+  private int totalItemsCount;
+  private boolean isLikedByCurrentUser;
 
-    public CustomListResponseDTO(CustomList customList) {
-        this.id = customList.getId();
-        this.title = customList.getTitle();
-        this.description = customList.getDescription();
-        this.creator = customList.getCreator() != null ? new UserResponseDTO(customList.getCreator()) : null;
-        this.movies = customList.getMovies().stream().map(MovieResponseDTO::new).collect(Collectors.toList());
-        this.series = customList.getSeries().stream().map(SeriesResponseDTO::new).collect(Collectors.toList());
-        this.isPublic = customList.isPublic();
-        this.createdAt = customList.getCreatedAt();
-        this.updatedAt = customList.getUpdatedAt();
-        this.likesCount = customList.getLikesCount();
-        this.coverImageUrl = customList.getCoverImageUrl();
-        this.tags = customList.getTags();
-        this.totalItemsCount = customList.getTotalItemsCount();
-        this.isLikedByCurrentUser = false;
-    }
+  public CustomListResponseDTO() {}
 
-    public CustomListResponseDTO(CustomList customList, boolean isLikedByCurrentUser) {
-        this(customList);
-        this.isLikedByCurrentUser = isLikedByCurrentUser;
-    }
+  public CustomListResponseDTO(CustomList customList) {
+    this.id = customList.getId();
+    this.title = customList.getTitle();
+    this.description = customList.getDescription();
+    this.creator =
+        customList.getCreator() != null ? new UserResponseDTO(customList.getCreator()) : null;
+    this.movies =
+        customList.getMovies().stream().map(MovieResponseDTO::new).collect(Collectors.toList());
+    this.series =
+        customList.getSeries().stream().map(SeriesResponseDTO::new).collect(Collectors.toList());
+    this.isPublic = customList.isPublic();
+    this.createdAt = customList.getCreatedAt();
+    this.updatedAt = customList.getUpdatedAt();
+    this.likesCount = customList.getLikesCount();
+    this.coverImageUrl = customList.getCoverImageUrl();
+    this.tags = customList.getTags();
+    this.totalItemsCount = customList.getTotalItemsCount();
+    this.isLikedByCurrentUser = false;
+  }
 
-    public String getId() {
-        return id;
-    }
+  public CustomListResponseDTO(CustomList customList, boolean isLikedByCurrentUser) {
+    this(customList);
+    this.isLikedByCurrentUser = isLikedByCurrentUser;
+  }
 
-    public void setId(String id) {
-        this.id = id;
-    }
+  public String getId() {
+    return id;
+  }
 
-    public String getTitle() {
-        return title;
-    }
+  public void setId(String id) {
+    this.id = id;
+  }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+  public String getTitle() {
+    return title;
+  }
 
-    public String getDescription() {
-        return description;
-    }
+  public void setTitle(String title) {
+    this.title = title;
+  }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+  public String getDescription() {
+    return description;
+  }
 
-    public UserResponseDTO getCreator() {
-        return creator;
-    }
+  public void setDescription(String description) {
+    this.description = description;
+  }
 
-    public void setCreator(UserResponseDTO creator) {
-        this.creator = creator;
-    }
+  public UserResponseDTO getCreator() {
+    return creator;
+  }
 
-    public List<MovieResponseDTO> getMovies() {
-        return movies;
-    }
+  public void setCreator(UserResponseDTO creator) {
+    this.creator = creator;
+  }
 
-    public void setMovies(List<MovieResponseDTO> movies) {
-        this.movies = movies;
-    }
+  public List<MovieResponseDTO> getMovies() {
+    return movies;
+  }
 
-    public List<SeriesResponseDTO> getSeries() {
-        return series;
-    }
+  public void setMovies(List<MovieResponseDTO> movies) {
+    this.movies = movies;
+  }
 
-    public void setSeries(List<SeriesResponseDTO> series) {
-        this.series = series;
-    }
+  public List<SeriesResponseDTO> getSeries() {
+    return series;
+  }
 
-    public boolean isPublic() {
-        return isPublic;
-    }
+  public void setSeries(List<SeriesResponseDTO> series) {
+    this.series = series;
+  }
 
-    public void setPublic(boolean isPublic) {
-        this.isPublic = isPublic;
-    }
+  public boolean isPublic() {
+    return isPublic;
+  }
 
-    public Date getCreatedAt() {
-        return createdAt;
-    }
+  public void setPublic(boolean isPublic) {
+    this.isPublic = isPublic;
+  }
 
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
-    }
+  public Date getCreatedAt() {
+    return createdAt;
+  }
 
-    public Date getUpdatedAt() {
-        return updatedAt;
-    }
+  public void setCreatedAt(Date createdAt) {
+    this.createdAt = createdAt;
+  }
 
-    public void setUpdatedAt(Date updatedAt) {
-        this.updatedAt = updatedAt;
-    }
+  public Date getUpdatedAt() {
+    return updatedAt;
+  }
 
-    public int getLikesCount() {
-        return likesCount;
-    }
+  public void setUpdatedAt(Date updatedAt) {
+    this.updatedAt = updatedAt;
+  }
 
-    public void setLikesCount(int likesCount) {
-        this.likesCount = likesCount;
-    }
+  public int getLikesCount() {
+    return likesCount;
+  }
 
-    public String getCoverImageUrl() {
-        return coverImageUrl;
-    }
+  public void setLikesCount(int likesCount) {
+    this.likesCount = likesCount;
+  }
 
-    public void setCoverImageUrl(String coverImageUrl) {
-        this.coverImageUrl = coverImageUrl;
-    }
+  public String getCoverImageUrl() {
+    return coverImageUrl;
+  }
 
-    public List<String> getTags() {
-        return tags;
-    }
+  public void setCoverImageUrl(String coverImageUrl) {
+    this.coverImageUrl = coverImageUrl;
+  }
 
-    public void setTags(List<String> tags) {
-        this.tags = tags;
-    }
+  public List<String> getTags() {
+    return tags;
+  }
 
-    public int getTotalItemsCount() {
-        return totalItemsCount;
-    }
+  public void setTags(List<String> tags) {
+    this.tags = tags;
+  }
 
-    public void setTotalItemsCount(int totalItemsCount) {
-        this.totalItemsCount = totalItemsCount;
-    }
+  public int getTotalItemsCount() {
+    return totalItemsCount;
+  }
 
-    public boolean isLikedByCurrentUser() {
-        return isLikedByCurrentUser;
-    }
+  public void setTotalItemsCount(int totalItemsCount) {
+    this.totalItemsCount = totalItemsCount;
+  }
 
-    public void setLikedByCurrentUser(boolean likedByCurrentUser) {
-        isLikedByCurrentUser = likedByCurrentUser;
-    }
+  public boolean isLikedByCurrentUser() {
+    return isLikedByCurrentUser;
+  }
+
+  public void setLikedByCurrentUser(boolean likedByCurrentUser) {
+    isLikedByCurrentUser = likedByCurrentUser;
+  }
 }

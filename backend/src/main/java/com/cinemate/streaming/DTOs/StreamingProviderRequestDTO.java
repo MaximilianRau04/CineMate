@@ -9,14 +9,12 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class StreamingProviderRequestDTO {
-    
-    @NotNull
-    private String name;
-    private String logoUrl;
-    private String websiteUrl;
-    private String country;
-    private boolean subscriptionRequired;
-    private boolean rentalAvailable;
-    private boolean purchaseAvailable;
 
+  @NotNull private String name;
+  private String logoUrl;
+  private String websiteUrl;
+  private String country;
+  private boolean subscriptionRequired;
+  private boolean rentalAvailable;
+  private boolean purchaseAvailable;
 }

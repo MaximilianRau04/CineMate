@@ -1,151 +1,174 @@
 package com.cinemate.recommendation;
 
 import com.cinemate.recommendation.DTOs.RecommendationResponseDTO;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/recommendations")
 @RequiredArgsConstructor
 public class RecommendationController {
 
-    private final RecommendationService recommendationService;
-    private final RecommendationNotificationService recommendationNotificationService;
+  private final RecommendationService recommendationService;
+  private final RecommendationNotificationService recommendationNotificationService;
 
-    /**
-     * return personal recommendations for a user
-     * @param userId - id of the user
-     * @return list of recommendations
-     */
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<RecommendationResponseDTO>> getRecommendationsForUser(@PathVariable String userId) {
-        List<RecommendationResponseDTO> recommendations = recommendationService.getRecommendationsForUser(userId);
-        return ResponseEntity.ok(recommendations);
-    }
+  /**
+   * return personal recommendations for a user
+   *
+   * @param userId - id of the user
+   * @return list of recommendations
+   */
+  @GetMapping("/user/{userId}")
+  public ResponseEntity<List<RecommendationResponseDTO>> getRecommendationsForUser(
+      @PathVariable String userId) {
+    List<RecommendationResponseDTO> recommendations =
+        recommendationService.getRecommendationsForUser(userId);
+    return ResponseEntity.ok(recommendations);
+  }
 
-    /**
-     * returns popular/trending content (for new user)
-     * @return list of recommendations
-     */
-    @GetMapping("/trending")
-    public ResponseEntity<List<RecommendationResponseDTO>> getTrendingRecommendations() {
-        List<RecommendationResponseDTO> trending = recommendationService.getTrendingRecommendations();
-        return ResponseEntity.ok(trending);
-    }
+  /**
+   * returns popular/trending content (for new user)
+   *
+   * @return list of recommendations
+   */
+  @GetMapping("/trending")
+  public ResponseEntity<List<RecommendationResponseDTO>> getTrendingRecommendations() {
+    List<RecommendationResponseDTO> trending = recommendationService.getTrendingRecommendations();
+    return ResponseEntity.ok(trending);
+  }
 
-    /**
-     * returns recommendations based on genre
-     * @param genre - the desired genre
-     * @return list of genre recommendations
-     */
-    @GetMapping("/genre/{genre}")
-    public ResponseEntity<List<RecommendationResponseDTO>> getRecommendationsByGenre(@PathVariable String genre) {
-        List<RecommendationResponseDTO> recommendations = recommendationService.getRecommendationsByGenre(genre);
-        return ResponseEntity.ok(recommendations);
-    }
+  /**
+   * returns recommendations based on genre
+   *
+   * @param genre - the desired genre
+   * @return list of genre recommendations
+   */
+  @GetMapping("/genre/{genre}")
+  public ResponseEntity<List<RecommendationResponseDTO>> getRecommendationsByGenre(
+      @PathVariable String genre) {
+    List<RecommendationResponseDTO> recommendations =
+        recommendationService.getRecommendationsByGenre(genre);
+    return ResponseEntity.ok(recommendations);
+  }
 
-    /**
-     * returns recommendations content-based + collaborative
-     * @param userId - id of the user
-     * @return list of recommendations
-     */
-    @GetMapping("/user/{userId}/hybrid")
-    public ResponseEntity<List<RecommendationResponseDTO>> getHybridRecommendations(@PathVariable String userId) {
-        List<RecommendationResponseDTO> recommendations = recommendationService.getHybridRecommendations(userId);
-        return ResponseEntity.ok(recommendations);
-    }
+  /**
+   * returns recommendations content-based + collaborative
+   *
+   * @param userId - id of the user
+   * @return list of recommendations
+   */
+  @GetMapping("/user/{userId}/hybrid")
+  public ResponseEntity<List<RecommendationResponseDTO>> getHybridRecommendations(
+      @PathVariable String userId) {
+    List<RecommendationResponseDTO> recommendations =
+        recommendationService.getHybridRecommendations(userId);
+    return ResponseEntity.ok(recommendations);
+  }
 
-    /**
-     * returns smart-recommendations based on the time of the day
-     * @param userId - id of the user
-     * @return list of recommendations
-     */
-    @GetMapping("/user/{userId}/smart")
-    public ResponseEntity<List<RecommendationResponseDTO>> getSmartRecommendations(@PathVariable String userId) {
-        List<RecommendationResponseDTO> recommendations = recommendationService.getSmartRecommendations(userId);
-        return ResponseEntity.ok(recommendations);
-    }
+  /**
+   * returns smart-recommendations based on the time of the day
+   *
+   * @param userId - id of the user
+   * @return list of recommendations
+   */
+  @GetMapping("/user/{userId}/smart")
+  public ResponseEntity<List<RecommendationResponseDTO>> getSmartRecommendations(
+      @PathVariable String userId) {
+    List<RecommendationResponseDTO> recommendations =
+        recommendationService.getSmartRecommendations(userId);
+    return ResponseEntity.ok(recommendations);
+  }
 
-    /**
-     * returns recommendations based on similar users and their preferences
-     * @param userId - id of the user
-     * @return list of recommendations
-     */
-    @GetMapping("/user/{userId}/collaborative")
-    public ResponseEntity<List<RecommendationResponseDTO>> getCollaborativeRecommendations(@PathVariable String userId) {
-        List<RecommendationResponseDTO> recommendations = recommendationService.getCollaborativeRecommendations(userId);
-        return ResponseEntity.ok(recommendations);
-    }
+  /**
+   * returns recommendations based on similar users and their preferences
+   *
+   * @param userId - id of the user
+   * @return list of recommendations
+   */
+  @GetMapping("/user/{userId}/collaborative")
+  public ResponseEntity<List<RecommendationResponseDTO>> getCollaborativeRecommendations(
+      @PathVariable String userId) {
+    List<RecommendationResponseDTO> recommendations =
+        recommendationService.getCollaborativeRecommendations(userId);
+    return ResponseEntity.ok(recommendations);
+  }
 
-    /**
-     * sends recommendation notifications to a specific user
-     * @param maxRecommendations - max number of notifications per user (optional, standard: 3)
-     * @return Confirmation of success
-     */
-    @PostMapping("/notify/{userId}")
-    public ResponseEntity<String> sendRecommendationNotifications(
-            @PathVariable String userId,
-            @RequestParam(defaultValue = "3") int maxRecommendations) {
+  /**
+   * sends recommendation notifications to a specific user
+   *
+   * @param maxRecommendations - max number of notifications per user (optional, standard: 3)
+   * @return Confirmation of success
+   */
+  @PostMapping("/notify/{userId}")
+  public ResponseEntity<String> sendRecommendationNotifications(
+      @PathVariable String userId, @RequestParam(defaultValue = "3") int maxRecommendations) {
 
-        recommendationNotificationService.sendRecommendationNotifications(userId, maxRecommendations);
-        return ResponseEntity.ok("Empfehlungsbenachrichtigungen erfolgreich gesendet für Benutzer: " + userId);
-    }
+    recommendationNotificationService.sendRecommendationNotifications(userId, maxRecommendations);
+    return ResponseEntity.ok(
+        "Empfehlungsbenachrichtigungen erfolgreich gesendet für Benutzer: " + userId);
+  }
 
-    /**
-     * sends recommendation summary notification to a specific user
-     * @param maxRecommendations - max number of recommendations to include (optional, standard: 5)
-     * @return Confirmation of success
-     */
-    @PostMapping("/notify/{userId}/summary")
-    public ResponseEntity<String> sendSummaryRecommendationNotifications(
-            @PathVariable String userId,
-            @RequestParam(defaultValue = "5") int maxRecommendations) {
+  /**
+   * sends recommendation summary notification to a specific user
+   *
+   * @param maxRecommendations - max number of recommendations to include (optional, standard: 5)
+   * @return Confirmation of success
+   */
+  @PostMapping("/notify/{userId}/summary")
+  public ResponseEntity<String> sendSummaryRecommendationNotifications(
+      @PathVariable String userId, @RequestParam(defaultValue = "5") int maxRecommendations) {
 
-        recommendationNotificationService.sendSummaryRecommendationNotifications(userId, maxRecommendations);
-        return ResponseEntity.ok("Zusammenfassungsbenachrichtigung erfolgreich gesendet für Benutzer: " + userId);
-    }
+    recommendationNotificationService.sendSummaryRecommendationNotifications(
+        userId, maxRecommendations);
+    return ResponseEntity.ok(
+        "Zusammenfassungsbenachrichtigung erfolgreich gesendet für Benutzer: " + userId);
+  }
 
-    /**
-     * sends recommendation notifications to all users
-     * @param maxRecommendations - max number of notifications per user (optional, standard: 3)
-     * @return Confirmation of success
-     */
-    @PostMapping("/notify/all")
-    public ResponseEntity<String> sendRecommendationNotificationsToAll(
-            @RequestParam(defaultValue = "3") int maxRecommendations) {
+  /**
+   * sends recommendation notifications to all users
+   *
+   * @param maxRecommendations - max number of notifications per user (optional, standard: 3)
+   * @return Confirmation of success
+   */
+  @PostMapping("/notify/all")
+  public ResponseEntity<String> sendRecommendationNotificationsToAll(
+      @RequestParam(defaultValue = "3") int maxRecommendations) {
 
-        recommendationNotificationService.sendRecommendationNotificationsToAllUsers(maxRecommendations);
-        return ResponseEntity.ok("Empfehlungsbenachrichtigungen erfolgreich an alle Benutzer gesendet");
-    }
+    recommendationNotificationService.sendRecommendationNotificationsToAllUsers(maxRecommendations);
+    return ResponseEntity.ok("Empfehlungsbenachrichtigungen erfolgreich an alle Benutzer gesendet");
+  }
 
-    /**
-     * sends summary recommendation notifications to all users
-     * @param maxRecommendations - max number of recommendations per user (optional, standard: 5)
-     * @return Confirmation of success
-     */
-    @PostMapping("/notify/all/summary")
-    public ResponseEntity<String> sendSummaryRecommendationNotificationsToAll(
-            @RequestParam(defaultValue = "5") int maxRecommendations) {
+  /**
+   * sends summary recommendation notifications to all users
+   *
+   * @param maxRecommendations - max number of recommendations per user (optional, standard: 5)
+   * @return Confirmation of success
+   */
+  @PostMapping("/notify/all/summary")
+  public ResponseEntity<String> sendSummaryRecommendationNotificationsToAll(
+      @RequestParam(defaultValue = "5") int maxRecommendations) {
 
-        recommendationNotificationService.sendSummaryRecommendationNotificationsToAllUsers(maxRecommendations);
-        return ResponseEntity.ok("Zusammenfassungsbenachrichtigungen erfolgreich an alle Benutzer gesendet");
-    }
+    recommendationNotificationService.sendSummaryRecommendationNotificationsToAllUsers(
+        maxRecommendations);
+    return ResponseEntity.ok(
+        "Zusammenfassungsbenachrichtigungen erfolgreich an alle Benutzer gesendet");
+  }
 
-    /**
-     * sends triggered recommendations based on user activity
-     * @param userId - id of the user
-     * @param trigger the trigger (e.g. "new_favorite", "new_rating")
-     * @return Confirmation of success
-     */
-    @PostMapping("/notify/{userId}/triggered")
-    public ResponseEntity<String> sendTriggeredRecommendations(
-            @PathVariable String userId,
-            @RequestParam String trigger) {
+  /**
+   * sends triggered recommendations based on user activity
+   *
+   * @param userId - id of the user
+   * @param trigger the trigger (e.g. "new_favorite", "new_rating")
+   * @return Confirmation of success
+   */
+  @PostMapping("/notify/{userId}/triggered")
+  public ResponseEntity<String> sendTriggeredRecommendations(
+      @PathVariable String userId, @RequestParam String trigger) {
 
-        recommendationNotificationService.sendTriggeredRecommendations(userId, trigger);
-        return ResponseEntity.ok("Getriggerte Empfehlungsbenachrichtigungen erfolgreich gesendet für Benutzer: " + userId);
-    }
+    recommendationNotificationService.sendTriggeredRecommendations(userId, trigger);
+    return ResponseEntity.ok(
+        "Getriggerte Empfehlungsbenachrichtigungen erfolgreich gesendet für Benutzer: " + userId);
+  }
 }

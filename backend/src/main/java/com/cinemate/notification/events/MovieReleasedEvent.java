@@ -6,11 +6,10 @@ import org.springframework.context.ApplicationEvent;
 
 @Getter
 public class MovieReleasedEvent extends ApplicationEvent {
-    private final Movie movie;
+  private final Movie movie;
 
-    public MovieReleasedEvent(Object source, Movie movie) {
-        super(source);
-        this.movie = movie;
-    }
-
+  public MovieReleasedEvent(Object source, Movie movie) {
+    super(source);
+    this.movie = movie;
+  }
 }

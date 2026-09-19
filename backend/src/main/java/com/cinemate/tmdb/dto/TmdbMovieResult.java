@@ -8,10 +8,10 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class TmdbMovieResult {
-    private int tmdbId;
-    private String title;
-    private String overview;
-    private String posterUrl;
-    private String releaseDate;
-    private double voteAverage;
+  private int tmdbId;
+  private String title;
+  private String overview;
+  private String posterUrl;
+  private String releaseDate;
+  private double voteAverage;
 }

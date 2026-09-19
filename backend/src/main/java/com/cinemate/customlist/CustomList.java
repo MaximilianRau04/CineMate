@@ -5,215 +5,212 @@ import com.cinemate.series.Series;
 import com.cinemate.user.User;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
 @Document(collection = "custom_lists")
 public class CustomList {
 
-    @Id
-    private String id;
-    
-    @NotNull
-    @Size(min = 1, max = 100)
-    private String title;
-    
-    @Size(max = 500)
-    private String description;
-    
-    @DBRef
-    private User creator;
-    
-    @DBRef(lazy = true)
-    private List<Movie> movies = new ArrayList<>();
-    
-    @DBRef(lazy = true)
-    private List<Series> series = new ArrayList<>();
-    
-    private boolean isPublic = true;
-    
-    private Date createdAt;
-    
-    private Date updatedAt;
-    
-    private int likesCount = 0;
-    
-    @DBRef(lazy = true)
-    private List<User> likedBy = new ArrayList<>();
-    
-    private String coverImageUrl;
-    
-    private List<String> tags = new ArrayList<>();
+  @Id private String id;
 
-    public CustomList() {
-        this.createdAt = new Date();
-        this.updatedAt = new Date();
-    }
+  @NotNull
+  @Size(min = 1, max = 100)
+  private String title;
 
-    public CustomList(String title, String description, User creator, boolean isPublic) {
-        this();
-        this.title = title;
-        this.description = description;
-        this.creator = creator;
-        this.isPublic = isPublic;
-    }
+  @Size(max = 500)
+  private String description;
 
-    public String getId() {
-        return id;
-    }
+  @DBRef private User creator;
 
-    public void setId(String id) {
-        this.id = id;
-    }
+  @DBRef(lazy = true)
+  private List<Movie> movies = new ArrayList<>();
 
-    public String getTitle() {
-        return title;
-    }
+  @DBRef(lazy = true)
+  private List<Series> series = new ArrayList<>();
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+  private boolean isPublic = true;
 
-    public String getDescription() {
-        return description;
-    }
+  private Date createdAt;
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+  private Date updatedAt;
 
-    public User getCreator() {
-        return creator;
-    }
+  private int likesCount = 0;
 
-    public void setCreator(User creator) {
-        this.creator = creator;
-    }
+  @DBRef(lazy = true)
+  private List<User> likedBy = new ArrayList<>();
 
-    public List<Movie> getMovies() {
-        return movies;
-    }
+  private String coverImageUrl;
 
-    public void setMovies(List<Movie> movies) {
-        this.movies = movies;
-    }
+  private List<String> tags = new ArrayList<>();
 
-    public List<Series> getSeries() {
-        return series;
-    }
+  public CustomList() {
+    this.createdAt = new Date();
+    this.updatedAt = new Date();
+  }
 
-    public void setSeries(List<Series> series) {
-        this.series = series;
-    }
+  public CustomList(String title, String description, User creator, boolean isPublic) {
+    this();
+    this.title = title;
+    this.description = description;
+    this.creator = creator;
+    this.isPublic = isPublic;
+  }
 
-    public boolean isPublic() {
-        return isPublic;
-    }
+  public String getId() {
+    return id;
+  }
 
-    public void setPublic(boolean isPublic) {
-        this.isPublic = isPublic;
-    }
+  public void setId(String id) {
+    this.id = id;
+  }
 
-    public Date getCreatedAt() {
-        return createdAt;
-    }
+  public String getTitle() {
+    return title;
+  }
 
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
-    }
+  public void setTitle(String title) {
+    this.title = title;
+  }
 
-    public Date getUpdatedAt() {
-        return updatedAt;
-    }
+  public String getDescription() {
+    return description;
+  }
 
-    public void setUpdatedAt(Date updatedAt) {
-        this.updatedAt = updatedAt;
-    }
+  public void setDescription(String description) {
+    this.description = description;
+  }
 
-    public int getLikesCount() {
-        return likesCount;
-    }
+  public User getCreator() {
+    return creator;
+  }
 
-    public void setLikesCount(int likesCount) {
-        this.likesCount = likesCount;
-    }
+  public void setCreator(User creator) {
+    this.creator = creator;
+  }
 
-    public List<User> getLikedBy() {
-        return likedBy;
-    }
+  public List<Movie> getMovies() {
+    return movies;
+  }
 
-    public void setLikedBy(List<User> likedBy) {
-        this.likedBy = likedBy;
-    }
+  public void setMovies(List<Movie> movies) {
+    this.movies = movies;
+  }
 
-    public String getCoverImageUrl() {
-        return coverImageUrl;
-    }
+  public List<Series> getSeries() {
+    return series;
+  }
 
-    public void setCoverImageUrl(String coverImageUrl) {
-        this.coverImageUrl = coverImageUrl;
-    }
+  public void setSeries(List<Series> series) {
+    this.series = series;
+  }
 
-    public List<String> getTags() {
-        return tags;
-    }
+  public boolean isPublic() {
+    return isPublic;
+  }
 
-    public void setTags(List<String> tags) {
-        this.tags = tags;
-    }
+  public void setPublic(boolean isPublic) {
+    this.isPublic = isPublic;
+  }
 
-    // Helper methods
-    public void addMovie(Movie movie) {
-        if (!movies.contains(movie)) {
-            movies.add(movie);
-            updateTimestamp();
-        }
-    }
+  public Date getCreatedAt() {
+    return createdAt;
+  }
 
-    public void removeMovie(Movie movie) {
-        movies.removeIf(m -> m.getId().equals(movie.getId()));
-        updateTimestamp();
-    }
+  public void setCreatedAt(Date createdAt) {
+    this.createdAt = createdAt;
+  }
 
-    public void addSeries(Series series) {
-        if (!this.series.contains(series)) {
-            this.series.add(series);
-            updateTimestamp();
-        }
-    }
+  public Date getUpdatedAt() {
+    return updatedAt;
+  }
 
-    public void removeSeries(Series series) {
-        this.series.removeIf(s -> s.getId().equals(series.getId()));
-        updateTimestamp();
-    }
+  public void setUpdatedAt(Date updatedAt) {
+    this.updatedAt = updatedAt;
+  }
 
-    public void addLike(User user) {
-        if (!likedBy.contains(user)) {
-            likedBy.add(user);
-            likesCount++;
-        }
-    }
+  public int getLikesCount() {
+    return likesCount;
+  }
 
-    public void removeLike(User user) {
-        if (likedBy.removeIf(u -> u.getId().equals(user.getId()))) {
-            likesCount--;
-        }
-    }
+  public void setLikesCount(int likesCount) {
+    this.likesCount = likesCount;
+  }
 
-    public boolean isLikedBy(User user) {
-        return likedBy.stream().anyMatch(u -> u.getId().equals(user.getId()));
-    }
+  public List<User> getLikedBy() {
+    return likedBy;
+  }
 
-    private void updateTimestamp() {
-        this.updatedAt = new Date();
-    }
+  public void setLikedBy(List<User> likedBy) {
+    this.likedBy = likedBy;
+  }
 
-    public int getTotalItemsCount() {
-        return movies.size() + series.size();
+  public String getCoverImageUrl() {
+    return coverImageUrl;
+  }
+
+  public void setCoverImageUrl(String coverImageUrl) {
+    this.coverImageUrl = coverImageUrl;
+  }
+
+  public List<String> getTags() {
+    return tags;
+  }
+
+  public void setTags(List<String> tags) {
+    this.tags = tags;
+  }
+
+  // Helper methods
+  public void addMovie(Movie movie) {
+    if (!movies.contains(movie)) {
+      movies.add(movie);
+      updateTimestamp();
     }
+  }
+
+  public void removeMovie(Movie movie) {
+    movies.removeIf(m -> m.getId().equals(movie.getId()));
+    updateTimestamp();
+  }
+
+  public void addSeries(Series series) {
+    if (!this.series.contains(series)) {
+      this.series.add(series);
+      updateTimestamp();
+    }
+  }
+
+  public void removeSeries(Series series) {
+    this.series.removeIf(s -> s.getId().equals(series.getId()));
+    updateTimestamp();
+  }
+
+  public void addLike(User user) {
+    if (!likedBy.contains(user)) {
+      likedBy.add(user);
+      likesCount++;
+    }
+  }
+
+  public void removeLike(User user) {
+    if (likedBy.removeIf(u -> u.getId().equals(user.getId()))) {
+      likesCount--;
+    }
+  }
+
+  public boolean isLikedBy(User user) {
+    return likedBy.stream().anyMatch(u -> u.getId().equals(user.getId()));
+  }
+
+  private void updateTimestamp() {
+    this.updatedAt = new Date();
+  }
+
+  public int getTotalItemsCount() {
+    return movies.size() + series.size();
+  }
 }

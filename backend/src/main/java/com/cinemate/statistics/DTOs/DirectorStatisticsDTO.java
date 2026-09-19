@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DirectorStatisticsDTO {
-    private String name;
-    private Integer count;
+  private String name;
+  private Integer count;
 }

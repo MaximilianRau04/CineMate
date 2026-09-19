@@ -11,8 +11,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class NotificationPreference {
-    private NotificationType type;
-    private boolean emailEnabled;
-    private boolean webEnabled;
-
+  private NotificationType type;
+  private boolean emailEnabled;
+  private boolean webEnabled;
 }

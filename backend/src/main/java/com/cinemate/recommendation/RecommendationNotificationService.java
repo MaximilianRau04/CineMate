@@ -6,224 +6,250 @@ import com.cinemate.notification.NotificationType;
 import com.cinemate.recommendation.DTOs.RecommendationResponseDTO;
 import com.cinemate.user.User;
 import com.cinemate.user.UserRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class RecommendationNotificationService {
 
-    private final RecommendationService recommendationService;
-    private final NotificationService notificationService;
-    private final UserRepository userRepository;
+  private final RecommendationService recommendationService;
+  private final NotificationService notificationService;
+  private final UserRepository userRepository;
 
-    /**
-     * Sends personalized recommendations as notifications to a user
-     * @param userId The user's ID
-     * @param maxRecommendations Maximum number of recommendations per notification
-     */
-    public void sendRecommendationNotifications(String userId, int maxRecommendations) {
-        Optional<User> userOpt = userRepository.findById(userId);
-        if (userOpt.isEmpty()) {
-            return;
-        }
-
-        User user = userOpt.get();
-        
-        // Check if user has recommendation notifications enabled
-        if (!shouldSendRecommendationNotification(user)) {
-            return;
-        }
-
-        List<RecommendationResponseDTO> recommendations = recommendationService.getRecommendationsForUser(userId);
-        
-        if (recommendations.isEmpty()) {
-            return;
-        }
-
-        // Send only the best recommendations
-        List<RecommendationResponseDTO> topRecommendations = recommendations.stream()
-                .limit(maxRecommendations)
-                .toList();
-
-        // Check if user prefers summary notifications
-        if (user.isSummaryRecommendationsEnabled() && topRecommendations.size() > 1) {
-            // Send summary notification
-            sendSummaryRecommendationNotification(user, topRecommendations);
-        } else {
-            // Create individual notifications for each recommendation
-            for (RecommendationResponseDTO recommendation : topRecommendations) {
-                sendSingleRecommendationNotification(user, recommendation);
-            }
-        }
+  /**
+   * Sends personalized recommendations as notifications to a user
+   *
+   * @param userId The user's ID
+   * @param maxRecommendations Maximum number of recommendations per notification
+   */
+  public void sendRecommendationNotifications(String userId, int maxRecommendations) {
+    Optional<User> userOpt = userRepository.findById(userId);
+    if (userOpt.isEmpty()) {
+      return;
     }
 
-    /**
-     * Sends personalized summary recommendations as a single notification to a user
-     * @param userId The user's ID
-     * @param maxRecommendations Maximum number of recommendations to include
-     */
-    public void sendSummaryRecommendationNotifications(String userId, int maxRecommendations) {
-        Optional<User> userOpt = userRepository.findById(userId);
-        if (userOpt.isEmpty()) {
-            return;
-        }
+    User user = userOpt.get();
 
-        User user = userOpt.get();
-        
-        // Check if user has recommendation notifications enabled
-        if (!shouldSendRecommendationNotification(user)) {
-            return;
-        }
-
-        List<RecommendationResponseDTO> recommendations = recommendationService.getRecommendationsForUser(userId);
-        
-        if (recommendations.isEmpty()) {
-            return;
-        }
-
-        // Send only the best recommendations as summary
-        List<RecommendationResponseDTO> topRecommendations = recommendations.stream()
-                .limit(maxRecommendations)
-                .toList();
-
-        // Always send as summary
-        sendSummaryRecommendationNotification(user, topRecommendations);
+    // Check if user has recommendation notifications enabled
+    if (!shouldSendRecommendationNotification(user)) {
+      return;
     }
 
-    /**
-     * Sends a single recommendation notification
-     * @param user The user
-     * @param recommendation The recommendation
-     */
-    private void sendSingleRecommendationNotification(User user, RecommendationResponseDTO recommendation) {
-        String title = String.format("Neue Empfehlung: %s", recommendation.getTitle());
-        String message = String.format("Wir empfehlen dir %s '%s'. %s", 
-                recommendation.getType().equals("movie") ? "den Film" : "die Serie",
-                recommendation.getTitle(),
-                recommendation.getReason());
+    List<RecommendationResponseDTO> recommendations =
+        recommendationService.getRecommendationsForUser(userId);
 
-        // Metadata for the notification
-        Map<String, Object> metadata = new HashMap<>();
-        metadata.put("score", recommendation.getScore());
-        metadata.put("reason", recommendation.getReason());
-        metadata.put("posterUrl", recommendation.getPosterUrl());
-
-        // Create and send notification with metadata
-        Notification notification = notificationService.createNotificationWithMetadata(
-                user.getId(),
-                NotificationType.RECOMMENDATION,
-                title,
-                message,
-                recommendation.getId(),
-                recommendation.getType(),
-                metadata
-        );
-
-        notificationService.sendNotification(notification.getId());
+    if (recommendations.isEmpty()) {
+      return;
     }
 
-    /**
-     * Sends a summary notification with multiple recommendations
-     * @param user The user
-     * @param recommendations The list of recommendations
-     */
-    private void sendSummaryRecommendationNotification(User user, List<RecommendationResponseDTO> recommendations) {
-        String title = "Neue personalisierte Empfehlungen für dich!";
-        
-        StringBuilder messageBuilder = new StringBuilder();
-        messageBuilder.append("Wir haben ").append(recommendations.size()).append(" neue Empfehlungen für dich:\n\n");
-        
-        for (RecommendationResponseDTO rec : recommendations) {
-            messageBuilder.append("• ").append(rec.getTitle())
-                    .append(" (").append(rec.getType().equals("movie") ? "Film" : "Serie").append(")\n");
-        }
+    // Send only the best recommendations
+    List<RecommendationResponseDTO> topRecommendations =
+        recommendations.stream().limit(maxRecommendations).toList();
 
-        // Metadata with all recommendations
-        Map<String, Object> metadata = new HashMap<>();
-        metadata.put("recommendations", recommendations);
-        metadata.put("count", recommendations.size());
+    // Check if user prefers summary notifications
+    if (user.isSummaryRecommendationsEnabled() && topRecommendations.size() > 1) {
+      // Send summary notification
+      sendSummaryRecommendationNotification(user, topRecommendations);
+    } else {
+      // Create individual notifications for each recommendation
+      for (RecommendationResponseDTO recommendation : topRecommendations) {
+        sendSingleRecommendationNotification(user, recommendation);
+      }
+    }
+  }
 
-        // Create and send notification with metadata
-        Notification notification = notificationService.createNotificationWithMetadata(
-                user.getId(),
-                NotificationType.RECOMMENDATION,
-                title,
-                messageBuilder.toString(),
-                null,
-                "recommendations",
-                metadata
-        );
-
-        notificationService.sendNotification(notification.getId());
+  /**
+   * Sends personalized summary recommendations as a single notification to a user
+   *
+   * @param userId The user's ID
+   * @param maxRecommendations Maximum number of recommendations to include
+   */
+  public void sendSummaryRecommendationNotifications(String userId, int maxRecommendations) {
+    Optional<User> userOpt = userRepository.findById(userId);
+    if (userOpt.isEmpty()) {
+      return;
     }
 
-    /**
-     * Sends recommendations to all users
-     * @param maxRecommendationsPerUser Maximum number of recommendations per user
-     */
-    public void sendRecommendationNotificationsToAllUsers(int maxRecommendationsPerUser) {
-        List<User> users = userRepository.findAll();
-        
-        users.forEach(user -> {
-            try {
-                sendRecommendationNotifications(user.getId(), maxRecommendationsPerUser);
-            } catch (Exception e) {
-                log.error("Error sending recommendation notifications to user " +
-                        user.getId() + ": " + e.getMessage());
-            }
+    User user = userOpt.get();
+
+    // Check if user has recommendation notifications enabled
+    if (!shouldSendRecommendationNotification(user)) {
+      return;
+    }
+
+    List<RecommendationResponseDTO> recommendations =
+        recommendationService.getRecommendationsForUser(userId);
+
+    if (recommendations.isEmpty()) {
+      return;
+    }
+
+    // Send only the best recommendations as summary
+    List<RecommendationResponseDTO> topRecommendations =
+        recommendations.stream().limit(maxRecommendations).toList();
+
+    // Always send as summary
+    sendSummaryRecommendationNotification(user, topRecommendations);
+  }
+
+  /**
+   * Sends a single recommendation notification
+   *
+   * @param user The user
+   * @param recommendation The recommendation
+   */
+  private void sendSingleRecommendationNotification(
+      User user, RecommendationResponseDTO recommendation) {
+    String title = String.format("Neue Empfehlung: %s", recommendation.getTitle());
+    String message =
+        String.format(
+            "Wir empfehlen dir %s '%s'. %s",
+            recommendation.getType().equals("movie") ? "den Film" : "die Serie",
+            recommendation.getTitle(),
+            recommendation.getReason());
+
+    // Metadata for the notification
+    Map<String, Object> metadata = new HashMap<>();
+    metadata.put("score", recommendation.getScore());
+    metadata.put("reason", recommendation.getReason());
+    metadata.put("posterUrl", recommendation.getPosterUrl());
+
+    // Create and send notification with metadata
+    Notification notification =
+        notificationService.createNotificationWithMetadata(
+            user.getId(),
+            NotificationType.RECOMMENDATION,
+            title,
+            message,
+            recommendation.getId(),
+            recommendation.getType(),
+            metadata);
+
+    notificationService.sendNotification(notification.getId());
+  }
+
+  /**
+   * Sends a summary notification with multiple recommendations
+   *
+   * @param user The user
+   * @param recommendations The list of recommendations
+   */
+  private void sendSummaryRecommendationNotification(
+      User user, List<RecommendationResponseDTO> recommendations) {
+    String title = "Neue personalisierte Empfehlungen für dich!";
+
+    StringBuilder messageBuilder = new StringBuilder();
+    messageBuilder
+        .append("Wir haben ")
+        .append(recommendations.size())
+        .append(" neue Empfehlungen für dich:\n\n");
+
+    for (RecommendationResponseDTO rec : recommendations) {
+      messageBuilder
+          .append("• ")
+          .append(rec.getTitle())
+          .append(" (")
+          .append(rec.getType().equals("movie") ? "Film" : "Serie")
+          .append(")\n");
+    }
+
+    // Metadata with all recommendations
+    Map<String, Object> metadata = new HashMap<>();
+    metadata.put("recommendations", recommendations);
+    metadata.put("count", recommendations.size());
+
+    // Create and send notification with metadata
+    Notification notification =
+        notificationService.createNotificationWithMetadata(
+            user.getId(),
+            NotificationType.RECOMMENDATION,
+            title,
+            messageBuilder.toString(),
+            null,
+            "recommendations",
+            metadata);
+
+    notificationService.sendNotification(notification.getId());
+  }
+
+  /**
+   * Sends recommendations to all users
+   *
+   * @param maxRecommendationsPerUser Maximum number of recommendations per user
+   */
+  public void sendRecommendationNotificationsToAllUsers(int maxRecommendationsPerUser) {
+    List<User> users = userRepository.findAll();
+
+    users.forEach(
+        user -> {
+          try {
+            sendRecommendationNotifications(user.getId(), maxRecommendationsPerUser);
+          } catch (Exception e) {
+            log.error(
+                "Error sending recommendation notifications to user "
+                    + user.getId()
+                    + ": "
+                    + e.getMessage());
+          }
         });
-    }
+  }
 
-    /**
-     * Sends summary recommendation notifications to all users
-     * @param maxRecommendationsPerUser Maximum number of recommendations per user
-     */
-    public void sendSummaryRecommendationNotificationsToAllUsers(int maxRecommendationsPerUser) {
-        List<User> users = userRepository.findAll();
-        
-        users.forEach(user -> {
-            try {
-                sendSummaryRecommendationNotifications(user.getId(), maxRecommendationsPerUser);
-            } catch (Exception e) {
-                log.error("Error sending summary recommendation notifications to user " +
-                        user.getId() + ": " + e.getMessage());
-            }
+  /**
+   * Sends summary recommendation notifications to all users
+   *
+   * @param maxRecommendationsPerUser Maximum number of recommendations per user
+   */
+  public void sendSummaryRecommendationNotificationsToAllUsers(int maxRecommendationsPerUser) {
+    List<User> users = userRepository.findAll();
+
+    users.forEach(
+        user -> {
+          try {
+            sendSummaryRecommendationNotifications(user.getId(), maxRecommendationsPerUser);
+          } catch (Exception e) {
+            log.error(
+                "Error sending summary recommendation notifications to user "
+                    + user.getId()
+                    + ": "
+                    + e.getMessage());
+          }
         });
+  }
+
+  /**
+   * Checks if recommendation notifications should be sent to the user
+   *
+   * @param user The user
+   * @return true if notifications should be sent
+   */
+  private boolean shouldSendRecommendationNotification(User user) {
+    // Check if user has notifications enabled in general
+    if (!user.isWebNotificationsEnabled() && !user.isEmailNotificationsEnabled()) {
+      return false;
     }
 
-    /**
-     * Checks if recommendation notifications should be sent to the user
-     * @param user The user
-     * @return true if notifications should be sent
-     */
-    private boolean shouldSendRecommendationNotification(User user) {
-        // Check if user has notifications enabled in general
-        if (!user.isWebNotificationsEnabled() && !user.isEmailNotificationsEnabled()) {
-            return false;
-        }
+    // Check if user has specifically enabled recommendation notifications
+    return user.getNotificationPreferences().stream()
+        .filter(pref -> pref.getType() == NotificationType.RECOMMENDATION)
+        .findFirst()
+        .map(pref -> pref.isWebEnabled() || pref.isEmailEnabled())
+        .orElse(true);
+  }
 
-        // Check if user has specifically enabled recommendation notifications
-        return user.getNotificationPreferences().stream()
-                .filter(pref -> pref.getType() == NotificationType.RECOMMENDATION)
-                .findFirst()
-                .map(pref -> pref.isWebEnabled() || pref.isEmailEnabled())
-                .orElse(true);
-    }
-
-    /**
-     * Sends immediate recommendations based on new user activity
-     * @param userId The user's ID
-     * @param trigger The trigger for the recommendation (e.g. "new_favorite", "new_rating")
-     */
-    public void sendTriggeredRecommendations(String userId, String trigger) {
-        sendRecommendationNotifications(userId, 3);
-    }
+  /**
+   * Sends immediate recommendations based on new user activity
+   *
+   * @param userId The user's ID
+   * @param trigger The trigger for the recommendation (e.g. "new_favorite", "new_rating")
+   */
+  public void sendTriggeredRecommendations(String userId, String trigger) {
+    sendRecommendationNotifications(userId, 3);
+  }
 }

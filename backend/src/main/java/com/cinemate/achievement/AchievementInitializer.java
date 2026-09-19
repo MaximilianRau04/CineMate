@@ -8,10 +8,10 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class AchievementInitializer implements CommandLineRunner {
 
-    private final AchievementService achievementService;
+  private final AchievementService achievementService;
 
-    @Override
-    public void run(String... args) throws Exception {
-        achievementService.initializeDefaultAchievements();
-    }
+  @Override
+  public void run(String... args) throws Exception {
+    achievementService.initializeDefaultAchievements();
+  }
 }

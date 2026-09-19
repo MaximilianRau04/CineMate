@@ -14,77 +14,73 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class NotificationEventListener {
 
-    private final AutoNotificationService autoNotificationService;
-    private final RecommendationNotificationService recommendationNotificationService;
+  private final AutoNotificationService autoNotificationService;
+  private final RecommendationNotificationService recommendationNotificationService;
 
-    @EventListener
-    @Async
-    public void handleMovieReleasedEvent(MovieReleasedEvent event) {
-        autoNotificationService.notifyMovieWatchlistReleased(event.getMovie());
+  @EventListener
+  @Async
+  public void handleMovieReleasedEvent(MovieReleasedEvent event) {
+    autoNotificationService.notifyMovieWatchlistReleased(event.getMovie());
+  }
+
+  @EventListener
+  @Async
+  public void handleSeriesUpdatedEvent(SeriesUpdatedEvent event) {
+    switch (event.getEventType()) {
+      case NEW_SEASON:
+        autoNotificationService.notifySeriesNewSeason(event.getSeries(), event.getNewSeason());
+        break;
+      case NEW_EPISODE:
+        autoNotificationService.notifySeriesNewEpisode(
+            event.getSeries(), event.getNewSeason(), event.getNewEpisode());
+        break;
+      case STATUS_CHANGED:
+        autoNotificationService.notifySeriesStatusChanged(event.getSeries(), event.getOldStatus());
+        break;
     }
+  }
 
-    @EventListener
-    @Async
-    public void handleSeriesUpdatedEvent(SeriesUpdatedEvent event) {
-        switch (event.getEventType()) {
-            case NEW_SEASON:
-                autoNotificationService.notifySeriesNewSeason(event.getSeries(), event.getNewSeason());
-                break;
-            case NEW_EPISODE:
-                autoNotificationService.notifySeriesNewEpisode(event.getSeries(), event.getNewSeason(), event.getNewEpisode());
-                break;
-            case STATUS_CHANGED:
-                autoNotificationService.notifySeriesStatusChanged(event.getSeries(), event.getOldStatus());
-                break;
-        }
+  @EventListener
+  @Async
+  public void handleReviewCreatedEvent(ReviewCreatedEvent event) {
+    autoNotificationService.notifyWatchlistItemReviewed(
+        event.getReview(), event.getItemTitle(), event.getItemType());
+
+    autoNotificationService.notifyFavoriteItemReviewed(
+        event.getReview(), event.getItemTitle(), event.getItemType());
+  }
+
+  @EventListener
+  @Async
+  public void handleUserActivityEvent(UserActivityEvent event) {
+    autoNotificationService.checkAndNotifyMilestones(event.getUserId());
+  }
+
+  @EventListener
+  @Async
+  public void handleUserPreferenceChangedEvent(UserPreferenceChangedEvent event) {
+    // Send triggered recommendations based on user activity
+    try {
+      recommendationNotificationService.sendTriggeredRecommendations(
+          event.getUserId(), event.getActivityType());
+    } catch (Exception e) {
+      log.error(
+          "Error sending triggered recommendation notifications for user "
+              + event.getUserId()
+              + ": "
+              + e.getMessage());
     }
+  }
 
-    @EventListener
-    @Async
-    public void handleReviewCreatedEvent(ReviewCreatedEvent event) {
-        autoNotificationService.notifyWatchlistItemReviewed(
-            event.getReview(), 
-            event.getItemTitle(), 
-            event.getItemType()
-        );
+  @EventListener
+  @Async
+  public void handleForumPostCreatedEvent(ForumPostCreatedEvent event) {
+    autoNotificationService.notifyForumPostCreated(event.getForumPost());
+  }
 
-        autoNotificationService.notifyFavoriteItemReviewed(
-            event.getReview(), 
-            event.getItemTitle(), 
-            event.getItemType()
-        );
-    }
-
-    @EventListener
-    @Async
-    public void handleUserActivityEvent(UserActivityEvent event) {
-        autoNotificationService.checkAndNotifyMilestones(event.getUserId());
-    }
-
-    @EventListener
-    @Async
-    public void handleUserPreferenceChangedEvent(UserPreferenceChangedEvent event) {
-        // Send triggered recommendations based on user activity
-        try {
-            recommendationNotificationService.sendTriggeredRecommendations(
-                event.getUserId(), 
-                event.getActivityType()
-            );
-        } catch (Exception e) {
-            log.error("Error sending triggered recommendation notifications for user "
-                + event.getUserId() + ": " + e.getMessage());
-        }
-    }
-
-    @EventListener
-    @Async
-    public void handleForumPostCreatedEvent(ForumPostCreatedEvent event) {
-        autoNotificationService.notifyForumPostCreated(event.getForumPost());
-    }
-
-    @EventListener
-    @Async
-    public void handleForumReplyCreatedEvent(ForumReplyCreatedEvent event) {
-        autoNotificationService.notifyForumReplyCreated(event.getForumReply(), event.getForumPost());
-    }
+  @EventListener
+  @Async
+  public void handleForumReplyCreatedEvent(ForumReplyCreatedEvent event) {
+    autoNotificationService.notifyForumReplyCreated(event.getForumReply(), event.getForumPost());
+  }
 }

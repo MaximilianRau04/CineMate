@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GenreStatisticsDTO {
-    private String name;
-    private Integer count;
-    private Integer hours;
+  private String name;
+  private Integer count;
+  private Integer hours;
 }

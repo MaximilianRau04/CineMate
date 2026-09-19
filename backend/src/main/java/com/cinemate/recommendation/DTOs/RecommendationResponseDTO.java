@@ -10,10 +10,10 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RecommendationResponseDTO {
-    private String id;
-    private String title;
-    private String type;
-    private double score;
-    private String reason;
-    private String posterUrl;
+  private String id;
+  private String title;
+  private String type;
+  private double score;
+  private String reason;
+  private String posterUrl;
 }

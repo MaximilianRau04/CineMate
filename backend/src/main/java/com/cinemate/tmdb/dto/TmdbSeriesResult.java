@@ -8,10 +8,10 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class TmdbSeriesResult {
-    private int tmdbId;
-    private String name;
-    private String overview;
-    private String posterUrl;
-    private String firstAirDate;
-    private double voteAverage;
+  private int tmdbId;
+  private String name;
+  private String overview;
+  private String posterUrl;
+  private String firstAirDate;
+  private double voteAverage;
 }
