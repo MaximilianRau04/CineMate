@@ -53,7 +53,7 @@ const AddToListModal = ({ mediaId, mediaType, onClose }) => {
             };
           }
           return list;
-        })
+        }),
       );
     } catch (error) {
       if (error.response?.status === 409) {

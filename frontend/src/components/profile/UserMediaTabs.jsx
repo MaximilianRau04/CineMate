@@ -618,13 +618,12 @@ const UserMediaTabs = ({ userId }) => {
                         <div className="d-flex justify-content-between align-items-center">
                           <small className="text-muted">
                             {new Date(list.updatedAt).toLocaleDateString(
-                              "de-DE"
+                              "de-DE",
                             )}
                           </small>
                           <div>
                             <span className="text-muted me-2">
-                              <i className="bi bi-heart"></i>{" "}
-                              {list.likesCount}
+                              <i className="bi bi-heart"></i> {list.likesCount}
                             </span>
                             <Link
                               to={`/lists/${list.id}`}

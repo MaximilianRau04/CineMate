@@ -127,7 +127,7 @@ const ListDetailView = () => {
   const handleDeleteList = async () => {
     if (
       !window.confirm(
-        "Liste wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden."
+        "Liste wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
       )
     )
       return;
@@ -153,7 +153,7 @@ const ListDetailView = () => {
 
     try {
       const { data } = await api.delete(
-        `/lists/${listId}/${contentType}/${contentId}`
+        `/lists/${listId}/${contentType}/${contentId}`,
       );
       setList(data);
       success("Inhalt entfernt!");
@@ -172,7 +172,7 @@ const ListDetailView = () => {
   const handleAddContent = async (contentId, contentType) => {
     try {
       const { data } = await api.post(
-        `/lists/${listId}/${contentType}/${contentId}`
+        `/lists/${listId}/${contentType}/${contentId}`,
       );
       setList(data);
       success("Inhalt hinzugefügt!");

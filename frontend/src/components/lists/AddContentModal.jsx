@@ -41,7 +41,7 @@ const AddContentModal = ({
           : existingSeries.map((s) => s.id);
 
       const filteredResults = data.filter(
-        (item) => !existingIds.includes(item.id)
+        (item) => !existingIds.includes(item.id),
       );
 
       setSearchResults(filteredResults);
@@ -182,9 +182,7 @@ const AddContentModal = ({
                                 style={{ fontSize: "0.8rem" }}
                               >
                                 {content.releaseDate &&
-                                  new Date(
-                                    content.releaseDate
-                                  ).getFullYear()}
+                                  new Date(content.releaseDate).getFullYear()}
                               </p>
                               <div className="mt-auto">
                                 <button
