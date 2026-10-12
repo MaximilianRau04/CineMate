@@ -4,6 +4,8 @@ CineMate is a web application for discovering, managing, and tracking movies and
 
 Built with a React frontend and a Spring Boot backend, using MongoDB for storage.
 
+![CineMate explore view](docs/screenshots/explore.webp)
+
 ## Tech Stack
 
 - **Frontend**: React, React Router, Axios, Bootstrap
