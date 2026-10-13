@@ -25,10 +25,7 @@ const useMediaData = () => {
       return sum / reviews.length;
     } catch (error) {
       if (error.response?.status === 404) return 0;
-      console.error(
-        `Fehler beim Laden des Ratings für ${type} ${itemId}:`,
-        error,
-      );
+      console.error(`Failed to load rating for ${type} ${itemId}:`, error);
       return null;
     }
   };
@@ -63,8 +60,7 @@ const useMediaData = () => {
           return {
             ...movie,
             genreArray,
-            currentRating:
-              currentRating !== null ? currentRating : movie.rating,
+            currentRating: currentRating || movie.rating,
           };
         }),
       );
@@ -77,8 +73,7 @@ const useMediaData = () => {
           return {
             ...series,
             genreArray,
-            currentRating:
-              currentRating !== null ? currentRating : series.rating,
+            currentRating: currentRating || series.rating,
           };
         }),
       );
@@ -96,7 +91,7 @@ const useMediaData = () => {
 
       return { movies: processedMovies, series: processedSeries };
     } catch (err) {
-      console.error("Fehler beim Laden:", err);
+      console.error("Failed to load media:", err);
       setError(err.message);
       return { movies: [], series: [] };
     } finally {

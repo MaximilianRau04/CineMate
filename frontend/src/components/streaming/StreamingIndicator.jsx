@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import api from "../../utils/api";
+import { useTranslation } from "../../i18n/I18nContext";
 
 const StreamingIndicator = ({ mediaId, mediaType, maxProviders = 3 }) => {
   const [providers, setProviders] = useState([]);
   const [loading, setLoading] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (mediaId && mediaType) {
@@ -69,13 +71,13 @@ const StreamingIndicator = ({ mediaId, mediaType, maxProviders = 3 }) => {
           </div>
         ))}
         {providers.length >= maxProviders && (
-          <div className="streaming-more" title="Weitere Anbieter verfügbar">
+          <div className="streaming-more" title={t("streaming.moreProviders")}>
             <i className="bi bi-three-dots"></i>
           </div>
         )}
       </div>
 
-      <style jsx>{`
+      <style>{`
         .streaming-indicator {
           position: absolute;
           top: 8px;
@@ -94,7 +96,7 @@ const StreamingIndicator = ({ mediaId, mediaType, maxProviders = 3 }) => {
           width: 24px;
           height: 24px;
           border-radius: 4px;
-          background: rgba(255, 255, 255, 0.9);
+          background: rgba(243, 233, 218, 0.92);
           backdrop-filter: blur(4px);
           display: flex;
           align-items: center;
@@ -112,7 +114,7 @@ const StreamingIndicator = ({ mediaId, mediaType, maxProviders = 3 }) => {
         .streaming-fallback {
           width: 20px;
           height: 20px;
-          background: #007bff;
+          background: var(--cm-brass);
           color: white;
           font-size: 10px;
           font-weight: bold;
@@ -122,7 +124,7 @@ const StreamingIndicator = ({ mediaId, mediaType, maxProviders = 3 }) => {
         }
 
         .streaming-more {
-          background: rgba(0, 0, 0, 0.7);
+          background: rgba(22, 14, 17, 0.8);
           color: white;
           font-size: 12px;
         }

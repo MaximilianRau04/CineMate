@@ -1,13 +1,17 @@
 import React from "react";
 import CalendarItem from "./CalendarItem";
+import { useTranslation } from "../../../i18n/I18nContext";
 
 const CalendarList = ({ groupedContent, resetFilters }) => {
+  const { t } = useTranslation();
+
   if (Object.keys(groupedContent).length === 0) {
     return (
-      <div className="text-center py-5">
-        <p className="lead text-muted">Keine passenden Inhalte gefunden.</p>
-        <button className="btn btn-outline-primary mt-2" onClick={resetFilters}>
-          Filter zurücksetzen
+      <div className="cm-empty">
+        <h3>{t("calendar.empty")}</h3>
+        <p>{t("calendar.emptyHint")}</p>
+        <button className="btn btn-outline-primary" onClick={resetFilters}>
+          {t("explore.resetFilters")}
         </button>
       </div>
     );
@@ -16,9 +20,9 @@ const CalendarList = ({ groupedContent, resetFilters }) => {
   return (
     <>
       {Object.entries(groupedContent).map(([month, items]) => (
-        <div key={month} className="mb-4">
-          <h4 className="border-bottom pb-2 mb-3">{month}</h4>
-          <div className="list-group">
+        <section key={month} className="cm-cal-month">
+          <h2>{month}</h2>
+          <div className="cm-cal-list">
             {items.map((item) => (
               <CalendarItem
                 key={`${item.contentType}-${item.id}`}
@@ -26,7 +30,7 @@ const CalendarList = ({ groupedContent, resetFilters }) => {
               />
             ))}
           </div>
-        </div>
+        </section>
       ))}
     </>
   );

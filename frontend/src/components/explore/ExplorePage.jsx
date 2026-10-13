@@ -5,11 +5,13 @@ import { LoadingSpinner, SearchBar, FilterPanel } from "./FilterPanel";
 import MediaList from "./MediaCard";
 import useMediaData from "./utils/useMediaData";
 import { applyMediaFilters } from "./utils/useFilters";
+import { useTranslation } from "../../i18n/I18nContext";
 
 const ExplorePage = () => {
   // Data fetching using custom hook
   const { movies, series, isLoading, error, availableGenres, fetchData } =
     useMediaData();
+  const { t } = useTranslation();
 
   // Filter state
   const [filteredMovies, setFilteredMovies] = useState([]);
@@ -22,7 +24,7 @@ const ExplorePage = () => {
     start: "",
     end: "",
   });
-  const [sortOrder, setSortOrder] = useState("asc");
+  const [sortOrder, setSortOrder] = useState("desc");
 
   // Apply filters when filter criteria change
   useEffect(() => {
@@ -55,7 +57,7 @@ const ExplorePage = () => {
     setSelectedGenres([]);
     setDateRange({ start: "", end: "" });
     setSearchQuery("");
-    setSortOrder("asc");
+    setSortOrder("desc");
   };
 
   /**
@@ -74,17 +76,23 @@ const ExplorePage = () => {
     return <LoadingSpinner />;
   }
 
+  const activeFilterCount =
+    selectedGenres.length +
+    (contentType !== "all" ? 1 : 0) +
+    (dateRange.start || dateRange.end ? 1 : 0);
+  const hasFilters = activeFilterCount > 0 || searchQuery;
+
   if (error) {
     return (
-      <div className="container py-5">
+      <div className="container cm-page">
         <div className="alert alert-danger" role="alert">
-          <h4 className="alert-heading">Fehler</h4>
+          <h4 className="alert-heading">{t("explore.loadError")}</h4>
           <p>{error}</p>
           <button
             className="btn btn-outline-danger"
             onClick={() => fetchData()}
           >
-            Erneut versuchen
+            {t("common.retry")}
           </button>
         </div>
       </div>
@@ -92,72 +100,74 @@ const ExplorePage = () => {
   }
 
   return (
-    <div className="container py-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1 className="text-center text-primary mb-0">
-          🎬 Entdecke Filme und Serien
-        </h1>
-      </div>
-
-      {/* Search and Filter UI */}
-      <div className="card shadow-lg border-0 mb-4">
-        <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-          <div className="d-flex align-items-center">
-            <h5 className="mb-0">🔍 Suche und Filter</h5>
+    <div className="container-xxl cm-page">
+      <header className="cm-page-head">
+        <div>
+          <div className="cm-eyebrow">
+            {t("explore.eyebrow", {
+              movies: movies.length,
+              series: series.length,
+            })}
           </div>
-          <div className="d-flex align-items-center">
-            <SearchBar
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-            />
-            <button
-              className="btn btn-light btn-sm"
-              onClick={() => setShowFilters(!showFilters)}
-            >
-              <FaFilter className="me-1" />
-              {showFilters ? "Filter ausblenden" : "Filter anzeigen"}
-            </button>
-          </div>
+          <h1>{t("explore.title")}</h1>
         </div>
-
-        {showFilters && (
-          <FilterPanel
-            contentType={contentType}
-            setContentType={setContentType}
-            sortOrder={sortOrder}
-            setSortOrder={setSortOrder}
-            dateRange={dateRange}
-            setDateRange={setDateRange}
-            availableGenres={availableGenres}
-            selectedGenres={selectedGenres}
-            toggleGenre={toggleGenre}
-            resetFilters={resetFilters}
+        <div className="cm-explore-tools">
+          <SearchBar
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
           />
-        )}
-      </div>
+          <button
+            type="button"
+            className={`btn ${showFilters ? "btn-primary" : "btn-outline-secondary"}`}
+            onClick={() => setShowFilters(!showFilters)}
+            aria-expanded={showFilters}
+          >
+            <FaFilter className="me-2" size={12} />
+            {t("explore.filters")}
+            {activeFilterCount > 0 && (
+              <span className="cm-filter-count">{activeFilterCount}</span>
+            )}
+          </button>
+        </div>
+      </header>
 
-      {/* No results message */}
+      {showFilters && (
+        <FilterPanel
+          contentType={contentType}
+          setContentType={setContentType}
+          sortOrder={sortOrder}
+          setSortOrder={setSortOrder}
+          dateRange={dateRange}
+          setDateRange={setDateRange}
+          availableGenres={availableGenres}
+          selectedGenres={selectedGenres}
+          toggleGenre={toggleGenre}
+          resetFilters={resetFilters}
+        />
+      )}
+
       {filteredMovies.length === 0 && filteredSeries.length === 0 && (
-        <div className="text-center py-5">
-          <p className="lead text-muted">Keine passenden Inhalte gefunden.</p>
-          {(contentType !== "all" ||
-            selectedGenres.length > 0 ||
-            dateRange.start ||
-            dateRange.end ||
-            searchQuery) && (
-            <button
-              className="btn btn-outline-primary mt-2"
-              onClick={resetFilters}
-            >
-              Filter zurücksetzen
+        <div className="cm-empty mt-4">
+          <h3>{t("explore.noResults")}</h3>
+          <p>{t("explore.noResultsHint")}</p>
+          {hasFilters && (
+            <button className="btn btn-outline-primary" onClick={resetFilters}>
+              {t("explore.resetFilters")}
             </button>
           )}
         </div>
       )}
 
-      {/* Movies and Series lists */}
-      <MediaList title="🎥 Filme" items={filteredMovies} type="movie" />
-      <MediaList title="📺 Serien" items={filteredSeries} type="series" />
+      <MediaList
+        title={t("common.movies")}
+        items={filteredMovies}
+        type="movie"
+      />
+      <MediaList
+        title={t("common.seriesPlural")}
+        items={filteredSeries}
+        type="series"
+      />
     </div>
   );
 };
