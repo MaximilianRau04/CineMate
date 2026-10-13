@@ -1,6 +1,8 @@
 import React, { useState } from "react";
+import { useTranslation } from "../../i18n/I18nContext";
 
 const EditListModal = ({ list, onClose, onSubmit }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     title: list.title || "",
     description: list.description || "",
@@ -56,14 +58,14 @@ const EditListModal = ({ list, onClose, onSubmit }) => {
     <div
       className="modal show d-block"
       tabIndex="-1"
-      style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+      style={{ backgroundColor: "rgba(8, 4, 10, 0.75)" }}
     >
       <div className="modal-dialog modal-lg">
         <div className="modal-content">
           <div className="modal-header">
             <h5 className="modal-title">
               <i className="bi bi-pencil me-2"></i>
-              Liste bearbeiten
+              {t("lists.editList")}
             </h5>
             <button
               type="button"
@@ -78,7 +80,7 @@ const EditListModal = ({ list, onClose, onSubmit }) => {
               {/* Title */}
               <div className="mb-3">
                 <label htmlFor="title" className="form-label">
-                  Titel <span className="text-danger">*</span>
+                  {t("lists.form.title")} <span className="text-danger">*</span>
                 </label>
                 <input
                   type="text"
@@ -91,14 +93,17 @@ const EditListModal = ({ list, onClose, onSubmit }) => {
                   maxLength="100"
                 />
                 <div className="form-text">
-                  {formData.title.length}/100 Zeichen
+                  {t("lists.form.chars", {
+                    count: formData.title.length,
+                    max: 100,
+                  })}
                 </div>
               </div>
 
               {/* Description */}
               <div className="mb-3">
                 <label htmlFor="description" className="form-label">
-                  Beschreibung
+                  {t("lists.form.description")}
                 </label>
                 <textarea
                   className="form-control"
@@ -110,7 +115,10 @@ const EditListModal = ({ list, onClose, onSubmit }) => {
                   maxLength="500"
                 ></textarea>
                 <div className="form-text">
-                  {formData.description.length}/500 Zeichen
+                  {t("lists.form.chars", {
+                    count: formData.description.length,
+                    max: 500,
+                  })}
                 </div>
               </div>
 
@@ -127,20 +135,20 @@ const EditListModal = ({ list, onClose, onSubmit }) => {
                   />
                   <label className="form-check-label" htmlFor="isPublic">
                     <i className="bi bi-globe me-1"></i>
-                    Öffentliche Liste
+                    {t("lists.form.public")}
                   </label>
                 </div>
                 <div className="form-text">
                   {formData.isPublic
-                    ? "Andere Nutzer können deine Liste sehen und liken."
-                    : "Nur du kannst diese Liste sehen."}
+                    ? t("lists.form.publicHint")
+                    : t("lists.form.privateHint")}
                 </div>
               </div>
 
               {/* Tags */}
               <div className="mb-3">
                 <label htmlFor="tags" className="form-label">
-                  Tags
+                  {t("lists.form.tags")}
                 </label>
                 <input
                   type="text"
@@ -149,15 +157,15 @@ const EditListModal = ({ list, onClose, onSubmit }) => {
                   name="tags"
                   value={formData.tags}
                   onChange={handleChange}
-                  placeholder="Action, Komödie, 2024, ..."
+                  placeholder={t("lists.form.tagsPlaceholder")}
                 />
-                <div className="form-text">Trenne mehrere Tags mit Kommas.</div>
+                <div className="form-text">{t("lists.form.tagsHint")}</div>
               </div>
 
               {/* Cover Image URL */}
               <div className="mb-3">
                 <label htmlFor="coverImageUrl" className="form-label">
-                  Cover-Bild URL (optional)
+                  {t("lists.form.coverUrl")}
                 </label>
                 <input
                   type="url"
@@ -173,11 +181,13 @@ const EditListModal = ({ list, onClose, onSubmit }) => {
               {/* Preview */}
               {formData.coverImageUrl && (
                 <div className="mb-3">
-                  <label className="form-label">Vorschau:</label>
+                  <label className="form-label">
+                    {t("lists.form.preview")}
+                  </label>
                   <div className="text-center">
                     <img
                       src={formData.coverImageUrl}
-                      alt="Cover Preview"
+                      alt=""
                       className="img-thumbnail"
                       style={{ maxHeight: "200px" }}
                       onError={(e) => {
@@ -196,7 +206,7 @@ const EditListModal = ({ list, onClose, onSubmit }) => {
                 onClick={onClose}
                 disabled={loading}
               >
-                Abbrechen
+                {t("common.cancel")}
               </button>
               <button
                 type="submit"
@@ -209,12 +219,12 @@ const EditListModal = ({ list, onClose, onSubmit }) => {
                       className="spinner-border spinner-border-sm me-2"
                       role="status"
                     ></span>
-                    Speichere...
+                    {t("common.saving")}
                   </>
                 ) : (
                   <>
                     <i className="bi bi-check-circle me-2"></i>
-                    Änderungen speichern
+                    {t("lists.form.saveChanges")}
                   </>
                 )}
               </button>

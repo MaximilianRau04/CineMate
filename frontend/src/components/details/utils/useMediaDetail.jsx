@@ -3,10 +3,12 @@ import { useParams } from "react-router-dom";
 import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
 import api from "../../../utils/api";
 import { useAuth } from "../../../utils/AuthContext";
+import { useTranslation } from "../../../i18n/I18nContext";
 
 export const useMediaDetail = (mediaType = "movies") => {
   const { id: mediaId } = useParams();
   const { user: currentUser } = useAuth();
+  const { t } = useTranslation();
   const userId = currentUser?.id ?? null;
   const [media, setMedia] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -32,16 +34,17 @@ export const useMediaDetail = (mediaType = "movies") => {
         setIsLoading(false);
       })
       .catch((err) => {
-        console.error(`Fehler beim Laden des ${mediaType}:`, err);
+        console.error(`Failed to load ${mediaType}:`, err);
         const status = err.response?.status;
+        const kind = mediaType === "movies" ? "movie" : "series";
         const message =
           status === 404
-            ? `${mediaType === "movies" ? "Film" : "Serie"} wurde nicht gefunden`
-            : `${mediaType === "movies" ? "Film" : "Serie"} konnte nicht geladen werden (${status})`;
+            ? t(`details.${kind}NotFound`)
+            : t(`details.${kind}LoadError`, { status: status ?? "-" });
         setError(message);
         setIsLoading(false);
       });
-  }, [mediaId, mediaType]);
+  }, [mediaId, mediaType]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /**
    * Fetches actors and director for the media based on mediaId and mediaType.
@@ -97,11 +100,11 @@ export const renderStars = (rating) => {
 
   for (let i = 0; i < 5; i++) {
     if (i < fullStars) {
-      stars.push(<FaStar key={i} color="#ffc107" />);
+      stars.push(<FaStar key={i} color="var(--cm-brass)" />);
     } else if (i === fullStars && hasHalfStar) {
-      stars.push(<FaStarHalfAlt key={i} color="#ffc107" />);
+      stars.push(<FaStarHalfAlt key={i} color="var(--cm-brass)" />);
     } else {
-      stars.push(<FaRegStar key={i} color="#e4e5e9" />);
+      stars.push(<FaRegStar key={i} color="rgba(243, 233, 218, 0.3)" />);
     }
   }
 
@@ -111,13 +114,14 @@ export const renderStars = (rating) => {
 /**
  * formats a timestamp to a date string in the format dd.mm.yyyy
  * @param {*} timestamp
- * @returns date formatted as dd.mm.yyyy or ""
+ * @param {string} locale
+ * @returns localized date or ""
  */
-export const formatBirthday = (timestamp) => {
+export const formatBirthday = (timestamp, locale = "en-US") => {
   if (!timestamp) return "";
   try {
     const date = new Date(timestamp);
-    return date.toLocaleDateString("de-DE", {
+    return date.toLocaleDateString(locale, {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",

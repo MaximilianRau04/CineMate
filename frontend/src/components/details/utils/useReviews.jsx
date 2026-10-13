@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import api from "../../../utils/api";
 import { useToast } from "../../toasts";
+import { useTranslation } from "../../../i18n/I18nContext";
 
 export const useReviews = (userId, mediaId, mediaType) => {
   const { error: showError } = useToast();
+  const { t } = useTranslation();
   const [reviews, setReviews] = useState([]);
   const [averageRating, setAverageRating] = useState(0);
   const [reviewUsers, setReviewUsers] = useState({});
@@ -148,7 +150,7 @@ export const useReviews = (userId, mediaId, mediaType) => {
       await loadReviews();
     } catch (error) {
       console.error("Fehler beim Speichern der Bewertung:", error);
-      showError("Bewertung konnte nicht gespeichert werden");
+      showError(t("reviews.saveError"));
     } finally {
       setSubmitting(false);
     }
@@ -179,7 +181,7 @@ export const useReviews = (userId, mediaId, mediaType) => {
       await loadReviews();
     } catch (error) {
       console.error("Fehler beim Bearbeiten der Bewertung:", error);
-      showError("Bewertung konnte nicht bearbeitet werden");
+      showError(t("reviews.editError"));
     } finally {
       setSubmitting(false);
     }
@@ -190,9 +192,7 @@ export const useReviews = (userId, mediaId, mediaType) => {
    * @returns {Promise<void>}
    */
   const handleDeleteReview = async () => {
-    const confirmDelete = window.confirm(
-      "Möchtest du deine Bewertung wirklich löschen?",
-    );
+    const confirmDelete = window.confirm(t("reviews.confirmDelete"));
     if (!confirmDelete) return;
 
     try {
@@ -209,7 +209,7 @@ export const useReviews = (userId, mediaId, mediaType) => {
       await loadReviews();
     } catch (error) {
       console.error("Fehler beim Löschen:", error);
-      showError("Bewertung konnte nicht gelöscht werden");
+      showError(t("reviews.deleteError"));
     }
   };
 

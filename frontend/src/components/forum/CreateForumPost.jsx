@@ -4,6 +4,7 @@ import { useToast } from "../toasts";
 import SearchableMediaSelect from "./SearchableMediaSelect";
 import "./css/CreateForumPost.css";
 import api from "../../utils/api";
+import { useTranslation } from "../../i18n/I18nContext";
 
 const CreateForumPost = () => {
   const [title, setTitle] = useState("");
@@ -16,6 +17,7 @@ const CreateForumPost = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const { success, error: showError } = useToast();
+  const { t, has } = useTranslation();
 
   useEffect(() => {
     fetchCategories();
@@ -31,7 +33,7 @@ const CreateForumPost = () => {
       setCategories(data);
     } catch (error) {
       console.error("Error fetching categories:", error);
-      showError("Kategorien konnten nicht geladen werden");
+      showError(t("forum.loadCategoriesError"));
     }
   };
 
@@ -44,7 +46,7 @@ const CreateForumPost = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!title.trim() || !content.trim()) {
-      setError("Titel und Inhalt sind erforderlich");
+      setError(t("forum.create.required"));
       return;
     }
 
@@ -64,16 +66,16 @@ const CreateForumPost = () => {
       };
 
       const { data: createdPost } = await api.post("/forum/posts", postData);
-      success("Beitrag erfolgreich erstellt!");
+      success(t("forum.create.created"));
       navigate(`/forum/post/${createdPost.id}`);
     } catch (error) {
       if (error.response?.status === 401) {
-        setError("Sie müssen sich anmelden, um einen Beitrag zu erstellen");
+        setError(t("forum.create.loginRequired"));
         setTimeout(() => navigate("/"), 2000);
       } else {
         console.error("Error creating post:", error);
-        showError("Fehler beim Erstellen des Beitrags");
-        setError("Fehler beim Erstellen des Beitrags");
+        showError(t("forum.create.error"));
+        setError(t("forum.create.error"));
       }
     } finally {
       setLoading(false);
@@ -85,18 +87,10 @@ const CreateForumPost = () => {
    * @param {string} category - The category key
    * @returns {string} - The display name for the category
    */
-  const getCategoryDisplayName = (category) => {
-    const categoryMap = {
-      GENERAL: "Allgemein",
-      MOVIE_DISCUSSION: "Filme",
-      SERIES_DISCUSSION: "Serien",
-      RECOMMENDATIONS: "Empfehlungen",
-      REVIEWS: "Bewertungen",
-      NEWS: "News",
-      OFF_TOPIC: "Off-Topic",
-    };
-    return categoryMap[category] || category;
-  };
+  const getCategoryDisplayName = (category) =>
+    has(`forum.categories.${category}`)
+      ? t(`forum.categories.${category}`)
+      : category;
 
   return (
     <div className="create-forum-post modern-create-page">
@@ -109,13 +103,11 @@ const CreateForumPost = () => {
             type="button"
           >
             <span className="back-arrow">←</span>
-            <span>Zurück zum Forum</span>
+            <span>{t("forum.backToForum")}</span>
           </button>
           <div className="header-title-section">
-            <h1 className="modern-create-title">Neuen Beitrag erstellen</h1>
-            <p className="header-subtitle">
-              Teile deine Gedanken mit der Community
-            </p>
+            <h1 className="modern-create-title">{t("forum.create.title")}</h1>
+            <p className="header-subtitle">{t("forum.create.subtitle")}</p>
           </div>
         </div>
       </div>
@@ -133,14 +125,14 @@ const CreateForumPost = () => {
           {/* Title */}
           <div className="form-group enhanced-form-group">
             <label htmlFor="title" className="enhanced-label">
-              Titel *
+              {t("forum.create.titleLabel")} *
             </label>
             <input
               type="text"
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Gib deinem Beitrag einen aussagekräftigen Titel..."
+              placeholder={t("forum.create.titlePlaceholder")}
               required
               maxLength={200}
               className="enhanced-input"
@@ -153,7 +145,7 @@ const CreateForumPost = () => {
           {/* Category */}
           <div className="form-group enhanced-form-group">
             <label htmlFor="category" className="enhanced-label">
-              Kategorie *
+              {t("forum.create.category")} *
             </label>
             <select
               id="category"
@@ -174,40 +166,38 @@ const CreateForumPost = () => {
           <div className="form-row enhanced-form-row">
             <div className="form-group enhanced-form-group">
               <label htmlFor="movieSelect" className="enhanced-label">
-                Film (optional)
+                {t("forum.create.movieOptional")}
               </label>
               <SearchableMediaSelect
                 type="movie"
                 value={movieId}
                 onChange={setMovieId}
-                placeholder="Film suchen und auswählen..."
+                placeholder={t("forum.create.movieSearch")}
                 disabled={!!seriesId}
                 className="enhanced-media-select"
               />
               {seriesId && (
                 <div className="info-text enhanced-info-text">
-                  Film-Auswahl ist deaktiviert, da bereits eine Serie ausgewählt
-                  wurde.
+                  {t("forum.create.movieDisabled")}
                 </div>
               )}
             </div>
 
             <div className="form-group enhanced-form-group">
               <label htmlFor="seriesSelect" className="enhanced-label">
-                Serie (optional)
+                {t("forum.create.seriesOptional")}
               </label>
               <SearchableMediaSelect
                 type="series"
                 value={seriesId}
                 onChange={setSeriesId}
-                placeholder="Serie suchen und auswählen..."
+                placeholder={t("forum.create.seriesSearch")}
                 disabled={!!movieId}
                 className="enhanced-media-select"
               />
               {movieId && (
                 <div className="info-text enhanced-info-text">
-                  Serien-Auswahl ist deaktiviert, da bereits ein Film ausgewählt
-                  wurde.
+                  {t("forum.create.seriesDisabled")}
                 </div>
               )}
             </div>
@@ -216,13 +206,13 @@ const CreateForumPost = () => {
           {/* Content */}
           <div className="form-group enhanced-form-group">
             <label htmlFor="content" className="enhanced-label">
-              Inhalt *
+              {t("forum.create.content")} *
             </label>
             <textarea
               id="content"
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="Schreibe hier deinen Beitrag..."
+              placeholder={t("forum.create.contentPlaceholder")}
               required
               rows="12"
               maxLength={5000}
@@ -235,13 +225,13 @@ const CreateForumPost = () => {
 
           {/* Tips */}
           <div className="form-tips enhanced-form-tips">
-            <h3>💡 Tipps für einen guten Beitrag:</h3>
+            <h3>{t("forum.create.tipsTitle")}</h3>
             <ul className="enhanced-tips-list">
-              <li>Verwende einen aussagekräftigen Titel</li>
-              <li>Wähle die passende Kategorie</li>
-              <li>Verknüpfe einen Film oder eine Serie, falls relevant</li>
-              <li>Strukturiere deinen Text mit Absätzen</li>
-              <li>Sei respektvoll und konstruktiv</li>
+              <li>{t("forum.create.tip1")}</li>
+              <li>{t("forum.create.tip2")}</li>
+              <li>{t("forum.create.tip3")}</li>
+              <li>{t("forum.create.tip4")}</li>
+              <li>{t("forum.create.tip5")}</li>
             </ul>
           </div>
 
@@ -253,14 +243,14 @@ const CreateForumPost = () => {
               onClick={() => navigate("/forum")}
               disabled={loading}
             >
-              Abbrechen
+              {t("common.cancel")}
             </button>
             <button
               type="submit"
               className="submit-btn enhanced-submit-btn"
               disabled={loading || !title.trim() || !content.trim()}
             >
-              {loading ? "Wird erstellt..." : "Beitrag erstellen"}
+              {loading ? t("forum.create.creating") : t("forum.create.submit")}
             </button>
           </div>
         </form>

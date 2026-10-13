@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { Send, Users, User, Mail } from "lucide-react";
 import api from "../../../utils/api";
+import { useTranslation } from "../../../i18n/I18nContext";
 
 const AdminNotificationPanel = () => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     title: "",
     message: "",
@@ -22,7 +24,7 @@ const AdminNotificationPanel = () => {
         const { data: userData } = await api.get("/admin/notifications/users");
         setUsers(userData);
       } catch (err) {
-        setError("Fehler beim Laden der Benutzerliste: " + err.message);
+        setError(t("admin.notify.loadUsersError", { message: err.message }));
       }
     };
 
@@ -39,7 +41,7 @@ const AdminNotificationPanel = () => {
     e.preventDefault();
 
     if (!formData.title.trim() || !formData.message.trim()) {
-      setError("Titel und Nachricht sind erforderlich");
+      setError(t("admin.notify.required"));
       return;
     }
 
@@ -48,17 +50,21 @@ const AdminNotificationPanel = () => {
     setSuccess("");
 
     try {
-      const { data: result } = await api.post("/admin/notifications/send", {
+      await api.post("/admin/notifications/send", {
         title: formData.title,
         message: formData.message,
         targetUserId: formData.targetUserId || null,
       });
-      setSuccess(result);
+      setSuccess(
+        formData.targetUserId
+          ? t("admin.notify.sentOne")
+          : t("admin.notify.sentAll"),
+      );
       setFormData({ title: "", message: "", targetUserId: "" });
     } catch (err) {
       setError(
         err.response?.data ||
-          "Fehler beim Senden der Benachrichtigung: " + err.message,
+          t("admin.notify.sendError", { message: err.message }),
       );
     } finally {
       setSending(false);
@@ -78,7 +84,7 @@ const AdminNotificationPanel = () => {
     <div className="card">
       <div className="card-header d-flex align-items-center">
         <Mail className="me-2" size={20} />
-        <h5 className="mb-0">📢 Benachrichtigungen senden</h5>
+        <h5 className="mb-0">{t("admin.notify.title")}</h5>
       </div>
       <div className="card-body">
         {error && (
@@ -113,7 +119,7 @@ const AdminNotificationPanel = () => {
           <div className="row">
             <div className="col-md-6 mb-3">
               <label htmlFor="title" className="form-label">
-                <strong>Titel</strong>
+                <strong>{t("admin.fields.title")}</strong>
               </label>
               <input
                 type="text"
@@ -122,7 +128,7 @@ const AdminNotificationPanel = () => {
                 className="form-control"
                 value={formData.title}
                 onChange={handleInputChange}
-                placeholder="Benachrichtigungstitel eingeben..."
+                placeholder={t("admin.notify.titlePlaceholder")}
                 required
                 disabled={sending}
               />
@@ -130,7 +136,7 @@ const AdminNotificationPanel = () => {
 
             <div className="col-md-6 mb-3">
               <label htmlFor="targetUserId" className="form-label">
-                <strong>Empfänger</strong>
+                <strong>{t("admin.notify.recipient")}</strong>
               </label>
               <select
                 id="targetUserId"
@@ -140,7 +146,7 @@ const AdminNotificationPanel = () => {
                 onChange={handleInputChange}
                 disabled={sending}
               >
-                <option value="">📢 Alle Benutzer</option>
+                <option value="">{t("admin.notify.allUsers")}</option>
                 {users.map((user) => (
                   <option key={user.id} value={user.id}>
                     👤 {user.username} ({user.email})
@@ -152,7 +158,7 @@ const AdminNotificationPanel = () => {
 
           <div className="mb-3">
             <label htmlFor="message" className="form-label">
-              <strong>Nachricht</strong>
+              <strong>{t("admin.notify.message")}</strong>
             </label>
             <textarea
               id="message"
@@ -161,12 +167,15 @@ const AdminNotificationPanel = () => {
               rows="4"
               value={formData.message}
               onChange={handleInputChange}
-              placeholder="Nachrichteninhalt eingeben..."
+              placeholder={t("admin.notify.messagePlaceholder")}
               required
               disabled={sending}
             />
             <div className="form-text">
-              {formData.message.length}/1000 Zeichen
+              {t("lists.form.chars", {
+                count: formData.message.length,
+                max: 1000,
+              })}
             </div>
           </div>
 
@@ -175,12 +184,12 @@ const AdminNotificationPanel = () => {
               {formData.targetUserId ? (
                 <span>
                   <User size={16} className="me-1" />
-                  Wird an einen Benutzer gesendet
+                  {t("admin.notify.toOne")}
                 </span>
               ) : (
                 <span>
                   <Users size={16} className="me-1" />
-                  Wird an alle {users.length} Benutzer gesendet
+                  {t("admin.notify.toAll", { count: users.length })}
                 </span>
               )}
             </div>
@@ -198,12 +207,12 @@ const AdminNotificationPanel = () => {
                     className="spinner-border spinner-border-sm me-2"
                     role="status"
                   ></span>
-                  Wird gesendet...
+                  {t("forum.sending")}
                 </>
               ) : (
                 <>
                   <Send size={16} className="me-2" />
-                  Benachrichtigung senden
+                  {t("admin.notify.send")}
                 </>
               )}
             </button>
@@ -213,20 +222,12 @@ const AdminNotificationPanel = () => {
         <hr className="my-4" />
 
         <div className="bg-light p-3 rounded">
-          <h6 className="mb-2">ℹ️ Hinweise:</h6>
+          <h6 className="mb-2">{t("notificationSettings.notes")}</h6>
           <ul className="mb-0 small text-muted">
-            <li>
-              Benachrichtigungen werden sowohl als Web- als auch als
-              Email-Benachrichtigungen versendet
-            </li>
-            <li>
-              Bei "Alle Benutzer" werden alle registrierten Nutzer
-              benachrichtigt
-            </li>
-            <li>
-              Spezifische Benutzer können über das Dropdown ausgewählt werden
-            </li>
-            <li>Der Versand erfolgt asynchron im Hintergrund</li>
+            <li>{t("admin.notify.note1")}</li>
+            <li>{t("admin.notify.note2")}</li>
+            <li>{t("admin.notify.note3")}</li>
+            <li>{t("admin.notify.note4")}</li>
           </ul>
         </div>
       </div>

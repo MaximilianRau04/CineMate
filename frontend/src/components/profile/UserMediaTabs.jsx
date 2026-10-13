@@ -2,15 +2,18 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useToast } from "../toasts";
 import MediaCard from "./MediaCard";
+import ListCard from "../lists/ListCard";
 import api from "../../utils/api";
+import { useTranslation } from "../../i18n/I18nContext";
 
-const UserMediaTabs = ({ userId }) => {
+const UserMediaTabs = ({ userId, readOnly = false }) => {
   const [activeTab, setActiveTab] = useState("reviews");
   const [favorites, setFavorites] = useState({ movies: [], series: [] });
   const [watched, setWatched] = useState({ movies: [], series: [] });
   const [reviews, setReviews] = useState([]);
   const [customLists, setCustomLists] = useState([]);
   const { success, error: showError } = useToast();
+  const { t, formatDate } = useTranslation();
   const [loading, setLoading] = useState({
     favorites: false,
     watched: false,
@@ -159,19 +162,16 @@ const UserMediaTabs = ({ userId }) => {
    */
   const removeFromFavorites = async (mediaId, mediaType) => {
     try {
-      await api.delete(`/users/${userId}/favorites/${mediaType}s/${mediaId}`);
+      const plural = mediaType === "movie" ? "movies" : "series";
+      await api.delete(`/users/${userId}/favorites/${plural}/${mediaId}`);
       setFavorites((prev) => ({
         ...prev,
-        [mediaType + "s"]: prev[mediaType + "s"].filter(
-          (item) => item.id !== mediaId,
-        ),
+        [plural]: prev[plural].filter((item) => item.id !== mediaId),
       }));
-      success(
-        `${mediaType === "movie" ? "Film" : "Serie"} aus Favoriten entfernt!`,
-      );
+      success(t("profile.removedFromFavorites"));
     } catch (error) {
       console.error("Fehler beim Entfernen aus Favoriten:", error);
-      showError("Fehler beim Entfernen aus Favoriten");
+      showError(t("profile.removeFromFavoritesError"));
     }
   };
 
@@ -183,21 +183,16 @@ const UserMediaTabs = ({ userId }) => {
    */
   const removeFromWatched = async (mediaId, mediaType) => {
     try {
-      await api.delete(`/users/${userId}/watched/${mediaType}s/${mediaId}`);
+      const plural = mediaType === "movie" ? "movies" : "series";
+      await api.delete(`/users/${userId}/watched/${plural}/${mediaId}`);
       setWatched((prev) => ({
         ...prev,
-        [mediaType + "s"]: prev[mediaType + "s"].filter(
-          (item) => item.id !== mediaId,
-        ),
+        [plural]: prev[plural].filter((item) => item.id !== mediaId),
       }));
-      success(
-        `${
-          mediaType === "movie" ? "Film" : "Serie"
-        } aus gesehenen Medien entfernt!`,
-      );
+      success(t("profile.removedFromWatched"));
     } catch (error) {
       console.error("Fehler beim Entfernen aus gesehenen Medien:", error);
-      showError("Fehler beim Entfernen aus gesehenen Medien");
+      showError(t("profile.removeFromWatchedError"));
     }
   };
 
@@ -241,7 +236,7 @@ const UserMediaTabs = ({ userId }) => {
    */
   const renderMediaTitle = (review, withLink = true) => {
     if (review.movie) {
-      const content = <>🎬 {review.movie.title}</>;
+      const content = <>{review.movie.title}</>;
       return withLink ? (
         <Link
           to={`/movies/${review.movie.id}`}
@@ -255,7 +250,7 @@ const UserMediaTabs = ({ userId }) => {
     }
 
     if (review.series) {
-      const content = <>📺 {review.series.title}</>;
+      const content = <>{review.series.title}</>;
       return withLink ? (
         <Link
           to={`/series/${review.series.id}`}
@@ -272,12 +267,7 @@ const UserMediaTabs = ({ userId }) => {
       const { type, data } = review.mediaData;
       const isMovie = type === "movie";
       const route = isMovie ? `/movies/${data.id}` : `/series/${data.id}`;
-      const icon = isMovie ? "🎬" : "📺";
-      const content = (
-        <>
-          {icon} {data.title}
-        </>
-      );
+      const content = <>{data.title}</>;
 
       return withLink ? (
         <Link to={route} className="text-decoration-none">
@@ -288,375 +278,179 @@ const UserMediaTabs = ({ userId }) => {
       );
     }
 
-    return <span>Unbekannter Inhalt</span>;
+    return <span>{t("profile.unknownContent")}</span>;
   };
 
+  const tabs = [
+    { key: "reviews", label: t("profile.tabs.reviews"), icon: "bi-star" },
+    { key: "favorites", label: t("profile.tabs.favorites"), icon: "bi-heart" },
+    { key: "watched", label: t("profile.tabs.watched"), icon: "bi-eye" },
+    { key: "lists", label: t("profile.tabs.lists"), icon: "bi-collection" },
+  ];
+
+  const spinner = (
+    <div className="text-center py-4">
+      <div className="spinner-border text-primary" role="status">
+        <span className="visually-hidden">{t("common.loading")}</span>
+      </div>
+    </div>
+  );
+
+  /**
+   * Renders a poster grid with a remove button on every card.
+   */
+  const renderMediaGroup = (items, type, emptyText, onRemove, removeLabel) => (
+    <>
+      <h3 className="cm-subhead">
+        {type === "movie" ? t("common.movies") : t("common.seriesPlural")}
+        <span className="cm-count ms-2">{items.length}</span>
+      </h3>
+      {items.length > 0 ? (
+        <div className="cm-poster-grid cm-poster-grid-sm mb-4">
+          {items.map((item) => (
+            <div className="position-relative" key={item.id}>
+              <MediaCard media={item} type={type} />
+              {!readOnly && (
+                <button
+                  type="button"
+                  className="cm-card-remove"
+                  onClick={() => onRemove(item.id, type)}
+                  title={removeLabel}
+                  aria-label={removeLabel}
+                >
+                  <i className="bi bi-x-lg"></i>
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-muted mb-4">{emptyText}</p>
+      )}
+    </>
+  );
+
   return (
-    <div className="mt-4">
-      <ul className="nav nav-tabs mb-3">
-        <li className="nav-item">
-          <button
-            className={`nav-link ${
-              activeTab === "reviews"
-                ? "active bg-primary text-white"
-                : "text-dark"
-            }`}
-            onClick={() => setActiveTab("reviews")}
-          >
-            <i className="bi bi-star-fill me-1"></i>
-            Bewertungen
-          </button>
-        </li>
-        <li className="nav-item">
-          <button
-            className={`nav-link ${
-              activeTab === "favorites"
-                ? "active bg-primary text-white"
-                : "text-dark"
-            }`}
-            onClick={() => setActiveTab("favorites")}
-          >
-            <i className="bi bi-heart-fill me-1"></i>
-            Favoriten
-          </button>
-        </li>
-        <li className="nav-item">
-          <button
-            className={`nav-link ${
-              activeTab === "watched"
-                ? "active bg-primary text-white"
-                : "text-dark"
-            }`}
-            onClick={() => setActiveTab("watched")}
-          >
-            <i className="bi bi-eye-fill me-1"></i>
-            Gesehen
-          </button>
-        </li>
-        <li className="nav-item">
-          <button
-            className={`nav-link ${
-              activeTab === "lists"
-                ? "active bg-primary text-white"
-                : "text-dark"
-            }`}
-            onClick={() => setActiveTab("lists")}
-          >
-            <i className="bi bi-list-ul me-1"></i>
-            Listen
-          </button>
-        </li>
+    <div>
+      <ul className="nav nav-tabs mb-4">
+        {tabs.map((tab) => (
+          <li className="nav-item" key={tab.key}>
+            <button
+              className={`nav-link ${activeTab === tab.key ? "active" : ""}`}
+              onClick={() => setActiveTab(tab.key)}
+            >
+              <i className={`bi ${tab.icon} me-2`}></i>
+              {tab.label}
+            </button>
+          </li>
+        ))}
       </ul>
 
-      <div className="tab-content">
-        {/* Reviews Tab Content */}
-        {activeTab === "reviews" && (
-          <div className="tab-pane fade show active">
-            {loading.reviews ? (
-              <div className="text-center py-3">
-                <div className="spinner-border text-primary" role="status">
-                  <span className="visually-hidden">Loading...</span>
-                </div>
-              </div>
-            ) : reviews.length > 0 ? (
-              <div className="list-group">
-                {reviews.map((review) => {
-                  const mediaRoute = getMediaRoute(review);
-                  return (
-                    <Link
-                      key={review.id}
-                      to={mediaRoute || "#"}
-                      className="list-group-item list-group-item-action text-decoration-none"
-                      style={{ cursor: mediaRoute ? "pointer" : "default" }}
-                    >
-                      <div className="d-flex justify-content-between align-items-center">
-                        <h6 className="mb-1">
-                          {renderMediaTitle(review, false)}
-                        </h6>
-                        <span className="badge bg-warning text-dark">
-                          {"⭐".repeat(review.rating)}
-                        </span>
-                      </div>
-                      <p className="mb-1">
-                        {review.comment || "Kein Kommentar"}
-                      </p>
-                      <small className="text-muted">
-                        Bewertet am:{" "}
-                        {new Date(review.date).toLocaleDateString()}
-                      </small>
-                    </Link>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="alert alert-light text-center">
-                Noch keine Bewertungen vorhanden.
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Favorites Tab Content */}
-        {activeTab === "favorites" && (
-          <div className="tab-pane fade show active">
-            {loading.favorites ? (
-              <div className="text-center py-3">
-                <div className="spinner-border text-primary" role="status">
-                  <span className="visually-hidden">Loading...</span>
-                </div>
-              </div>
-            ) : (
-              <>
-                <h5 className="my-3">
-                  <i className="bi bi-film me-2"></i>
-                  Filme
-                </h5>
-                {favorites.movies.length > 0 ? (
-                  <div className="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3 mb-4">
-                    {favorites.movies.map((movie) => (
-                      <div className="col" key={movie.id}>
-                        <div className="position-relative">
-                          <MediaCard media={movie} type="movie" />
-                          <button
-                            className="btn btn-danger btn-sm position-absolute top-0 end-0 m-2"
-                            onClick={() =>
-                              removeFromFavorites(movie.id, "movie")
-                            }
-                            title="Aus Favoriten entfernen"
-                            style={{ zIndex: 10 }}
-                          >
-                            <i className="bi bi-heart-fill"></i>
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+      {activeTab === "reviews" &&
+        (loading.reviews ? (
+          spinner
+        ) : reviews.length > 0 ? (
+          <div className="cm-review-list">
+            {reviews.map((review) => {
+              const mediaRoute = getMediaRoute(review);
+              return (
+                <Link
+                  key={review.id}
+                  to={mediaRoute || "#"}
+                  className="cm-review-row"
+                >
+                  <div className="d-flex justify-content-between align-items-center gap-2">
+                    <h4 className="cm-review-row-title">
+                      {renderMediaTitle(review, false)}
+                    </h4>
+                    <span className="cm-rating cm-mono">
+                      <i className="bi bi-star-fill me-1" />
+                      {review.rating}/5
+                    </span>
                   </div>
-                ) : (
-                  <div className="alert alert-light text-center mb-4">
-                    Keine Lieblingsfilme vorhanden.
-                  </div>
-                )}
-
-                <h5 className="my-3">
-                  <i className="bi bi-tv me-2"></i>
-                  Serien
-                </h5>
-                {favorites.series.length > 0 ? (
-                  <div className="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
-                    {favorites.series.map((series) => (
-                      <div className="col" key={series.id}>
-                        <div className="position-relative">
-                          <MediaCard media={series} type="series" />
-                          <button
-                            className="btn btn-danger btn-sm position-absolute top-0 end-0 m-2"
-                            onClick={() =>
-                              removeFromFavorites(series.id, "series")
-                            }
-                            title="Aus Favoriten entfernen"
-                            style={{ zIndex: 10 }}
-                          >
-                            <i className="bi bi-heart-fill"></i>
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="alert alert-light text-center">
-                    Keine Lieblingsserien vorhanden.
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        )}
-
-        {/* Watched Tab Content */}
-        {activeTab === "watched" && (
-          <div className="tab-pane fade show active">
-            {loading.watched ? (
-              <div className="text-center py-3">
-                <div className="spinner-border text-primary" role="status">
-                  <span className="visually-hidden">Loading...</span>
-                </div>
-              </div>
-            ) : (
-              <>
-                <h5 className="my-3">
-                  <i className="bi bi-film me-2"></i>
-                  Filme
-                </h5>
-                {watched.movies.length > 0 ? (
-                  <div className="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3 mb-4">
-                    {watched.movies.map((movie) => (
-                      <div className="col" key={movie.id}>
-                        <div className="position-relative">
-                          <MediaCard media={movie} type="movie" />
-                          <button
-                            className="btn btn-secondary btn-sm position-absolute top-0 end-0 m-2"
-                            onClick={() => removeFromWatched(movie.id, "movie")}
-                            title="Aus gesehenen Filmen entfernen"
-                            style={{ zIndex: 10 }}
-                          >
-                            <i className="bi bi-eye-slash-fill"></i>
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="alert alert-light text-center mb-4">
-                    Keine gesehenen Filme vorhanden.
-                  </div>
-                )}
-
-                <h5 className="my-3">
-                  <i className="bi bi-tv me-2"></i>
-                  Serien
-                </h5>
-                {watched.series.length > 0 ? (
-                  <div className="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
-                    {watched.series.map((series) => (
-                      <div className="col" key={series.id}>
-                        <div className="position-relative">
-                          <MediaCard media={series} type="series" />
-                          <button
-                            className="btn btn-secondary btn-sm position-absolute top-0 end-0 m-2"
-                            onClick={() =>
-                              removeFromWatched(series.id, "series")
-                            }
-                            title="Aus gesehenen Serien entfernen"
-                            style={{ zIndex: 10 }}
-                          >
-                            <i className="bi bi-eye-slash-fill"></i>
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="alert alert-light text-center">
-                    Keine gesehenen Serien vorhanden.
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        )}
-
-        {/* Lists Tab Content */}
-        {activeTab === "lists" && (
-          <div className="tab-pane fade show active">
-            {loading.lists ? (
-              <div className="text-center py-3">
-                <div className="spinner-border text-primary" role="status">
-                  <span className="visually-hidden">Loading...</span>
-                </div>
-              </div>
-            ) : customLists.length > 0 ? (
-              <div className="row">
-                {customLists.map((list) => (
-                  <div className="col-md-6 col-lg-4 mb-4" key={list.id}>
-                    <div className="card h-100">
-                      <div className="position-relative">
-                        <Link to={`/lists/${list.id}`}>
-                          <img
-                            src={
-                              list.coverImageUrl ||
-                              list.movies?.[0]?.posterUrl ||
-                              list.series?.[0]?.posterUrl ||
-                              "https://via.placeholder.com/300x400?text=Liste"
-                            }
-                            alt={list.title}
-                            className="card-img-top"
-                            style={{ height: "200px", objectFit: "cover" }}
-                            onError={(e) => {
-                              e.target.src =
-                                "https://via.placeholder.com/300x400?text=Liste";
-                            }}
-                          />
-                        </Link>
-                        <div className="position-absolute top-0 start-0 m-2">
-                          <span
-                            className={`badge ${
-                              list.public ? "bg-success" : "bg-secondary"
-                            }`}
-                          >
-                            <i
-                              className={`bi bi-${
-                                list.public ? "globe" : "lock"
-                              } me-1`}
-                            ></i>
-                            {list.public ? "Öffentlich" : "Privat"}
-                          </span>
-                        </div>
-                        <div className="position-absolute top-0 end-0 m-2">
-                          <span className="badge bg-dark bg-opacity-75">
-                            {list.totalItemsCount}{" "}
-                            {list.totalItemsCount === 1
-                              ? "Element"
-                              : "Elemente"}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="card-body">
-                        <h5 className="card-title">
-                          <Link
-                            to={`/lists/${list.id}`}
-                            className="text-decoration-none"
-                          >
-                            {list.title}
-                          </Link>
-                        </h5>
-                        {list.description && (
-                          <p className="card-text text-muted small">
-                            {list.description.length > 100
-                              ? `${list.description.substring(0, 100)}...`
-                              : list.description}
-                          </p>
-                        )}
-                        <div className="d-flex justify-content-between align-items-center">
-                          <small className="text-muted">
-                            {new Date(list.updatedAt).toLocaleDateString(
-                              "de-DE",
-                            )}
-                          </small>
-                          <div>
-                            <span className="text-muted me-2">
-                              <i className="bi bi-heart"></i> {list.likesCount}
-                            </span>
-                            <Link
-                              to={`/lists/${list.id}`}
-                              className="btn btn-outline-primary btn-sm"
-                            >
-                              <i className="bi bi-eye"></i>
-                            </Link>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="alert alert-light text-center">
-                <i
-                  className="bi bi-list-ul mb-3"
-                  style={{ fontSize: "3rem", opacity: 0.3 }}
-                ></i>
-                <h5>Keine Listen vorhanden</h5>
-                <p className="text-muted">
-                  Du hast noch keine Listen erstellt.
-                </p>
-                <Link to="/lists" className="btn btn-primary">
-                  <i className="bi bi-plus-circle me-2"></i>
-                  Erste Liste erstellen
+                  <p className="mb-1">
+                    {review.comment || (
+                      <span className="text-muted fst-italic">
+                        {t("profile.noComment")}
+                      </span>
+                    )}
+                  </p>
+                  <small className="text-muted cm-mono">
+                    {formatDate(review.date)}
+                  </small>
                 </Link>
-              </div>
-            )}
+              );
+            })}
           </div>
-        )}
-      </div>
+        ) : (
+          <p className="text-muted">{t("profile.noReviews")}</p>
+        ))}
+
+      {activeTab === "favorites" &&
+        (loading.favorites ? (
+          spinner
+        ) : (
+          <>
+            {renderMediaGroup(
+              favorites.movies,
+              "movie",
+              t("profile.noFavoriteMovies"),
+              removeFromFavorites,
+              t("profile.removeFromFavorites"),
+            )}
+            {renderMediaGroup(
+              favorites.series,
+              "series",
+              t("profile.noFavoriteSeries"),
+              removeFromFavorites,
+              t("profile.removeFromFavorites"),
+            )}
+          </>
+        ))}
+
+      {activeTab === "watched" &&
+        (loading.watched ? (
+          spinner
+        ) : (
+          <>
+            {renderMediaGroup(
+              watched.movies,
+              "movie",
+              t("profile.noWatchedMovies"),
+              removeFromWatched,
+              t("profile.removeFromWatched"),
+            )}
+            {renderMediaGroup(
+              watched.series,
+              "series",
+              t("profile.noWatchedSeries"),
+              removeFromWatched,
+              t("profile.removeFromWatched"),
+            )}
+          </>
+        ))}
+
+      {activeTab === "lists" &&
+        (loading.lists ? (
+          spinner
+        ) : customLists.length > 0 ? (
+          <div className="row">
+            {customLists.map((list) => (
+              <div className="col-md-6 col-lg-4 mb-4" key={list.id}>
+                <ListCard list={list} />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="cm-empty py-4">
+            <h3>{t("lists.noOwnLists")}</h3>
+            <p>{t("lists.noOwnListsHint")}</p>
+            <Link to="/lists" className="btn btn-primary">
+              <i className="bi bi-plus-circle me-2"></i>
+              {t("lists.createFirst")}
+            </Link>
+          </div>
+        ))}
     </div>
   );
 };

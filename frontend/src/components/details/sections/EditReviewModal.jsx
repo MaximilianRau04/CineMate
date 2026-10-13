@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
+import StarInput from "../../common/StarInput";
+import { useTranslation } from "../../../i18n/I18nContext";
 
 const EditReviewModal = ({
   showEditModal,
@@ -11,7 +12,7 @@ const EditReviewModal = ({
 }) => {
   const [editRating, setEditRating] = useState(0);
   const [editComment, setEditComment] = useState("");
-  const [editHover, setEditHover] = useState(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (showEditModal) {
@@ -30,58 +31,31 @@ const EditReviewModal = ({
     <div
       className="modal fade show d-block"
       tabIndex="-1"
-      style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+      style={{ backgroundColor: "rgba(8, 4, 10, 0.75)" }}
     >
       <div className="modal-dialog">
         <div className="modal-content">
           <div className="modal-header">
-            <h5 className="modal-title">Bewertung bearbeiten</h5>
-            <button type="button" className="btn-close" onClick={onClose} />
+            <h5 className="modal-title">{t("reviews.editTitle")}</h5>
+            <button
+              type="button"
+              className="btn-close"
+              onClick={onClose}
+              aria-label={t("common.close")}
+            />
           </div>
           <div className="modal-body">
-            <label className="form-label">⭐ Bewertung:</label>
-            <div className="d-flex mb-3">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <span
-                  key={star}
-                  className="position-relative"
-                  style={{ fontSize: "32px", cursor: "pointer" }}
-                >
-                  <span
-                    style={{
-                      position: "absolute",
-                      width: "50%",
-                      height: "100%",
-                      left: 0,
-                    }}
-                    onClick={() => setEditRating(star - 0.5)}
-                    onMouseEnter={() => setEditHover(star - 0.5)}
-                    onMouseLeave={() => setEditHover(null)}
-                  />
-                  <span
-                    style={{
-                      position: "absolute",
-                      width: "50%",
-                      height: "100%",
-                      right: 0,
-                    }}
-                    onClick={() => setEditRating(star)}
-                    onMouseEnter={() => setEditHover(star)}
-                    onMouseLeave={() => setEditHover(null)}
-                  />
-                  {(editHover || editRating) >= star ? (
-                    <FaStar color="#ffc107" />
-                  ) : (editHover || editRating) >= star - 0.5 ? (
-                    <FaStarHalfAlt color="#ffc107" />
-                  ) : (
-                    <FaRegStar color="#e4e5e9" />
-                  )}
-                </span>
-              ))}
+            <label className="form-label">{t("reviews.rating")}</label>
+            <div className="mb-3">
+              <StarInput
+                value={editRating}
+                onChange={setEditRating}
+                label={t("reviews.rating")}
+              />
             </div>
 
             <label htmlFor="editComment" className="form-label">
-              Kommentar (optional):
+              {t("reviews.commentOptional")}
             </label>
             <textarea
               id="editComment"
@@ -92,12 +66,15 @@ const EditReviewModal = ({
             />
           </div>
           <div className="modal-footer">
+            <button className="btn btn-outline-secondary" onClick={onClose}>
+              {t("common.cancel")}
+            </button>
             <button
               className="btn btn-primary"
               onClick={handleSubmit}
               disabled={submitting || editRating === 0}
             >
-              {submitting ? "Speichern..." : "Speichern"}
+              {submitting ? t("common.saving") : t("common.save")}
             </button>
           </div>
         </div>

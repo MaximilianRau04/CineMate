@@ -50,7 +50,7 @@ export const useAppData = () => {
             reviewUsers[review.id] = user;
           } catch (error) {
             console.error(`Error loading user for review ${review.id}:`, error);
-            reviewUsers[review.id] = { username: "Unbekannt" };
+            reviewUsers[review.id] = { username: "—" };
           }
         }),
       );
@@ -271,7 +271,9 @@ export const useAppData = () => {
 export const formatDate = (timestamp) => {
   if (!timestamp) return "";
   const date = new Date(timestamp);
-  return date.toLocaleDateString("de-DE");
+  // follow the UI language that I18nProvider writes to <html lang>
+  const locale = document.documentElement.lang === "de" ? "de-DE" : "en-US";
+  return date.toLocaleDateString(locale);
 };
 
 // Formats a timestamp for use in an input field

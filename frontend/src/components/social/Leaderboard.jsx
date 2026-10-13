@@ -11,10 +11,13 @@ import {
 import api from "../../utils/api";
 import { useAuth } from "../../utils/AuthContext";
 import { useToast } from "../toasts";
+import { LoadingSpinner } from "../explore/FilterPanel";
+import { useTranslation } from "../../i18n/I18nContext";
 
 const Leaderboard = () => {
   const { user: currentUser } = useAuth();
   const { error: showError } = useToast();
+  const { t } = useTranslation();
   const [leaderboard, setLeaderboard] = useState([]);
   const [myPoints, setMyPoints] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -47,13 +50,14 @@ const Leaderboard = () => {
     } else {
       return (
         <div
-          className="rounded-circle bg-secondary d-flex align-items-center justify-content-center"
-          style={{ width: `${size}px`, height: `${size}px` }}
+          className="cm-avatar"
+          style={{
+            width: `${size}px`,
+            height: `${size}px`,
+            fontSize: `${size * 0.32}px`,
+          }}
         >
-          <i
-            className="bi bi-person-fill text-white"
-            style={{ fontSize: `${size * 0.6}px` }}
-          ></i>
+          {username?.slice(0, 2).toUpperCase()}
         </div>
       );
     }
@@ -82,7 +86,7 @@ const Leaderboard = () => {
       setLeaderboard(data);
     } catch (error) {
       console.error("Error loading leaderboard:", error);
-      showError("Bestenliste konnte nicht geladen werden");
+      showError(t("leaderboard.loadError"));
     }
   };
 
@@ -95,7 +99,7 @@ const Leaderboard = () => {
       setMyPoints(data);
     } catch (error) {
       console.error("Error loading my points:", error);
-      showError("Punkte konnten nicht geladen werden");
+      showError(t("leaderboard.pointsError"));
     }
   };
 
@@ -107,15 +111,13 @@ const Leaderboard = () => {
   const getRankIcon = (rank) => {
     switch (rank) {
       case 1:
-        return <FaTrophy className="text-warning" />;
+        return <FaTrophy style={{ color: "var(--cm-brass)" }} size={20} />;
       case 2:
-        return <FaMedal className="text-secondary" />;
+        return <FaMedal style={{ color: "#c9c3bd" }} size={20} />;
       case 3:
-        return (
-          <FaAward className="text-warning" style={{ color: "#CD7F32" }} />
-        );
+        return <FaAward style={{ color: "#cd7f32" }} size={20} />;
       default:
-        return <span className="fw-bold text-muted">#{rank}</span>;
+        return <span className="cm-mono text-muted">{rank}</span>;
     }
   };
 
@@ -125,93 +127,59 @@ const Leaderboard = () => {
    * @returns {string} The CSS class for the rank.
    */
   const getRankClass = (rank) => {
-    switch (rank) {
-      case 1:
-        return "bg-gradient bg-warning text-dark";
-      case 2:
-        return "bg-gradient bg-secondary text-white";
-      case 3:
-        return "bg-gradient text-white";
-      default:
-        return "";
-    }
+    return rank <= 3 ? "cm-podium" : "";
   };
 
   if (loading) {
-    return (
-      <div className="container py-5">
-        <div className="text-center">
-          <div className="spinner-border" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-          <p className="mt-2">Lade Rangliste...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner message={t("leaderboard.loading")} />;
   }
 
   return (
-    <div className="container py-5">
+    <div className="container-xxl cm-page">
       <div className="row">
         <div className="col-12">
-          <h1 className="mb-4">
-            <FaTrophy className="me-2 text-warning" />
-            Rangliste
-          </h1>
+          <header className="cm-page-head">
+            <div>
+              <div className="cm-eyebrow">{t("leaderboard.eyebrow")}</div>
+              <h1>{t("leaderboard.title")}</h1>
+            </div>
+          </header>
 
-          {/* My Points Card */}
           {myPoints && (
-            <div className="card mb-4 bg-primary text-white">
-              <div className="card-body">
-                <div className="row align-items-center">
-                  <div className="col-md-8">
-                    <h5 className="card-title">Deine Punkte</h5>
-                    <div className="row">
-                      <div className="col-sm-3">
-                        <div className="text-center">
-                          <h3 className="mb-0">{myPoints.totalPoints}</h3>
-                          <small>Gesamt</small>
-                        </div>
-                      </div>
-                      <div className="col-sm-3">
-                        <div className="text-center">
-                          <h4 className="mb-0 text-warning">
-                            <FaStar className="me-1" />
-                            {myPoints.reviewPoints}
-                          </h4>
-                          <small>Bewertungen</small>
-                        </div>
-                      </div>
-                      <div className="col-sm-3">
-                        <div className="text-center">
-                          <h4 className="mb-0 text-info">
-                            <FaEye className="me-1" />
-                            {myPoints.watchPoints}
-                          </h4>
-                          <small>Gesehen</small>
-                        </div>
-                      </div>
-                      <div className="col-sm-3">
-                        <div className="text-center">
-                          <h4 className="mb-0 text-success">
-                            <FaHeart className="me-1" />
-                            {myPoints.socialPoints}
-                          </h4>
-                          <small>Sozial</small>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="col-md-4 text-center">
-                    <div className="bg-white bg-opacity-25 rounded p-3">
-                      <h6 className="mb-2">Dein Rang</h6>
-                      <h2 className="mb-0">
-                        {leaderboard.findIndex(
-                          (entry) => entry.userId === currentUser?.id,
-                        ) + 1 || "Unranked"}
-                      </h2>
-                    </div>
-                  </div>
+            <div className="cm-stat-tiles mb-4">
+              <div className="cm-stat-tile">
+                <div className="cm-stat-value">
+                  {leaderboard.findIndex(
+                    (entry) => entry.userId === currentUser?.id,
+                  ) + 1 || "–"}
+                </div>
+                <div className="cm-stat-label">{t("leaderboard.yourRank")}</div>
+              </div>
+              <div className="cm-stat-tile">
+                <div className="cm-stat-value">{myPoints.totalPoints}</div>
+                <div className="cm-stat-label">
+                  {t("leaderboard.totalPoints")}
+                </div>
+              </div>
+              <div className="cm-stat-tile">
+                <div className="cm-stat-value">{myPoints.reviewPoints}</div>
+                <div className="cm-stat-label">
+                  <FaStar className="me-1" />
+                  {t("leaderboard.reviews")}
+                </div>
+              </div>
+              <div className="cm-stat-tile">
+                <div className="cm-stat-value">{myPoints.watchPoints}</div>
+                <div className="cm-stat-label">
+                  <FaEye className="me-1" />
+                  {t("leaderboard.watched")}
+                </div>
+              </div>
+              <div className="cm-stat-tile">
+                <div className="cm-stat-value">{myPoints.socialPoints}</div>
+                <div className="cm-stat-label">
+                  <FaHeart className="me-1" />
+                  {t("leaderboard.social")}
                 </div>
               </div>
             </div>
@@ -220,38 +188,44 @@ const Leaderboard = () => {
           {/* Leaderboard */}
           <div className="card">
             <div className="card-header">
-              <h5 className="mb-0">Top CineMate Nutzer</h5>
+              <h5 className="mb-0">{t("leaderboard.topUsers")}</h5>
             </div>
             <div className="card-body">
               {leaderboard.length === 0 ? (
-                <p className="text-muted text-center">Keine Daten verfügbar.</p>
+                <p className="text-muted text-center">
+                  {t("leaderboard.noData")}
+                </p>
               ) : (
                 <div className="table-responsive">
                   <table className="table table-hover">
                     <thead>
                       <tr>
-                        <th width="80">Rang</th>
-                        <th>Benutzer</th>
-                        <th className="text-center">Gesamt</th>
+                        <th width="80" className="text-center">
+                          {t("leaderboard.rank")}
+                        </th>
+                        <th>{t("statistics.user")}</th>
+                        <th className="text-center">
+                          {t("leaderboard.total")}
+                        </th>
                         <th className="text-center">
                           <FaStar
                             className="text-warning"
-                            title="Bewertungspunkte"
+                            title={t("leaderboard.reviewPoints")}
                           />
                         </th>
                         <th className="text-center">
-                          <FaEye className="text-info" title="Gesehen-Punkte" />
+                          <FaEye title={t("leaderboard.watchPoints")} />
                         </th>
                         <th className="text-center">
                           <FaHeart
                             className="text-success"
-                            title="Soziale Punkte"
+                            title={t("leaderboard.socialPoints")}
                           />
                         </th>
                         <th className="text-center">
                           <FaAward
                             className="text-primary"
-                            title="Achievement-Punkte"
+                            title={t("leaderboard.achievementPoints")}
                           />
                         </th>
                       </tr>
@@ -264,16 +238,7 @@ const Leaderboard = () => {
                         return (
                           <tr
                             key={entry.id}
-                            className={`${getRankClass(rank)} ${isCurrentUser ? "table-info" : ""}`}
-                            style={{
-                              background:
-                                rank <= 3
-                                  ? ""
-                                  : isCurrentUser
-                                    ? "rgba(13, 202, 240, 0.1)"
-                                    : "",
-                              fontWeight: isCurrentUser ? "bold" : "normal",
-                            }}
+                            className={`${getRankClass(rank)} ${isCurrentUser ? "cm-row-self" : ""}`}
                           >
                             <td className="text-center">{getRankIcon(rank)}</td>
                             <td>
@@ -289,7 +254,7 @@ const Leaderboard = () => {
                                 ) : (
                                   <Link
                                     to={`/profile/${entry.userId}`}
-                                    title="Profil ansehen"
+                                    title={t("social.viewProfile")}
                                     className="me-3"
                                   >
                                     <div
@@ -319,8 +284,8 @@ const Leaderboard = () => {
                                     {isCurrentUser ? (
                                       <>
                                         {entry.username}
-                                        <span className="badge bg-info ms-2">
-                                          Du
+                                        <span className="badge bg-primary ms-2">
+                                          {t("common.you")}
                                         </span>
                                       </>
                                     ) : (
@@ -328,7 +293,7 @@ const Leaderboard = () => {
                                         to={`/profile/${entry.userId}`}
                                         className="text-decoration-none fw-bold"
                                         style={{ color: "inherit" }}
-                                        title="Profil ansehen"
+                                        title={t("social.viewProfile")}
                                       >
                                         {entry.username}
                                       </Link>
@@ -365,43 +330,43 @@ const Leaderboard = () => {
           {/* Points System Info */}
           <div className="card mt-4">
             <div className="card-header">
-              <h6 className="mb-0">Punktesystem</h6>
+              <h6 className="mb-0">{t("leaderboard.pointSystem")}</h6>
             </div>
             <div className="card-body">
               <div className="row">
-                <div className="col-md-3">
+                <div className="col-sm-6 col-lg-3 mb-3 mb-lg-0">
                   <div className="text-center p-3 border rounded">
                     <FaStar className="fs-3 text-warning mb-2" />
-                    <h6>Bewertungen</h6>
+                    <h6>{t("leaderboard.reviews")}</h6>
                     <p className="small text-muted mb-0">
-                      10 Punkte pro Review
+                      {t("leaderboard.perReview")}
                     </p>
                   </div>
                 </div>
-                <div className="col-md-3">
+                <div className="col-sm-6 col-lg-3 mb-3 mb-lg-0">
                   <div className="text-center p-3 border rounded">
                     <FaEye className="fs-3 text-info mb-2" />
-                    <h6>Gesehen markieren</h6>
+                    <h6>{t("leaderboard.markWatched")}</h6>
                     <p className="small text-muted mb-0">
-                      5 Punkte pro Film/Serie
+                      {t("leaderboard.perWatched")}
                     </p>
                   </div>
                 </div>
-                <div className="col-md-3">
+                <div className="col-sm-6 col-lg-3 mb-3 mb-lg-0">
                   <div className="text-center p-3 border rounded">
                     <FaHeart className="fs-3 text-success mb-2" />
-                    <h6>Soziale Interaktionen</h6>
+                    <h6>{t("leaderboard.socialInteractions")}</h6>
                     <p className="small text-muted mb-0">
-                      15 Punkte pro Freundschaft
+                      {t("leaderboard.perFriendship")}
                     </p>
                   </div>
                 </div>
-                <div className="col-md-3">
+                <div className="col-sm-6 col-lg-3 mb-3 mb-lg-0">
                   <div className="text-center p-3 border rounded">
                     <FaAward className="fs-3 text-primary mb-2" />
-                    <h6>Achievements</h6>
+                    <h6>{t("nav.achievements")}</h6>
                     <p className="small text-muted mb-0">
-                      25 Punkte pro Meilenstein
+                      {t("leaderboard.perMilestone")}
                     </p>
                   </div>
                 </div>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useToast } from "../../toasts";
 import api from "../../../utils/api";
+import { useTranslation } from "../../../i18n/I18nContext";
 
 export const useMediaInteractions = (userId, mediaId, mediaType = "movies") => {
   const [isInWatchlist, setIsInWatchlist] = useState(false);
@@ -10,6 +11,8 @@ export const useMediaInteractions = (userId, mediaId, mediaType = "movies") => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [addingToFavorites, setAddingToFavorites] = useState(false);
   const { success, error: showError } = useToast();
+  const { t } = useTranslation();
+  const kind = mediaType === "movies" ? "movie" : "series";
 
   /**
    * Checks if the user has the media in their watchlist, watched list, or favorites.
@@ -25,7 +28,7 @@ export const useMediaInteractions = (userId, mediaId, mediaType = "movies") => {
           res.data.some((m) => m.id.toString() === mediaId.toString()),
         );
       })
-      .catch((err) => console.error("Fehler beim Check der Watchlist:", err));
+      .catch((err) => console.error("Failed to check watchlist:", err));
 
     // watched
     api
@@ -35,9 +38,7 @@ export const useMediaInteractions = (userId, mediaId, mediaType = "movies") => {
           res.data.some((m) => m.id.toString() === mediaId.toString()),
         );
       })
-      .catch((err) =>
-        console.error("Fehler beim Check der gesehenen Inhalte:", err),
-      );
+      .catch((err) => console.error("Failed to check watched items:", err));
 
     // favorites
     api
@@ -47,7 +48,7 @@ export const useMediaInteractions = (userId, mediaId, mediaType = "movies") => {
           res.data.some((m) => m.id.toString() === mediaId.toString()),
         );
       })
-      .catch((err) => console.error("Fehler beim Check der Favoriten:", err));
+      .catch((err) => console.error("Failed to check favorites:", err));
   }, [userId, mediaId, mediaType]);
 
   /**
@@ -63,13 +64,11 @@ export const useMediaInteractions = (userId, mediaId, mediaType = "movies") => {
       .put(`/users/${userId}/watchlist/${mediaType}/${mediaId}`)
       .then(() => {
         setIsInWatchlist(true);
-        success(
-          `${mediaType === "movies" ? "Film" : "Serie"} zur Watchlist hinzugefügt!`,
-        );
+        success(t(`details.${kind}AddedToWatchlist`));
       })
       .catch((err) => {
-        console.error("Fehler beim Hinzufügen zur Watchlist:", err);
-        showError("Fehler beim Hinzufügen zur Watchlist");
+        console.error("Failed to add to watchlist:", err);
+        showError(t("details.watchlistError"));
       })
       .finally(() => {
         setAddingToWatchlist(false);
@@ -89,13 +88,11 @@ export const useMediaInteractions = (userId, mediaId, mediaType = "movies") => {
       .put(`/users/${userId}/watched/${mediaType}/${mediaId}`)
       .then(() => {
         setIsWatched(true);
-        success(
-          `${mediaType === "movies" ? "Film" : "Serie"} als gesehen markiert!`,
-        );
+        success(t(`details.${kind}MarkedWatched`));
       })
       .catch((err) => {
-        console.error("Fehler beim Markieren als gesehen:", err);
-        showError("Fehler beim Markieren als gesehen");
+        console.error("Failed to mark as watched:", err);
+        showError(t("details.watchedError"));
       })
       .finally(() => {
         setMarkingAsWatched(false);
@@ -115,13 +112,11 @@ export const useMediaInteractions = (userId, mediaId, mediaType = "movies") => {
       .put(`/users/${userId}/favorites/${mediaType}/${mediaId}`)
       .then(() => {
         setIsFavorite(true);
-        success(
-          `${mediaType === "movies" ? "Film" : "Serie"} zu Favoriten hinzugefügt!`,
-        );
+        success(t(`details.${kind}AddedToFavorites`));
       })
       .catch((err) => {
-        console.error("Fehler beim Hinzufügen zu Favoriten:", err);
-        showError("Fehler beim Hinzufügen zu Favoriten");
+        console.error("Failed to add to favorites:", err);
+        showError(t("details.favoritesError"));
       })
       .finally(() => {
         setAddingToFavorites(false);

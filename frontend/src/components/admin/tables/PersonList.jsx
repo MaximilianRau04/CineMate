@@ -1,5 +1,6 @@
 import { FaEdit, FaTrash, FaLink, FaFilm } from "react-icons/fa";
 import { formatDate } from "../utils/utils";
+import { useTranslation } from "../../../i18n/I18nContext";
 
 const PersonList = ({
   people,
@@ -9,16 +10,17 @@ const PersonList = ({
   onEdit,
   onDelete,
 }) => {
+  const { t } = useTranslation();
   const labels = {
     actor: {
-      title: "Schauspieler",
-      filmography: "Filmografie anzeigen",
-      assign: "Zu Film/Serie hinzufügen",
+      empty: t("admin.cast.noActors"),
+      filmography: t("admin.cast.showFilmography"),
+      assign: t("admin.cast.assignActor"),
     },
     director: {
-      title: "Regisseur",
-      filmography: "Filmografie anzeigen",
-      assign: "Als Regisseur zuweisen",
+      empty: t("admin.cast.noDirectors"),
+      filmography: t("admin.cast.showFilmography"),
+      assign: t("admin.cast.assignDirector"),
     },
   };
 
@@ -31,11 +33,11 @@ const PersonList = ({
           <table className="table">
             <thead>
               <tr>
-                <th width="60px">Bild</th>
-                <th>Name</th>
-                <th>Geburtsdatum</th>
-                <th>Biografie</th>
-                <th>Aktionen</th>
+                <th width="60px">{t("admin.fields.image")}</th>
+                <th>{t("admin.fields.name")}</th>
+                <th>{t("admin.fields.birthday")}</th>
+                <th>{t("admin.fields.biography")}</th>
+                <th>{t("common.actions")}</th>
               </tr>
             </thead>
             <tbody>
@@ -87,14 +89,14 @@ const PersonList = ({
                     <button
                       className="btn btn-primary btn-sm me-1"
                       onClick={() => onEdit(person)}
-                      title="Bearbeiten"
+                      title={t("common.edit")}
                     >
                       <FaEdit />
                     </button>
                     <button
                       className="btn btn-sm btn-outline-danger"
                       onClick={() => onDelete(person.id)}
-                      title="Löschen"
+                      title={t("common.delete")}
                     >
                       <FaTrash />
                     </button>
@@ -104,7 +106,7 @@ const PersonList = ({
               {people.length === 0 && (
                 <tr>
                   <td colSpan="5" className="text-center">
-                    Keine {label.title} gefunden
+                    {label.empty}
                   </td>
                 </tr>
               )}

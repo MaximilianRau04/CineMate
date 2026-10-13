@@ -1,0 +1,454 @@
+/* ---------- Toolbar ---------- */
+
+.cm-explore-tools {
+  display: flex;
+  flex-wrap: nowrap;
+  width: min(460px, 100%);
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.cm-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin: 0;
+  min-width: 0;
+  flex: 1;
+}
+
+.cm-search-icon {
+  position: absolute;
+  left: 0.95rem;
+  color: var(--cm-dust);
+  font-size: 0.85rem;
+  pointer-events: none;
+}
+
+.cm-search input {
+  width: 100%;
+  height: 40px;
+  padding: 0 1rem 0 2.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--cm-line-strong);
+  background: var(--cm-surface);
+  color: var(--cm-ivory);
+  font-size: 0.92rem;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.cm-search input::placeholder {
+  color: rgba(243, 233, 218, 0.4);
+}
+
+.cm-search input:focus {
+  outline: none;
+  border-color: rgba(var(--cm-brass-rgb), 0.7);
+  box-shadow: 0 0 0 0.2rem rgba(var(--cm-brass-rgb), 0.18);
+}
+
+.cm-filter-count {
+  display: inline-block;
+  margin-left: 0.45rem;
+  min-width: 1.3rem;
+  padding: 0 0.35rem;
+  border-radius: 999px;
+  background: #1a1012;
+  color: var(--cm-brass);
+  font-family: var(--cm-font-mono);
+  font-size: 0.7rem;
+  line-height: 1.3rem;
+}
+
+.btn-outline-secondary .cm-filter-count {
+  background: var(--cm-brass);
+  color: #1a1012;
+}
+
+/* ---------- Filter panel ---------- */
+
+.cm-filter-panel {
+  padding: 1.25rem 1.4rem;
+  margin-bottom: 1rem;
+  background: var(--cm-surface);
+  border: 1px solid var(--cm-line);
+  border-radius: var(--cm-radius-lg);
+  animation: cm-dd-in 0.18s ease-out;
+}
+
+.cm-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+}
+
+.cm-filter-label {
+  display: block;
+  margin-bottom: 0.45rem;
+  font-family: var(--cm-font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cm-dust);
+}
+
+.cm-segment {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 999px;
+  border: 1px solid var(--cm-line-strong);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.cm-segment button {
+  border: 0;
+  background: none;
+  color: var(--cm-dust);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.3rem 0.9rem;
+  border-radius: 999px;
+}
+
+.cm-segment button:hover {
+  color: var(--cm-ivory);
+}
+
+.cm-segment button.is-active {
+  background: var(--cm-brass);
+  color: #1a1012;
+}
+
+.cm-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.cm-chip {
+  border: 1px solid var(--cm-line-strong);
+  background: transparent;
+  color: var(--cm-ivory);
+  font-size: 0.82rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.cm-chip:hover {
+  border-color: rgba(var(--cm-brass-rgb), 0.6);
+}
+
+.cm-chip.is-active {
+  background: rgba(var(--cm-brass-rgb), 0.16);
+  border-color: var(--cm-brass);
+  color: var(--cm-brass);
+}
+
+/* ---------- Ticket poster cards (signature) ---------- */
+
+.cm-poster-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1.75rem 1.25rem;
+}
+
+@media (min-width: 1200px) {
+  .cm-poster-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  }
+}
+
+@media (max-width: 420px) {
+  .cm-poster-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem 0.85rem;
+  }
+}
+
+.cm-ticket-card {
+  --stub-bg: var(--cm-surface);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  background: var(--stub-bg);
+  color: var(--cm-ivory);
+  text-decoration: none;
+  box-shadow: 0 0 0 1px var(--cm-line);
+  transition:
+    transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.25s ease;
+}
+
+.cm-ticket-card:hover,
+.cm-ticket-card:focus-visible {
+  color: #fffaf2;
+  transform: translateY(-4px) rotate(-0.6deg);
+  box-shadow:
+    0 0 0 1px rgba(var(--cm-brass-rgb), 0.55),
+    0 22px 40px -20px rgba(0, 0, 0, 0.9);
+}
+
+.cm-ticket-poster {
+  position: relative;
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+  border-radius: 12px 12px 0 0;
+  background: var(--cm-surface-2);
+}
+
+.cm-ticket-poster img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
+}
+
+.cm-ticket-card:hover .cm-ticket-poster img {
+  transform: scale(1.03);
+}
+
+.cm-ticket-stub-info {
+  position: relative;
+  padding: 0.8rem 0.85rem 0.85rem;
+  border-top: 2px dashed rgba(243, 233, 218, 0.16);
+}
+
+/* punched notches on the perforation line */
+.cm-ticket-stub-info::before,
+.cm-ticket-stub-info::after {
+  content: "";
+  position: absolute;
+  top: -9px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--cm-bg);
+}
+
+.cm-ticket-stub-info::before {
+  left: -8px;
+  box-shadow: inset -1px 0 0 var(--cm-line);
+}
+
+.cm-ticket-stub-info::after {
+  right: -8px;
+  box-shadow: inset 1px 0 0 var(--cm-line);
+}
+
+.cm-ticket-title {
+  font-family: var(--cm-font-body);
+  font-size: 0.95rem;
+  font-weight: 650;
+  text-transform: none;
+  letter-spacing: 0;
+  line-height: 1.25;
+  margin: 0 0 0.35rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.5em;
+}
+
+.cm-ticket-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-family: var(--cm-font-mono);
+  font-size: 0.7rem;
+  color: var(--cm-dust);
+}
+
+.cm-ticket-meta > span:first-child {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cm-rating {
+  color: var(--cm-brass);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.cm-rating i {
+  font-size: 0.65rem;
+}
+
+/* ---------- Release calendar ---------- */
+
+.cm-cal-month {
+  margin-bottom: 2.5rem;
+}
+
+.cm-cal-month h2 {
+  display: flex;
+  align-items: baseline;
+  gap: 0.9rem;
+  font-size: 1.7rem;
+  margin-bottom: 1rem;
+}
+
+.cm-cal-month h2::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px dashed var(--cm-line-strong);
+  transform: translateY(-0.35rem);
+}
+
+.cm-cal-list {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.cm-cal-item {
+  display: grid;
+  grid-template-columns: 64px 48px 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.7rem 1rem 0.7rem 0.7rem;
+  border-radius: 12px;
+  background: var(--cm-surface);
+  border: 1px solid var(--cm-line);
+  color: var(--cm-ivory);
+  text-decoration: none;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.cm-cal-item:hover {
+  background: var(--cm-surface-2);
+  border-color: rgba(var(--cm-brass-rgb), 0.5);
+  color: #fffaf2;
+}
+
+.cm-cal-date {
+  text-align: center;
+  border-right: 1px dashed var(--cm-line-strong);
+  padding-right: 0.7rem;
+  font-family: var(--cm-font-mono);
+  line-height: 1.05;
+}
+
+.cm-cal-day {
+  display: block;
+  font-family: var(--cm-font-display);
+  font-size: 1.9rem;
+  font-weight: 800;
+  color: var(--cm-brass);
+}
+
+.cm-cal-weekday {
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cm-dust);
+}
+
+.cm-cal-thumb {
+  width: 48px;
+  height: 72px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--cm-surface-2);
+}
+
+.cm-cal-thumb img,
+.cm-cal-thumb .cm-poster-fallback {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  font-size: 0.6rem;
+  padding: 0.3rem;
+}
+
+.cm-cal-title {
+  font-weight: 650;
+  margin: 0 0 0.3rem;
+  font-size: 1rem;
+}
+
+.cm-cal-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  color: var(--cm-dust);
+}
+
+.cm-tag {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  border-radius: 4px;
+  font-family: var(--cm-font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1px solid var(--cm-line-strong);
+  color: var(--cm-ivory);
+}
+
+.cm-tag-brass {
+  border-color: rgba(var(--cm-brass-rgb), 0.5);
+  color: var(--cm-brass);
+}
+
+@media (max-width: 575.98px) {
+  .cm-cal-item {
+    grid-template-columns: 56px 1fr auto;
+  }
+
+  .cm-cal-thumb {
+    display: none;
+  }
+}
+
+.cm-tag-solid {
+  background: rgba(22, 14, 17, 0.82);
+  border-color: transparent;
+  backdrop-filter: blur(6px);
+}
+
+.cm-card-remove {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 11;
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(22, 14, 17, 0.82);
+  color: var(--cm-ivory);
+  opacity: 0;
+  transition:
+    opacity 0.15s ease,
+    background 0.15s ease;
+}
+
+.position-relative:hover > .cm-card-remove,
+.cm-card-remove:focus-visible {
+  opacity: 1;
+}
+
+.cm-card-remove:hover {
+  background: var(--cm-scarlet);
+}
+
+@media (hover: none) {
+  .cm-card-remove {
+    opacity: 1;
+  }
+}

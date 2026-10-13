@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import api from "../../../utils/api";
 import { useToast } from "../../toasts";
+import { useTranslation } from "../../../i18n/I18nContext";
 
 const SeasonSection = ({ seriesId }) => {
   const { error: showError } = useToast();
   const [seasons, setSeasons] = useState([]);
   const [seasonsLoading, setSeasonsLoading] = useState(true);
+  const [activeSeason, setActiveSeason] = useState(null);
+  const { t, formatDate } = useTranslation();
 
   /**
    * Fetches seasons and episodes data for this series
@@ -21,7 +24,7 @@ const SeasonSection = ({ seriesId }) => {
       setSeasonsLoading(false);
     } catch (err) {
       console.error("Fehler beim Laden der Staffeln:", err);
-      showError("Staffeln konnten nicht geladen werden");
+      showError(t("seasons.loadError"));
       setSeasonsLoading(false);
     }
   };
@@ -32,90 +35,84 @@ const SeasonSection = ({ seriesId }) => {
 
   if (seasonsLoading) {
     return (
-      <div className="mt-5 text-center">
-        <div className="spinner-border text-primary" role="status" />
-        <p className="mt-2">Staffeln werden geladen...</p>
-      </div>
+      <section className="cm-detail-section text-muted">
+        <span className="spinner-border spinner-border-sm me-2" />
+        {t("seasons.loading")}
+      </section>
     );
   }
 
   if (!seasons || seasons.length === 0) {
     return (
-      <div className="alert alert-info mt-5">
-        Keine Staffeln für diese Serie verfügbar.
-      </div>
+      <section className="cm-detail-section">
+        <div className="cm-section-title">
+          <h2>{t("seasons.title")}</h2>
+        </div>
+        <p className="text-muted">{t("seasons.empty")}</p>
+      </section>
     );
   }
 
+  const season =
+    seasons.find((s) => s.seasonNumber === activeSeason) || seasons[0];
+
   return (
-    <div className="mt-5">
-      <h3 className="mb-4 text-light">📺 Staffeln und Episoden</h3>
-      <div className="accordion mb-3" id="seasonsAccordion">
-        {seasons.map((season) => (
-          <div
-            className="accordion-item bg-dark text-light"
-            key={season.seasonNumber}
+    <section className="cm-detail-section">
+      <div className="cm-section-title">
+        <h2>{t("seasons.title")}</h2>
+        <span className="cm-count">
+          {t("calendar.seasonCount", { count: seasons.length })}
+        </span>
+      </div>
+
+      <div className="cm-chips mb-3" role="tablist">
+        {seasons.map((s) => (
+          <button
+            key={s.seasonNumber}
+            type="button"
+            role="tab"
+            aria-selected={s.seasonNumber === season.seasonNumber}
+            className={`cm-chip${s.seasonNumber === season.seasonNumber ? " is-active" : ""}`}
+            onClick={() => setActiveSeason(s.seasonNumber)}
           >
-            <h2
-              className="accordion-header"
-              id={`heading-${season.seasonNumber}`}
-            >
-              <button
-                className="accordion-button collapsed bg-dark text-light"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target={`#collapse-${season.seasonNumber}`}
-                aria-expanded="false"
-                aria-controls={`collapse-${season.seasonNumber}`}
-              >
-                Staffel {season.seasonNumber}
-              </button>
-            </h2>
-            <div
-              id={`collapse-${season.seasonNumber}`}
-              className="accordion-collapse collapse"
-              aria-labelledby={`heading-${season.seasonNumber}`}
-            >
-              <div className="accordion-body">
-                {season.episodes &&
-                  season.episodes.map((episode) => (
-                    <div
-                      key={episode.episodeNumber}
-                      className="row mb-4 align-items-center"
-                    >
-                      <div className="col-md-3 text-center">
-                        <img
-                          src={
-                            episode.posterUrl ||
-                            "https://via.placeholder.com/200x300?text=No+Image"
-                          }
-                          alt={episode.title}
-                          className="img-fluid rounded shadow-sm"
-                          style={{ maxHeight: "200px", objectFit: "cover" }}
-                        />
-                      </div>
-
-                      {/* episode Infos */}
-                      <div className="col-md-9">
-                        <h5 className="text-white">
-                          Episode {episode.episodeNumber}: {episode.title}
-                        </h5>
-                        <p className="small text-light mb-1">
-                          ⏱️ {episode.duration} | 📅{" "}
-                          {new Date(episode.releaseDate).toLocaleDateString()}
-                        </p>
-                        <p className="text-secondary">{episode.description}</p>
-                      </div>
-
-                      <hr className="border-secondary my-3" />
-                    </div>
-                  ))}
-              </div>
-            </div>
-          </div>
+            {t("common.season")} {s.seasonNumber}
+          </button>
         ))}
       </div>
-    </div>
+
+      <ol className="cm-episodes">
+        {(season.episodes || []).map((episode) => (
+          <li key={episode.episodeNumber} className="cm-episode">
+            <span className="cm-episode-no">
+              {String(episode.episodeNumber).padStart(2, "0")}
+            </span>
+            {episode.posterUrl && (
+              <img
+                src={episode.posterUrl}
+                alt=""
+                loading="lazy"
+                className="cm-episode-still"
+              />
+            )}
+            <div className="min-w-0">
+              <h3 className="cm-episode-title">{episode.title}</h3>
+              <div className="cm-episode-meta">
+                {episode.duration && <span>{episode.duration}</span>}
+                {episode.releaseDate && (
+                  <span>{formatDate(episode.releaseDate)}</span>
+                )}
+              </div>
+              {episode.description && (
+                <p className="cm-episode-desc">{episode.description}</p>
+              )}
+            </div>
+          </li>
+        ))}
+        {(!season.episodes || season.episodes.length === 0) && (
+          <li className="text-muted">{t("seasons.noEpisodes")}</li>
+        )}
+      </ol>
+    </section>
   );
 };
 

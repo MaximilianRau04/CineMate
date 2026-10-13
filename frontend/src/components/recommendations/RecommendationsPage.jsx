@@ -1,13 +1,18 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import "./RecommendationsPage.css";
+import { MediaCard } from "../explore/MediaCard";
+import { LoadingSpinner } from "../explore/FilterPanel";
+import { localizeReason } from "./localizeReason";
 import api from "../../utils/api";
 import { useAuth } from "../../utils/AuthContext";
 import { useToast } from "../toasts";
+import { useTranslation } from "../../i18n/I18nContext";
 
 const RecommendationsPage = () => {
   const { user } = useAuth();
   const { error: showError } = useToast();
+  const { t } = useTranslation();
   const userId = user?.id ?? null;
   const [recommendations, setRecommendations] = useState([]);
   const [trending, setTrending] = useState([]);
@@ -52,7 +57,7 @@ const RecommendationsPage = () => {
       setError(null);
     } catch (error) {
       console.error("Fehler beim Laden der Empfehlungen:", error);
-      setError("Fehler beim Laden der Empfehlungen");
+      setError(t("recommendations.loadError"));
     } finally {
       setLoading(false);
     }
@@ -68,7 +73,7 @@ const RecommendationsPage = () => {
       setTrending(data);
     } catch (error) {
       console.error("Fehler beim Laden der Trending-Empfehlungen:", error);
-      showError("Trending-Empfehlungen konnten nicht geladen werden");
+      showError(t("recommendations.trendingError"));
     }
   };
 
@@ -87,7 +92,7 @@ const RecommendationsPage = () => {
       setError(null);
     } catch (error) {
       console.error("Fehler beim Laden der Genre-Empfehlungen:", error);
-      setError("Fehler beim Laden der Genre-Empfehlungen");
+      setError(t("recommendations.genreError"));
     } finally {
       setLoading(false);
     }
@@ -104,204 +109,140 @@ const RecommendationsPage = () => {
   };
 
   const RecommendationCard = ({ recommendation }) => (
-    <div className="col-lg-3 col-md-4 col-sm-6 mb-4">
-      <div className="card recommendation-card h-100">
-        <div className="recommendation-poster-container">
-          <img
-            src={
-              recommendation.posterUrl ||
-              "https://via.placeholder.com/300x450?text=No+Image"
-            }
-            alt={recommendation.title}
-            className="card-img-top recommendation-poster"
-            onError={(e) => {
-              e.target.src =
-                "https://via.placeholder.com/300x450?text=No+Image";
-            }}
-          />
-          <div className="recommendation-score">
-            {recommendation.score.toFixed(1)}
-          </div>
-        </div>
-        <div className="card-body d-flex flex-column">
-          <h6 className="card-title recommendation-title">
-            {recommendation.title}
-          </h6>
-          <p className="card-text recommendation-reason text-muted small">
-            {recommendation.reason}
-          </p>
-          <div className="mt-auto">
-            <Link
-              to={`/${recommendation.type === "movie" ? "movies" : "series"}/${
-                recommendation.id
-              }`}
-              className="btn btn-primary btn-sm w-100"
-            >
-              Details ansehen
-            </Link>
-          </div>
-        </div>
-      </div>
+    <div className="cm-rec">
+      <MediaCard
+        item={{
+          ...recommendation,
+          currentRating: recommendation.rating,
+          genreArray: recommendation.genre
+            ? recommendation.genre.split(/,\s*/)
+            : [],
+        }}
+        type={recommendation.type === "movie" ? "movie" : "series"}
+      />
+      {recommendation.reason && (
+        <p className="cm-rec-reason">
+          {localizeReason(recommendation.reason, t)}
+        </p>
+      )}
+    </div>
+  );
+
+  const renderGrid = (items) => (
+    <div className="cm-poster-grid">
+      {items.map((recommendation) => (
+        <RecommendationCard
+          key={`${recommendation.type}-${recommendation.id}`}
+          recommendation={recommendation}
+        />
+      ))}
     </div>
   );
 
   if (loading && activeTab === "personal" && recommendations.length === 0) {
-    return (
-      <div className="container py-5">
-        <div className="text-center">
-          <div className="spinner-border text-primary" role="status" />
-          <p className="mt-3">Empfehlungen werden geladen...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner message={t("recommendations.loading")} />;
   }
 
+  const tabs = [
+    { key: "personal", label: t("recommendations.tabs.personal") },
+    { key: "trending", label: t("recommendations.tabs.trending") },
+    { key: "genre", label: t("recommendations.tabs.genre") },
+  ];
+
   return (
-    <div className="recommendations-page">
-      <div className="container py-4">
-        <h1 className="mb-4 text-center">🎬 Empfehlungen für dich</h1>
-
-        {/* Navigation Tabs */}
-        <ul className="nav nav-tabs mb-4" role="tablist">
-          <li className="nav-item">
+    <div className="container-xxl cm-page recommendations-page">
+      <header className="cm-page-head">
+        <div>
+          <div className="cm-eyebrow">{t("recommendations.eyebrow")}</div>
+          <h1>{t("recommendations.title")}</h1>
+        </div>
+        <div className="cm-segment" role="tablist">
+          {tabs.map((tab) => (
             <button
-              className={`nav-link ${activeTab === "personal" ? "active" : ""}`}
-              onClick={() => setActiveTab("personal")}
+              key={tab.key}
+              type="button"
+              role="tab"
+              aria-selected={activeTab === tab.key}
+              className={activeTab === tab.key ? "is-active" : ""}
+              onClick={() => setActiveTab(tab.key)}
             >
-              <i className="bi bi-person-heart me-2"></i>
-              Persönlich
+              {tab.label}
             </button>
-          </li>
-          <li className="nav-item">
-            <button
-              className={`nav-link ${activeTab === "trending" ? "active" : ""}`}
-              onClick={() => setActiveTab("trending")}
-            >
-              <i className="bi bi-fire me-2"></i>
-              Trending
-            </button>
-          </li>
-          <li className="nav-item">
-            <button
-              className={`nav-link ${activeTab === "genre" ? "active" : ""}`}
-              onClick={() => setActiveTab("genre")}
-            >
-              <i className="bi bi-tags me-2"></i>
-              Nach Genre
-            </button>
-          </li>
-        </ul>
+          ))}
+        </div>
+      </header>
 
-        {error && (
-          <div className="alert alert-warning mb-4" role="alert">
-            {error}
+      {error && (
+        <div className="alert alert-warning mb-4" role="alert">
+          {error}
+        </div>
+      )}
+
+      {activeTab === "personal" &&
+        (recommendations.length === 0 ? (
+          <div className="cm-empty">
+            <h3>{t("recommendations.emptyTitle")}</h3>
+            <p>{t("recommendations.emptyHint")}</p>
+            <Link to="/explore" className="btn btn-outline-primary">
+              {t("recommendations.discover")}
+            </Link>
           </div>
-        )}
+        ) : (
+          <>
+            <p className="text-muted mb-4">
+              {t("recommendations.personalIntro")}
+            </p>
+            {renderGrid(recommendations)}
+          </>
+        ))}
 
-        {/* personal recommendations */}
-        {activeTab === "personal" && (
-          <div className="tab-content">
-            {!userId ? (
-              <div className="alert alert-info text-center">
-                <h5>Melde dich an für personalisierte Empfehlungen!</h5>
-                <p>
-                  Sobald du Filme und Serien bewertest oder als Favoriten
-                  markierst, können wir dir passende Inhalte empfehlen.
-                </p>
-                <Link to="/login" className="btn btn-primary">
-                  Anmelden
-                </Link>
+      {activeTab === "trending" && (
+        <>
+          <p className="text-muted mb-4">
+            {t("recommendations.trendingIntro")}
+          </p>
+          {trending.length > 0 ? (
+            renderGrid(trending)
+          ) : (
+            <p className="text-muted">{t("recommendations.noTrending")}</p>
+          )}
+        </>
+      )}
+
+      {activeTab === "genre" && (
+        <>
+          <div className="cm-chips mb-4">
+            {genres.map((genre) => (
+              <button
+                key={genre}
+                type="button"
+                className={`cm-chip${selectedGenre === genre ? " is-active" : ""}`}
+                aria-pressed={selectedGenre === genre}
+                onClick={() =>
+                  handleGenreChange(selectedGenre === genre ? "" : genre)
+                }
+              >
+                {genre}
+              </button>
+            ))}
+          </div>
+
+          {!selectedGenre ? (
+            <p className="text-muted">{t("recommendations.pickGenre")}</p>
+          ) : loading ? (
+            <LoadingSpinner />
+          ) : genreRecommendations.length > 0 ? (
+            <>
+              <div className="cm-section-title mt-0">
+                <h2>{t("recommendations.bestOf", { genre: selectedGenre })}</h2>
               </div>
-            ) : recommendations.length === 0 ? (
-              <div className="alert alert-light text-center">
-                <h5>Noch keine Empfehlungen verfügbar</h5>
-                <p>
-                  Markiere einige Filme oder Serien als Favoriten, um
-                  personalisierte Empfehlungen zu erhalten!
-                </p>
-                <Link to="/explore" className="btn btn-outline-primary">
-                  Inhalte entdecken
-                </Link>
-              </div>
-            ) : (
-              <>
-                <h3 className="mb-3">Basierend auf deinen Vorlieben</h3>
-                <div className="row">
-                  {recommendations.map((recommendation) => (
-                    <RecommendationCard
-                      key={`${recommendation.type}-${recommendation.id}`}
-                      recommendation={recommendation}
-                    />
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
-        )}
-
-        {/* trending recommendations */}
-        {activeTab === "trending" && (
-          <div className="tab-content">
-            <h3 className="mb-3">Was gerade angesagt ist</h3>
-            <div className="row">
-              {trending.map((recommendation) => (
-                <RecommendationCard
-                  key={`${recommendation.type}-${recommendation.id}`}
-                  recommendation={recommendation}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* genre recommendations */}
-        {activeTab === "genre" && (
-          <div className="tab-content">
-            <div className="mb-4">
-              <h3 className="mb-3">Empfehlungen nach Genre</h3>
-              <div className="row">
-                <div className="col-md-4">
-                  <select
-                    className="form-select"
-                    value={selectedGenre}
-                    onChange={(e) => handleGenreChange(e.target.value)}
-                  >
-                    <option value="">Genre auswählen...</option>
-                    {genres.map((genre) => (
-                      <option key={genre} value={genre}>
-                        {genre}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            {selectedGenre && (
-              <>
-                <h4 className="mb-3">Die besten {selectedGenre}-Titel</h4>
-                {loading ? (
-                  <div className="text-center">
-                    <div
-                      className="spinner-border text-primary"
-                      role="status"
-                    />
-                  </div>
-                ) : (
-                  <div className="row">
-                    {genreRecommendations.map((recommendation) => (
-                      <RecommendationCard
-                        key={`${recommendation.type}-${recommendation.id}`}
-                        recommendation={recommendation}
-                      />
-                    ))}
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        )}
-      </div>
+              {renderGrid(genreRecommendations)}
+            </>
+          ) : (
+            <p className="text-muted">{t("recommendations.noGenreResults")}</p>
+          )}
+        </>
+      )}
     </div>
   );
 };

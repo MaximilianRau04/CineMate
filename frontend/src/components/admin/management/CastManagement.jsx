@@ -6,6 +6,7 @@ import PersonList from "../tables/PersonList";
 import Filmography from "./Filmography";
 import AssignmentForm from "../forms/AssignmentForm";
 import { useToast } from "../../toasts";
+import { useTranslation } from "../../../i18n/I18nContext";
 
 const CastManagement = ({
   actors,
@@ -24,6 +25,7 @@ const CastManagement = ({
   loadData,
 }) => {
   const { error: showError } = useToast();
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("actors");
   const [modals, setModals] = useState({
     addActor: false,
@@ -75,7 +77,7 @@ const CastManagement = ({
       setActorFilmography({ movies, series });
     } catch (error) {
       console.error("Error fetching actor filmography:", error);
-      showError("Fehler beim Laden der Filmografie");
+      showError(t("admin.cast.errors.filmography"));
       setActorFilmography({ movies: [], series: [] });
     } finally {
       setFilmographyLoading(false);
@@ -96,7 +98,7 @@ const CastManagement = ({
       setDirectorFilmography({ movies, series });
     } catch (error) {
       console.error("Error fetching director filmography:", error);
-      showError("Fehler beim Laden der Filmografie");
+      showError(t("admin.cast.errors.filmography"));
       setDirectorFilmography({ movies: [], series: [] });
     } finally {
       setFilmographyLoading(false);
@@ -115,7 +117,7 @@ const CastManagement = ({
       setNewActor({ name: "", birthday: null, image: "", biography: "" });
     } catch (error) {
       console.error("Error adding actor:", error);
-      showError("Fehler beim Hinzufügen des Schauspielers");
+      showError(t("admin.cast.errors.addActor"));
     }
   };
 
@@ -132,7 +134,7 @@ const CastManagement = ({
       setSelectedPerson(null);
     } catch (error) {
       console.error("Error updating actor:", error);
-      showError("Fehler beim Aktualisieren des Schauspielers");
+      showError(t("admin.cast.errors.updateActor"));
     }
   };
 
@@ -142,19 +144,14 @@ const CastManagement = ({
    * @returns {Promise<void>}
    */
   const handleDeleteActor = async (id) => {
-    if (
-      !window.confirm(
-        "Sind Sie sicher, dass Sie diesen Schauspieler löschen möchten?",
-      )
-    )
-      return;
+    if (!window.confirm(t("admin.cast.confirmDeleteActor"))) return;
 
     try {
       await api.delete(`/actors/${id}`);
       await loadData();
     } catch (error) {
       console.error("Error deleting actor:", error);
-      showError("Fehler beim Löschen des Schauspielers");
+      showError(t("admin.cast.errors.deleteActor"));
     }
   };
 
@@ -170,7 +167,7 @@ const CastManagement = ({
       setNewDirector({ name: "", birthday: null, image: "", biography: "" });
     } catch (error) {
       console.error("Error adding director:", error);
-      showError("Fehler beim Hinzufügen des Regisseurs");
+      showError(t("admin.cast.errors.addDirector"));
     }
   };
 
@@ -187,7 +184,7 @@ const CastManagement = ({
       setSelectedPerson(null);
     } catch (error) {
       console.error("Error updating director:", error);
-      showError("Fehler beim Aktualisieren des Regisseurs");
+      showError(t("admin.cast.errors.updateDirector"));
     }
   };
 
@@ -197,19 +194,14 @@ const CastManagement = ({
    * @returns {Promise<void>}
    */
   const handleDeleteDirector = async (id) => {
-    if (
-      !window.confirm(
-        "Sind Sie sicher, dass Sie diesen Regisseur löschen möchten?",
-      )
-    )
-      return;
+    if (!window.confirm(t("admin.cast.confirmDeleteDirector"))) return;
 
     try {
       await api.delete(`/directors/${id}`);
       await loadData();
     } catch (error) {
       console.error("Error deleting director:", error);
-      showError("Fehler beim Löschen des Regisseurs");
+      showError(t("admin.cast.errors.deleteDirector"));
     }
   };
 
@@ -227,7 +219,7 @@ const CastManagement = ({
           : await assignActorToSeries(selectedContent.id, selectedPerson.id);
 
       if (!assigned) {
-        showError("Fehler beim Zuweisen des Schauspielers");
+        showError(t("admin.cast.errors.assignActor"));
         return;
       }
 
@@ -237,7 +229,7 @@ const CastManagement = ({
       setSelectedContent(null);
     } catch (error) {
       console.error("Error assigning actor:", error);
-      showError("Fehler beim Zuweisen des Schauspielers");
+      showError(t("admin.cast.errors.assignActor"));
     }
   };
 
@@ -249,7 +241,7 @@ const CastManagement = ({
    * @returns {Promise<void>}
    */
   const handleRemoveActor = async (contentId, actorId, type) => {
-    if (!window.confirm("Möchten Sie diesen Schauspieler entfernen?")) return;
+    if (!window.confirm(t("admin.cast.confirmRemoveActor"))) return;
 
     try {
       const removed =
@@ -258,14 +250,14 @@ const CastManagement = ({
           : await removeActorFromSeries(contentId, actorId);
 
       if (!removed) {
-        showError("Fehler beim Entfernen des Schauspielers");
+        showError(t("admin.cast.errors.removeActor"));
         return;
       }
 
       await loadData();
     } catch (error) {
       console.error("Error removing actor:", error);
-      showError("Fehler beim Entfernen des Schauspielers");
+      showError(t("admin.cast.errors.removeActor"));
     }
   };
 
@@ -283,7 +275,7 @@ const CastManagement = ({
           : await assignDirectorToSeries(selectedContent.id, selectedPerson.id);
 
       if (!assigned) {
-        showError("Fehler beim Zuweisen des Regisseurs");
+        showError(t("admin.cast.errors.assignDirector"));
         return;
       }
 
@@ -293,7 +285,7 @@ const CastManagement = ({
       setSelectedContent(null);
     } catch (error) {
       console.error("Error assigning director:", error);
-      showError("Fehler beim Zuweisen des Regisseurs");
+      showError(t("admin.cast.errors.assignDirector"));
     }
   };
   /**
@@ -304,7 +296,7 @@ const CastManagement = ({
    * @returns {Promise<void>}
    */
   const handleRemoveDirector = async (contentId, directorId, type) => {
-    if (!window.confirm("Möchten Sie diesen Regisseur entfernen?")) return;
+    if (!window.confirm(t("admin.cast.confirmRemoveDirector"))) return;
 
     try {
       const removed =
@@ -313,28 +305,28 @@ const CastManagement = ({
           : await removeDirectorFromSeries(contentId, directorId);
 
       if (!removed) {
-        showError("Fehler beim Entfernen des Regisseurs");
+        showError(t("admin.cast.errors.removeDirector"));
         return;
       }
 
       await loadData();
     } catch (error) {
       console.error("Error removing director:", error);
-      showError("Fehler beim Entfernen des Regisseurs");
+      showError(t("admin.cast.errors.removeDirector"));
     }
   };
 
   return (
     <div>
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h4>Schauspieler & Regisseure</h4>
+        <h4>{t("admin.tabs.cast")}</h4>
         <div>
           {activeTab === "actors" && (
             <button
               className="btn btn-primary"
               onClick={() => setModals((prev) => ({ ...prev, addActor: true }))}
             >
-              <FaPlus /> Schauspieler hinzufügen
+              <FaPlus className="me-1" /> {t("admin.cast.addActor")}
             </button>
           )}
           {activeTab === "directors" && (
@@ -344,7 +336,7 @@ const CastManagement = ({
                 setModals((prev) => ({ ...prev, addDirector: true }))
               }
             >
-              <FaPlus /> Regisseur hinzufügen
+              <FaPlus className="me-1" /> {t("admin.cast.addDirector")}
             </button>
           )}
         </div>
@@ -356,7 +348,7 @@ const CastManagement = ({
             className={`nav-link ${activeTab === "actors" ? "active" : ""}`}
             onClick={() => setActiveTab("actors")}
           >
-            Schauspieler
+            {t("admin.cast.actors")}
           </button>
         </li>
         <li className="nav-item">
@@ -364,7 +356,7 @@ const CastManagement = ({
             className={`nav-link ${activeTab === "directors" ? "active" : ""}`}
             onClick={() => setActiveTab("directors")}
           >
-            Regisseure
+            {t("admin.cast.directors")}
           </button>
         </li>
       </ul>
@@ -415,7 +407,9 @@ const CastManagement = ({
       {/* Modals for adding/editing actors and directors, viewing filmography, and assigning */}
       <Modal
         show={modals.viewActorMovies}
-        title={`Filmografie von ${selectedPerson?.name || ""}`}
+        title={t("admin.cast.filmographyOf", {
+          name: selectedPerson?.name || "",
+        })}
         onClose={() => {
           setModals((prev) => ({ ...prev, viewActorMovies: false }));
           setSelectedPerson(null);
@@ -435,7 +429,9 @@ const CastManagement = ({
 
       <Modal
         show={modals.viewDirectorMovies}
-        title={`Filmografie von ${selectedPerson?.name || ""}`}
+        title={t("admin.cast.filmographyOf", {
+          name: selectedPerson?.name || "",
+        })}
         onClose={() => {
           setModals((prev) => ({ ...prev, viewDirectorMovies: false }));
           setSelectedPerson(null);
@@ -464,7 +460,7 @@ const CastManagement = ({
 
       <Modal
         show={modals.addActor}
-        title="Neuen Schauspieler hinzufügen"
+        title={t("admin.cast.addActor")}
         onClose={() => setModals((prev) => ({ ...prev, addActor: false }))}
         onSave={handleAddActor}
       >
@@ -473,7 +469,7 @@ const CastManagement = ({
 
       <Modal
         show={modals.editActor}
-        title="Schauspieler bearbeiten"
+        title={t("admin.cast.editActor")}
         onClose={() => {
           setModals((prev) => ({ ...prev, editActor: false }));
           setSelectedPerson(null);
@@ -487,7 +483,7 @@ const CastManagement = ({
 
       <Modal
         show={modals.addDirector}
-        title="Neuen Regisseur hinzufügen"
+        title={t("admin.cast.addDirector")}
         onClose={() => setModals((prev) => ({ ...prev, addDirector: false }))}
         onSave={handleAddDirector}
       >
@@ -496,7 +492,7 @@ const CastManagement = ({
 
       <Modal
         show={modals.editDirector}
-        title="Regisseur bearbeiten"
+        title={t("admin.cast.editDirector")}
         onClose={() => {
           setModals((prev) => ({ ...prev, editDirector: false }));
           setSelectedPerson(null);
@@ -510,7 +506,7 @@ const CastManagement = ({
 
       <Modal
         show={modals.assignActor}
-        title="Actor zuweisen"
+        title={t("admin.cast.assignActor")}
         onClose={() => {
           setModals((prev) => ({ ...prev, assignActor: false }));
           setSelectedPerson(null);
@@ -531,7 +527,7 @@ const CastManagement = ({
 
       <Modal
         show={modals.assignDirector}
-        title="Regisseur zuweisen"
+        title={t("admin.cast.assignDirector")}
         onClose={() => {
           setModals((prev) => ({ ...prev, assignDirector: false }));
           setSelectedPerson(null);

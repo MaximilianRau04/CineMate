@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaCalendarAlt } from "react-icons/fa";
+import { FaFilter } from "react-icons/fa";
 
 import { LoadingSpinner, SearchBar, FilterPanel } from "../FilterPanel";
 import CalendarList from "./CalendarList";
@@ -9,11 +9,13 @@ import {
   groupContentByMonth,
 } from "./utils/useCalendarData";
 import { applyMediaFilters } from "../utils/useFilters";
+import { useTranslation } from "../../../i18n/I18nContext";
 
 const Calendar = () => {
   // Data fetching using custom hook
   const { movies, series, isLoading, error, availableGenres, fetchData } =
     useCalendarData();
+  const { t, locale } = useTranslation();
 
   // Filter state
   const [filteredMovies, setFilteredMovies] = useState([]);
@@ -66,24 +68,29 @@ const Calendar = () => {
         ? filteredMovies
         : filteredSeries;
 
-  const groupedContent = groupContentByMonth(combinedContent);
+  const groupedContent = groupContentByMonth(combinedContent, locale);
   const today = new Date().toISOString().split("T")[0];
 
   if (isLoading) {
-    return <LoadingSpinner message="Kommende Releases werden geladen..." />;
+    return <LoadingSpinner message={t("calendar.loading")} />;
   }
+
+  const activeFilterCount =
+    selectedGenres.length +
+    (contentType !== "all" ? 1 : 0) +
+    (dateRange.start || dateRange.end ? 1 : 0);
 
   if (error) {
     return (
-      <div className="container py-5">
+      <div className="container cm-page">
         <div className="alert alert-danger" role="alert">
-          <h4 className="alert-heading">Fehler</h4>
+          <h4 className="alert-heading">{t("calendar.loadError")}</h4>
           <p>{error}</p>
           <button
             className="btn btn-outline-danger"
             onClick={() => fetchData()}
           >
-            Erneut versuchen
+            {t("common.retry")}
           </button>
         </div>
       </div>
@@ -91,48 +98,50 @@ const Calendar = () => {
   }
 
   return (
-    <div className="container py-4">
-      <div className="card shadow-lg border-0">
-        <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-          <div className="d-flex align-items-center">
-            <FaCalendarAlt className="me-2" />
-            <h3 className="mb-0">Kommende Releases</h3>
-          </div>
-          <div className="d-flex align-items-center">
-            <SearchBar
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-            />
-            <button
-              className="btn btn-light btn-sm"
-              onClick={() => setShowFilters(!showFilters)}
-            >
-              {showFilters ? "Filter ausblenden" : "Filter anzeigen"}
-            </button>
-          </div>
+    <div className="container cm-page">
+      <header className="cm-page-head">
+        <div>
+          <div className="cm-eyebrow">{t("calendar.eyebrow")}</div>
+          <h1>{t("calendar.title")}</h1>
         </div>
-
-        {showFilters && (
-          <FilterPanel
-            contentType={contentType}
-            setContentType={setContentType}
-            dateRange={dateRange}
-            setDateRange={setDateRange}
-            availableGenres={availableGenres}
-            selectedGenres={selectedGenres}
-            toggleGenre={toggleGenre}
-            resetFilters={resetFilters}
-            minDate={today}
+        <div className="cm-explore-tools">
+          <SearchBar
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
           />
-        )}
-
-        <div className="card-body">
-          <CalendarList
-            groupedContent={groupedContent}
-            resetFilters={resetFilters}
-          />
+          <button
+            type="button"
+            className={`btn ${showFilters ? "btn-primary" : "btn-outline-secondary"}`}
+            onClick={() => setShowFilters(!showFilters)}
+            aria-expanded={showFilters}
+          >
+            <FaFilter className="me-2" size={12} />
+            {t("explore.filters")}
+            {activeFilterCount > 0 && (
+              <span className="cm-filter-count">{activeFilterCount}</span>
+            )}
+          </button>
         </div>
-      </div>
+      </header>
+
+      {showFilters && (
+        <FilterPanel
+          contentType={contentType}
+          setContentType={setContentType}
+          dateRange={dateRange}
+          setDateRange={setDateRange}
+          availableGenres={availableGenres}
+          selectedGenres={selectedGenres}
+          toggleGenre={toggleGenre}
+          resetFilters={resetFilters}
+          minDate={today}
+        />
+      )}
+
+      <CalendarList
+        groupedContent={groupedContent}
+        resetFilters={resetFilters}
+      />
     </div>
   );
 };

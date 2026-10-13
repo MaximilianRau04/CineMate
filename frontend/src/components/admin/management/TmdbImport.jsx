@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { FaSearch, FaDownload, FaCheck, FaStar } from "react-icons/fa";
 import api from "../../../utils/api";
+import { useTranslation } from "../../../i18n/I18nContext";
 
 const TmdbImport = () => {
+  const { t } = useTranslation();
   const [query, setQuery] = useState("");
   const [type, setType] = useState("movie");
   const [results, setResults] = useState([]);
@@ -25,7 +27,7 @@ const TmdbImport = () => {
       const { data } = await api.get(endpoint, { params: { query } });
       setResults(data);
     } catch {
-      setError("Suche fehlgeschlagen. Bitte versuche es erneut.");
+      setError(t("admin.tmdb.searchError"));
     } finally {
       setLoading(false);
     }
@@ -43,7 +45,7 @@ const TmdbImport = () => {
       await api.post(endpoint);
       setImported((prev) => ({ ...prev, [id]: true }));
     } catch {
-      setError(`Import fehlgeschlagen für "${item.title || item.name}".`);
+      setError(t("admin.tmdb.importError", { title: item.title || item.name }));
     } finally {
       setImporting((prev) => ({ ...prev, [id]: false }));
     }
@@ -57,7 +59,7 @@ const TmdbImport = () => {
           alt="TMDB"
           height="16"
         />
-        <h5 className="mb-0">TMDB Import</h5>
+        <h5 className="mb-0">{t("admin.tabs.tmdb")}</h5>
       </div>
 
       <div className="card-body">
@@ -77,7 +79,7 @@ const TmdbImport = () => {
                   }}
                 />
                 <label className="btn btn-outline-primary" htmlFor="type-movie">
-                  Filme
+                  {t("common.movies")}
                 </label>
                 <input
                   type="radio"
@@ -94,7 +96,7 @@ const TmdbImport = () => {
                   className="btn btn-outline-primary"
                   htmlFor="type-series"
                 >
-                  Serien
+                  {t("common.seriesPlural")}
                 </label>
               </div>
             </div>
@@ -102,7 +104,11 @@ const TmdbImport = () => {
               <input
                 type="text"
                 className="form-control"
-                placeholder={`${type === "movie" ? "Film" : "Serie"} suchen...`}
+                placeholder={
+                  type === "movie"
+                    ? t("lists.searchMovies")
+                    : t("lists.searchSeries")
+                }
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
               />
@@ -121,7 +127,7 @@ const TmdbImport = () => {
                 ) : (
                   <FaSearch className="me-1" />
                 )}
-                Suchen
+                {t("common.search")}
               </button>
             </div>
           </div>
@@ -190,11 +196,13 @@ const TmdbImport = () => {
                                 <span className="spinner-border spinner-border-sm" />
                               ) : imported[id] ? (
                                 <>
-                                  <FaCheck className="me-1" /> Importiert
+                                  <FaCheck className="me-1" />{" "}
+                                  {t("admin.tmdb.imported")}
                                 </>
                               ) : (
                                 <>
-                                  <FaDownload className="me-1" /> Importieren
+                                  <FaDownload className="me-1" />{" "}
+                                  {t("admin.tmdb.import")}
                                 </>
                               )}
                             </button>
@@ -210,16 +218,11 @@ const TmdbImport = () => {
         )}
 
         {!loading && results.length === 0 && query && (
-          <p className="text-muted text-center mt-3">
-            Keine Ergebnisse gefunden.
-          </p>
+          <p className="text-muted text-center mt-3">{t("lists.noResults")}</p>
         )}
 
         {!query && !loading && (
-          <p className="text-muted text-center mt-3">
-            Suche nach einem Film oder einer Serie um Inhalte von TMDB zu
-            importieren.
-          </p>
+          <p className="text-muted text-center mt-3">{t("admin.tmdb.hint")}</p>
         )}
       </div>
     </div>

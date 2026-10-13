@@ -5,8 +5,10 @@ import {
   getNotificationStatus,
   filterNotificationTypesByRole,
 } from "./utils/notificationUtils";
+import { useTranslation } from "../../i18n/I18nContext";
 
 const CompactNotificationSettings = ({ userId }) => {
+  const { t } = useTranslation();
   const [showDetails, setShowDetails] = useState(false);
 
   const {
@@ -24,30 +26,32 @@ const CompactNotificationSettings = ({ userId }) => {
     notificationTypes,
     user,
   );
-  const status = getNotificationStatus(globalSettings);
+  const status = getNotificationStatus(globalSettings, t);
 
   if (loading) {
     return (
       <div className="card">
         <div className="card-body text-center">
           <div className="spinner-border spinner-border-sm" role="status"></div>
-          <span className="ms-2">
-            Benachrichtigungseinstellungen werden geladen...
-          </span>
+          <span className="ms-2">{t("notificationSettings.loading")}</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="card">
+    <div className="card cm-settings-card">
       <div className="card-header d-flex justify-content-between align-items-center">
-        <h6 className="mb-0">🔔 Benachrichtigungen</h6>
+        <h2 className="cm-panel-title mb-0">
+          {t("notificationSettings.title")}
+        </h2>
         <button
           className="btn btn-link btn-sm p-0"
           onClick={() => setShowDetails(!showDetails)}
         >
-          {showDetails ? "Weniger anzeigen" : "Detaillierte Einstellungen"}
+          {showDetails
+            ? t("common.showLess")
+            : t("notificationSettings.detailed")}
         </button>
       </div>
       <div className="card-body">
@@ -57,7 +61,7 @@ const CompactNotificationSettings = ({ userId }) => {
               className="spinner-border spinner-border-sm me-2"
               role="status"
             ></div>
-            Wird gespeichert...
+            {t("common.saving")}
           </div>
         )}
 
@@ -78,7 +82,7 @@ const CompactNotificationSettings = ({ userId }) => {
                 disabled={saving}
               />
               <label className="form-check-label" htmlFor="emailGlobal">
-                📧 Email-Benachrichtigungen
+                {t("notificationSettings.email")}
               </label>
             </div>
           </div>
@@ -98,7 +102,7 @@ const CompactNotificationSettings = ({ userId }) => {
                 disabled={saving}
               />
               <label className="form-check-label" htmlFor="webGlobal">
-                🌐 Web-Benachrichtigungen
+                {t("notificationSettings.web")}
               </label>
             </div>
           </div>
@@ -124,9 +128,9 @@ const CompactNotificationSettings = ({ userId }) => {
                 className="form-check-label"
                 htmlFor="summaryRecommendations"
               >
-                📝 Empfehlungen als Zusammenfassung
+                {t("notificationSettings.summary")}
                 <div className="text-muted small">
-                  Mehrere Empfehlungen in einer Benachrichtigung
+                  {t("notificationSettings.summaryHint")}
                 </div>
               </label>
             </div>
@@ -136,11 +140,10 @@ const CompactNotificationSettings = ({ userId }) => {
         {showDetails && (
           <div className="mt-4">
             <h6 className="border-bottom pb-2 mb-3">
-              ⚙️ Detaillierte Einstellungen
+              {t("notificationSettings.detailed")}
             </h6>
             <div className="text-muted small mb-3">
-              Stelle für jeden Benachrichtigungstyp einzeln ein, ob du Email-
-              und/oder Web-Benachrichtigungen erhalten möchtest.
+              {t("notificationSettings.detailedHint")}
             </div>
 
             <div className="row">
@@ -148,12 +151,12 @@ const CompactNotificationSettings = ({ userId }) => {
                 const pref = getPreferenceForType(type);
                 return (
                   <div key={type} className="col-12 mb-2">
-                    <div className="card border-light">
+                    <div className="card">
                       <div className="card-body py-2">
                         <div className="row align-items-center">
                           <div className="col-md-6">
                             <small className="fw-bold">
-                              {getNotificationTypeLabel(type)}
+                              {getNotificationTypeLabel(type, t)}
                             </small>
                           </div>
                           <div className="col-md-3">
@@ -179,7 +182,7 @@ const CompactNotificationSettings = ({ userId }) => {
                                 className="form-check-label small"
                                 htmlFor={`email-${type}`}
                               >
-                                📧 Email
+                                {t("notificationSettings.emailShort")}
                               </label>
                             </div>
                           </div>
@@ -206,7 +209,7 @@ const CompactNotificationSettings = ({ userId }) => {
                                 className="form-check-label small"
                                 htmlFor={`web-${type}`}
                               >
-                                🌐 Web
+                                {t("notificationSettings.webShort")}
                               </label>
                             </div>
                           </div>
@@ -219,17 +222,11 @@ const CompactNotificationSettings = ({ userId }) => {
             </div>
 
             <div className="mt-3 p-3 bg-light rounded">
-              <h6 className="mb-2">ℹ️ Hinweise:</h6>
+              <h6 className="mb-2">{t("notificationSettings.notes")}</h6>
               <ul className="mb-0 small text-muted">
-                <li>
-                  Globale Einstellungen überschreiben alle spezifischen
-                  Einstellungen
-                </li>
-                <li>
-                  Email-Benachrichtigungen werden nur versendet, wenn sowohl
-                  global als auch spezifisch aktiviert
-                </li>
-                <li>Änderungen werden automatisch gespeichert</li>
+                <li>{t("notificationSettings.note1")}</li>
+                <li>{t("notificationSettings.note2")}</li>
+                <li>{t("notificationSettings.note3")}</li>
               </ul>
             </div>
           </div>
@@ -237,7 +234,7 @@ const CompactNotificationSettings = ({ userId }) => {
 
         <div className="mt-3">
           <small className="text-muted">
-            <strong>Status:</strong>
+            <strong>{t("notificationSettings.statusLabel")}</strong>
             <span className={status.className}> {status.text}</span>
           </small>
         </div>

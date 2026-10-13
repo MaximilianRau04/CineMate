@@ -1,0 +1,71 @@
+.cm-toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  min-width: 300px;
+  padding: 0.85rem 0.9rem 0.85rem 1rem;
+  background: var(--cm-surface-2);
+  border: 1px solid var(--cm-line-strong);
+  border-left: 3px solid var(--cm-toast-color, var(--cm-sky));
+  border-radius: 12px;
+  box-shadow: var(--cm-shadow);
+  color: var(--cm-ivory);
+  transform: translateX(120%);
+  opacity: 0;
+  transition:
+    transform 0.3s ease,
+    opacity 0.3s ease;
+}
+
+.cm-toast.is-visible {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.cm-toast-success {
+  --cm-toast-color: var(--cm-mint);
+}
+
+.cm-toast-error {
+  --cm-toast-color: var(--cm-scarlet);
+}
+
+.cm-toast-warning {
+  --cm-toast-color: #f0c05a;
+}
+
+.cm-toast-info {
+  --cm-toast-color: var(--cm-sky);
+}
+
+.cm-toast-icon {
+  color: var(--cm-toast-color);
+  font-size: 1.1rem;
+  line-height: 1.3;
+}
+
+.cm-toast-title {
+  display: block;
+  font-size: 0.9rem;
+}
+
+.cm-toast-msg {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--cm-dust);
+}
+
+.cm-toast-close {
+  border: 0;
+  background: none;
+  color: var(--cm-dust);
+  font-size: 1.3rem;
+  line-height: 1;
+  padding: 0 0.25rem;
+  border-radius: 6px;
+}
+
+.cm-toast-close:hover {
+  color: var(--cm-ivory);
+  background: var(--cm-surface-3);
+}

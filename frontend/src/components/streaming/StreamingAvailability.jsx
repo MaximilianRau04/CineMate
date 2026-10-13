@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import "./StreamingAvailability.css";
 import api from "../../utils/api";
+import { useTranslation } from "../../i18n/I18nContext";
 
 const StreamingAvailability = ({ mediaId, mediaType, userRegion = "DE" }) => {
   const [availabilities, setAvailabilities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { t, has, locale } = useTranslation();
 
   useEffect(() => {
     fetchStreamingAvailability();
@@ -37,22 +39,8 @@ const StreamingAvailability = ({ mediaId, mediaType, userRegion = "DE" }) => {
    * @param {*} type
    * @returns {string} the text representation of the availability type.
    */
-  const getAvailabilityTypeText = (type) => {
-    switch (type) {
-      case "SUBSCRIPTION":
-        return "Abo";
-      case "RENTAL":
-        return "Leihen";
-      case "PURCHASE":
-        return "Kaufen";
-      case "FREE":
-        return "Kostenlos";
-      case "FREE_WITH_ADS":
-        return "Kostenlos mit Werbung";
-      default:
-        return type;
-    }
-  };
+  const getAvailabilityTypeText = (type) =>
+    has(`streaming.types.${type}`) ? t(`streaming.types.${type}`) : type;
 
   /**
    * returns the icon class for the availability type.
@@ -84,7 +72,14 @@ const StreamingAvailability = ({ mediaId, mediaType, userRegion = "DE" }) => {
    */
   const formatPrice = (price, currency) => {
     if (!price) return "";
-    return `${price.toFixed(2)} ${currency || "€"}`;
+    try {
+      return new Intl.NumberFormat(locale, {
+        style: "currency",
+        currency: currency || "EUR",
+      }).format(price);
+    } catch {
+      return `${price.toFixed(2)} ${currency || "€"}`;
+    }
   };
 
   /**
@@ -102,50 +97,32 @@ const StreamingAvailability = ({ mediaId, mediaType, userRegion = "DE" }) => {
     }
   };
 
+  const heading = (
+    <div className="cm-section-title mt-0">
+      <h2>{t("streaming.title")}</h2>
+    </div>
+  );
+
   if (loading) {
     return (
-      <div className="streaming-availability">
-        <h5 className="mb-3">
-          <i className="bi bi-tv me-2"></i>
-          Verfügbar auf
-        </h5>
-        <div className="d-flex align-items-center">
-          <div className="spinner-border spinner-border-sm me-2" role="status">
-            <span className="visually-hidden">Lädt...</span>
-          </div>
-          <span>Streaming-Verfügbarkeiten werden geladen...</span>
+      <section className="cm-detail-section">
+        {heading}
+        <div className="text-muted">
+          <span className="spinner-border spinner-border-sm me-2" />
+          {t("streaming.loading")}
         </div>
-      </div>
+      </section>
     );
   }
 
-  if (error) {
+  if (error || availabilities.length === 0) {
     return (
-      <div className="streaming-availability">
-        <h5 className="mb-3">
-          <i className="bi bi-tv me-2"></i>
-          Verfügbar auf
-        </h5>
-        <div className="alert alert-warning" role="alert">
-          <i className="bi bi-exclamation-triangle me-2"></i>
-          {error}
-        </div>
-      </div>
-    );
-  }
-
-  if (availabilities.length === 0) {
-    return (
-      <div className="streaming-availability">
-        <h5 className="mb-3">
-          <i className="bi bi-tv me-2"></i>
-          Verfügbar auf
-        </h5>
-        <div className="alert alert-info" role="alert">
-          <i className="bi bi-info-circle me-2"></i>
-          Derzeit keine Streaming-Verfügbarkeiten für Ihre Region verfügbar.
-        </div>
-      </div>
+      <section className="cm-detail-section">
+        {heading}
+        <p className="text-muted mb-0">
+          {error ? t("streaming.loadError") : t("streaming.none")}
+        </p>
+      </section>
     );
   }
 
@@ -163,105 +140,64 @@ const StreamingAvailability = ({ mediaId, mediaType, userRegion = "DE" }) => {
   }, {});
 
   return (
-    <div className="streaming-availability">
-      <h5 className="mb-3 text-white">
-        <i className="bi bi-tv me-2"></i>
-        Verfügbar auf
-      </h5>
+    <section className="cm-detail-section">
+      {heading}
 
-      <div className="streaming-providers">
+      <div className="cm-providers">
         {Object.values(groupedAvailabilities).map(
           ({ provider, availabilities: providerAvailabilities }) => (
-            <div key={provider.id} className="streaming-provider-card">
-              <div
-                className="provider-header"
-                onClick={() =>
-                  handleProviderClick(providerAvailabilities[0], provider)
-                }
-                style={{ cursor: "pointer" }}
-              >
-                <div className="provider-info">
-                  <div className="provider-logo-container">
-                    {provider.logoUrl ? (
-                      <img
-                        src={provider.logoUrl}
-                        alt={provider.name}
-                        className="provider-logo"
-                        onError={(e) => {
-                          e.target.style.display = "none";
-                          e.target.nextSibling.style.display = "flex";
-                        }}
-                      />
-                    ) : null}
-                    <div
-                      className="provider-logo-fallback"
-                      style={{ display: provider.logoUrl ? "none" : "flex" }}
-                    >
-                      <i className="bi bi-tv"></i>
-                    </div>
-                  </div>
-                  <span className="provider-name">{provider.name}</span>
-                </div>
-
-                <div className="availability-options">
+            <button
+              key={provider.id}
+              type="button"
+              className="cm-provider"
+              onClick={() =>
+                handleProviderClick(providerAvailabilities[0], provider)
+              }
+              title={t("streaming.watchOn", { provider: provider.name })}
+            >
+              <div className="cm-provider-logo">
+                {provider.logoUrl ? (
+                  <img
+                    src={provider.logoUrl}
+                    alt=""
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                    }}
+                  />
+                ) : (
+                  <i className="bi bi-tv" />
+                )}
+              </div>
+              <div className="min-w-0 text-start">
+                <div className="cm-provider-name">{provider.name}</div>
+                <div className="cm-provider-offers">
                   {providerAvailabilities.map((availability, index) => (
-                    <div
+                    <span
                       key={index}
-                      className={`availability-badge ${availability.availabilityType.toLowerCase()}`}
+                      className={`cm-offer cm-offer-${availability.availabilityType.toLowerCase()}`}
                     >
                       <i
-                        className={getAvailabilityTypeIcon(
+                        className={`bi ${getAvailabilityTypeIcon(
                           availability.availabilityType,
-                        )}
-                      ></i>
-                      <span className="availability-text">
-                        {getAvailabilityTypeText(availability.availabilityType)}
-                      </span>
-                      {availability.price && (
-                        <span className="availability-price">
-                          {formatPrice(
-                            availability.price,
-                            availability.currency,
-                          )}
-                        </span>
-                      )}
-                      {availability.quality && (
-                        <span className="availability-quality">
-                          {availability.quality}
-                        </span>
-                      )}
-                    </div>
+                        )}`}
+                      />
+                      {getAvailabilityTypeText(availability.availabilityType)}
+                      {availability.price
+                        ? ` · ${formatPrice(availability.price, availability.currency)}`
+                        : ""}
+                      {availability.quality ? ` · ${availability.quality}` : ""}
+                    </span>
                   ))}
                 </div>
               </div>
-
-              {providerAvailabilities[0] && (
-                <div className="provider-actions">
-                  <button
-                    className="btn btn-primary btn-sm"
-                    onClick={(e) => {
-                      e.stopPropagation(); // Prevent triggering header click
-                      handleProviderClick(providerAvailabilities[0], provider);
-                    }}
-                  >
-                    <i className="bi bi-play-fill me-1"></i>
-                    Jetzt ansehen
-                  </button>
-                </div>
-              )}
-            </div>
+              <i className="bi bi-box-arrow-up-right cm-provider-go" />
+            </button>
           ),
         )}
       </div>
 
-      <div className="streaming-info mt-3">
-        <small className="text-muted">
-          <i className="bi bi-info-circle me-1"></i>
-          Verfügbarkeiten können sich ändern. Preise und Angebote können
-          variieren.
-        </small>
-      </div>
-    </div>
+      <p className="small text-muted mt-2 mb-0">{t("streaming.disclaimer")}</p>
+    </section>
   );
 };
 

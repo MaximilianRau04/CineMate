@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useToast } from "../../toasts";
 import api from "../../../utils/api";
 import "./StreamingProviderManagement.css";
+import { useTranslation } from "../../../i18n/I18nContext";
 
 const StreamingProviderManagement = () => {
   const [providers, setProviders] = useState([]);
@@ -10,6 +11,14 @@ const StreamingProviderManagement = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingProvider, setEditingProvider] = useState(null);
   const { success, error: showError } = useToast();
+  const { t, locale } = useTranslation();
+  const countryName = (code) => {
+    try {
+      return new Intl.DisplayNames([locale], { type: "region" }).of(code);
+    } catch {
+      return code;
+    }
+  };
   const [formData, setFormData] = useState({
     name: "",
     logoUrl: "",
@@ -59,8 +68,11 @@ const StreamingProviderManagement = () => {
         await api.post("/streaming/providers", formData);
       }
 
-      const action = editingProvider ? "aktualisiert" : "erstellt";
-      success(`Streaming-Anbieter erfolgreich ${action}!`);
+      success(
+        editingProvider
+          ? t("admin.providers.updated")
+          : t("admin.providers.created"),
+      );
       await fetchProviders();
       handleCloseModal();
     } catch (err) {
@@ -68,7 +80,7 @@ const StreamingProviderManagement = () => {
       showError(
         err.response?.data?.message ||
           err.message ||
-          "Fehler beim Speichern des Anbieters",
+          t("admin.providers.saveError"),
       );
       setError(err.response?.data?.message || err.message);
     }
@@ -100,20 +112,20 @@ const StreamingProviderManagement = () => {
    * @throws {Error} if the delete request fails or the response is not ok.
    */
   const handleDelete = async (providerId) => {
-    if (!window.confirm("Möchten Sie diesen Anbieter wirklich löschen?")) {
+    if (!window.confirm(t("admin.providers.confirmDelete"))) {
       return;
     }
 
     try {
       await api.delete(`/streaming/providers/${providerId}`);
-      success("Streaming-Anbieter erfolgreich gelöscht!");
+      success(t("admin.providers.deleted"));
       await fetchProviders();
     } catch (err) {
       console.error("Fehler beim Löschen:", err);
       showError(
         err.response?.data?.message ||
           err.message ||
-          "Fehler beim Löschen des Anbieters",
+          t("admin.providers.deleteError"),
       );
       setError(err.response?.data?.message || err.message);
     }
@@ -182,7 +194,7 @@ const StreamingProviderManagement = () => {
         style={{ minHeight: "200px" }}
       >
         <div className="spinner-border" role="status">
-          <span className="visually-hidden">Lädt...</span>
+          <span className="visually-hidden">{t("common.loading")}</span>
         </div>
       </div>
     );
@@ -193,11 +205,11 @@ const StreamingProviderManagement = () => {
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h4>
           <i className="bi bi-tv me-2"></i>
-          Streaming-Anbieter Verwaltung
+          {t("admin.tabs.streaming")}
         </h4>
         <button className="btn btn-primary" onClick={() => setShowModal(true)}>
           <i className="bi bi-plus me-2"></i>
-          Neuer Anbieter
+          {t("admin.providers.new")}
         </button>
       </div>
 
@@ -212,12 +224,12 @@ const StreamingProviderManagement = () => {
         <table className="table table-striped">
           <thead>
             <tr>
-              <th>Logo</th>
-              <th>Name</th>
-              <th>Land</th>
-              <th>Verfügbarkeit</th>
-              <th>Status</th>
-              <th>Aktionen</th>
+              <th>{t("admin.providers.logo")}</th>
+              <th>{t("admin.fields.name")}</th>
+              <th>{t("admin.fields.country")}</th>
+              <th>{t("admin.providers.availability")}</th>
+              <th>{t("admin.fields.status")}</th>
+              <th>{t("common.actions")}</th>
             </tr>
           </thead>
           <tbody>
@@ -237,7 +249,7 @@ const StreamingProviderManagement = () => {
                     />
                   ) : (
                     <div
-                      className="bg-light d-flex align-items-center justify-content-center"
+                      className="bg-light d-flex align-items-center justify-content-center rounded"
                       style={{
                         width: "40px",
                         height: "40px",
@@ -270,13 +282,19 @@ const StreamingProviderManagement = () => {
                 <td>
                   <div className="d-flex flex-wrap gap-1">
                     {provider.subscriptionRequired && (
-                      <span className="badge bg-primary">Abo</span>
+                      <span className="badge bg-primary">
+                        {t("streaming.types.SUBSCRIPTION")}
+                      </span>
                     )}
                     {provider.rentalAvailable && (
-                      <span className="badge bg-warning">Leihen</span>
+                      <span className="badge bg-warning">
+                        {t("streaming.types.RENTAL")}
+                      </span>
                     )}
                     {provider.purchaseAvailable && (
-                      <span className="badge bg-success">Kaufen</span>
+                      <span className="badge bg-success text-dark">
+                        {t("streaming.types.PURCHASE")}
+                      </span>
                     )}
                   </div>
                 </td>
@@ -284,7 +302,9 @@ const StreamingProviderManagement = () => {
                   <span
                     className={`badge ${provider.active ? "bg-success" : "bg-danger"}`}
                   >
-                    {provider.active ? "Aktiv" : "Inaktiv"}
+                    {provider.active
+                      ? t("admin.providers.active")
+                      : t("admin.providers.inactive")}
                   </span>
                 </td>
                 <td>
@@ -292,14 +312,18 @@ const StreamingProviderManagement = () => {
                     <button
                       className="btn btn-primary btn-sm"
                       onClick={() => handleEdit(provider)}
-                      title="Bearbeiten"
+                      title={t("common.edit")}
                     >
                       <i className="bi bi-pencil"></i>
                     </button>
                     <button
                       className={`btn btn-outline-${provider.active ? "warning" : "success"} btn-sm`}
                       onClick={() => handleToggleStatus(provider.id)}
-                      title={provider.active ? "Deaktivieren" : "Aktivieren"}
+                      title={
+                        provider.active
+                          ? t("admin.providers.deactivate")
+                          : t("admin.providers.activate")
+                      }
                     >
                       <i
                         className={`bi bi-${provider.active ? "pause" : "play"}`}
@@ -308,7 +332,7 @@ const StreamingProviderManagement = () => {
                     <button
                       className="btn btn-outline-danger btn-sm"
                       onClick={() => handleDelete(provider.id)}
-                      title="Löschen"
+                      title={t("common.delete")}
                     >
                       <i className="bi bi-trash"></i>
                     </button>
@@ -324,14 +348,10 @@ const StreamingProviderManagement = () => {
         <div className="text-center py-5">
           <i
             className="bi bi-tv"
-            style={{ fontSize: "3rem", color: "#ccc" }}
+            style={{ fontSize: "3rem", opacity: 0.4 }}
           ></i>
-          <h5 className="mt-3 text-muted">
-            Keine Streaming-Anbieter vorhanden
-          </h5>
-          <p className="text-muted">
-            Fügen Sie den ersten Anbieter hinzu, um zu beginnen.
-          </p>
+          <h5 className="mt-3 text-muted">{t("admin.providers.empty")}</h5>
+          <p className="text-muted">{t("admin.providers.emptyHint")}</p>
         </div>
       )}
 
@@ -340,13 +360,15 @@ const StreamingProviderManagement = () => {
         <div
           className="modal show d-block"
           tabIndex="-1"
-          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+          style={{ backgroundColor: "rgba(8, 4, 10, 0.75)" }}
         >
           <div className="modal-dialog">
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">
-                  {editingProvider ? "Anbieter bearbeiten" : "Neuer Anbieter"}
+                  {editingProvider
+                    ? t("admin.providers.edit")
+                    : t("admin.providers.new")}
                 </h5>
                 <button
                   type="button"
@@ -358,7 +380,7 @@ const StreamingProviderManagement = () => {
                 <div className="modal-body">
                   <div className="mb-3">
                     <label htmlFor="name" className="form-label">
-                      Name *
+                      {t("admin.fields.name")} *
                     </label>
                     <input
                       type="text"
@@ -373,7 +395,7 @@ const StreamingProviderManagement = () => {
 
                   <div className="mb-3">
                     <label htmlFor="logoUrl" className="form-label">
-                      Logo URL
+                      {t("admin.providers.logoUrl")}
                     </label>
                     <input
                       type="url"
@@ -387,7 +409,7 @@ const StreamingProviderManagement = () => {
 
                   <div className="mb-3">
                     <label htmlFor="websiteUrl" className="form-label">
-                      Website URL
+                      {t("admin.providers.websiteUrl")}
                     </label>
                     <input
                       type="url"
@@ -401,7 +423,7 @@ const StreamingProviderManagement = () => {
 
                   <div className="mb-3">
                     <label htmlFor="country" className="form-label">
-                      Land
+                      {t("admin.fields.country")}
                     </label>
                     <select
                       className="form-select"
@@ -410,19 +432,21 @@ const StreamingProviderManagement = () => {
                       value={formData.country}
                       onChange={handleInputChange}
                     >
-                      <option value="DE">Deutschland</option>
-                      <option value="US">USA</option>
-                      <option value="GB">Großbritannien</option>
-                      <option value="FR">Frankreich</option>
-                      <option value="IT">Italien</option>
-                      <option value="ES">Spanien</option>
-                      <option value="AT">Österreich</option>
-                      <option value="CH">Schweiz</option>
+                      <option value="DE">{countryName("DE")}</option>
+                      <option value="US">{countryName("US")}</option>
+                      <option value="GB">{countryName("GB")}</option>
+                      <option value="FR">{countryName("FR")}</option>
+                      <option value="IT">{countryName("IT")}</option>
+                      <option value="ES">{countryName("ES")}</option>
+                      <option value="AT">{countryName("AT")}</option>
+                      <option value="CH">{countryName("CH")}</option>
                     </select>
                   </div>
 
                   <div className="mb-3">
-                    <label className="form-label">Verfügbarkeitsoptionen</label>
+                    <label className="form-label">
+                      {t("admin.providers.availabilityOptions")}
+                    </label>
                     <div className="form-check">
                       <input
                         className="form-check-input"
@@ -436,7 +460,7 @@ const StreamingProviderManagement = () => {
                         className="form-check-label"
                         htmlFor="subscriptionRequired"
                       >
-                        Abo erforderlich
+                        {t("admin.providers.subscriptionRequired")}
                       </label>
                     </div>
                     <div className="form-check">
@@ -452,7 +476,7 @@ const StreamingProviderManagement = () => {
                         className="form-check-label"
                         htmlFor="rentalAvailable"
                       >
-                        Leihen verfügbar
+                        {t("admin.providers.rentalAvailable")}
                       </label>
                     </div>
                     <div className="form-check">
@@ -468,7 +492,7 @@ const StreamingProviderManagement = () => {
                         className="form-check-label"
                         htmlFor="purchaseAvailable"
                       >
-                        Kauf verfügbar
+                        {t("admin.providers.purchaseAvailable")}
                       </label>
                     </div>
                   </div>
@@ -479,10 +503,10 @@ const StreamingProviderManagement = () => {
                     className="btn btn-secondary"
                     onClick={handleCloseModal}
                   >
-                    Abbrechen
+                    {t("common.cancel")}
                   </button>
                   <button type="submit" className="btn btn-primary">
-                    {editingProvider ? "Aktualisieren" : "Erstellen"}
+                    {editingProvider ? t("common.save") : t("common.create")}
                   </button>
                 </div>
               </form>

@@ -2,10 +2,9 @@ import {
   BrowserRouter as Router,
   Route,
   Routes,
+  Link,
   useLocation,
 } from "react-router-dom";
-import "bootstrap/dist/css/bootstrap.min.css";
-import "./assets/App.css";
 
 import Header from "./components/navigation/Header";
 import Login from "./components/login/Login";
@@ -33,6 +32,23 @@ import ProtectedRoute from "./components/auth/ProtectedRoute";
 import PublicRoute from "./components/auth/PublicRoute";
 
 import { useAuth } from "./utils/AuthContext";
+import { I18nProvider, useTranslation } from "./i18n/I18nContext";
+
+const NotFound = () => {
+  const { t } = useTranslation();
+  return (
+    <div className="container cm-page">
+      <div className="cm-empty">
+        <div className="cm-eyebrow mb-2">404</div>
+        <h3>{t("common.notFound")}</h3>
+        <p className="mb-4">{t("common.notFoundHint")}</p>
+        <Link to="/explore" className="btn btn-primary">
+          {t("common.backToExplore")}
+        </Link>
+      </div>
+    </div>
+  );
+};
 
 const AppContent = () => {
   const location = useLocation();
@@ -204,10 +220,7 @@ const AppContent = () => {
           }
         />
 
-        <Route
-          path="*"
-          element={<h2 className="text-center mt-5">Seite nicht gefunden</h2>}
-        />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </>
   );
@@ -215,14 +228,16 @@ const AppContent = () => {
 
 const App = () => {
   return (
-    <AuthProvider>
-      <ToastProvider>
-        <Router>
-          <AppContent />
-          <ToastContainer />
-        </Router>
-      </ToastProvider>
-    </AuthProvider>
+    <I18nProvider>
+      <AuthProvider>
+        <ToastProvider>
+          <Router>
+            <AppContent />
+            <ToastContainer />
+          </Router>
+        </ToastProvider>
+      </AuthProvider>
+    </I18nProvider>
   );
 };
 

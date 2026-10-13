@@ -1,4 +1,5 @@
 import { FaUnlink, FaEdit } from "react-icons/fa";
+import { useTranslation } from "../../../i18n/I18nContext";
 
 const Filmography = ({
   person,
@@ -8,11 +9,12 @@ const Filmography = ({
   onRemove,
   onChangeDirector,
 }) => {
+  const { t } = useTranslation();
   if (isLoading) {
     return (
       <div className="text-center py-3">
         <div className="spinner-border" role="status">
-          <span className="visually-hidden">Loading...</span>
+          <span className="visually-hidden">{t("common.loading")}</span>
         </div>
       </div>
     );
@@ -22,15 +24,15 @@ const Filmography = ({
 
   return (
     <>
-      <h5 className="mb-3">Filme</h5>
+      <h5 className="mb-3">{t("common.movies")}</h5>
       <div className="table-responsive">
         <table className="table table-sm">
           <thead>
             <tr>
-              <th>Titel</th>
-              <th>Genre</th>
-              <th>Erscheinungsjahr</th>
-              <th>Aktionen</th>
+              <th>{t("admin.fields.title")}</th>
+              <th>{t("admin.fields.genre")}</th>
+              <th>{t("admin.fields.releaseYear")}</th>
+              <th>{t("common.actions")}</th>
             </tr>
           </thead>
           <tbody>
@@ -44,17 +46,17 @@ const Filmography = ({
                     <button
                       className="btn btn-sm btn-outline-primary"
                       onClick={() => onChangeDirector(movie)}
-                      title="Regisseur ändern"
+                      title={t("admin.cast.changeDirector")}
                     >
-                      <FaEdit /> Ändern
+                      <FaEdit className="me-1" /> {t("admin.cast.change")}
                     </button>
                   ) : (
                     <button
                       className="btn btn-sm btn-outline-danger"
                       onClick={() => onRemove(movie.id, person.id, "movie")}
-                      title="Entfernen"
+                      title={t("common.remove")}
                     >
-                      <FaUnlink /> Entfernen
+                      <FaUnlink className="me-1" /> {t("common.remove")}
                     </button>
                   )}
                 </td>
@@ -63,7 +65,7 @@ const Filmography = ({
             {filmography.movies.length === 0 && (
               <tr>
                 <td colSpan="4" className="text-center">
-                  Keine Filme gefunden
+                  {t("admin.cast.noMovies")}
                 </td>
               </tr>
             )}
@@ -71,15 +73,15 @@ const Filmography = ({
         </table>
       </div>
 
-      <h5 className="mt-4 mb-3">Serien</h5>
+      <h5 className="mt-4 mb-3">{t("common.seriesPlural")}</h5>
       <div className="table-responsive">
         <table className="table table-sm">
           <thead>
             <tr>
-              <th>Titel</th>
-              <th>Genre</th>
-              <th>Erscheinungsjahr</th>
-              <th>Aktionen</th>
+              <th>{t("admin.fields.title")}</th>
+              <th>{t("admin.fields.genre")}</th>
+              <th>{t("admin.fields.releaseYear")}</th>
+              <th>{t("common.actions")}</th>
             </tr>
           </thead>
           <tbody>
@@ -92,9 +94,9 @@ const Filmography = ({
                   <button
                     className="btn btn-sm btn-outline-danger"
                     onClick={() => onRemove(serie.id, person.id, "series")}
-                    title="Entfernen"
+                    title={t("common.remove")}
                   >
-                    <FaUnlink /> Entfernen
+                    <FaUnlink className="me-1" /> {t("common.remove")}
                   </button>
                 </td>
               </tr>
@@ -102,7 +104,7 @@ const Filmography = ({
             {filmography.series.length === 0 && (
               <tr>
                 <td colSpan="4" className="text-center">
-                  Keine Serien gefunden
+                  {t("admin.cast.noSeries")}
                 </td>
               </tr>
             )}

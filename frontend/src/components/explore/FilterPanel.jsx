@@ -1,27 +1,32 @@
-import { FaSearch, FaSpinner, FaTimes } from "react-icons/fa";
+import { FaSearch, FaTimes } from "react-icons/fa";
+import { useTranslation } from "../../i18n/I18nContext";
+import "./Explore.css";
 
-export const LoadingSpinner = ({ message = "Inhalte werden geladen..." }) => (
-  <div className="container text-center py-5">
-    <FaSpinner className="fa-spin mb-3" size={30} />
-    <p>{message}</p>
-  </div>
-);
+export const LoadingSpinner = ({ message }) => {
+  const { t } = useTranslation();
+  return (
+    <div className="cm-spinner" role="status">
+      <div className="cm-reel" />
+      <span>{message || t("common.loading")}</span>
+    </div>
+  );
+};
 
-export const SearchBar = ({ searchQuery, setSearchQuery }) => (
-  <div className="input-group me-4">
-    <input
-      type="text"
-      className="form-control form-control-sm"
-      placeholder="Suchen..."
-      value={searchQuery}
-      onChange={(e) => setSearchQuery(e.target.value)}
-      aria-label="Suche"
-    />
-    <span className="input-group-text bg-white">
-      <FaSearch className="text-muted" />
-    </span>
-  </div>
-);
+export const SearchBar = ({ searchQuery, setSearchQuery }) => {
+  const { t } = useTranslation();
+  return (
+    <label className="cm-search">
+      <FaSearch className="cm-search-icon" aria-hidden="true" />
+      <input
+        type="search"
+        placeholder={t("explore.searchPlaceholder")}
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        aria-label={t("common.search")}
+      />
+    </label>
+  );
+};
 
 export const FilterPanel = ({
   contentType,
@@ -35,67 +40,69 @@ export const FilterPanel = ({
   toggleGenre,
   resetFilters,
   minDate,
-}) => (
-  <div className="card-body bg-light border-bottom">
-    <div className="row g-3">
-      <div className="col-md-3">
-        <label className="form-label fw-bold">Inhaltstyp</label>
-        <div className="btn-group w-100">
-          <button
-            className={`btn ${contentType === "all" ? "btn-primary" : "btn-outline-primary"}`}
-            onClick={() => setContentType("all")}
-          >
-            Alle
-          </button>
-          <button
-            className={`btn ${contentType === "movies" ? "btn-primary" : "btn-outline-primary"}`}
-            onClick={() => setContentType("movies")}
-          >
-            Filme
-          </button>
-          <button
-            className={`btn ${contentType === "series" ? "btn-primary" : "btn-outline-primary"}`}
-            onClick={() => setContentType("series")}
-          >
-            Serien
-          </button>
-        </div>
-      </div>
+}) => {
+  const { t } = useTranslation();
+  const types = [
+    { value: "all", label: t("common.all") },
+    { value: "movies", label: t("common.movies") },
+    { value: "series", label: t("common.seriesPlural") },
+  ];
 
-      {sortOrder !== undefined && setSortOrder && (
-        <div className="col-md-3">
-          <label className="form-label fw-bold">Sortierung</label>
-          <select
-            className="form-select"
-            value={sortOrder}
-            onChange={(e) => setSortOrder(e.target.value)}
-          >
-            <option value="asc">📅 Nach Datum (aufsteigend)</option>
-            <option value="desc">📅 Nach Datum (absteigend)</option>
-          </select>
+  return (
+    <div className="cm-filter-panel">
+      <div className="cm-filter-grid">
+        <div>
+          <div className="cm-filter-label">{t("explore.contentType")}</div>
+          <div className="cm-segment" role="group">
+            {types.map((type) => (
+              <button
+                key={type.value}
+                type="button"
+                className={contentType === type.value ? "is-active" : ""}
+                aria-pressed={contentType === type.value}
+                onClick={() => setContentType(type.value)}
+              >
+                {type.label}
+              </button>
+            ))}
+          </div>
         </div>
-      )}
 
-      <div className="col-md-3">
-        <label className="form-label fw-bold">Zeitraum</label>
-        <div className="row g-2">
-          <div className="col-6">
+        {sortOrder !== undefined && setSortOrder && (
+          <div>
+            <label className="cm-filter-label" htmlFor="cm-sort">
+              {t("explore.sort")}
+            </label>
+            <select
+              id="cm-sort"
+              className="form-select form-select-sm"
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value)}
+            >
+              <option value="desc">{t("explore.sortNewest")}</option>
+              <option value="asc">{t("explore.sortOldest")}</option>
+            </select>
+          </div>
+        )}
+
+        <div>
+          <div className="cm-filter-label">{t("explore.dateRange")}</div>
+          <div className="d-flex gap-2 align-items-center">
             <input
               type="date"
-              className="form-control"
-              placeholder="Von"
+              className="form-control form-control-sm"
+              aria-label={t("explore.from")}
               min={minDate || ""}
               value={dateRange.start}
               onChange={(e) =>
                 setDateRange({ ...dateRange, start: e.target.value })
               }
             />
-          </div>
-          <div className="col-6">
+            <span className="text-muted">–</span>
             <input
               type="date"
-              className="form-control"
-              placeholder="Bis"
+              className="form-control form-control-sm"
+              aria-label={t("explore.to")}
               min={dateRange.start || minDate || ""}
               value={dateRange.end}
               onChange={(e) =>
@@ -106,30 +113,35 @@ export const FilterPanel = ({
         </div>
       </div>
 
-      <div className="col-md-3 d-flex flex-column">
-        <label className="form-label fw-bold">Genres</label>
-        <div
-          className="d-flex flex-wrap gap-2"
-          style={{ maxHeight: "100px", overflowY: "auto" }}
-        >
-          {availableGenres.sort().map((genre) => (
-            <button
-              key={genre}
-              className={`btn btn-sm ${selectedGenres.includes(genre) ? "btn-primary" : "btn-outline-primary"}`}
-              onClick={() => toggleGenre(genre)}
-            >
-              {genre}
-            </button>
-          ))}
+      {availableGenres.length > 0 && (
+        <div className="mt-3">
+          <div className="cm-filter-label">{t("explore.genres")}</div>
+          <div className="cm-chips">
+            {[...availableGenres].sort().map((genre) => (
+              <button
+                key={genre}
+                type="button"
+                className={`cm-chip${selectedGenres.includes(genre) ? " is-active" : ""}`}
+                aria-pressed={selectedGenres.includes(genre)}
+                onClick={() => toggleGenre(genre)}
+              >
+                {genre}
+              </button>
+            ))}
+          </div>
         </div>
+      )}
+
+      <div className="d-flex justify-content-end mt-3">
+        <button
+          type="button"
+          className="btn btn-sm btn-outline-secondary"
+          onClick={resetFilters}
+        >
+          <FaTimes className="me-1" />
+          {t("explore.resetFilters")}
+        </button>
       </div>
     </div>
-
-    <div className="d-flex justify-content-end mt-3">
-      <button className="btn btn-secondary" onClick={resetFilters}>
-        <FaTimes className="me-1" />
-        Filter zurücksetzen
-      </button>
-    </div>
-  </div>
-);
+  );
+};

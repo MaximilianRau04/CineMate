@@ -1,62 +1,68 @@
+const TYPE_ICONS = {
+  MOVIE_WATCHLIST_RELEASED: "🎬",
+  SERIES_NEW_SEASON: "📺",
+  SERIES_NEW_EPISODE: "🆕",
+  SERIES_STATUS_CHANGED: "📊",
+  WATCHLIST_ITEM_REVIEWED: "⭐",
+  FAVORITE_ITEM_REVIEWED: "❤️",
+  MILESTONE_REACHED: "🏆",
+  UPCOMING_RELEASES: "📅",
+  SYSTEM_ANNOUNCEMENT: "📢",
+  NEW_MOVIE_RELEASE: "🎬",
+  WATCHLIST_REMINDER: "📋",
+  RATING_UPDATE: "⭐",
+  NEW_SEASON_ANNOUNCED: "📺",
+  RECOMMENDATION: "💡",
+  BIRTHDAY_REMINDER: "🎂",
+  NEW_USER_REGISTERED: "👤",
+  ADMIN_NOTIFICATION: "📢",
+};
+
 /**
- * german translations for notification types
+ * localized label for a notification type
  * @param {string} type - the notification type
+ * @param {Function} t - translate function from useTranslation
  * @returns {string}
  */
-export const getNotificationTypeLabel = (type) => {
-  const labels = {
-    MOVIE_WATCHLIST_RELEASED: "🎬 Film aus Watchlist verfügbar",
-    SERIES_NEW_SEASON: "📺 Neue Staffel verfügbar",
-    SERIES_NEW_EPISODE: "🆕 Neue Episode verfügbar",
-    SERIES_STATUS_CHANGED: "📊 Serie Status-Update",
-    WATCHLIST_ITEM_REVIEWED: "⭐ Watchlist-Item bewertet",
-    FAVORITE_ITEM_REVIEWED: "❤️ Favorit bewertet",
-    MILESTONE_REACHED: "🏆 Meilenstein erreicht",
-    UPCOMING_RELEASES: "📅 Wöchentliche Zusammenfassung",
-    SYSTEM_ANNOUNCEMENT: "📢 System-Ankündigung",
-    NEW_MOVIE_RELEASE: "🎬 Neue Filmveröffentlichung",
-    WATCHLIST_REMINDER: "📋 Watchlist-Erinnerung",
-    RATING_UPDATE: "⭐ Bewertungs-Update",
-    NEW_SEASON_ANNOUNCED: "📺 Neue Staffel angekündigt",
-    RECOMMENDATION: "💡 Empfehlung",
-    BIRTHDAY_REMINDER: "🎂 Geburtstags-Erinnerung",
-    NEW_USER_REGISTERED: "👤 Neue Benutzer-Registrierung",
-    ADMIN_NOTIFICATION: "📢 Admin-Mitteilung",
-  };
-  return labels[type] || type;
+export const getNotificationTypeLabel = (type, t) => {
+  const key = `notificationSettings.types.${type}`;
+  const label = t ? t(key) : type;
+  if (label === key) return type;
+  return TYPE_ICONS[type] ? `${TYPE_ICONS[type]} ${label}` : label;
 };
 
 /**
  * creates a status message based on global settings
  * @param {object} globalSettings - the global settings
+ * @param {Function} t - translate function from useTranslation
  * @returns {object} status info with text and CSS class
  */
-export const getNotificationStatus = (globalSettings) => {
+export const getNotificationStatus = (globalSettings, t) => {
   const { emailNotificationsEnabled, webNotificationsEnabled } = globalSettings;
 
   if (emailNotificationsEnabled && webNotificationsEnabled) {
     return {
-      text: "✓ Alle Benachrichtigungen aktiviert",
+      text: t("notificationSettings.status.all"),
       className: "text-success",
     };
   }
 
   if (emailNotificationsEnabled && !webNotificationsEnabled) {
     return {
-      text: "⚠️ Nur Email-Benachrichtigungen aktiviert",
+      text: t("notificationSettings.status.emailOnly"),
       className: "text-warning",
     };
   }
 
   if (!emailNotificationsEnabled && webNotificationsEnabled) {
     return {
-      text: "⚠️ Nur Web-Benachrichtigungen aktiviert",
+      text: t("notificationSettings.status.webOnly"),
       className: "text-warning",
     };
   }
 
   return {
-    text: "✗ Alle Benachrichtigungen deaktiviert",
+    text: t("notificationSettings.status.none"),
     className: "text-danger",
   };
 };
@@ -106,12 +112,13 @@ export const sortNotificationTypes = (notificationTypes) => {
 /**
  * groups notification types into categories
  * @param {array} notificationTypes - array of notification types
+ * @param {Function} t - translate function from useTranslation
  * @returns {object}
  */
-export const groupNotificationTypes = (notificationTypes) => {
+export const groupNotificationTypes = (notificationTypes, t) => {
   const groups = {
     watchlist: {
-      title: "📋 Watchlist",
+      title: t("notificationSettings.groups.watchlist"),
       types: [
         "MOVIE_WATCHLIST_RELEASED",
         "SERIES_NEW_SEASON",
@@ -120,7 +127,7 @@ export const groupNotificationTypes = (notificationTypes) => {
       ],
     },
     reviews: {
-      title: "⭐ Bewertungen",
+      title: t("notificationSettings.groups.reviews"),
       types: [
         "WATCHLIST_ITEM_REVIEWED",
         "FAVORITE_ITEM_REVIEWED",
@@ -128,11 +135,11 @@ export const groupNotificationTypes = (notificationTypes) => {
       ],
     },
     achievements: {
-      title: "🏆 Erfolge",
+      title: t("notificationSettings.groups.achievements"),
       types: ["MILESTONE_REACHED", "UPCOMING_RELEASES"],
     },
     general: {
-      title: "📢 Allgemein",
+      title: t("notificationSettings.groups.general"),
       types: [
         "NEW_MOVIE_RELEASE",
         "WATCHLIST_REMINDER",
@@ -143,7 +150,7 @@ export const groupNotificationTypes = (notificationTypes) => {
       ],
     },
     admin: {
-      title: "👨‍💼 Administration",
+      title: t("notificationSettings.groups.admin"),
       types: ["NEW_USER_REGISTERED", "ADMIN_NOTIFICATION"],
     },
   };

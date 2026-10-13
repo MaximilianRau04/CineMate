@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import api from "../../utils/api";
+import Poster from "../common/Poster";
+import { useTranslation } from "../../i18n/I18nContext";
 
 const AddContentModal = ({
   onClose,
@@ -7,6 +9,7 @@ const AddContentModal = ({
   existingMovies = [],
   existingSeries = [],
 }) => {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [contentType, setContentType] = useState("movies");
@@ -67,7 +70,7 @@ const AddContentModal = ({
           <div className="modal-header">
             <h5 className="modal-title">
               <i className="bi bi-plus-circle me-2"></i>
-              Inhalt zur Liste hinzufügen
+              {t("lists.addContentTitle")}
             </h5>
             <button
               type="button"
@@ -91,7 +94,7 @@ const AddContentModal = ({
                 />
                 <label className="btn btn-outline-primary" htmlFor="movies">
                   <i className="bi bi-film me-2"></i>
-                  Filme
+                  {t("common.movies")}
                 </label>
 
                 <input
@@ -105,7 +108,7 @@ const AddContentModal = ({
                 />
                 <label className="btn btn-outline-primary" htmlFor="series">
                   <i className="bi bi-tv me-2"></i>
-                  Serien
+                  {t("common.seriesPlural")}
                 </label>
               </div>
             </div>
@@ -116,19 +119,23 @@ const AddContentModal = ({
                 <input
                   type="text"
                   className="form-control"
-                  placeholder={`${
-                    contentType === "movies" ? "Filme" : "Serien"
-                  } suchen...`}
+                  placeholder={
+                    contentType === "movies"
+                      ? t("lists.searchMovies")
+                      : t("lists.searchSeries")
+                  }
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
-                <button className="btn btn-outline-secondary" type="button">
+                <button
+                  className="btn btn-outline-secondary"
+                  type="button"
+                  aria-label={t("common.search")}
+                >
                   <i className="bi bi-search"></i>
                 </button>
               </div>
-              <div className="form-text">
-                Gib mindestens 3 Zeichen ein, um zu suchen
-              </div>
+              <div className="form-text">{t("lists.minChars")}</div>
             </div>
 
             {/* Search Results */}
@@ -139,7 +146,9 @@ const AddContentModal = ({
               {loading ? (
                 <div className="text-center py-4">
                   <div className="spinner-border text-primary" role="status">
-                    <span className="visually-hidden">Loading...</span>
+                    <span className="visually-hidden">
+                      {t("common.loading")}
+                    </span>
                   </div>
                 </div>
               ) : searchResults.length > 0 ? (
@@ -149,18 +158,10 @@ const AddContentModal = ({
                       <div className="card h-100">
                         <div className="row g-0 h-100">
                           <div className="col-4">
-                            <img
-                              src={
-                                content.posterUrl ||
-                                "https://via.placeholder.com/100x150?text=No+Image"
-                              }
-                              alt={content.title}
-                              className="img-fluid h-100 w-100"
-                              style={{ objectFit: "cover" }}
-                              onError={(e) => {
-                                e.target.src =
-                                  "https://via.placeholder.com/100x150?text=No+Image";
-                              }}
+                            <Poster
+                              src={content.posterUrl}
+                              title={content.title}
+                              className="img-fluid h-100 w-100 object-fit-cover rounded-start"
                             />
                           </div>
                           <div className="col-8">
@@ -190,7 +191,7 @@ const AddContentModal = ({
                                   onClick={() => handleAddContent(content)}
                                 >
                                   <i className="bi bi-plus me-1"></i>
-                                  Hinzufügen
+                                  {t("common.add")}
                                 </button>
                               </div>
                             </div>
@@ -206,7 +207,7 @@ const AddContentModal = ({
                     className="bi bi-search"
                     style={{ fontSize: "2rem", opacity: 0.3 }}
                   ></i>
-                  <p className="mt-2">Keine Ergebnisse gefunden</p>
+                  <p className="mt-2">{t("lists.noResults")}</p>
                 </div>
               ) : (
                 <div className="text-center py-4 text-muted">
@@ -215,7 +216,9 @@ const AddContentModal = ({
                     style={{ fontSize: "2rem", opacity: 0.3 }}
                   ></i>
                   <p className="mt-2">
-                    Suche nach {contentType === "movies" ? "Filmen" : "Serien"}
+                    {contentType === "movies"
+                      ? t("lists.searchMoviesHint")
+                      : t("lists.searchSeriesHint")}
                   </p>
                 </div>
               )}
@@ -228,7 +231,7 @@ const AddContentModal = ({
               className="btn btn-secondary"
               onClick={onClose}
             >
-              Schließen
+              {t("common.close")}
             </button>
           </div>
         </div>

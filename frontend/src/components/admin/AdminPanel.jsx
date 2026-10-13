@@ -18,6 +18,7 @@ import {
 import Dashboard from "./Dashboard";
 import Moderation from "./management/Moderation";
 import Modal from "./modals/Modal";
+import { LoadingSpinner } from "../explore/FilterPanel";
 import {
   ContentManagement,
   SeasonsManagement,
@@ -32,9 +33,11 @@ import TmdbImport from "./management/TmdbImport";
 
 import { SeasonForm, EpisodeForm, ContentForm } from "./forms/ContentForms";
 import { useToast } from "../toasts";
+import { useTranslation } from "../../i18n/I18nContext";
 
 const AdminPanel = () => {
   const { error: showError } = useToast();
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("dashboard");
   const {
     data,
@@ -135,7 +138,7 @@ const AdminPanel = () => {
       }));
     } catch (error) {
       console.error("Error adding content:", error);
-      showError("Fehler beim Hinzufügen des Inhalts");
+      showError(t("admin.errors.addContent"));
     }
   };
 
@@ -178,7 +181,7 @@ const AdminPanel = () => {
       setForms((prev) => ({ ...prev, editingContent: null }));
     } catch (error) {
       console.error("Error updating content:", error);
-      showError("Fehler beim Aktualisieren des Inhalts");
+      showError(t("admin.errors.updateContent"));
     }
   };
 
@@ -189,12 +192,7 @@ const AdminPanel = () => {
    * @returns {Promise<void>}
    */
   const handleDeleteContent = async (id, type) => {
-    if (
-      !window.confirm(
-        "Sind Sie sicher, dass Sie diesen Inhalt löschen möchten?",
-      )
-    )
-      return;
+    if (!window.confirm(t("admin.confirm.deleteContent"))) return;
 
     try {
       const endpoint = type === "movie" ? "movies" : "series";
@@ -202,7 +200,7 @@ const AdminPanel = () => {
       await loadData();
     } catch (error) {
       console.error("Error deleting content:", error);
-      showError("Fehler beim Löschen des Inhalts");
+      showError(t("admin.errors.deleteContent"));
     }
   };
 
@@ -224,7 +222,7 @@ const AdminPanel = () => {
       await loadData();
     } catch (error) {
       console.error("Error deleting review:", error);
-      showError("Fehler beim Löschen der Bewertung");
+      showError(t("admin.errors.deleteReview"));
     }
   };
 
@@ -252,7 +250,7 @@ const AdminPanel = () => {
       }));
     } catch (error) {
       console.error("Error adding season:", error);
-      showError("Fehler beim Hinzufügen der Staffel");
+      showError(t("admin.errors.addSeason"));
     }
   };
 
@@ -282,7 +280,7 @@ const AdminPanel = () => {
       setForms((prev) => ({ ...prev, editingSeason: null }));
     } catch (error) {
       console.error("Error updating season:", error);
-      showError("Fehler beim Aktualisieren der Staffel");
+      showError(t("admin.errors.updateSeason"));
     }
   };
 
@@ -292,12 +290,7 @@ const AdminPanel = () => {
    * @returns {Promise<void>}
    */
   const handleDeleteSeason = async (seasonNumber) => {
-    if (
-      !window.confirm(
-        "Sind Sie sicher, dass Sie diese Staffel löschen möchten?",
-      )
-    )
-      return;
+    if (!window.confirm(t("admin.confirm.deleteSeason"))) return;
 
     try {
       await api.delete(
@@ -306,7 +299,7 @@ const AdminPanel = () => {
       await loadSeasons(forms.selectedSeries.id);
     } catch (error) {
       console.error("Error deleting season:", error);
-      showError("Fehler beim Löschen der Staffel");
+      showError(t("admin.errors.deleteSeason"));
     }
   };
 
@@ -351,7 +344,7 @@ const AdminPanel = () => {
       }));
     } catch (error) {
       console.error("Error adding episode:", error);
-      showError("Fehler beim Hinzufügen der Episode");
+      showError(t("admin.errors.addEpisode"));
     }
   };
 
@@ -396,7 +389,7 @@ const AdminPanel = () => {
       setForms((prev) => ({ ...prev, editingEpisode: null }));
     } catch (error) {
       console.error("Error updating episode:", error);
-      showError("Fehler beim Aktualisieren der Episode");
+      showError(t("admin.errors.updateEpisode"));
     }
   };
 
@@ -406,12 +399,7 @@ const AdminPanel = () => {
    * @returns {Promise<void>}
    */
   const handleDeleteEpisode = async (episodeNumber) => {
-    if (
-      !window.confirm(
-        "Sind Sie sicher, dass Sie diese Episode löschen möchten?",
-      )
-    )
-      return;
+    if (!window.confirm(t("admin.confirm.deleteEpisode"))) return;
 
     try {
       await api.delete(
@@ -423,14 +411,14 @@ const AdminPanel = () => {
       );
     } catch (error) {
       console.error("Error deleting episode:", error);
-      showError("Fehler beim Löschen der Episode");
+      showError(t("admin.errors.deleteEpisode"));
     }
   };
 
   const handleDeleteUser = async (userId) => {
     const deleted = await deleteUser(userId);
     if (!deleted) {
-      showError("Fehler beim Löschen des Benutzers");
+      showError(t("admin.errors.deleteUser"));
     }
   };
 
@@ -451,46 +439,57 @@ const AdminPanel = () => {
   };
 
   if (loading) {
-    return (
-      <div className="container mt-4">
-        <div className="text-center">
-          <div className="spinner-border" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner message={t("admin.loading")} />;
   }
 
   return (
-    <div className="container-fluid mt-4">
-      <div className="row">
-        <div className="col-md-3">
-          <div className="card">
-            <div className="card-header">
-              <h5>Admin Panel</h5>
-            </div>
+    <div className="container-fluid cm-page px-3 px-lg-4">
+      <header className="cm-page-head">
+        <div>
+          <div className="cm-eyebrow">{t("admin.eyebrow")}</div>
+          <h1>{t("admin.title")}</h1>
+        </div>
+      </header>
+      <div className="row g-4">
+        <div className="col-lg-3">
+          <div className="card cm-admin-nav">
             <div className="list-group list-group-flush">
               {[
-                { key: "dashboard", icon: FaChartBar, label: "Dashboard" },
-                { key: "content", icon: FaFilm, label: "Contentverwaltung" },
-                { key: "users", icon: FaUsers, label: "Benutzerverwaltung" },
-                { key: "moderation", icon: FaComments, label: "Moderation" },
+                {
+                  key: "dashboard",
+                  icon: FaChartBar,
+                  label: t("admin.tabs.dashboard"),
+                },
+                {
+                  key: "content",
+                  icon: FaFilm,
+                  label: t("admin.tabs.content"),
+                },
+                { key: "users", icon: FaUsers, label: t("admin.tabs.users") },
+                {
+                  key: "moderation",
+                  icon: FaComments,
+                  label: t("admin.tabs.moderation"),
+                },
                 {
                   key: "cast",
                   icon: FaUserTie,
-                  label: "Schauspieler & Regisseure",
+                  label: t("admin.tabs.cast"),
                 },
-                { key: "streaming", icon: FaFilm, label: "Streaming-Anbieter" },
+                {
+                  key: "streaming",
+                  icon: FaFilm,
+                  label: t("admin.tabs.streaming"),
+                },
                 {
                   key: "notifications",
                   icon: FaBell,
-                  label: "Benachrichtigungen",
+                  label: t("admin.tabs.notifications"),
                 },
                 {
                   key: "tmdb",
                   icon: FaCloudDownloadAlt,
-                  label: "TMDB Import",
+                  label: t("admin.tabs.tmdb"),
                 },
               ].map(({ key, icon: Icon, label }) => (
                 <button
@@ -506,7 +505,7 @@ const AdminPanel = () => {
           </div>
         </div>
 
-        <div className="col-md-9">
+        <div className="col-lg-9">
           {activeTab === "dashboard" && <Dashboard data={data} />}
 
           {activeTab === "content" && viewMode === "content" && (
@@ -593,10 +592,10 @@ const AdminPanel = () => {
       {/* Modals for adding/editing movies, series, seasons and episodes */}
       <Modal
         show={modals.add}
-        title="Neuen Inhalt hinzufügen"
+        title={t("admin.modals.addContent")}
         onClose={() => setModals((prev) => ({ ...prev, add: false }))}
         onSave={handleAddContent}
-        saveText="Hinzufügen"
+        saveText={t("common.add")}
       >
         <ContentForm
           content={forms.newContent}
@@ -609,7 +608,11 @@ const AdminPanel = () => {
 
       <Modal
         show={modals.edit}
-        title={`${forms.editingContent?.type === "movie" ? "Film" : "Serie"} bearbeiten`}
+        title={
+          forms.editingContent?.type === "movie"
+            ? t("admin.modals.editMovie")
+            : t("admin.modals.editSeries")
+        }
         onClose={() => {
           setModals((prev) => ({ ...prev, edit: false }));
           setForms((prev) => ({ ...prev, editingContent: null }));
@@ -629,10 +632,10 @@ const AdminPanel = () => {
 
       <Modal
         show={modals.addSeason}
-        title="Neue Staffel hinzufügen"
+        title={t("admin.modals.addSeason")}
         onClose={() => setModals((prev) => ({ ...prev, addSeason: false }))}
         onSave={handleAddSeason}
-        saveText="Hinzufügen"
+        saveText={t("common.add")}
       >
         <SeasonForm
           season={forms.newSeason}
@@ -644,7 +647,7 @@ const AdminPanel = () => {
 
       <Modal
         show={modals.editSeason}
-        title="Staffel bearbeiten"
+        title={t("admin.modals.editSeason")}
         onClose={() => {
           setModals((prev) => ({ ...prev, editSeason: false }));
           setForms((prev) => ({ ...prev, editingSeason: null }));
@@ -663,10 +666,10 @@ const AdminPanel = () => {
 
       <Modal
         show={modals.addEpisode}
-        title="Neue Episode hinzufügen"
+        title={t("admin.modals.addEpisode")}
         onClose={() => setModals((prev) => ({ ...prev, addEpisode: false }))}
         onSave={handleAddEpisode}
-        saveText="Hinzufügen"
+        saveText={t("common.add")}
       >
         <EpisodeForm
           episode={forms.newEpisode}
@@ -678,7 +681,7 @@ const AdminPanel = () => {
 
       <Modal
         show={modals.editEpisode}
-        title="Episode bearbeiten"
+        title={t("admin.modals.editEpisode")}
         onClose={() => {
           setModals((prev) => ({ ...prev, editEpisode: false }));
           setForms((prev) => ({ ...prev, editingEpisode: null }));

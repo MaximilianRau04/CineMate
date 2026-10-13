@@ -1,6 +1,7 @@
 import React from "react";
 import { useToast } from "./ToastContext";
 import Toast from "./Toast";
+import "./Toast.css";
 
 const ToastContainer = () => {
   const { toasts, removeToast } = useToast();

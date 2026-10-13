@@ -1,0 +1,31 @@
+const statistics = {
+  statistics: {
+    eyebrow: "Dein Schauen in Zahlen",
+    title: "Statistiken",
+    loading: "Deine Zahlen werden berechnet…",
+    loadError: "Statistiken konnten nicht geladen werden",
+    compareUnavailable: "Der Freundesvergleich ist gerade nicht verfügbar.",
+    compareError: "Statistiken deiner Freunde konnten nicht geladen werden.",
+    period: "Zeitraum",
+    lastMonth: "Letzter Monat",
+    lastYear: "Letztes Jahr",
+    allTime: "Insgesamt",
+    compare: "Mit Freunden vergleichen",
+    hoursWatched: "Stunden geschaut",
+    moviesWatched: "Filme gesehen",
+    seriesWatched: "Serien gesehen",
+    averageRating: "Ø Bewertung",
+    friendsComparison: "Du im Vergleich zu deinen Freunden",
+    user: "Nutzer",
+    activity: "Aktivität über Zeit",
+    topGenres: "Top-Genres",
+    favoriteActors: "Lieblingsdarsteller",
+    favoriteDirectors: "Lieblingsregisseure",
+    titleCount: "Titel",
+    recentActivity: "Letzte Aktivitäten",
+    noActivity: "Keine aktuellen Aktivitäten.",
+    ratedAction: "Mit {rating} Sternen bewertet",
+  },
+};
+
+export default statistics;

@@ -140,9 +140,10 @@ export const useCalendarData = () => {
 /**
  * Groups content (movies and series) by month based on their release date
  * @param {Array} content - Array of movies and series
+ * @param {string} locale - Locale used for the month labels
  * @returns {Object}
  */
-export const groupContentByMonth = (content) => {
+export const groupContentByMonth = (content, locale = "en-US") => {
   const grouped = {};
 
   content.forEach((item) => {
@@ -152,7 +153,7 @@ export const groupContentByMonth = (content) => {
     if (!dateField) return;
 
     const date = new Date(dateField);
-    const month = date.toLocaleDateString("de-DE", {
+    const month = date.toLocaleDateString(locale, {
       month: "long",
       year: "numeric",
     });
