@@ -1,240 +1,241 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import "bootstrap/dist/css/bootstrap.min.css";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import NotificationSystem from "../notifications/NotificationSystem";
-import { LogOut } from "lucide-react";
+import { LogOut, Menu, X, ChevronDown, Settings } from "lucide-react";
 import { useAuth } from "../../utils/AuthContext";
+import { useTranslation } from "../../i18n/I18nContext";
+import LanguageSwitcher from "./LanguageSwitcher";
+import "./Header.css";
 
-const Header = () => {
-  const navigate = useNavigate();
-  const { logout, user, isAuthenticated } = useAuth();
-  const [socialOpen, setSocialOpen] = useState(false);
-  const socialRef = useRef(null);
+const MAIN_LINKS = [
+  { to: "/explore", key: "nav.explore", icon: "bi-compass" },
+  { to: "/calendar", key: "nav.calendar", icon: "bi-calendar3" },
+  { to: "/watchlist", key: "nav.watchlist", icon: "bi-bookmark" },
+  { to: "/lists", key: "nav.lists", icon: "bi-collection" },
+  { to: "/recommendations", key: "nav.recommendations", icon: "bi-stars" },
+];
+
+const COMMUNITY_LINKS = [
+  { to: "/friends", key: "nav.friends", icon: "bi-person-hearts" },
+  { to: "/leaderboard", key: "nav.leaderboard", icon: "bi-trophy" },
+  { to: "/forum", key: "nav.forum", icon: "bi-chat-square-text" },
+];
+
+const ACCOUNT_LINKS = [
+  { to: "/profile", key: "nav.profile", icon: "bi-person" },
+  { to: "/statistics", key: "nav.statistics", icon: "bi-graph-up" },
+  { to: "/achievements", key: "nav.achievements", icon: "bi-award" },
+];
+
+/**
+ * Small dropdown that closes on outside click.
+ */
+const NavDropdown = ({ label, icon, links, active, align = "start" }) => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (socialRef.current && !socialRef.current.contains(e.target)) {
-        setSocialOpen(false);
-      }
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
     };
+    const handleEscape = (e) => e.key === "Escape" && setOpen(false);
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
   }, []);
 
-  const userRole = user?.role;
-  const isAdmin = userRole === "ADMIN";
+  return (
+    <div className="cm-dd" ref={ref}>
+      <button
+        type="button"
+        className={`cm-nav-link cm-dd-toggle${active ? " active" : ""}`}
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        aria-haspopup="true"
+      >
+        {icon}
+        <span>{label}</span>
+        <ChevronDown size={14} className={`cm-dd-chev${open ? " up" : ""}`} />
+      </button>
+      {open && (
+        <div className={`cm-dd-menu cm-dd-${align}`} role="menu">
+          {links.map((link) =>
+            link.divider ? (
+              <div key={link.key} className="cm-dd-divider" />
+            ) : link.onClick ? (
+              <button
+                key={link.key}
+                type="button"
+                className="cm-dd-item"
+                role="menuitem"
+                onClick={() => {
+                  setOpen(false);
+                  link.onClick();
+                }}
+              >
+                <i className={`bi ${link.icon}`} />
+                {t(link.key)}
+              </button>
+            ) : (
+              <NavLink
+                key={link.key}
+                to={link.to}
+                className="cm-dd-item"
+                role="menuitem"
+                onClick={() => setOpen(false)}
+              >
+                <i className={`bi ${link.icon}`} />
+                {t(link.key)}
+              </NavLink>
+            ),
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
 
+const Header = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { logout, user, isAuthenticated } = useAuth();
+  const { t } = useTranslation();
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const isAdmin = user?.role === "ADMIN";
   const userId = user?.id;
+
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname]);
 
   const handleLogout = () => {
     logout();
     navigate("/");
   };
 
+  const isActive = (links) =>
+    links.some((link) => link.to && location.pathname.startsWith(link.to));
+
+  const initials = (user?.username || "?").slice(0, 2).toUpperCase();
+
   return (
-    <nav className="navbar navbar-expand-xl navbar-dark bg-dark shadow-sm sticky-top">
-      <div className="container-fluid px-2 px-md-3">
-        <Link
-          className="navbar-brand fw-bold text-primary d-flex align-items-center"
-          to="/explore"
-        >
-          <span style={{ fontSize: "1.5rem" }}>🎬</span>
-          <span className="ms-2 d-none d-md-inline">CineMate</span>
-          <span className="ms-2 d-inline d-md-none d-none d-sm-inline">CM</span>
+    <header className="cm-header">
+      <div className="cm-header-inner">
+        <Link className="cm-brand" to="/explore" aria-label="CineMate">
+          <span className="cm-brand-mark" aria-hidden="true" />
+          <span>
+            CINE<span className="cm-brand-accent">MATE</span>
+          </span>
         </Link>
 
-        {/* Toggler Button */}
-        <button
-          className="navbar-toggler border-0 p-1 ms-auto"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span className="navbar-toggler-icon"></span>
-        </button>
+        {isAuthenticated && (
+          <>
+            <nav className="cm-nav" aria-label={t("nav.main")}>
+              {MAIN_LINKS.map((link) => (
+                <NavLink key={link.to} to={link.to} className="cm-nav-link">
+                  {t(link.key)}
+                </NavLink>
+              ))}
+              <NavDropdown
+                label={t("nav.community")}
+                links={COMMUNITY_LINKS}
+                active={isActive(COMMUNITY_LINKS)}
+              />
+            </nav>
 
-        {/* Collapsible content */}
-        <div className="collapse navbar-collapse" id="navbarNav">
-          {isAuthenticated && (
-            <>
-              {/* Main navigation */}
-              <ul className="navbar-nav me-auto flex-wrap">
-                <li className="nav-item">
-                  <Link className="nav-link px-2 px-lg-3" to="/explore">
-                    <i className="bi bi-compass d-xl-none me-1"></i>
-                    <span className="d-none d-xl-inline">Erkunden</span>
-                    <span className="d-xl-none">Erkunden</span>
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link className="nav-link px-2 px-lg-3" to="/watchlist">
-                    <i className="bi bi-bookmark d-xl-none me-1"></i>
-                    <span className="d-none d-xl-inline">Watchlist</span>
-                    <span className="d-xl-none">Watchlist</span>
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link className="nav-link px-2 px-lg-3" to="/calendar">
-                    <i className="bi bi-calendar d-xl-none me-1"></i>
-                    <span className="d-none d-xl-inline">Kalender</span>
-                    <span className="d-xl-none">Kalender</span>
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link className="nav-link px-2 px-lg-3" to="/profile">
-                    <i className="bi bi-person d-xl-none me-1"></i>
-                    <span className="d-none d-xl-inline">Profil</span>
-                    <span className="d-xl-none">Profil</span>
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link className="nav-link px-2 px-lg-3" to="/statistics">
-                    <i className="bi bi-graph-up me-1"></i>
-                    <span className="d-none d-lg-inline">Statistiken</span>
-                    <span className="d-lg-none">Stats</span>
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link className="nav-link px-2 px-lg-3" to="/achievements">
-                    <i className="bi bi-trophy me-1"></i>
-                    <span className="d-none d-lg-inline">Achievements</span>
-                    <span className="d-lg-none">Awards</span>
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link className="nav-link px-2 px-lg-3" to="/recommendations">
-                    <i className="bi bi-stars d-xl-none me-1"></i>
-                    <span className="d-none d-lg-inline">Empfehlungen</span>
-                    <span className="d-lg-none">Tipps</span>
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link className="nav-link px-2 px-lg-3" to="/lists">
-                    <i className="bi bi-list-ul d-xl-none me-1"></i>
-                    <span className="d-none d-lg-inline">Listen</span>
-                    <span className="d-lg-none">Listen</span>
-                  </Link>
-                </li>
-
-                {/* Social Dropdown */}
-                <li className="nav-item dropdown" ref={socialRef}>
-                  <button
-                    className="nav-link dropdown-toggle px-2 px-lg-3 bg-transparent border-0"
-                    onClick={() => setSocialOpen((o) => !o)}
-                    aria-expanded={socialOpen}
-                  >
-                    <i className="bi bi-people-fill me-1"></i>
-                    <span className="d-none d-lg-inline">Social</span>
-                    <span className="d-lg-none">Social</span>
-                  </button>
-                  <ul
-                    className={`dropdown-menu dropdown-menu-end dropdown-menu-lg-start${socialOpen ? " show" : ""}`}
-                  >
-                    <li>
-                      <Link
-                        className="dropdown-item"
-                        to="/friends"
-                        onClick={() => setSocialOpen(false)}
-                      >
-                        <i className="bi bi-person-hearts me-2"></i>
-                        Freunde
-                      </Link>
-                    </li>
-                    <li>
-                      <Link
-                        className="dropdown-item"
-                        to="/leaderboard"
-                        onClick={() => setSocialOpen(false)}
-                      >
-                        <i className="bi bi-trophy-fill me-2"></i>
-                        Rangliste
-                      </Link>
-                    </li>
-                    <li>
-                      <hr className="dropdown-divider" />
-                    </li>
-                    <li>
-                      <Link
-                        className="dropdown-item"
-                        to="/forum"
-                        onClick={() => setSocialOpen(false)}
-                      >
-                        <i className="bi bi-chat-square-text me-2"></i>
-                        Forum
-                      </Link>
-                    </li>
-                  </ul>
-                </li>
-              </ul>
-
-              {/* Right side content */}
-              <div className="d-flex align-items-center flex-wrap gap-2 mt-2 mt-xl-0">
-                {/* Admin Panel */}
-                {isAdmin && (
-                  <Link
-                    className="text-warning text-decoration-none d-flex align-items-center order-3 order-xl-1"
-                    to="/admin"
-                    style={{
-                      fontSize: "1rem",
-                      transition: "all 0.2s ease",
-                      whiteSpace: "nowrap",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.target.style.filter =
-                        "drop-shadow(0 0 5px rgba(255, 193, 7, 0.5))";
-                      e.target.style.transform = "scale(1.05)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.filter = "none";
-                      e.target.style.transform = "scale(1)";
-                    }}
-                    title="Admin Panel"
-                  >
-                    <i className="bi bi-gear-fill me-1"></i>
-                    <span className="d-none d-lg-inline">Admin-Panel</span>
-                    <span className="d-lg-none">Admin</span>
-                  </Link>
-                )}
-
-                {/* Notifications */}
-                <div className="order-1 order-xl-2">
-                  <NotificationSystem userId={userId} />
-                </div>
-
-                {/* Role Badge */}
-                {userRole && (
-                  <span
-                    className={`badge order-2 order-xl-3 ${isAdmin ? "bg-warning text-dark" : "bg-primary"}`}
-                    style={{ fontSize: "0.75rem", whiteSpace: "nowrap" }}
-                  >
-                    {userRole}
-                  </span>
-                )}
-
-                {/* Logout Button */}
-                <button
-                  className="btn btn-sm btn-outline-light d-flex align-items-center order-4"
-                  onClick={handleLogout}
-                  style={{
-                    borderRadius: "8px",
-                    padding: "6px 12px",
-                    transition: "all 0.2s ease",
-                    whiteSpace: "nowrap",
-                  }}
-                  title="Abmelden"
+            <div className="cm-header-actions">
+              {isAdmin && (
+                <NavLink
+                  to="/admin"
+                  className="cm-icon-btn cm-admin-link"
+                  title={t("nav.admin")}
+                  aria-label={t("nav.admin")}
                 >
-                  <LogOut size={18} />
-                  <span className="ms-2 d-none d-lg-inline">Abmelden</span>
-                </button>
+                  <Settings size={19} />
+                </NavLink>
+              )}
+
+              <NotificationSystem userId={userId} />
+
+              <LanguageSwitcher className="d-none d-sm-inline-flex" />
+
+              <div className="d-none d-lg-block">
+                <NavDropdown
+                  align="end"
+                  active={isActive(ACCOUNT_LINKS)}
+                  icon={
+                    <span className="cm-avatar" aria-hidden="true">
+                      {initials}
+                    </span>
+                  }
+                  label={<span className="cm-user-name">{user?.username}</span>}
+                  links={[
+                    ...ACCOUNT_LINKS,
+                    { key: "divider", divider: true },
+                    {
+                      key: "nav.logout",
+                      icon: "bi-box-arrow-right",
+                      onClick: handleLogout,
+                    },
+                  ]}
+                />
               </div>
-            </>
-          )}
-        </div>
+
+              <button
+                type="button"
+                className="cm-icon-btn d-lg-none"
+                onClick={() => setMobileOpen((o) => !o)}
+                aria-expanded={mobileOpen}
+                aria-label={t("nav.toggleMenu")}
+              >
+                {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+              </button>
+            </div>
+          </>
+        )}
       </div>
-    </nav>
+
+      {isAuthenticated && mobileOpen && (
+        <div className="cm-mobile-panel d-lg-none">
+          <div className="cm-mobile-user">
+            <span className="cm-avatar">{initials}</span>
+            <div>
+              <div className="fw-semibold">{user?.username}</div>
+              <div className="cm-eyebrow">{user?.role}</div>
+            </div>
+            <LanguageSwitcher className="ms-auto" />
+          </div>
+          {[
+            { title: t("nav.browse"), links: MAIN_LINKS },
+            { title: t("nav.community"), links: COMMUNITY_LINKS },
+            { title: t("nav.account"), links: ACCOUNT_LINKS },
+          ].map((group) => (
+            <div key={group.title} className="cm-mobile-group">
+              <div className="cm-eyebrow">{group.title}</div>
+              {group.links.map((link) => (
+                <NavLink key={link.to} to={link.to} className="cm-mobile-link">
+                  <i className={`bi ${link.icon}`} />
+                  {t(link.key)}
+                </NavLink>
+              ))}
+            </div>
+          ))}
+          <button
+            type="button"
+            className="btn btn-outline-light w-100 mt-2"
+            onClick={handleLogout}
+          >
+            <LogOut size={16} className="me-2" />
+            {t("nav.logout")}
+          </button>
+        </div>
+      )}
+    </header>
   );
 };
 

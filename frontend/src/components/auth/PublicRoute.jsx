@@ -7,10 +7,9 @@ const PublicRoute = ({ children }) => {
 
   if (isLoading) {
     return (
-      <div className="d-flex justify-content-center align-items-center vh-100">
-        <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Laden...</span>
-        </div>
+      <div className="cm-spinner vh-100" role="status">
+        <div className="cm-reel" />
+        <span className="visually-hidden">Loading</span>
       </div>
     );
   }

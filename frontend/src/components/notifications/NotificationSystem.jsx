@@ -3,10 +3,12 @@ import { Bell, Check, CheckCheck, Trash2, Clock } from "lucide-react";
 import api from "../../utils/api";
 import { useAuth } from "../../utils/AuthContext";
 import { useToast } from "../toasts";
+import { useTranslation } from "../../i18n/I18nContext";
 
 const NotificationSystem = () => {
   const { user } = useAuth();
   const { error: showError } = useToast();
+  const { t, formatRelative } = useTranslation();
   const userId = user?.id ?? null;
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -42,7 +44,7 @@ const NotificationSystem = () => {
       setNotifications(processedData);
     } catch (error) {
       console.error("Error fetching notifications:", error);
-      showError("Benachrichtigungen konnten nicht geladen werden");
+      showError(t("notifications.loadError"));
     } finally {
       setLoading(false);
     }
@@ -74,7 +76,7 @@ const NotificationSystem = () => {
       setUnreadCount((prev) => Math.max(0, prev - 1));
     } catch (error) {
       console.error("Error marking notification as read:", error);
-      showError("Konnte nicht als gelesen markiert werden");
+      showError(t("notifications.markReadError"));
     }
   };
 
@@ -102,7 +104,7 @@ const NotificationSystem = () => {
       setUnreadCount(0);
     } catch (error) {
       console.error("Error marking all notifications as read:", error);
-      showError("Konnte nicht alle als gelesen markieren");
+      showError(t("notifications.markAllReadError"));
     }
   };
 
@@ -131,7 +133,7 @@ const NotificationSystem = () => {
       setUnreadCount(0);
     } catch (error) {
       console.error("Error deleting all notifications:", error);
-      showError("Benachrichtigungen konnten nicht gelöscht werden");
+      showError(t("notifications.deleteAllError"));
     }
   };
 
@@ -154,58 +156,7 @@ const NotificationSystem = () => {
       }
     } catch (error) {
       console.error("Error deleting notification:", error);
-      showError("Benachrichtigung konnte nicht gelöscht werden");
-    }
-  };
-
-  /**
-   * Formats a date string into a more readable format.
-   * @param {string} dateString - The date string to format.
-   * @returns {string} The formatted date string.
-   */
-  const formatDate = (dateString) => {
-    if (!dateString) return "Datum unbekannt";
-
-    try {
-      const date = new Date(dateString);
-
-      if (isNaN(date.getTime())) {
-        console.error("Invalid date:", dateString);
-        return "Datum unbekannt";
-      }
-
-      const now = new Date();
-      const diffInMs = now - date;
-      const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
-      const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
-      const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
-
-      if (diffInMinutes < 1) {
-        return "Gerade eben";
-      } else if (diffInMinutes < 60) {
-        return `vor ${diffInMinutes} Min.`;
-      } else if (diffInHours < 24) {
-        return `vor ${diffInHours} Std.`;
-      } else if (diffInDays === 1) {
-        return "Gestern";
-      } else if (diffInDays < 7) {
-        return `vor ${diffInDays} Tag${diffInDays > 1 ? "en" : ""}`;
-      } else if (diffInDays < 30) {
-        const weeks = Math.floor(diffInDays / 7);
-        return `vor ${weeks} Woche${weeks > 1 ? "n" : ""}`;
-      } else if (diffInDays < 365) {
-        const months = Math.floor(diffInDays / 30);
-        return `vor ${months} Monat${months > 1 ? "en" : ""}`;
-      } else {
-        return date.toLocaleDateString("de-DE", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-        });
-      }
-    } catch (error) {
-      console.error("Error formatting date:", error, dateString);
-      return "Datum unbekannt";
+      showError(t("notifications.deleteError"));
     }
   };
 
@@ -214,15 +165,15 @@ const NotificationSystem = () => {
    * @param {string} type - The type of the notification.
    * @returns {Object} The style object containing icon and color.
    */
-  const getNotificationStyle = (type) => {
-    const styles = {
-      NEW_MOVIE: { icon: "🎬", color: "#667eea" },
-      REMINDER: { icon: "⏰", color: "#f093fb" },
-      FRIEND_REQUEST: { icon: "👥", color: "#4facfe" },
-      SYSTEM: { icon: "⚙️", color: "#a8edea" },
-      PROMOTION: { icon: "🎁", color: "#d299c2" },
+  const getNotificationIcon = (type) => {
+    const icons = {
+      NEW_MOVIE: "🎬",
+      REMINDER: "⏰",
+      FRIEND_REQUEST: "👥",
+      SYSTEM: "⚙️",
+      PROMOTION: "🎁",
     };
-    return styles[type] || { icon: "📢", color: "#667eea" };
+    return icons[type] || "📢";
   };
 
   // Fetch notifications when userId changes or filter changes
@@ -257,113 +208,54 @@ const NotificationSystem = () => {
   };
 
   return (
-    <div className="notification-dropdown position-relative">
-      {/* Notification Bell Button */}
+    <div className="cm-notif">
       <button
-        className="btn position-relative me-2"
+        className="cm-icon-btn"
         onClick={() => setIsOpen(!isOpen)}
         type="button"
-        style={{
-          border: "none",
-          background: "transparent",
-          color: "#ffd700",
-          borderRadius: "50%",
-          padding: "8px",
-          transition: "all 0.3s ease",
-          boxShadow: "0 0 0 transparent",
-        }}
-        onMouseEnter={(e) => {
-          e.target.style.color = "#ffed4e";
-          e.target.style.transform = "translateY(-2px) scale(1.05)";
-          e.target.style.boxShadow = "0 4px 10px rgba(0,0,0,0.15)";
-        }}
-        onMouseLeave={(e) => {
-          e.target.style.color = "#ffd700";
-          e.target.style.transform = "translateY(0) scale(1)";
-          e.target.style.boxShadow = "0 0 0 transparent";
-        }}
+        aria-expanded={isOpen}
+        aria-label={t("notifications.title")}
+        title={t("notifications.title")}
       >
-        <Bell size={25} fill="currentColor" />
+        <Bell size={18} />
         {unreadCount > 0 && (
-          <span
-            className="position-absolute top-0 start-100 translate-middle badge rounded-pill"
-            style={{
-              fontSize: "0.6rem",
-              background:
-                "linear-gradient(135deg, rgb(255, 80, 80), rgb(255, 120, 120))",
-              border: "2px solid white",
-              minWidth: "20px",
-              height: "20px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "white",
-              boxShadow: "0 0 4px rgba(0,0,0,0.2)",
-              transform: "scale(1)",
-              transition: "transform 0.2s ease",
-            }}
-          >
+          <span className="cm-notif-count">
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         )}
       </button>
 
-      {/* Notification Dropdown */}
       {isOpen && (
-        <div
-          className="position-absolute border shadow-lg"
-          style={{
-            width: "380px",
-            maxHeight: "480px",
-            zIndex: 1050,
-            right: 0,
-            top: "100%",
-            marginTop: "12px",
-            background: "white",
-            borderRadius: "16px",
-            border: "1px solid rgba(0, 0, 0, 0.08)",
-            boxShadow:
-              "0 20px 40px rgba(0, 0, 0, 0.1), 0 8px 16px rgba(0, 0, 0, 0.05)",
-            overflow: "hidden",
-          }}
-        >
-          {/* Header */}
-          <div className="p-3 border-bottom" style={{ background: "#f8f9fa" }}>
+        <div className="cm-notif-panel">
+          <div className="cm-notif-head">
             <div className="d-flex justify-content-between align-items-center">
-              <h6
-                className="mb-0 fw-bold"
-                style={{ color: "#212529", fontSize: "1rem" }}
-              >
-                Benachrichtigungen
-              </h6>
+              <h6>{t("notifications.title")}</h6>
               <button
                 className="btn-close"
                 onClick={() => setIsOpen(false)}
-                style={{ fontSize: "0.8rem" }}
+                aria-label={t("common.close")}
+                style={{ fontSize: "0.7rem" }}
               ></button>
             </div>
 
-            {/* Controls */}
-            <div className="d-flex justify-content-between align-items-center mt-2">
-              <div>
-                <button
-                  className={`btn btn-sm ${showUnreadOnly ? "btn-primary" : "btn-outline-secondary"}`}
-                  onClick={handleFilterToggle}
-                  style={{ fontSize: "0.75rem", padding: "3px 10px" }}
-                >
-                  {showUnreadOnly ? "Alle anzeigen" : "Nur ungelesene"}
-                </button>
-              </div>
+            <div className="cm-notif-tools">
+              <button
+                className={`btn btn-sm ${showUnreadOnly ? "btn-primary" : "btn-outline-secondary"}`}
+                onClick={handleFilterToggle}
+              >
+                {showUnreadOnly
+                  ? t("notifications.showAll")
+                  : t("notifications.unreadOnly")}
+              </button>
 
               <div className="d-flex gap-2">
                 {unreadCount > 0 && (
                   <button
                     className="btn btn-sm btn-outline-secondary"
                     onClick={markAllAsRead}
-                    style={{ fontSize: "0.75rem", padding: "3px 10px" }}
                   >
                     <CheckCheck size={12} className="me-1" />
-                    Alle lesen
+                    {t("notifications.markAllRead")}
                   </button>
                 )}
 
@@ -371,196 +263,81 @@ const NotificationSystem = () => {
                   <button
                     className="btn btn-sm btn-outline-danger"
                     onClick={deleteAllNotifications}
-                    style={{ fontSize: "0.75rem", padding: "3px 10px" }}
                   >
                     <Trash2 size={12} className="me-1" />
-                    Alle löschen
+                    {t("notifications.deleteAll")}
                   </button>
                 )}
               </div>
             </div>
           </div>
 
-          {/* Notifications List */}
-          <div style={{ maxHeight: "360px", overflowY: "auto" }}>
-            {loading ? (
-              <div className="p-4 text-center text-muted">
-                <div
-                  className="spinner-border spinner-border-sm me-2"
-                  style={{ color: "#667eea" }}
-                ></div>
-                <span style={{ color: "#6c757d" }}>
-                  Lade Benachrichtigungen...
-                </span>
+          <div className="cm-notif-list">
+            {loading && notifications.length === 0 ? (
+              <div className="cm-notif-empty">
+                <span className="spinner-border spinner-border-sm me-2 text-primary"></span>
+                {t("notifications.loading")}
               </div>
             ) : notifications.length === 0 ? (
-              <div className="p-4 text-center text-muted">
-                <Bell
-                  size={32}
-                  style={{ color: "#dee2e6", marginBottom: "8px" }}
-                />
-                <div style={{ color: "#6c757d", fontSize: "0.9rem" }}>
+              <div className="cm-notif-empty">
+                <Bell size={28} className="mb-2 opacity-50" />
+                <div>
                   {showUnreadOnly
-                    ? "Keine ungelesenen Benachrichtigungen"
-                    : "Keine Benachrichtigungen"}
+                    ? t("notifications.emptyUnread")
+                    : t("notifications.empty")}
                 </div>
               </div>
             ) : (
-              notifications.map((notification) => {
-                const style = getNotificationStyle(notification.type);
-                return (
-                  <div
-                    key={notification.id}
-                    className={`p-3 border-bottom position-relative`}
-                    style={{
-                      borderColor: "#f1f3f4",
-                      background: !notification.read
-                        ? "linear-gradient(90deg, rgba(102, 126, 234, 0.02) 0%, rgba(255, 255, 255, 1) 100%)"
-                        : "white",
-                      transition: "all 0.2s ease",
-                      cursor: "pointer",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = "#f8f9ff";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = !notification.read
-                        ? "linear-gradient(90deg, rgba(102, 126, 234, 0.02) 0%, rgba(255, 255, 255, 1) 100%)"
-                        : "white";
-                    }}
-                  >
-                    <div className="d-flex">
-                      {/* Icon */}
-                      <div className="me-3 d-flex align-items-center">
-                        <div
-                          className="rounded-circle d-flex align-items-center justify-content-center"
-                          style={{
-                            width: "40px",
-                            height: "40px",
-                            background: "#0d6efd",
-                            fontSize: "1.1rem",
-                          }}
-                        >
-                          {style.icon}
-                        </div>
-                      </div>
+              notifications.map((notification) => (
+                <div
+                  key={notification.id}
+                  className={`cm-notif-item${notification.read ? "" : " is-unread"}`}
+                >
+                  <div className="cm-notif-icon">
+                    {getNotificationIcon(notification.type)}
+                  </div>
 
-                      {/* Content */}
-                      <div className="flex-grow-1">
-                        <div className="d-flex justify-content-between align-items-start mb-1">
-                          <h6
-                            className={`mb-0 ${
-                              !notification.read ? "fw-bold" : "fw-normal"
-                            }`}
-                            style={{
-                              color: "#2d3748",
-                              fontSize: "0.9rem",
-                              lineHeight: "1.3",
-                            }}
+                  <div className="flex-grow-1 min-w-0">
+                    <div className="d-flex justify-content-between align-items-start gap-2">
+                      <h6
+                        className={`cm-notif-title ${notification.read ? "fw-normal" : "fw-semibold"}`}
+                      >
+                        {notification.title}
+                      </h6>
+
+                      <div className="cm-notif-actions">
+                        {!notification.read && (
+                          <button
+                            className="cm-notif-action"
+                            onClick={() => markAsRead(notification.id)}
+                            title={t("notifications.markRead")}
+                            aria-label={t("notifications.markRead")}
                           >
-                            {notification.title}
-                          </h6>
-
-                          {/* Actions */}
-                          <div className="d-flex ms-2">
-                            {!notification.read && (
-                              <button
-                                className="btn btn-sm me-1"
-                                onClick={() => markAsRead(notification.id)}
-                                title="Als gelesen markieren"
-                                style={{
-                                  fontSize: "0.7rem",
-                                  padding: "4px 8px",
-                                  borderRadius: "6px",
-                                  border: "1px solid #e2e8f0",
-                                  background: "white",
-                                  color: "#667eea",
-                                  transition: "all 0.2s ease",
-                                }}
-                                onMouseEnter={(e) => {
-                                  e.target.style.background = "#48bb78";
-                                  e.target.style.color = "white";
-                                  e.target.style.borderColor = "#48bb78";
-                                }}
-                                onMouseLeave={(e) => {
-                                  e.target.style.background = "white";
-                                  e.target.style.color = "#667eea";
-                                  e.target.style.borderColor = "#e2e8f0";
-                                }}
-                              >
-                                <Check size={12} />
-                              </button>
-                            )}
-                            <button
-                              className="btn btn-sm"
-                              onClick={() =>
-                                deleteNotification(notification.id)
-                              }
-                              title="Löschen"
-                              style={{
-                                fontSize: "0.7rem",
-                                padding: "4px 8px",
-                                borderRadius: "6px",
-                                border: "1px solid #fed7d7",
-                                background: "white",
-                                color: "#e53e3e",
-                                transition: "all 0.2s ease",
-                              }}
-                              onMouseEnter={(e) => {
-                                e.target.style.background = "#e53e3e";
-                                e.target.style.color = "white";
-                              }}
-                              onMouseLeave={(e) => {
-                                e.target.style.background = "white";
-                                e.target.style.color = "#e53e3e";
-                              }}
-                            >
-                              <Trash2 size={12} />
-                            </button>
-                          </div>
-                        </div>
-
-                        <p
-                          className="mb-2 small"
-                          style={{
-                            color: "#718096",
-                            fontSize: "0.8rem",
-                            lineHeight: "1.4",
-                          }}
+                            <Check size={13} />
+                          </button>
+                        )}
+                        <button
+                          className="cm-notif-action is-danger"
+                          onClick={() => deleteNotification(notification.id)}
+                          title={t("common.delete")}
+                          aria-label={t("common.delete")}
                         >
-                          {notification.message}
-                        </p>
-
-                        {/* Footer */}
-                        <div className="d-flex justify-content-between align-items-center">
-                          <small
-                            className="d-flex align-items-center"
-                            style={{ color: "#a0aec0", fontSize: "0.75rem" }}
-                          >
-                            <Clock size={12} className="me-1" />
-                            {formatDate(notification.sentAt)}
-                          </small>
-
-                          {!notification.read && (
-                            <span
-                              className="badge rounded-pill"
-                              style={{
-                                fontSize: "0.6rem",
-                                background:
-                                  "linear-gradient(45deg, #667eea, #764ba2)",
-                                color: "white",
-                                padding: "4px 8px",
-                              }}
-                            >
-                              Neu
-                            </span>
-                          )}
-                        </div>
+                          <Trash2 size={13} />
+                        </button>
                       </div>
                     </div>
+
+                    <p className="cm-notif-msg">{notification.message}</p>
+
+                    <span className="cm-notif-time d-inline-flex align-items-center">
+                      <Clock size={11} className="me-1" />
+                      {notification.sentAt
+                        ? formatRelative(notification.sentAt)
+                        : t("common.unknownDate")}
+                    </span>
                   </div>
-                );
-              })
+                </div>
+              ))
             )}
           </div>
         </div>
