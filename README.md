@@ -6,6 +6,8 @@ Built with a React frontend and a Spring Boot backend, using MongoDB for storage
 
 ![CineMate explore view](docs/screenshots/explore.webp)
 
+![CineMate sign-in page](docs/screenshots/login.webp)
+
 ## Tech Stack
 
 - **Frontend**: React, React Router, Axios, Bootstrap
