@@ -5,6 +5,7 @@ import { useAuth } from "../../utils/AuthContext";
 import { useToast } from "../toasts";
 import "./CustomListsPage.css";
 import api from "../../utils/api";
+import { useTranslation } from "../../i18n/I18nContext";
 
 const CustomListsPage = () => {
   const [lists, setLists] = useState([]);
@@ -19,6 +20,7 @@ const CustomListsPage = () => {
 
   const { isAuthenticated } = useAuth();
   const { success, error: showError } = useToast();
+  const { t } = useTranslation();
 
   /**
    * Load public lists from the API.
@@ -43,7 +45,7 @@ const CustomListsPage = () => {
       setPage(currentPage + 1);
     } catch (error) {
       console.error("Error loading public lists:", error);
-      showError("Fehler beim Laden der öffentlichen Listen");
+      showError(t("lists.loadPublicError"));
     } finally {
       setLoading(false);
     }
@@ -62,10 +64,10 @@ const CustomListsPage = () => {
       setMyLists(data);
     } catch (error) {
       if (error.response?.status === 401) {
-        showError("Session abgelaufen. Bitte loggen Sie sich erneut ein.");
+        showError(t("lists.sessionExpired"));
       } else {
         console.error("Error loading my lists:", error);
-        showError("Fehler beim Laden deiner Listen");
+        showError(t("lists.loadMineError"));
       }
     } finally {
       setLoading(false);
@@ -114,7 +116,7 @@ const CustomListsPage = () => {
       setPage(1);
     } catch (error) {
       console.error("Error searching lists:", error);
-      showError("Fehler beim Suchen der Listen");
+      showError(t("lists.searchError"));
     } finally {
       setLoading(false);
     }
@@ -128,7 +130,7 @@ const CustomListsPage = () => {
   const handleCreateList = async (listData) => {
     try {
       const { data: newList } = await api.post("/lists", listData);
-      success("Liste erfolgreich erstellt!");
+      success(t("lists.created"));
       setShowCreateModal(false);
 
       if (activeTab === "my-lists") {
@@ -136,10 +138,10 @@ const CustomListsPage = () => {
       }
     } catch (error) {
       if (error.response?.status === 401) {
-        showError("Session abgelaufen. Bitte loggen Sie sich erneut ein.");
+        showError(t("lists.sessionExpired"));
       } else {
         console.error("Error creating list:", error);
-        showError("Fehler beim Erstellen der Liste");
+        showError(t("lists.createError"));
       }
     }
   };
@@ -150,16 +152,16 @@ const CustomListsPage = () => {
    * @returns {Promise<void>}
    */
   const handleDeleteList = async (listId) => {
-    if (!window.confirm("Möchtest du diese Liste wirklich löschen?")) return;
+    if (!window.confirm(t("lists.confirmDelete"))) return;
 
     try {
       await api.delete(`/lists/${listId}`);
-      success("Liste erfolgreich gelöscht!");
+      success(t("lists.deleted"));
       setMyLists((prev) => prev.filter((list) => list.id !== listId));
       setLists((prev) => prev.filter((list) => list.id !== listId));
     } catch (error) {
       console.error("Error deleting list:", error);
-      showError("Fehler beim Löschen der Liste");
+      showError(t("lists.deleteError"));
     }
   };
 
@@ -178,7 +180,7 @@ const CustomListsPage = () => {
       );
     } catch (error) {
       console.error("Error liking list:", error);
-      showError("Fehler beim Liken der Liste");
+      showError(t("lists.likeError"));
     }
   };
 
@@ -190,35 +192,32 @@ const CustomListsPage = () => {
   const renderLists = (listsToRender) => {
     if (loading && listsToRender.length === 0) {
       return (
-        <div className="text-center py-5">
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
+        <div className="cm-spinner">
+          <div className="cm-reel" />
         </div>
       );
     }
 
     if (listsToRender.length === 0) {
       return (
-        <div className="text-center py-5">
-          <div className="mb-4">
-            <i
-              className="bi bi-list-ul"
-              style={{ fontSize: "4rem", opacity: 0.3 }}
-            ></i>
-          </div>
-          <h4 className="text-muted mb-3">
+        <div className="cm-empty">
+          <h3>
             {activeTab === "my-lists"
-              ? "Keine eigenen Listen vorhanden"
-              : "Keine Listen gefunden"}
-          </h4>
+              ? t("lists.noOwnLists")
+              : t("lists.noListsFound")}
+          </h3>
+          <p>
+            {activeTab === "my-lists"
+              ? t("lists.noOwnListsHint")
+              : t("lists.noListsFoundHint")}
+          </p>
           {activeTab === "my-lists" && isAuthenticated && (
             <button
               className="btn btn-primary"
               onClick={() => setShowCreateModal(true)}
             >
               <i className="bi bi-plus-circle me-2"></i>
-              Erste Liste erstellen
+              {t("lists.createFirst")}
             </button>
           )}
         </div>
@@ -246,26 +245,22 @@ const CustomListsPage = () => {
   };
 
   return (
-    <div className="container-fluid py-4">
-      <div className="row mb-4">
-        <div className="col">
-          <h1 className="text-white mb-4">
-            <i className="bi bi-list-ul me-3"></i>
-            Listen
-          </h1>
+    <div className="container-xxl cm-page custom-lists-page">
+      <header className="cm-page-head">
+        <div>
+          <div className="cm-eyebrow">{t("lists.eyebrow")}</div>
+          <h1>{t("lists.title")}</h1>
         </div>
         {isAuthenticated && (
-          <div className="col-auto">
-            <button
-              className="btn btn-primary"
-              onClick={() => setShowCreateModal(true)}
-            >
-              <i className="bi bi-plus-circle me-2"></i>
-              Neue Liste erstellen
-            </button>
-          </div>
+          <button
+            className="btn btn-primary"
+            onClick={() => setShowCreateModal(true)}
+          >
+            <i className="bi bi-plus-lg me-2"></i>
+            {t("lists.newList")}
+          </button>
         )}
-      </div>
+      </header>
 
       {/* Navigation Tabs */}
       <ul className="nav nav-tabs custom-tabs mb-4">
@@ -275,7 +270,7 @@ const CustomListsPage = () => {
             onClick={() => setActiveTab("public")}
           >
             <i className="bi bi-globe me-2"></i>
-            Öffentliche Listen
+            {t("lists.publicLists")}
           </button>
         </li>
         {isAuthenticated && (
@@ -285,7 +280,7 @@ const CustomListsPage = () => {
               onClick={() => setActiveTab("my-lists")}
             >
               <i className="bi bi-person-circle me-2"></i>
-              Meine Listen ({myLists.length})
+              {t("lists.myLists")} ({myLists.length})
             </button>
           </li>
         )}
@@ -299,7 +294,7 @@ const CustomListsPage = () => {
               <input
                 type="text"
                 className="form-control"
-                placeholder="Listen durchsuchen..."
+                placeholder={t("lists.searchPlaceholder")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && searchLists()}
@@ -307,6 +302,7 @@ const CustomListsPage = () => {
               <button
                 className="btn btn-outline-secondary"
                 onClick={searchLists}
+                aria-label={t("common.search")}
               >
                 <i className="bi bi-search"></i>
               </button>
@@ -318,8 +314,8 @@ const CustomListsPage = () => {
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
             >
-              <option value="recent">Neueste zuerst</option>
-              <option value="popular">Beliebteste zuerst</option>
+              <option value="recent">{t("lists.sortRecent")}</option>
+              <option value="popular">{t("lists.sortPopular")}</option>
             </select>
           </div>
         </div>
@@ -341,10 +337,10 @@ const CustomListsPage = () => {
                   className="spinner-border spinner-border-sm me-2"
                   role="status"
                 ></span>
-                Lädt...
+                {t("common.loading")}
               </>
             ) : (
-              "Mehr laden"
+              t("lists.loadMore")
             )}
           </button>
         </div>

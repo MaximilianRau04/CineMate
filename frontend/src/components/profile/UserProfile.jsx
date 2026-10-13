@@ -5,6 +5,9 @@ import CompactNotificationSettings from "./CompactNotificationSettings";
 import UserAchievementBadges from "../achievements/UserAchievementBadges";
 import { Link } from "react-router-dom";
 import api from "../../utils/api";
+import { LoadingSpinner } from "../explore/FilterPanel";
+import "./Profile.css";
+import { useTranslation } from "../../i18n/I18nContext";
 
 const UserProfile = () => {
   const [user, setUser] = useState(null);
@@ -21,6 +24,7 @@ const UserProfile = () => {
   const fileInputRef = useRef(null);
   const [reviews, setReviews] = useState([]);
   const { success, error: showError } = useToast();
+  const { t, formatDate } = useTranslation();
 
   /**
    * * Fetches the user data from the API and sets the user state.
@@ -87,10 +91,10 @@ const UserProfile = () => {
       setUser(updatedUser);
       setAvatarPreview(null);
       setAvatarFile(null);
-      success("Avatar erfolgreich entfernt!");
+      success(t("profile.avatarRemoved"));
     } catch (err) {
       console.error("Fehler beim Entfernen des Avatars:", err);
-      showError("Fehler beim Entfernen des Avatars");
+      showError(t("profile.avatarRemoveError"));
     } finally {
       setSaving(false);
     }
@@ -122,10 +126,10 @@ const UserProfile = () => {
       setUser(updatedUser);
       setBio(modalBio);
       setShowModal(false);
-      success("Biografie erfolgreich aktualisiert!");
+      success(t("profile.bioSaved"));
     } catch (error) {
       console.error("Error saving bio:", error);
-      showError("Fehler beim Speichern der Biografie");
+      showError(t("profile.bioSaveError"));
     } finally {
       setIsBioLoading(false);
     }
@@ -164,10 +168,10 @@ const UserProfile = () => {
           setUser(updatedUser);
           setAvatarFile(null);
           setAvatarPreview(null);
-          success("Profil erfolgreich aktualisiert!");
+          success(t("profile.profileSaved"));
         } catch (err) {
           console.error("Fehler beim Speichern:", err);
-          showError("Fehler beim Aktualisieren des Profils");
+          showError(t("profile.profileSaveError"));
         } finally {
           setSaving(false);
         }
@@ -177,20 +181,19 @@ const UserProfile = () => {
     }
   }, [avatarFile, userId, bio, showError, success]);
 
-  if (loading)
-    return <p className="text-center mt-5">🔄 Benutzer wird geladen...</p>;
+  if (loading) return <LoadingSpinner message={t("profile.loading")} />;
 
   if (error) {
     return (
-      <div className="container py-5">
+      <div className="container cm-page">
         <div className="alert alert-danger" role="alert">
-          <h4 className="alert-heading">Fehler</h4>
+          <h4 className="alert-heading">{t("common.error")}</h4>
           <p>{error}</p>
           <button
             className="btn btn-outline-danger"
             onClick={() => window.location.reload()}
           >
-            Erneut versuchen
+            {t("common.retry")}
           </button>
         </div>
       </div>
@@ -198,7 +201,7 @@ const UserProfile = () => {
   }
 
   const { username, email, avatarUrl, joinedAt } = user;
-  const formattedDate = new Date(joinedAt).toLocaleDateString("de-DE", {
+  const formattedDate = formatDate(joinedAt, {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -207,233 +210,135 @@ const UserProfile = () => {
   const hasAvatar = avatarPreview || avatarUrl;
 
   return (
-    <div className="container py-5">
-      <div className="card shadow-lg border-0">
-        <div className="row g-0">
-          <div className="col-md-4 d-flex flex-column align-items-center justify-content-center bg-dark text-white p-4">
-            <div
-              className="avatar-container position-relative"
-              style={{ cursor: "pointer" }}
-            >
-              {hasAvatar ? (
-                <>
-                  <img
-                    src={
-                      avatarPreview ||
-                      `${import.meta.env.VITE_BASE_URL}${avatarUrl}`
-                    }
-                    alt={username}
-                    className="img-fluid rounded-circle shadow-sm mb-3"
-                    style={{
-                      width: "150px",
-                      height: "150px",
-                      objectFit: "cover",
-                    }}
-                    onClick={handleAvatarClick}
-                    onError={(e) => {
-                      e.target.src =
-                        "https://via.placeholder.com/150?text=Kein+Bild";
-                    }}
-                  />
-                  {/* hover-overlay for avatar */}
-                  <div
-                    className="avatar-overlay position-absolute rounded-circle d-flex justify-content-center align-items-center"
-                    style={{
-                      top: 0,
-                      left: "50%",
-                      transform: "translateX(-50%)",
-                      width: "150px",
-                      height: "150px",
-                      background: "rgba(0,0,0,0.7)",
-                      opacity: 0,
-                      transition: "opacity 0.3s",
-                    }}
-                    onClick={handleAvatarClick}
-                    onMouseOver={(e) => (e.currentTarget.style.opacity = 1)}
-                    onMouseOut={(e) => (e.currentTarget.style.opacity = 0)}
-                  >
-                    <div className="text-center">
-                      <i
-                        className="bi bi-camera-fill"
-                        style={{ fontSize: "1.5rem" }}
-                      ></i>
-                      <div style={{ fontSize: "0.8rem", marginTop: "5px" }}>
-                        Ändern
-                      </div>
-                    </div>
-                  </div>
-
-                  <button
-                    className="btn btn-danger btn-sm position-absolute"
-                    style={{
-                      top: "5px",
-                      right: "5px",
-                      width: "30px",
-                      height: "30px",
-                      borderRadius: "50%",
-                      padding: "0",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                    onClick={handleRemoveAvatar}
-                    title="Avatar entfernen"
-                  >
-                    <i className="bi bi-x-lg"></i>
-                  </button>
-                </>
-              ) : (
-                /* Placeholder*/
-                <div
-                  className="d-flex flex-column align-items-center justify-content-center rounded-circle bg-secondary mb-3"
-                  style={{
-                    width: "150px",
-                    height: "150px",
-                    border: "3px dashed #6c757d",
-                    transition: "all 0.3s ease",
-                  }}
-                  onClick={handleAvatarClick}
-                  onMouseOver={(e) => {
-                    e.currentTarget.style.backgroundColor = "#5a6268";
-                    e.currentTarget.style.borderColor = "#adb5bd";
-                  }}
-                  onMouseOut={(e) => {
-                    e.currentTarget.style.backgroundColor = "#6c757d";
-                    e.currentTarget.style.borderColor = "#6c757d";
-                  }}
-                >
-                  <i
-                    className="bi bi-camera-fill"
-                    style={{ fontSize: "2rem", marginBottom: "10px" }}
-                  ></i>
-                  <div className="text-center" style={{ fontSize: "0.9rem" }}>
-                    <div>Avatar</div>
-                    <div>hinzufügen</div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files[0];
-                if (file) {
-                  setAvatarPreview(URL.createObjectURL(file));
-                  setAvatarFile(file);
+    <div className="container-xxl cm-page">
+      <section className="cm-profile-head">
+        <div className="cm-profile-avatar">
+          <button
+            type="button"
+            className="cm-avatar-xl"
+            onClick={handleAvatarClick}
+            title={
+              hasAvatar ? t("profile.changeAvatar") : t("profile.addAvatar")
+            }
+            aria-label={
+              hasAvatar ? t("profile.changeAvatar") : t("profile.addAvatar")
+            }
+          >
+            {hasAvatar ? (
+              <img
+                src={
+                  avatarPreview ||
+                  `${import.meta.env.VITE_BASE_URL}${avatarUrl}`
                 }
-              }}
-              className="d-none"
-            />
-          </div>
-
-          <div className="col-md-8 p-4">
-            <h2 className="mb-3">{username}</h2>
-            <p className="text-muted mb-1">
-              <strong>Email:</strong> {email}
-            </p>
-            <div className="mb-3">
-              <label className="form-label mb-2">
-                <strong>Über mich:</strong>
-              </label>
-              <div className="bio-container p-3 bg-light rounded mb-2">
-                {bio ? (
-                  <p className="mb-0">{bio}</p>
-                ) : (
-                  <p className="text-muted mb-0 fst-italic">
-                    Keine Biografie vorhanden. Klicke auf "Bearbeiten", um eine
-                    hinzuzufügen.
-                  </p>
-                )}
-              </div>
-              <button
-                type="button"
-                className="btn btn-primary btn-sm"
-                onClick={openModal}
-              >
-                <i className="bi bi-pencil-fill me-1"></i>
-                Bearbeiten
-              </button>
-            </div>
-
-            {/* Achievements Section */}
-            <div className="mb-3">
-              <label className="form-label mb-2">
-                <strong>Meine Achievements:</strong>
-              </label>
-              {userId && (
-                <UserAchievementBadges
-                  userId={userId}
-                  limit={6}
-                  showCount={true}
-                />
-              )}
-              <Link
-                to={`/achievements`}
-                className="btn btn-primary btn-sm mt-2"
-              >
-                <i className="bi bi-trophy me-1"></i>
-                Alle Achievements anzeigen
-              </Link>
-            </div>
-
-            <p className="text-muted">
-              <strong>Beigetreten:</strong> {formattedDate}
-            </p>
-
-            {saving && (
-              <div className="mt-3 text-center">
-                <span
-                  className="spinner-border spinner-border-sm me-2"
-                  role="status"
-                  aria-hidden="true"
-                ></span>
-                <span>
-                  {avatarFile
-                    ? "Bild wird gespeichert..."
-                    : "Avatar wird entfernt..."}
-                </span>
-              </div>
+                alt=""
+                onError={(e) => {
+                  e.currentTarget.style.display = "none";
+                }}
+              />
+            ) : (
+              <span>{username?.slice(0, 2).toUpperCase()}</span>
             )}
-          </div>
-
-          <div className="card shadow-lg border-0 mt-4">
-            <div className="card-header bg-white">
-              <h4 className="mb-0">Meine Medien</h4>
-            </div>
-            <div
-              className="card-body"
-              style={{
-                maxHeight: "350px",
-                overflowY: "auto",
-              }}
+            <span className="cm-avatar-xl-overlay">
+              <i className="bi bi-camera-fill" />
+            </span>
+          </button>
+          {hasAvatar && (
+            <button
+              type="button"
+              className="btn btn-link btn-sm text-danger p-0 mt-2"
+              onClick={handleRemoveAvatar}
             >
-              <UserMediaTabs userId={userId} />
-            </div>
+              {t("profile.removeAvatar")}
+            </button>
+          )}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={(e) => {
+              const file = e.target.files[0];
+              if (file) {
+                setAvatarPreview(URL.createObjectURL(file));
+                setAvatarFile(file);
+              }
+            }}
+            className="d-none"
+          />
+        </div>
+
+        <div className="min-w-0 flex-grow-1">
+          <div className="cm-eyebrow">
+            {t("profile.memberSince", { date: formattedDate })}
+          </div>
+          <h1 className="cm-profile-name">{username}</h1>
+          <div className="text-muted small mb-3">{email}</div>
+
+          <div className="cm-bio">
+            {bio ? (
+              <p className="mb-0">{bio}</p>
+            ) : (
+              <p className="text-muted mb-0 fst-italic">{t("profile.noBio")}</p>
+            )}
+            <button
+              type="button"
+              className="btn btn-sm btn-outline-secondary mt-3"
+              onClick={openModal}
+            >
+              <i className="bi bi-pencil me-1"></i>
+              {t("profile.editBio")}
+            </button>
           </div>
 
-          <div className="mt-4">
-            <CompactNotificationSettings userId={userId} />
-          </div>
+          {saving && (
+            <div className="mt-3 small text-muted">
+              <span
+                className="spinner-border spinner-border-sm me-2"
+                role="status"
+                aria-hidden="true"
+              ></span>
+              {avatarFile
+                ? t("profile.savingAvatar")
+                : t("profile.removingAvatar")}
+            </div>
+          )}
         </div>
+      </section>
+
+      <section className="cm-panel mt-4">
+        <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+          <h2 className="cm-panel-title mb-0">{t("profile.achievements")}</h2>
+          <Link to="/achievements" className="btn btn-sm btn-outline-primary">
+            {t("profile.allAchievements")}
+          </Link>
+        </div>
+        {userId && (
+          <UserAchievementBadges userId={userId} limit={6} showCount={true} />
+        )}
+      </section>
+
+      <section className="cm-panel mt-4">
+        <h2 className="cm-panel-title">{t("profile.myMedia")}</h2>
+        <UserMediaTabs userId={userId} />
+      </section>
+
+      <div className="mt-4">
+        <CompactNotificationSettings userId={userId} />
       </div>
 
-      {/* Bio Edit Modal */}
       {showModal && (
         <div
           className="modal fade show"
-          style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
+          style={{ display: "block", backgroundColor: "rgba(8, 4, 10, 0.75)" }}
         >
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title">Biografie bearbeiten</h5>
+                <h5 className="modal-title">{t("profile.editBio")}</h5>
                 <button
                   type="button"
                   className="btn-close"
                   onClick={() => setShowModal(false)}
+                  aria-label={t("common.close")}
                 ></button>
               </div>
               <div className="modal-body">
@@ -442,7 +347,7 @@ const UserProfile = () => {
                   rows="5"
                   value={modalBio}
                   onChange={(e) => setModalBio(e.target.value)}
-                  placeholder="Erzähle etwas über dich..."
+                  placeholder={t("profile.bioPlaceholder")}
                 ></textarea>
               </div>
               <div className="modal-footer">
@@ -452,7 +357,7 @@ const UserProfile = () => {
                   onClick={() => setShowModal(false)}
                   disabled={isBioLoading}
                 >
-                  Abbrechen
+                  {t("common.cancel")}
                 </button>
                 <button
                   type="button"
@@ -467,10 +372,10 @@ const UserProfile = () => {
                         role="status"
                         aria-hidden="true"
                       ></span>
-                      Speichern...
+                      {t("common.saving")}
                     </>
                   ) : (
-                    "Speichern"
+                    t("common.save")
                   )}
                 </button>
               </div>

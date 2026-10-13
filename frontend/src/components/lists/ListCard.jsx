@@ -1,71 +1,40 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import Poster from "../common/Poster";
+import { useTranslation } from "../../i18n/I18nContext";
 
 const ListCard = ({ list, onLike, onDelete, showOwnerActions = false }) => {
-  /**
-   * Get the preview image URL for the list.
-   * @returns {string} - Returns the preview image URL for the list.
-   */
-  const getListPreviewImage = () => {
-    if (list.coverImageUrl) {
-      return list.coverImageUrl;
-    }
-
-    // Use first movie/series poster as preview
-    if (list.movies && list.movies.length > 0) {
-      return list.movies[0].posterUrl;
-    }
-
-    if (list.series && list.series.length > 0) {
-      return list.series[0].posterUrl;
-    }
-
-    return "https://via.placeholder.com/300x400?text=Keine+Inhalte";
-  };
-
-  /**
-   * Formats a date string to a more readable format.
-   * @param {*} dateString - The date string to format.
-   * @returns The formatted date string.
-   */
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString("de-DE", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
+  const { t, formatDate } = useTranslation();
+  const previewImage =
+    list.coverImageUrl ||
+    list.movies?.[0]?.posterUrl ||
+    list.series?.[0]?.posterUrl;
 
   return (
     <div className="card custom-list-card h-100">
       <div className="position-relative">
         <Link to={`/lists/${list.id}`}>
-          <img
-            src={getListPreviewImage()}
-            alt={list.title}
-            className="card-img-top list-preview-image"
-            onError={(e) => {
-              e.target.src =
-                "https://via.placeholder.com/300x400?text=Keine+Inhalte";
-            }}
-          />
+          <div className="list-preview-image overflow-hidden">
+            <Poster
+              src={previewImage}
+              title={list.title}
+              className="w-100 h-100 object-fit-cover"
+            />
+          </div>
         </Link>
 
         {/* Privacy indicator */}
         <div className="position-absolute top-0 start-0 m-2">
-          <span
-            className={`badge ${list.public ? "bg-success" : "bg-secondary"}`}
-          >
+          <span className="cm-tag cm-tag-solid">
             <i className={`bi bi-${list.public ? "globe" : "lock"} me-1`}></i>
-            {list.public ? "Öffentlich" : "Privat"}
+            {list.public ? t("common.public") : t("common.private")}
           </span>
         </div>
 
         {/* Items count */}
         <div className="position-absolute top-0 end-0 m-2">
-          <span className="badge bg-dark bg-opacity-75">
-            {list.totalItemsCount}{" "}
-            {list.totalItemsCount === 1 ? "Element" : "Elemente"}
+          <span className="cm-tag cm-tag-solid">
+            {t("lists.itemCount", { count: list.totalItemsCount || 0 })}
           </span>
         </div>
 
@@ -78,7 +47,8 @@ const ListCard = ({ list, onLike, onDelete, showOwnerActions = false }) => {
                 e.preventDefault();
                 onDelete();
               }}
-              title="Liste löschen"
+              title={t("lists.deleteList")}
+              aria-label={t("lists.deleteList")}
             >
               <i className="bi bi-trash"></i>
             </button>
@@ -106,7 +76,7 @@ const ListCard = ({ list, onLike, onDelete, showOwnerActions = false }) => {
           <div className="d-flex align-items-center mb-2">
             <small className="text-muted">
               <i className="bi bi-person me-1"></i>
-              {list.creator?.username || "Unbekannter Nutzer"}
+              {list.creator?.username || t("lists.unknownUser")}
             </small>
           </div>
 
@@ -120,7 +90,7 @@ const ListCard = ({ list, onLike, onDelete, showOwnerActions = false }) => {
               ))}
               {list.tags.length > 3 && (
                 <span className="badge bg-light text-dark">
-                  +{list.tags.length - 3} weitere
+                  {t("lists.moreTags", { count: list.tags.length - 3 })}
                 </span>
               )}
             </div>
@@ -128,7 +98,13 @@ const ListCard = ({ list, onLike, onDelete, showOwnerActions = false }) => {
 
           {/* Bottom row with date, likes, and actions */}
           <div className="d-flex justify-content-between align-items-center">
-            <small className="text-muted">{formatDate(list.updatedAt)}</small>
+            <small className="text-muted">
+              {formatDate(list.updatedAt, {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              })}
+            </small>
 
             <div className="d-flex align-items-center">
               {/* Like button */}
@@ -143,7 +119,11 @@ const ListCard = ({ list, onLike, onDelete, showOwnerActions = false }) => {
                     e.preventDefault();
                     onLike();
                   }}
-                  title={list.likedByCurrentUser ? "Unlike" : "Like"}
+                  title={
+                    list.likedByCurrentUser
+                      ? t("lists.unlike")
+                      : t("lists.like")
+                  }
                 >
                   <i
                     className={`bi bi-heart${
@@ -158,7 +138,8 @@ const ListCard = ({ list, onLike, onDelete, showOwnerActions = false }) => {
               <Link
                 to={`/lists/${list.id}`}
                 className="btn btn-outline-primary btn-sm"
-                title="Liste ansehen"
+                title={t("lists.viewList")}
+                aria-label={t("lists.viewList")}
               >
                 <i className="bi bi-eye"></i>
               </Link>

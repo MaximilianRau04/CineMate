@@ -1,6 +1,8 @@
 import React, { useState } from "react";
+import { useTranslation } from "../../i18n/I18nContext";
 
 const CreateListModal = ({ onClose, onSubmit }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -56,14 +58,14 @@ const CreateListModal = ({ onClose, onSubmit }) => {
     <div
       className="modal show d-block"
       tabIndex="-1"
-      style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+      style={{ backgroundColor: "rgba(8, 4, 10, 0.75)" }}
     >
       <div className="modal-dialog modal-lg">
         <div className="modal-content">
           <div className="modal-header">
             <h5 className="modal-title">
               <i className="bi bi-plus-circle me-2"></i>
-              Neue Liste erstellen
+              {t("lists.newList")}
             </h5>
             <button
               type="button"
@@ -78,7 +80,7 @@ const CreateListModal = ({ onClose, onSubmit }) => {
               {/* Title */}
               <div className="mb-3">
                 <label htmlFor="title" className="form-label">
-                  Titel <span className="text-danger">*</span>
+                  {t("lists.form.title")} <span className="text-danger">*</span>
                 </label>
                 <input
                   type="text"
@@ -89,17 +91,20 @@ const CreateListModal = ({ onClose, onSubmit }) => {
                   onChange={handleChange}
                   required
                   maxLength="100"
-                  placeholder="z.B. Meine Top 10 Sci-Fi Filme"
+                  placeholder={t("lists.form.titlePlaceholder")}
                 />
                 <div className="form-text">
-                  {formData.title.length}/100 Zeichen
+                  {t("lists.form.chars", {
+                    count: formData.title.length,
+                    max: 100,
+                  })}
                 </div>
               </div>
 
               {/* Description */}
               <div className="mb-3">
                 <label htmlFor="description" className="form-label">
-                  Beschreibung
+                  {t("lists.form.description")}
                 </label>
                 <textarea
                   className="form-control"
@@ -109,10 +114,13 @@ const CreateListModal = ({ onClose, onSubmit }) => {
                   value={formData.description}
                   onChange={handleChange}
                   maxLength="500"
-                  placeholder="Beschreibe deine Liste..."
+                  placeholder={t("lists.form.descriptionPlaceholder")}
                 ></textarea>
                 <div className="form-text">
-                  {formData.description.length}/500 Zeichen
+                  {t("lists.form.chars", {
+                    count: formData.description.length,
+                    max: 500,
+                  })}
                 </div>
               </div>
 
@@ -129,20 +137,20 @@ const CreateListModal = ({ onClose, onSubmit }) => {
                   />
                   <label className="form-check-label" htmlFor="isPublic">
                     <i className="bi bi-globe me-1"></i>
-                    Öffentliche Liste
+                    {t("lists.form.public")}
                   </label>
                 </div>
                 <div className="form-text">
                   {formData.isPublic
-                    ? "Andere Nutzer können deine Liste sehen und liken."
-                    : "Nur du kannst diese Liste sehen."}
+                    ? t("lists.form.publicHint")
+                    : t("lists.form.privateHint")}
                 </div>
               </div>
 
               {/* Tags */}
               <div className="mb-3">
                 <label htmlFor="tags" className="form-label">
-                  Tags
+                  {t("lists.form.tags")}
                 </label>
                 <input
                   type="text"
@@ -151,18 +159,15 @@ const CreateListModal = ({ onClose, onSubmit }) => {
                   name="tags"
                   value={formData.tags}
                   onChange={handleChange}
-                  placeholder="Action, Komödie, 2024, ..."
+                  placeholder={t("lists.form.tagsPlaceholder")}
                 />
-                <div className="form-text">
-                  Trenne mehrere Tags mit Kommas. Diese helfen anderen, deine
-                  Liste zu finden.
-                </div>
+                <div className="form-text">{t("lists.form.tagsHintLong")}</div>
               </div>
 
               {/* Cover Image URL */}
               <div className="mb-3">
                 <label htmlFor="coverImageUrl" className="form-label">
-                  Cover-Bild URL (optional)
+                  {t("lists.form.coverUrl")}
                 </label>
                 <input
                   type="url"
@@ -173,19 +178,19 @@ const CreateListModal = ({ onClose, onSubmit }) => {
                   onChange={handleChange}
                   placeholder="https://example.com/image.jpg"
                 />
-                <div className="form-text">
-                  Wenn leer, wird das erste Poster aus der Liste verwendet.
-                </div>
+                <div className="form-text">{t("lists.form.coverHint")}</div>
               </div>
 
               {/* Preview */}
               {formData.coverImageUrl && (
                 <div className="mb-3">
-                  <label className="form-label">Vorschau:</label>
+                  <label className="form-label">
+                    {t("lists.form.preview")}
+                  </label>
                   <div className="text-center">
                     <img
                       src={formData.coverImageUrl}
-                      alt="Cover Preview"
+                      alt=""
                       className="img-thumbnail"
                       style={{ maxHeight: "200px" }}
                       onError={(e) => {
@@ -204,7 +209,7 @@ const CreateListModal = ({ onClose, onSubmit }) => {
                 onClick={onClose}
                 disabled={loading}
               >
-                Abbrechen
+                {t("common.cancel")}
               </button>
               <button
                 type="submit"
@@ -217,12 +222,12 @@ const CreateListModal = ({ onClose, onSubmit }) => {
                       className="spinner-border spinner-border-sm me-2"
                       role="status"
                     ></span>
-                    Erstelle...
+                    {t("lists.form.creating")}
                   </>
                 ) : (
                   <>
                     <i className="bi bi-check-circle me-2"></i>
-                    Liste erstellen
+                    {t("lists.form.create")}
                   </>
                 )}
               </button>

@@ -1,9 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { FaTrashAlt, FaFilm, FaInfoCircle } from "react-icons/fa";
+import { FaTrashAlt } from "react-icons/fa";
+import { MediaCard } from "../explore/MediaCard";
+import { LoadingSpinner } from "../explore/FilterPanel";
 import api from "../../utils/api";
+import { useTranslation } from "../../i18n/I18nContext";
 
 const Watchlist = () => {
+  const { t } = useTranslation();
   const [movieWatchlist, setMovieWatchlist] = useState([]);
   const [seriesWatchlist, setSeriesWatchlist] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -52,7 +56,7 @@ const Watchlist = () => {
    * @returns {void}
    */
   const removeMovieFromWatchlist = (movieId) => {
-    if (!window.confirm("Möchtest du diesen Film wirklich entfernen?")) return;
+    if (!window.confirm(t("watchlist.confirmRemoveMovie"))) return;
     api
       .delete(`/users/${userId}/watchlist/movies/${movieId}`)
       .then(() =>
@@ -67,7 +71,7 @@ const Watchlist = () => {
    * @returns {void}
    */
   const removeSeriesFromWatchlist = (seriesId) => {
-    if (!window.confirm("Möchtest du diese Serie wirklich entfernen?")) return;
+    if (!window.confirm(t("watchlist.confirmRemoveSeries"))) return;
     api
       .delete(`/users/${userId}/watchlist/series/${seriesId}`)
       .then(() =>
@@ -77,159 +81,89 @@ const Watchlist = () => {
   };
 
   if (loading) {
-    return (
-      <div className="text-center py-5">
-        <div className="spinner-border text-primary" role="status" />
-        <p className="mt-3 text-muted">Watchlist wird geladen...</p>
-      </div>
-    );
+    return <LoadingSpinner message={t("watchlist.loading")} />;
   }
 
-  if (movieWatchlist.length === 0 && seriesWatchlist.length === 0) {
-    return (
-      <div className="container py-5">
-        <div className="text-center py-5">
-          <FaFilm size={48} className="text-muted mb-3" />
-          <h5 className="text-muted">Deine Watchlist ist noch leer.</h5>
-          <Link to="/explore" className="btn btn-primary mt-3">
-            Filme &amp; Serien entdecken
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  const MediaCard = ({ item, onRemove, linkPrefix }) => (
-    <div className="col-6 col-md-4 col-lg-3 mb-4">
-      <div className="card h-100 shadow-sm border-0">
-        <div style={{ position: "relative", paddingTop: "100%" }}>
-          <img
-            src={item.posterUrl}
-            alt={item.title}
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-            }}
-            onError={(e) => {
-              e.target.src =
-                "https://via.placeholder.com/300x450?text=No+Image";
-            }}
-          />
-        </div>
-        <div className="card-body d-flex flex-column p-2">
-          <h6
-            className="card-title mb-1 fw-semibold"
-            style={{
-              fontSize: "0.85rem",
-              overflow: "hidden",
-              display: "-webkit-box",
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: "vertical",
-            }}
-          >
-            {item.title}
-          </h6>
-          {item.genre && (
-            <p className="text-muted mb-2" style={{ fontSize: "0.75rem" }}>
-              {item.genre}
-            </p>
-          )}
-          <div className="mt-auto d-flex gap-1">
-            <Link
-              to={`/${linkPrefix}/${item.id}`}
-              className="btn btn-outline-primary btn-sm flex-fill"
-              style={{ fontSize: "0.75rem", padding: "0.25rem 0.4rem" }}
-            >
-              <FaInfoCircle className="me-1" />
-              Details
-            </Link>
-            <button
-              className="btn btn-outline-danger btn-sm"
-              style={{ fontSize: "0.75rem", padding: "0.25rem 0.5rem" }}
-              onClick={onRemove}
-              title="Entfernen"
-            >
-              <FaTrashAlt />
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  const tabs = [
+    { key: "movies", label: t("common.movies"), items: movieWatchlist },
+    { key: "series", label: t("common.seriesPlural"), items: seriesWatchlist },
+  ];
+  const active = tabs.find((tab) => tab.key === activeTab);
+  const isEmpty = movieWatchlist.length === 0 && seriesWatchlist.length === 0;
 
   return (
-    <div className="container py-4">
-      <h2 className="mb-4 text-center fw-bold">⭐ Deine Watchlist</h2>
-
-      {/* Tabs */}
-      <ul className="nav nav-tabs mb-4">
-        <li className="nav-item">
-          <button
-            className={`nav-link ${activeTab === "movies" ? "active" : ""}`}
-            onClick={() => setActiveTab("movies")}
-          >
-            🎬 Filme
-            <span className="badge bg-secondary ms-2">
-              {movieWatchlist.length}
-            </span>
-          </button>
-        </li>
-        <li className="nav-item">
-          <button
-            className={`nav-link ${activeTab === "series" ? "active" : ""}`}
-            onClick={() => setActiveTab("series")}
-          >
-            📺 Serien
-            <span className="badge bg-secondary ms-2">
-              {seriesWatchlist.length}
-            </span>
-          </button>
-        </li>
-      </ul>
-
-      {/* Movies */}
-      {activeTab === "movies" &&
-        (movieWatchlist.length === 0 ? (
-          <div className="text-center py-5 text-muted">
-            <FaFilm size={36} className="mb-3 opacity-50" />
-            <p>Noch keine Filme in deiner Watchlist.</p>
+    <div className="container-xxl cm-page">
+      <header className="cm-page-head">
+        <div>
+          <div className="cm-eyebrow">
+            {t("watchlist.eyebrow", {
+              count: movieWatchlist.length + seriesWatchlist.length,
+            })}
           </div>
-        ) : (
-          <div className="row">
-            {movieWatchlist.map((movie) => (
-              <MediaCard
-                key={movie.id}
-                item={movie}
-                linkPrefix="movies"
-                onRemove={() => removeMovieFromWatchlist(movie.id)}
-              />
+          <h1>{t("watchlist.title")}</h1>
+        </div>
+        {!isEmpty && (
+          <div className="cm-segment" role="tablist">
+            {tabs.map((tab) => (
+              <button
+                key={tab.key}
+                type="button"
+                role="tab"
+                aria-selected={activeTab === tab.key}
+                className={activeTab === tab.key ? "is-active" : ""}
+                onClick={() => setActiveTab(tab.key)}
+              >
+                {tab.label} · {tab.items.length}
+              </button>
             ))}
           </div>
-        ))}
+        )}
+      </header>
 
-      {/* Series */}
-      {activeTab === "series" &&
-        (seriesWatchlist.length === 0 ? (
-          <div className="text-center py-5 text-muted">
-            <FaFilm size={36} className="mb-3 opacity-50" />
-            <p>Noch keine Serien in deiner Watchlist.</p>
-          </div>
-        ) : (
-          <div className="row">
-            {seriesWatchlist.map((serie) => (
+      {isEmpty ? (
+        <div className="cm-empty">
+          <h3>{t("watchlist.empty")}</h3>
+          <p>{t("watchlist.emptyHint")}</p>
+          <Link to="/explore" className="btn btn-primary">
+            {t("watchlist.discover")}
+          </Link>
+        </div>
+      ) : active.items.length === 0 ? (
+        <div className="cm-empty">
+          <p className="mb-0">
+            {activeTab === "movies"
+              ? t("watchlist.noMovies")
+              : t("watchlist.noSeries")}
+          </p>
+        </div>
+      ) : (
+        <div className="cm-poster-grid">
+          {active.items.map((item) => (
+            <div key={item.id} className="position-relative">
               <MediaCard
-                key={serie.id}
-                item={serie}
-                linkPrefix="series"
-                onRemove={() => removeSeriesFromWatchlist(serie.id)}
+                item={{
+                  ...item,
+                  genreArray: item.genre ? item.genre.split(/,\s*/) : [],
+                }}
+                type={activeTab === "movies" ? "movie" : "series"}
               />
-            ))}
-          </div>
-        ))}
+              <button
+                type="button"
+                className="cm-card-remove"
+                onClick={() =>
+                  activeTab === "movies"
+                    ? removeMovieFromWatchlist(item.id)
+                    : removeSeriesFromWatchlist(item.id)
+                }
+                title={t("watchlist.remove")}
+                aria-label={t("watchlist.remove")}
+              >
+                <FaTrashAlt size={12} />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

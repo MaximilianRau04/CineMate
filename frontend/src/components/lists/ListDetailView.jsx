@@ -6,12 +6,14 @@ import MediaCard from "../profile/MediaCard";
 import AddContentModal from "./AddContentModal";
 import EditListModal from "./EditListModal";
 import api from "../../utils/api";
+import { useTranslation } from "../../i18n/I18nContext";
 
 const ListDetailView = () => {
   const { listId } = useParams();
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
   const { success, error: showError } = useToast();
+  const { t, formatDateTime } = useTranslation();
 
   const [list, setList] = useState(null);
   const [comments, setComments] = useState([]);
@@ -35,14 +37,14 @@ const ListDetailView = () => {
       setList(data);
     } catch (error) {
       if (error.response?.status === 404) {
-        showError("Liste nicht gefunden");
+        showError(t("lists.notFound"));
         navigate("/lists");
       } else if (error.response?.status === 403) {
-        showError("Du hast keine Berechtigung, diese Liste zu sehen");
+        showError(t("lists.noPermission"));
         navigate("/lists");
       } else {
         console.error("Error loading list:", error);
-        showError("Fehler beim Laden der Liste");
+        showError(t("lists.loadError"));
       }
     } finally {
       setLoading(false);
@@ -76,7 +78,7 @@ const ListDetailView = () => {
       setList(data);
     } catch (error) {
       console.error("Error liking list:", error);
-      showError("Fehler beim Liken der Liste");
+      showError(t("lists.likeError"));
     }
   };
 
@@ -95,10 +97,10 @@ const ListDetailView = () => {
       });
       setComments((prev) => [data, ...prev]);
       setNewComment("");
-      success("Kommentar hinzugefügt!");
+      success(t("lists.commentAdded"));
     } catch (error) {
       console.error("Error adding comment:", error);
-      showError("Fehler beim Hinzufügen des Kommentars");
+      showError(t("lists.commentAddError"));
     }
   };
 
@@ -108,15 +110,15 @@ const ListDetailView = () => {
    * @returns {Promise<void>}
    */
   const handleDeleteComment = async (commentId) => {
-    if (!window.confirm("Kommentar wirklich löschen?")) return;
+    if (!window.confirm(t("lists.confirmDeleteComment"))) return;
 
     try {
       await api.delete(`/lists/comments/${commentId}`);
       setComments((prev) => prev.filter((c) => c.id !== commentId));
-      success("Kommentar gelöscht!");
+      success(t("lists.commentDeleted"));
     } catch (error) {
       console.error("Error deleting comment:", error);
-      showError("Fehler beim Löschen des Kommentars");
+      showError(t("lists.commentDeleteError"));
     }
   };
 
@@ -125,20 +127,15 @@ const ListDetailView = () => {
    * @returns {JSX.Element}
    */
   const handleDeleteList = async () => {
-    if (
-      !window.confirm(
-        "Liste wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
-      )
-    )
-      return;
+    if (!window.confirm(t("lists.confirmDeleteIrreversible"))) return;
 
     try {
       await api.delete(`/lists/${listId}`);
-      success("Liste gelöscht!");
+      success(t("lists.deleted"));
       navigate("/lists");
     } catch (error) {
       console.error("Error deleting list:", error);
-      showError("Fehler beim Löschen der Liste");
+      showError(t("lists.deleteError"));
     }
   };
 
@@ -149,17 +146,17 @@ const ListDetailView = () => {
    * @returns {Promise<void>}
    */
   const handleRemoveContent = async (contentId, contentType) => {
-    if (!window.confirm("Inhalt aus Liste entfernen?")) return;
+    if (!window.confirm(t("lists.confirmRemoveContent"))) return;
 
     try {
       const { data } = await api.delete(
         `/lists/${listId}/${contentType}/${contentId}`,
       );
       setList(data);
-      success("Inhalt entfernt!");
+      success(t("lists.contentRemoved"));
     } catch (error) {
       console.error("Error removing content:", error);
-      showError("Fehler beim Entfernen des Inhalts");
+      showError(t("lists.contentRemoveError"));
     }
   };
 
@@ -175,11 +172,11 @@ const ListDetailView = () => {
         `/lists/${listId}/${contentType}/${contentId}`,
       );
       setList(data);
-      success("Inhalt hinzugefügt!");
+      success(t("lists.contentAdded"));
       setShowAddContentModal(false);
     } catch (error) {
       console.error("Error adding content:", error);
-      showError("Fehler beim Hinzufügen des Inhalts");
+      showError(t("lists.contentAddError"));
     }
   };
 
@@ -192,50 +189,40 @@ const ListDetailView = () => {
     try {
       const { data } = await api.put(`/lists/${listId}`, updatedData);
       setList(data);
-      success("Liste aktualisiert!");
+      success(t("lists.updated"));
       setShowEditModal(false);
     } catch (error) {
       console.error("Error updating list:", error);
-      showError("Fehler beim Aktualisieren der Liste");
+      showError(t("lists.updateError"));
     }
   };
 
-  /**
-   * Formats a date string into a more readable format.
-   * @param {*} dateString - The date string to format.
-   * @returns {string} - The formatted date string.
-   */
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString("de-DE", {
+  const formatDate = (dateString) =>
+    formatDateTime(dateString, {
       year: "numeric",
       month: "long",
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
     });
-  };
 
   const isOwner = list && user && list.creator?.id === user.id;
 
   if (loading) {
     return (
-      <div className="container py-5">
-        <div className="text-center">
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-        </div>
+      <div className="cm-spinner">
+        <div className="cm-reel" />
       </div>
     );
   }
 
   if (!list) {
     return (
-      <div className="container py-5">
-        <div className="text-center">
-          <h3>Liste nicht gefunden</h3>
+      <div className="container cm-page">
+        <div className="cm-empty">
+          <h3>{t("lists.notFound")}</h3>
           <Link to="/lists" className="btn btn-primary">
-            Zurück zu den Listen
+            {t("lists.backToLists")}
           </Link>
         </div>
       </div>
@@ -243,22 +230,11 @@ const ListDetailView = () => {
   }
 
   return (
-    <div className="container py-4">
-      {/* Header */}
-      <div className="row mb-4">
-        <div className="col">
-          <nav aria-label="breadcrumb">
-            <ol className="breadcrumb">
-              <li className="breadcrumb-item">
-                <Link to="/lists" className="text-decoration-none">
-                  Listen
-                </Link>
-              </li>
-              <li className="breadcrumb-item active">{list.title}</li>
-            </ol>
-          </nav>
-        </div>
-      </div>
+    <div className="container-xxl cm-page list-detail-container">
+      <Link to="/lists" className="cm-back-link">
+        <i className="bi bi-arrow-left" />
+        {t("lists.backToLists")}
+      </Link>
 
       {/* List Info */}
       <div className="row mb-4">
@@ -276,8 +252,7 @@ const ListDetailView = () => {
                     objectFit: "cover",
                   }}
                   onError={(e) => {
-                    e.target.src =
-                      "https://via.placeholder.com/120x160?text=Liste";
+                    e.currentTarget.style.visibility = "hidden";
                   }}
                 />
               ) : (
@@ -292,34 +267,34 @@ const ListDetailView = () => {
 
             <div className="flex-grow-1">
               <div className="d-flex align-items-center mb-2">
-                <h1 className="text-white mb-0 me-3">{list.title}</h1>
-                <span
-                  className={`badge ${
-                    list.public ? "bg-success" : "bg-secondary"
-                  }`}
-                >
+                <h1 className="mb-0 me-3">{list.title}</h1>
+                <span className="cm-tag">
                   <i
                     className={`bi bi-${list.public ? "globe" : "lock"} me-1`}
                   ></i>
-                  {list.public ? "Öffentlich" : "Privat"}
+                  {list.public ? t("common.public") : t("common.private")}
                 </span>
               </div>
 
-              {list.description && (
-                <p className="text-light mb-3">{list.description}</p>
-              )}
+              {list.description && <p className="mb-3">{list.description}</p>}
 
-              <div className="d-flex align-items-center text-muted mb-3">
+              <div className="d-flex flex-wrap align-items-center text-muted small mb-3">
                 <i className="bi bi-person me-1"></i>
-                <span className="me-3">von {list.creator?.username}</span>
+                <span className="me-3">
+                  {t("common.by", { name: list.creator?.username })}
+                </span>
                 <i className="bi bi-calendar me-1"></i>
                 <span className="me-3">
-                  Erstellt: {formatDate(list.createdAt)}
+                  {t("lists.createdAt", { date: formatDate(list.createdAt) })}
                 </span>
                 {list.updatedAt !== list.createdAt && (
                   <>
                     <i className="bi bi-pencil me-1"></i>
-                    <span>Aktualisiert: {formatDate(list.updatedAt)}</span>
+                    <span>
+                      {t("lists.updatedAt", {
+                        date: formatDate(list.updatedAt),
+                      })}
+                    </span>
                   </>
                 )}
               </div>
@@ -341,9 +316,9 @@ const ListDetailView = () => {
         <div className="col-md-4">
           <div className="card">
             <div className="card-body text-center">
-              <h5 className="card-title">{list.totalItemsCount}</h5>
+              <div className="cm-big-number">{list.totalItemsCount}</div>
               <p className="card-text text-muted">
-                {list.totalItemsCount === 1 ? "Element" : "Elemente"}
+                {t("lists.itemsLabel", { count: list.totalItemsCount })}
               </p>
 
               {/* Action Buttons */}
@@ -362,7 +337,7 @@ const ListDetailView = () => {
                         list.likedByCurrentUser ? "-fill" : ""
                       } me-2`}
                     ></i>
-                    {list.likesCount} {list.likesCount === 1 ? "Like" : "Likes"}
+                    {t("lists.likeCount", { count: list.likesCount })}
                   </button>
                 )}
 
@@ -373,7 +348,7 @@ const ListDetailView = () => {
                       onClick={() => setShowAddContentModal(true)}
                     >
                       <i className="bi bi-plus-circle me-2"></i>
-                      Inhalt hinzufügen
+                      {t("lists.addContent")}
                     </button>
 
                     <button
@@ -381,7 +356,7 @@ const ListDetailView = () => {
                       onClick={() => setShowEditModal(true)}
                     >
                       <i className="bi bi-pencil me-2"></i>
-                      Liste bearbeiten
+                      {t("lists.editList")}
                     </button>
 
                     <button
@@ -389,7 +364,7 @@ const ListDetailView = () => {
                       onClick={handleDeleteList}
                     >
                       <i className="bi bi-trash me-2"></i>
-                      Liste löschen
+                      {t("lists.deleteList")}
                     </button>
                   </>
                 )}
@@ -405,25 +380,24 @@ const ListDetailView = () => {
           {/* Movies */}
           {list.movies && list.movies.length > 0 && (
             <div className="mb-5">
-              <h3 className="text-white mb-3">
-                <i className="bi bi-film me-2"></i>
-                Filme ({list.movies.length})
-              </h3>
+              <div className="cm-section-title mt-0">
+                <h2>{t("common.movies")}</h2>
+                <span className="cm-count">{list.movies.length}</span>
+              </div>
               <div className="row">
                 {list.movies.map((movie) => (
-                  <div
-                    className="col-md-6 col-lg-4 col-xl-3 mb-3"
-                    key={movie.id}
-                  >
+                  <div className="col-6 col-md-4 col-xl-3 mb-4" key={movie.id}>
                     <div className="position-relative">
                       <MediaCard media={movie} type="movie" />
                       {isOwner && (
                         <button
-                          className="btn btn-danger btn-sm position-absolute top-0 end-0 m-2"
+                          className="btn btn-danger btn-sm position-absolute top-0 start-0 m-2"
+                          style={{ zIndex: 11 }}
                           onClick={() =>
                             handleRemoveContent(movie.id, "movies")
                           }
-                          title="Aus Liste entfernen"
+                          title={t("lists.removeFromList")}
+                          aria-label={t("lists.removeFromList")}
                         >
                           <i className="bi bi-x"></i>
                         </button>
@@ -438,25 +412,24 @@ const ListDetailView = () => {
           {/* Series */}
           {list.series && list.series.length > 0 && (
             <div className="mb-5">
-              <h3 className="text-white mb-3">
-                <i className="bi bi-tv me-2"></i>
-                Serien ({list.series.length})
-              </h3>
+              <div className="cm-section-title mt-0">
+                <h2>{t("common.seriesPlural")}</h2>
+                <span className="cm-count">{list.series.length}</span>
+              </div>
               <div className="row">
                 {list.series.map((series) => (
-                  <div
-                    className="col-md-6 col-lg-4 col-xl-3 mb-3"
-                    key={series.id}
-                  >
+                  <div className="col-6 col-md-4 col-xl-3 mb-4" key={series.id}>
                     <div className="position-relative">
                       <MediaCard media={series} type="series" />
                       {isOwner && (
                         <button
-                          className="btn btn-danger btn-sm position-absolute top-0 end-0 m-2"
+                          className="btn btn-danger btn-sm position-absolute top-0 start-0 m-2"
+                          style={{ zIndex: 11 }}
                           onClick={() =>
                             handleRemoveContent(series.id, "series")
                           }
-                          title="Aus Liste entfernen"
+                          title={t("lists.removeFromList")}
+                          aria-label={t("lists.removeFromList")}
                         >
                           <i className="bi bi-x"></i>
                         </button>
@@ -471,19 +444,15 @@ const ListDetailView = () => {
           {/* Empty state */}
           {(!list.movies || list.movies.length === 0) &&
             (!list.series || list.series.length === 0) && (
-              <div className="text-center py-5">
-                <i
-                  className="bi bi-inbox"
-                  style={{ fontSize: "4rem", opacity: 0.3 }}
-                ></i>
-                <h4 className="text-muted mt-3">Diese Liste ist noch leer</h4>
+              <div className="cm-empty">
+                <h3>{t("lists.emptyList")}</h3>
                 {isOwner && (
                   <button
                     className="btn btn-primary mt-3"
                     onClick={() => setShowAddContentModal(true)}
                   >
                     <i className="bi bi-plus-circle me-2"></i>
-                    Ersten Inhalt hinzufügen
+                    {t("lists.addFirstContent")}
                   </button>
                 )}
               </div>
@@ -496,7 +465,7 @@ const ListDetailView = () => {
             <div className="card-header">
               <h5 className="mb-0">
                 <i className="bi bi-chat-dots me-2"></i>
-                Kommentare ({comments.length})
+                {t("lists.comments")} ({comments.length})
               </h5>
             </div>
             <div className="card-body">
@@ -507,7 +476,7 @@ const ListDetailView = () => {
                     <textarea
                       className="form-control form-control-sm"
                       rows="3"
-                      placeholder="Schreibe einen Kommentar..."
+                      placeholder={t("lists.commentPlaceholder")}
                       value={newComment}
                       onChange={(e) => setNewComment(e.target.value)}
                       maxLength="1000"
@@ -519,7 +488,7 @@ const ListDetailView = () => {
                     disabled={!newComment.trim()}
                   >
                     <i className="bi bi-send me-1"></i>
-                    Kommentieren
+                    {t("lists.postComment")}
                   </button>
                 </form>
               )}
@@ -553,7 +522,8 @@ const ListDetailView = () => {
                           <button
                             className="btn btn-outline-danger btn-sm"
                             onClick={() => handleDeleteComment(comment.id)}
-                            title="Kommentar löschen"
+                            title={t("lists.deleteComment")}
+                            aria-label={t("lists.deleteComment")}
                           >
                             <i className="bi bi-trash"></i>
                           </button>
@@ -565,7 +535,7 @@ const ListDetailView = () => {
                 </div>
               ) : (
                 <p className="text-muted text-center py-3">
-                  Noch keine Kommentare vorhanden.
+                  {t("lists.noComments")}
                 </p>
               )}
             </div>

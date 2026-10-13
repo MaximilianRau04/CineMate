@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../../utils/AuthContext";
 import { useToast } from "../toasts";
 import api from "../../utils/api";
+import { Link } from "react-router-dom";
+import { useTranslation } from "../../i18n/I18nContext";
 
 const AddToListModal = ({ mediaId, mediaType, onClose }) => {
   const [userLists, setUserLists] = useState([]);
@@ -10,6 +12,7 @@ const AddToListModal = ({ mediaId, mediaType, onClose }) => {
 
   const { isAuthenticated } = useAuth();
   const { success, error: showError } = useToast();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -26,7 +29,7 @@ const AddToListModal = ({ mediaId, mediaType, onClose }) => {
       setUserLists(data);
     } catch (error) {
       console.error("Error loading user lists:", error);
-      showError("Fehler beim Laden der Listen");
+      showError(t("lists.loadMineError"));
     } finally {
       setLoading(false);
     }
@@ -41,7 +44,7 @@ const AddToListModal = ({ mediaId, mediaType, onClose }) => {
 
     try {
       await api.post(`/lists/${listId}/${mediaType}/${mediaId}`);
-      success("Zu Liste hinzugefügt!");
+      success(t("lists.addedToList"));
       // Update the list to show it now contains this item
       setUserLists((prev) =>
         prev.map((list) => {
@@ -57,10 +60,10 @@ const AddToListModal = ({ mediaId, mediaType, onClose }) => {
       );
     } catch (error) {
       if (error.response?.status === 409) {
-        showError("Element ist bereits in dieser Liste vorhanden");
+        showError(t("lists.alreadyInList"));
       } else {
         console.error("Error adding to list:", error);
-        showError("Fehler beim Hinzufügen zur Liste");
+        showError(t("lists.addToListError"));
       }
     } finally {
       setAdding((prev) => ({ ...prev, [listId]: false }));
@@ -88,7 +91,7 @@ const AddToListModal = ({ mediaId, mediaType, onClose }) => {
           <div className="modal-header">
             <h5 className="modal-title">
               <i className="bi bi-plus-circle me-2"></i>
-              Zu Liste hinzufügen
+              {t("details.addToList")}
             </h5>
             <button
               type="button"
@@ -101,7 +104,7 @@ const AddToListModal = ({ mediaId, mediaType, onClose }) => {
             {loading ? (
               <div className="text-center py-3">
                 <div className="spinner-border text-primary" role="status">
-                  <span className="visually-hidden">Loading...</span>
+                  <span className="visually-hidden">{t("common.loading")}</span>
                 </div>
               </div>
             ) : userLists.length > 0 ? (
@@ -121,10 +124,9 @@ const AddToListModal = ({ mediaId, mediaType, onClose }) => {
                         <div>
                           <h6 className="mb-0">{list.title}</h6>
                           <small className="text-muted">
-                            {list.totalItemsCount}{" "}
-                            {list.totalItemsCount === 1
-                              ? "Element"
-                              : "Elemente"}
+                            {t("lists.itemCount", {
+                              count: list.totalItemsCount || 0,
+                            })}
                           </small>
                         </div>
                       </div>
@@ -132,9 +134,9 @@ const AddToListModal = ({ mediaId, mediaType, onClose }) => {
 
                     <div>
                       {isInList(list) ? (
-                        <span className="badge bg-success">
+                        <span className="badge bg-success text-dark">
                           <i className="bi bi-check-circle me-1"></i>
-                          Bereits vorhanden
+                          {t("lists.alreadyAdded")}
                         </span>
                       ) : (
                         <button
@@ -148,12 +150,12 @@ const AddToListModal = ({ mediaId, mediaType, onClose }) => {
                                 className="spinner-border spinner-border-sm me-1"
                                 role="status"
                               ></span>
-                              Hinzufügen...
+                              {t("details.adding")}
                             </>
                           ) : (
                             <>
                               <i className="bi bi-plus me-1"></i>
-                              Hinzufügen
+                              {t("common.add")}
                             </>
                           )}
                         </button>
@@ -168,14 +170,12 @@ const AddToListModal = ({ mediaId, mediaType, onClose }) => {
                   className="bi bi-list-ul"
                   style={{ fontSize: "3rem", opacity: 0.3 }}
                 ></i>
-                <h5 className="mt-3">Keine Listen vorhanden</h5>
-                <p className="text-muted">
-                  Du hast noch keine Listen erstellt.
-                </p>
-                <a href="/lists" className="btn btn-primary">
+                <h5 className="mt-3">{t("lists.noOwnLists")}</h5>
+                <p className="text-muted">{t("lists.noOwnListsHint")}</p>
+                <Link to="/lists" className="btn btn-primary" onClick={onClose}>
                   <i className="bi bi-plus-circle me-2"></i>
-                  Erste Liste erstellen
-                </a>
+                  {t("lists.createFirst")}
+                </Link>
               </div>
             )}
           </div>
@@ -186,7 +186,7 @@ const AddToListModal = ({ mediaId, mediaType, onClose }) => {
               className="btn btn-secondary"
               onClick={onClose}
             >
-              Schließen
+              {t("common.close")}
             </button>
           </div>
         </div>
