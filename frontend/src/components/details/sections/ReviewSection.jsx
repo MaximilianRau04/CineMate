@@ -1,61 +1,54 @@
+import { useTranslation } from "../../../i18n/I18nContext";
+
 const ReviewSection = ({ reviews, renderStars, reviewUsers }) => {
+  const { t, formatDate } = useTranslation();
+
   const getUserName = (reviewId) => {
     const user = reviewUsers[reviewId];
     if (user) {
-      return (
-        user.name || user.username || user.displayName || `Benutzer ${reviewId}`
-      );
+      return user.name || user.username || user.displayName || "—";
     }
-    return "Lädt...";
+    return t("common.loading");
   };
 
-  if (reviews && reviews.length > 0) {
-    return (
-      <div className="card mt-4 shadow-sm">
-        <div className="card-header bg-light">
-          <h4 className="mb-0">📢 Nutzerbewertungen ({reviews.length})</h4>
-        </div>
-        <div className="card-body">
+  return (
+    <section className="cm-detail-section">
+      <div className="cm-section-title">
+        <h2>{t("reviews.title")}</h2>
+        <span className="cm-count">{reviews?.length || 0}</span>
+      </div>
+
+      {reviews && reviews.length > 0 ? (
+        <div className="cm-review-grid">
           {reviews.map((review) => (
-            <div key={review.id} className="border rounded p-3 mb-3">
-              <div className="d-flex justify-content-between align-items-center mb-2">
-                <strong>{getUserName(review.id)}</strong>
-                <span className="text-muted" style={{ fontSize: "0.9em" }}>
-                  {review.date
-                    ? new Date(review.date).toLocaleDateString("de-DE", {
-                        day: "2-digit",
-                        month: "2-digit",
-                        year: "numeric",
-                      })
-                    : review.createdAt
-                      ? new Date(review.createdAt).toLocaleDateString("de-DE", {
-                          day: "2-digit",
-                          month: "2-digit",
-                          year: "numeric",
-                        })
-                      : "Unbekanntes Datum"}
+            <article key={review.id} className="cm-review">
+              <header className="d-flex justify-content-between align-items-start gap-2 mb-2">
+                <div className="d-flex align-items-center gap-2">
+                  <span className="cm-avatar">
+                    {String(getUserName(review.id)).slice(0, 2).toUpperCase()}
+                  </span>
+                  <strong>{getUserName(review.id)}</strong>
+                </div>
+                <span className="cm-mono small text-muted">
+                  {formatDate(review.date || review.createdAt)}
+                </span>
+              </header>
+              <div className="d-flex align-items-center gap-2 mb-2">
+                <span className="cm-stars">{renderStars(review.rating)}</span>
+                <span className="cm-mono small text-primary">
+                  {review.rating}/5
                 </span>
               </div>
-              <div className="mb-2">
-                <div className="d-flex align-items-center">
-                  {renderStars(review.rating)}
-                  <span className="ms-2">({review.rating}/5)</span>
-                </div>
-              </div>
               {review.comment && <p className="mb-0">{review.comment}</p>}
-            </div>
+            </article>
           ))}
         </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="card mt-4 shadow-sm">
-      <div className="card-body text-center py-4">
-        <p className="text-muted mb-0">Noch keine Bewertungen vorhanden...</p>
-      </div>
-    </div>
+      ) : (
+        <div className="cm-empty py-4">
+          <p className="mb-0">{t("reviews.empty")}</p>
+        </div>
+      )}
+    </section>
   );
 };
 

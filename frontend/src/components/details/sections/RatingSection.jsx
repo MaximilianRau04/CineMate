@@ -1,5 +1,6 @@
-import React, { useState } from "react";
-import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
+import React from "react";
+import StarInput from "../../common/StarInput";
+import { useTranslation } from "../../../i18n/I18nContext";
 
 const RatingSection = ({
   userId,
@@ -15,120 +16,68 @@ const RatingSection = ({
   onDelete,
   renderStars,
 }) => {
-  const [hover, setHover] = useState(null);
-
-  // renderStars is a function that can be passed to customize star rendering
-  const displayStars =
-    renderStars ||
-    ((value) => (
-      <span>
-        {[1, 2, 3, 4, 5].map((star, i) => {
-          if (value >= star) return <FaStar key={i} color="#ffc107" />;
-          else if (value >= star - 0.5)
-            return <FaStarHalfAlt key={i} color="#ffc107" />;
-          else return <FaRegStar key={i} color="#e4e5e9" />;
-        })}
-      </span>
-    ));
+  const { t } = useTranslation();
 
   if (!userId) return null;
 
   // If the user has already reviewed, show their review details
   if (reviewed) {
     return (
-      <div className="alert alert-info mt-4" style={{ maxWidth: "33%" }}>
-        <h5>⭐ Deine bisherige Bewertung</h5>
-        <p>
-          Bewertung: {displayStars(rating)} ({rating}/5)
-          {comment && (
-            <>
-              <br />
-              Kommentar: {comment}
-            </>
-          )}
-        </p>
-        <div className="d-flex gap-2 mt-3">
+      <div className="cm-panel cm-my-review">
+        <div className="cm-eyebrow mb-2">{t("reviews.yourReview")}</div>
+        <div className="d-flex align-items-center gap-2 mb-2">
+          <span className="cm-stars">{renderStars(rating)}</span>
+          <span className="cm-mono text-primary">{rating}/5</span>
+        </div>
+        {comment && <p className="mb-3">“{comment}”</p>}
+        <div className="d-flex gap-2">
           <button className="btn btn-sm btn-outline-primary" onClick={onEdit}>
-            ✏️ Bearbeiten
+            <i className="bi bi-pencil me-1" />
+            {t("common.edit")}
           </button>
           <button className="btn btn-sm btn-outline-danger" onClick={onDelete}>
-            ❌ Löschen
+            <i className="bi bi-trash me-1" />
+            {t("common.delete")}
           </button>
         </div>
       </div>
     );
   }
 
-  // If the user hasn't reviewed yet, show the rating section
   return (
-    <div className="mt-4">
-      <h5 className="card-title mb-1 text-white">⭐ Deine Bewertung</h5>
-      <div className="d-flex mb-3">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <span
-            key={star}
-            className="position-relative"
-            style={{ fontSize: "32px", cursor: "pointer" }}
-          >
-            <span
-              style={{
-                position: "absolute",
-                width: "50%",
-                height: "100%",
-                left: 0,
-              }}
-              onClick={() => onRatingChange(star - 0.5)}
-              onMouseEnter={() => setHover(star - 0.5)}
-              onMouseLeave={() => setHover(null)}
-            />
-            <span
-              style={{
-                position: "absolute",
-                width: "50%",
-                height: "100%",
-                right: 0,
-              }}
-              onClick={() => onRatingChange(star)}
-              onMouseEnter={() => setHover(star)}
-              onMouseLeave={() => setHover(null)}
-            />
-            {(hover || rating) >= star ? (
-              <FaStar color="#ffc107" />
-            ) : (hover || rating) >= star - 0.5 ? (
-              <FaStarHalfAlt color="#ffc107" />
-            ) : (
-              <FaRegStar color="#e4e5e9" />
-            )}
-          </span>
-        ))}
-      </div>
+    <div className="cm-panel">
+      <h2 className="cm-panel-title">{t("reviews.rateTitle")}</h2>
+      <StarInput
+        value={rating}
+        onChange={onRatingChange}
+        label={t("reviews.rating")}
+      />
 
-      <div className="mb-3" style={{ maxWidth: "500px" }}>
-        <label htmlFor="comment" className="form-label text-white">
-          Kommentar (optional):
+      <div className="mt-3 mb-3" style={{ maxWidth: "620px" }}>
+        <label htmlFor="comment" className="form-label">
+          {t("reviews.commentOptional")}
         </label>
         <textarea
           id="comment"
-          className="form-control border border-primary"
+          className="form-control"
           rows="3"
+          placeholder={t("reviews.commentPlaceholder")}
           value={comment}
           onChange={(e) => onCommentChange(e.target.value)}
         />
       </div>
 
-      <div className="d-flex gap-2 mb-3">
-        <button
-          className="btn btn-primary"
-          onClick={onSubmitReview}
-          disabled={submitting || rating === 0 || submitSuccess}
-        >
-          {submitting
-            ? "Wird gespeichert..."
-            : submitSuccess
-              ? "Bewertung gespeichert!"
-              : "Bewertung abgeben"}
-        </button>
-      </div>
+      <button
+        className="btn btn-primary"
+        onClick={onSubmitReview}
+        disabled={submitting || rating === 0 || submitSuccess}
+      >
+        {submitting
+          ? t("common.saving")
+          : submitSuccess
+            ? t("reviews.saved")
+            : t("reviews.submit")}
+      </button>
     </div>
   );
 };
