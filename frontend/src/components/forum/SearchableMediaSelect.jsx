@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import "./css/SearchableMediaSelect.css";
 import api from "../../utils/api";
+import { useTranslation } from "../../i18n/I18nContext";
 
 const SearchableMediaSelect = ({
   type,
@@ -9,6 +10,7 @@ const SearchableMediaSelect = ({
   placeholder,
   disabled,
 }) => {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [options, setOptions] = useState([]);
@@ -162,7 +164,7 @@ const SearchableMediaSelect = ({
    * @returns {string} - The title of the media item
    */
   const getMediaTitle = (media) => {
-    return media.title || media.name || "Unbekannt";
+    return media.title || media.name || t("common.unknown");
   };
 
   /**
@@ -204,7 +206,8 @@ const SearchableMediaSelect = ({
               type="button"
               className="clear-button"
               onClick={handleClear}
-              title="Auswahl entfernen"
+              title={t("forum.select.clear")}
+              aria-label={t("forum.select.clear")}
               disabled={disabled}
             >
               ✕
@@ -214,7 +217,7 @@ const SearchableMediaSelect = ({
           <div className="search-input-container">
             <input
               type="text"
-              placeholder={disabled ? "Deaktiviert" : placeholder}
+              placeholder={disabled ? t("forum.select.disabled") : placeholder}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onFocus={handleInputClick}
@@ -237,14 +240,16 @@ const SearchableMediaSelect = ({
           {loading ? (
             <div className="loading-item">
               <div className="mini-spinner"></div>
-              Suche läuft...
+              {t("forum.select.searching")}
             </div>
           ) : options.length > 0 ? (
             <div className="options-list">
               <div className="options-header">
                 {searchTerm
-                  ? `Suchergebnisse für "${searchTerm}"`
-                  : `Alle verfügbaren ${type === "movie" ? "Filme" : "Serien"}`}
+                  ? t("forum.select.resultsFor", { term: searchTerm })
+                  : type === "movie"
+                    ? t("forum.select.allMovies")
+                    : t("forum.select.allSeries")}
               </div>
               {options.map((media) => (
                 <div
@@ -277,14 +282,17 @@ const SearchableMediaSelect = ({
             </div>
           ) : searchTerm.length >= 2 ? (
             <div className="no-results">
-              Keine {type === "movie" ? "Filme" : "Serien"} gefunden für "
-              {searchTerm}"
+              {type === "movie"
+                ? t("forum.select.noMoviesFor", { term: searchTerm })
+                : t("forum.select.noSeriesFor", { term: searchTerm })}
             </div>
           ) : (
             <div className="search-hint">
               {searchTerm.length < 2
-                ? `Mindestens 2 Zeichen eingeben zum Suchen`
-                : `Keine ${type === "movie" ? "Filme" : "Serien"} verfügbar`}
+                ? t("forum.select.minChars")
+                : type === "movie"
+                  ? t("forum.select.noMovies")
+                  : t("forum.select.noSeries")}
             </div>
           )}
         </div>

@@ -4,6 +4,8 @@ import { useToast } from "../toasts";
 import "./css/ForumHome.css";
 import api from "../../utils/api";
 import { useAuth } from "../../utils/AuthContext";
+import { LoadingSpinner } from "../explore/FilterPanel";
+import { useTranslation } from "../../i18n/I18nContext";
 
 const ForumHome = () => {
   const { user: currentUser, isAuthenticated } = useAuth();
@@ -22,6 +24,7 @@ const ForumHome = () => {
 
   const navigate = useNavigate();
   const { success, error: showError } = useToast();
+  const { t, has, formatRelative } = useTranslation();
 
   /**
    * Fetches media information for a post
@@ -70,7 +73,7 @@ const ForumHome = () => {
       setCategories(data);
     } catch (error) {
       console.error("Error fetching categories:", error);
-      showError("Kategorien konnten nicht geladen werden");
+      showError(t("forum.loadCategoriesError"));
     }
   };
 
@@ -85,7 +88,7 @@ const ForumHome = () => {
       setPinnedPosts(data);
     } catch (error) {
       console.error("Error fetching pinned posts:", error);
-      showError("Angepinnte Beiträge konnten nicht geladen werden");
+      showError(t("forum.loadPinnedError"));
     }
   };
 
@@ -114,7 +117,7 @@ const ForumHome = () => {
       setLoading(false);
     } catch (error) {
       console.error("Error fetching posts:", error);
-      setError("Fehler beim Laden der Beiträge");
+      setError(t("forum.loadPostsError"));
       setLoading(false);
     }
   }, [currentPage, selectedCategory, sortBy, selectedMediaType]);
@@ -172,46 +175,22 @@ const ForumHome = () => {
       setLoading(false);
     } catch (error) {
       console.error("Error searching posts:", error);
-      setError("Fehler bei der Suche");
+      setError(t("forum.searchError"));
       setLoading(false);
     }
   };
 
-  /**
-   * Formats date string
-   * @param {string} dateString - The date string to format
-   * @returns {string} - Formatted date string
-   */
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffTime = Math.abs(now - date);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    if (diffDays === 1) return "Heute";
-    if (diffDays === 2) return "Gestern";
-    if (diffDays <= 7) return `vor ${diffDays - 1} Tagen`;
-
-    return date.toLocaleDateString("de-DE");
-  };
+  const formatDate = (dateString) => formatRelative(dateString);
 
   /**
    * Returns category display name
    * @param {string} category - The category key
    * @returns {string} - The display name for the category
    */
-  const getCategoryDisplayName = (category) => {
-    const categoryMap = {
-      GENERAL: "Allgemein",
-      MOVIE_DISCUSSION: "Filme",
-      SERIES_DISCUSSION: "Serien",
-      RECOMMENDATIONS: "Empfehlungen",
-      REVIEWS: "Bewertungen",
-      NEWS: "News",
-      OFF_TOPIC: "Off-Topic",
-    };
-    return categoryMap[category] || category;
-  };
+  const getCategoryDisplayName = (category) =>
+    has(`forum.categories.${category}`)
+      ? t(`forum.categories.${category}`)
+      : category;
 
   /**
    * Renders media badge for a post
@@ -228,22 +207,18 @@ const ForumHome = () => {
       return (
         <span
           className="media-badge movie-badge"
-          title={
-            mediaInfo ? `Film: ${mediaInfo.data.title}` : "Verknüpfter Film"
-          }
+          title={mediaInfo ? mediaInfo.data.title : t("forum.linkedMovie")}
         >
-          🎬 {mediaInfo ? mediaInfo.data.title : "Film"}
+          🎬 {mediaInfo ? mediaInfo.data.title : t("common.movie")}
         </span>
       );
     } else if (post.seriesId) {
       return (
         <span
           className="media-badge series-badge"
-          title={
-            mediaInfo ? `Serie: ${mediaInfo.data.title}` : "Verknüpfte Serie"
-          }
+          title={mediaInfo ? mediaInfo.data.title : t("forum.linkedSeries")}
         >
-          📺 {mediaInfo ? mediaInfo.data.title : "Serie"}
+          📺 {mediaInfo ? mediaInfo.data.title : t("common.series")}
         </span>
       );
     }
@@ -281,7 +256,7 @@ const ForumHome = () => {
   const handleDeletePost = async (postId, e) => {
     e.stopPropagation();
 
-    if (!window.confirm("Möchten Sie diesen Beitrag wirklich löschen?")) {
+    if (!window.confirm(t("forum.confirmDeletePost"))) {
       return;
     }
 
@@ -296,31 +271,31 @@ const ForumHome = () => {
       setPinnedPosts((prevPinned) =>
         prevPinned.filter((post) => post.id !== postId),
       );
-      success("Beitrag erfolgreich gelöscht!");
+      success(t("forum.postDeleted"));
     } catch (error) {
       console.error("Error deleting post:", error);
-      showError("Fehler beim Löschen des Beitrags");
+      showError(t("forum.deletePostError"));
     }
   };
 
   if (loading && posts.length === 0) {
     return (
-      <div className="forum-home">
-        <div className="loading-container">
-          <div className="loading-spinner"></div>
-          <p>Lädt...</p>
-        </div>
+      <div className="forum-home container-xxl cm-page">
+        <LoadingSpinner message={t("forum.loading")} />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="forum-home">
+      <div className="forum-home container-xxl cm-page">
         <div className="error-container">
           <p>{error}</p>
-          <button onClick={() => window.location.reload()}>
-            Erneut versuchen
+          <button
+            className="btn btn-outline-danger"
+            onClick={() => window.location.reload()}
+          >
+            {t("common.retry")}
           </button>
         </div>
       </div>
@@ -328,24 +303,29 @@ const ForumHome = () => {
   }
 
   return (
-    <div className="forum-home">
+    <div className="forum-home container-xxl cm-page">
       {/* Header */}
-      <div className="forum-header">
-        <h1>Forum</h1>
-        <button className="create-btn" onClick={handleCreatePost}>
-          <span>+</span> Neuer Beitrag
+      <header className="cm-page-head">
+        <div>
+          <div className="cm-eyebrow">{t("forum.eyebrow")}</div>
+          <h1>{t("forum.title")}</h1>
+        </div>
+        <button className="btn btn-primary" onClick={handleCreatePost}>
+          <i className="bi bi-plus-lg me-2" />
+          {t("forum.newPost")}
         </button>
-      </div>
+      </header>
 
       {/* Search and Filters */}
       <div className="forum-controls">
         <div className="search-section">
           <input
             type="text"
-            placeholder="Beiträge suchen..."
+            placeholder={t("forum.searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+            aria-label={t("common.search")}
             className="search-input"
           />
         </div>
@@ -356,7 +336,7 @@ const ForumHome = () => {
             onChange={(e) => setSelectedCategory(e.target.value)}
             className="filter-select"
           >
-            <option value="">Alle Kategorien</option>
+            <option value="">{t("forum.allCategories")}</option>
             {categories.map((category) => (
               <option key={category} value={category}>
                 {getCategoryDisplayName(category)}
@@ -369,10 +349,10 @@ const ForumHome = () => {
             onChange={(e) => setSelectedMediaType(e.target.value)}
             className="filter-select"
           >
-            <option value="">Alle Medien</option>
-            <option value="movie">Nur Filme</option>
-            <option value="series">Nur Serien</option>
-            <option value="none">Ohne Medien</option>
+            <option value="">{t("forum.allMedia")}</option>
+            <option value="movie">{t("forum.onlyMovies")}</option>
+            <option value="series">{t("forum.onlySeries")}</option>
+            <option value="none">{t("forum.noMedia")}</option>
           </select>
 
           <select
@@ -380,9 +360,9 @@ const ForumHome = () => {
             onChange={(e) => setSortBy(e.target.value)}
             className="filter-select"
           >
-            <option value="">Neueste</option>
-            <option value="popular">Beliebteste</option>
-            <option value="recent">Aktuelle</option>
+            <option value="">{t("forum.sortNewest")}</option>
+            <option value="popular">{t("forum.sortPopular")}</option>
+            <option value="recent">{t("forum.sortActive")}</option>
           </select>
         </div>
       </div>
@@ -390,7 +370,7 @@ const ForumHome = () => {
       {/* Pinned Posts */}
       {pinnedPosts.length > 0 && (
         <div className="pinned-section">
-          <h2>Wichtige Beiträge</h2>
+          <h2>{t("forum.pinned")}</h2>
           <div className="posts-grid">
             {pinnedPosts.map((post) => (
               <div
@@ -408,7 +388,8 @@ const ForumHome = () => {
                     <button
                       className="delete-post-btn"
                       onClick={(e) => handleDeletePost(post.id, e)}
-                      title="Beitrag löschen"
+                      title={t("forum.deletePost")}
+                      aria-label={t("forum.deletePost")}
                     >
                       🗑️
                     </button>
@@ -431,13 +412,13 @@ const ForumHome = () => {
 
       {/* Regular Posts */}
       <div className="posts-section">
-        <h2>Alle Beiträge</h2>
+        <h2>{t("forum.allPosts")}</h2>
 
         {posts.length === 0 ? (
           <div className="no-posts">
-            <p>Noch keine Beiträge vorhanden.</p>
+            <p>{t("forum.noPosts")}</p>
             <button onClick={handleCreatePost} className="create-first-btn">
-              Ersten Beitrag erstellen
+              {t("forum.createFirst")}
             </button>
           </div>
         ) : (
@@ -457,7 +438,8 @@ const ForumHome = () => {
                     <button
                       className="delete-post-btn"
                       onClick={(e) => handleDeletePost(post.id, e)}
-                      title="Beitrag löschen"
+                      title={t("forum.deletePost")}
+                      aria-label={t("forum.deletePost")}
                     >
                       🗑️
                     </button>
@@ -490,10 +472,10 @@ const ForumHome = () => {
               disabled={currentPage === 0}
               className="page-btn"
             >
-              ← Zurück
+              ← {t("forum.prev")}
             </button>
             <span className="page-info">
-              Seite {currentPage + 1} von {totalPages}
+              {t("forum.pageOf", { page: currentPage + 1, total: totalPages })}
             </span>
             <button
               onClick={() =>
@@ -502,7 +484,7 @@ const ForumHome = () => {
               disabled={currentPage === totalPages - 1}
               className="page-btn"
             >
-              Weiter →
+              {t("forum.next")} →
             </button>
           </div>
         )}

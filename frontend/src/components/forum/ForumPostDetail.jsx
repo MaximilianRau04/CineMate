@@ -4,11 +4,14 @@ import { useToast } from "../toasts";
 import "./css/ForumPostDetail.css";
 import api from "../../utils/api";
 import { useAuth } from "../../utils/AuthContext";
+import { LoadingSpinner } from "../explore/FilterPanel";
+import { useTranslation } from "../../i18n/I18nContext";
 
 const ForumPostDetail = () => {
   const { postId } = useParams();
   const navigate = useNavigate();
   const { success, error: showError } = useToast();
+  const { t, has, formatRelative } = useTranslation();
   const { user: currentUser } = useAuth();
   const [post, setPost] = useState(null);
   const [replies, setReplies] = useState([]);
@@ -52,7 +55,7 @@ const ForumPostDetail = () => {
       setPost(data);
     } catch (error) {
       console.error("Error fetching post:", error);
-      setError("Beitrag konnte nicht geladen werden");
+      setError(t("forum.loadPostError"));
     } finally {
       setLoading(false);
     }
@@ -72,7 +75,7 @@ const ForumPostDetail = () => {
       setTotalPages(data.totalPages);
     } catch (error) {
       console.error("Error fetching replies:", error);
-      showError("Antworten konnten nicht geladen werden");
+      showError(t("forum.loadRepliesError"));
     }
   };
 
@@ -137,12 +140,13 @@ const ForumPostDetail = () => {
         await api.post(`/forum/posts/${postId}/subscribe`);
       }
 
-      const action = wasSubscribed ? "abbestellt" : "abonniert";
-      success(`Beitrag erfolgreich ${action}!`);
+      success(
+        wasSubscribed ? t("forum.unsubscribed") : t("forum.subscribedToast"),
+      );
       await fetchSubscriptionStatus();
     } catch (error) {
       console.error("Error toggling subscription:", error);
-      showError("Fehler beim Ändern des Abonnement-Status");
+      showError(t("forum.subscribeError"));
     }
   };
 
@@ -165,7 +169,7 @@ const ForumPostDetail = () => {
       fetchPost();
     } catch (error) {
       console.error("Error submitting reply:", error);
-      showError("Antwort konnte nicht gesendet werden");
+      showError(t("forum.replyError"));
     } finally {
       setSubmittingReply(false);
     }
@@ -186,49 +190,16 @@ const ForumPostDetail = () => {
       fetchPost();
     } catch (error) {
       console.error("Error toggling like:", error);
-      showError("Like konnte nicht verarbeitet werden");
+      showError(t("forum.likeError"));
     }
   };
 
-  /**
-   * Formats date to readable format
-   * @param {string} dateString - The date string to format
-   * @returns {string} - Formatted date string
-   */
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffTime = Math.abs(now - date);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  const formatDate = (dateString) => formatRelative(dateString);
 
-    if (diffDays === 1) return "Heute";
-    if (diffDays === 2) return "Gestern";
-    if (diffDays <= 7) return `vor ${diffDays - 1} Tagen`;
-
-    return date.toLocaleDateString("de-DE", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
-  };
-
-  /**
-   * Returns category display name
-   * @param {string} category - The category key
-   * @returns {string} - The display name for the category
-   */
-  const getCategoryDisplayName = (category) => {
-    const categoryMap = {
-      GENERAL: "Allgemein",
-      MOVIE_DISCUSSION: "Filme",
-      SERIES_DISCUSSION: "Serien",
-      RECOMMENDATIONS: "Empfehlungen",
-      REVIEWS: "Bewertungen",
-      NEWS: "News",
-      OFF_TOPIC: "Off-Topic",
-    };
-    return categoryMap[category] || category;
-  };
+  const getCategoryDisplayName = (category) =>
+    has(`forum.categories.${category}`)
+      ? t(`forum.categories.${category}`)
+      : category;
 
   /**
    * Checks if the current user can edit a post or reply (only author can edit)
@@ -263,10 +234,10 @@ const ForumPostDetail = () => {
       });
       setEditingPost(false);
       fetchPost();
-      success("Beitrag erfolgreich bearbeitet!");
+      success(t("forum.postUpdated"));
     } catch (error) {
       console.error("Error editing post:", error);
-      showError("Fehler beim Bearbeiten des Beitrags");
+      showError(t("forum.editPostError"));
     }
   };
 
@@ -275,7 +246,7 @@ const ForumPostDetail = () => {
    * @returns {Promise<void>} - Resolves when the post is deleted
    */
   const handleDeletePost = async () => {
-    if (!window.confirm("Möchten Sie diesen Beitrag wirklich löschen?")) {
+    if (!window.confirm(t("forum.confirmDeletePost"))) {
       return;
     }
 
@@ -286,11 +257,11 @@ const ForumPostDetail = () => {
           : `/forum/posts/${postId}`;
 
       await api.delete(endpoint);
-      success("Beitrag erfolgreich gelöscht!");
+      success(t("forum.postDeleted"));
       navigate("/forum");
     } catch (error) {
       console.error("Error deleting post:", error);
-      showError("Fehler beim Löschen des Beitrags");
+      showError(t("forum.deletePostError"));
     }
   };
 
@@ -307,10 +278,10 @@ const ForumPostDetail = () => {
       setEditingReplyId(null);
       setEditReplyContent("");
       fetchReplies();
-      success("Antwort erfolgreich bearbeitet!");
+      success(t("forum.replyUpdated"));
     } catch (error) {
       console.error("Error editing reply:", error);
-      showError("Fehler beim Bearbeiten der Antwort");
+      showError(t("forum.editReplyError"));
     }
   };
 
@@ -320,17 +291,17 @@ const ForumPostDetail = () => {
    * @returns {Promise<void>} - Resolves when the reply is deleted
    */
   const handleDeleteReply = async (replyId) => {
-    if (!window.confirm("Möchten Sie diese Antwort wirklich löschen?")) {
+    if (!window.confirm(t("forum.confirmDeleteReply"))) {
       return;
     }
 
     try {
       await api.delete(`/forum/replies/${replyId}`);
       fetchReplies();
-      success("Antwort erfolgreich gelöscht!");
+      success(t("forum.replyDeleted"));
     } catch (error) {
       console.error("Error deleting reply:", error);
-      showError("Fehler beim Löschen der Antwort");
+      showError(t("forum.deleteReplyError"));
     }
   };
 
@@ -364,10 +335,7 @@ const ForumPostDetail = () => {
   if (loading) {
     return (
       <div className="forum-detail">
-        <div className="loading-container">
-          <div className="loading-spinner"></div>
-          <p>Lädt...</p>
-        </div>
+        <LoadingSpinner message={t("forum.loading")} />
       </div>
     );
   }
@@ -376,8 +344,13 @@ const ForumPostDetail = () => {
     return (
       <div className="forum-detail">
         <div className="error-container">
-          <p>{error || "Beitrag nicht gefunden"}</p>
-          <button onClick={() => navigate("/forum")}>Zurück zum Forum</button>
+          <p>{error || t("forum.postNotFound")}</p>
+          <button
+            className="btn btn-outline-primary"
+            onClick={() => navigate("/forum")}
+          >
+            {t("forum.backToForum")}
+          </button>
         </div>
       </div>
     );
@@ -394,7 +367,7 @@ const ForumPostDetail = () => {
               onClick={() => navigate("/forum")}
             >
               <span className="back-icon">←</span>
-              <span>Zurück zum Forum</span>
+              <span>{t("forum.backToForum")}</span>
             </button>
             <div className="post-category-badge">
               {getCategoryDisplayName(post.category)}
@@ -413,10 +386,14 @@ const ForumPostDetail = () => {
             </div>
             <div className="post-badges">
               {post.pinned && (
-                <span className="status-badge pinned">📌 Angepinnt</span>
+                <span className="status-badge pinned">
+                  📌 {t("forum.pinnedBadge")}
+                </span>
               )}
               {post.locked && (
-                <span className="status-badge locked">🔒 Gesperrt</span>
+                <span className="status-badge locked">
+                  🔒 {t("forum.lockedBadge")}
+                </span>
               )}
             </div>
           </div>
@@ -438,10 +415,10 @@ const ForumPostDetail = () => {
                 />
                 <div className="edit-actions">
                   <button onClick={handleEditPost} className="save-btn">
-                    Speichern
+                    {t("common.save")}
                   </button>
                   <button onClick={cancelEditing} className="cancel-btn">
-                    Abbrechen
+                    {t("common.cancel")}
                   </button>
                 </div>
               </div>
@@ -452,12 +429,12 @@ const ForumPostDetail = () => {
                   <div className="post-actions">
                     {canEdit(post.author) && (
                       <button onClick={startEditingPost} className="edit-btn">
-                        ✏️ Bearbeiten
+                        ✏️ {t("common.edit")}
                       </button>
                     )}
                     {canDelete(post.author) && (
                       <button onClick={handleDeletePost} className="delete-btn">
-                        🗑️ Löschen
+                        🗑️ {t("common.delete")}
                       </button>
                     )}
                   </div>
@@ -469,7 +446,7 @@ const ForumPostDetail = () => {
           {/* Related Media Section */}
           {mediaInfo && (
             <div className="related-media-section">
-              <h4>Verknüpftes Medium</h4>
+              <h4>{t("forum.linkedMedia")}</h4>
               <div className="media-card">
                 <div className="media-poster">
                   {mediaInfo.data.posterUrl ? (
@@ -489,7 +466,9 @@ const ForumPostDetail = () => {
                     {mediaInfo.data.title || mediaInfo.data.name}
                   </h5>
                   <p className="media-type">
-                    {mediaInfo.type === "movie" ? "Film" : "Serie"}
+                    {mediaInfo.type === "movie"
+                      ? t("common.movie")
+                      : t("common.series")}
                     {mediaInfo.data.releaseYear &&
                       ` • ${mediaInfo.data.releaseYear}`}
                   </p>
@@ -512,8 +491,8 @@ const ForumPostDetail = () => {
                       }
                     >
                       {mediaInfo.type === "movie"
-                        ? "Film ansehen"
-                        : "Serie ansehen"}
+                        ? t("forum.viewMovie")
+                        : t("forum.viewSeries")}
                     </button>
                     <button
                       className="find-similar-btn"
@@ -523,7 +502,7 @@ const ForumPostDetail = () => {
                         )
                       }
                     >
-                      Ähnliche Posts finden
+                      {t("forum.findSimilar")}
                     </button>
                   </div>
                 </div>
@@ -555,8 +534,8 @@ const ForumPostDetail = () => {
                     </span>
                     <span className="btn-text">
                       {subscriptionStatus.isSubscribed
-                        ? "Abonniert"
-                        : "Abonnieren"}
+                        ? t("forum.subscribed")
+                        : t("forum.subscribe")}
                     </span>
                   </button>
                 </>
@@ -565,11 +544,11 @@ const ForumPostDetail = () => {
             <div className="post-stats">
               <div className="stat-item">
                 <span className="stat-icon">💬</span>
-                <span>{replies.length} Antworten</span>
+                <span>{t("forum.replyCount", { count: replies.length })}</span>
               </div>
               <div className="stat-item">
                 <span className="stat-icon">👁️</span>
-                <span>{post.views || 0} Aufrufe</span>
+                <span>{t("forum.viewCount", { count: post.views || 0 })}</span>
               </div>
             </div>
           </div>
@@ -578,12 +557,12 @@ const ForumPostDetail = () => {
         {/* Reply Form */}
         {currentUser && !post.locked && (
           <div className="reply-form-card">
-            <h4>Antwort schreiben</h4>
+            <h4>{t("forum.writeReply")}</h4>
             <form onSubmit={handleReplySubmit}>
               <textarea
                 value={replyContent}
                 onChange={(e) => setReplyContent(e.target.value)}
-                placeholder="Schreibe deine Antwort..."
+                placeholder={t("forum.replyPlaceholder")}
                 rows="4"
                 className="reply-textarea"
                 required
@@ -594,7 +573,7 @@ const ForumPostDetail = () => {
                   className="submit-reply-btn"
                   disabled={submittingReply || !replyContent.trim()}
                 >
-                  {submittingReply ? "Wird gesendet..." : "Antwort senden"}
+                  {submittingReply ? t("forum.sending") : t("forum.sendReply")}
                 </button>
               </div>
             </form>
@@ -605,7 +584,7 @@ const ForumPostDetail = () => {
         <div className="replies-section">
           <div className="replies-header">
             <h3>
-              Antworten{" "}
+              {t("forum.replies")}{" "}
               <span className="replies-count">({replies.length})</span>
             </h3>
           </div>
@@ -614,8 +593,8 @@ const ForumPostDetail = () => {
             {replies.length === 0 ? (
               <div className="empty-replies">
                 <div className="empty-icon">💬</div>
-                <h4>Noch keine Antworten</h4>
-                <p>Sei der erste, der auf diesen Beitrag antwortet!</p>
+                <h4>{t("forum.noReplies")}</h4>
+                <p>{t("forum.noRepliesHint")}</p>
               </div>
             ) : (
               replies.map((reply) => (
@@ -640,7 +619,8 @@ const ForumPostDetail = () => {
                           <button
                             onClick={() => startEditingReply(reply)}
                             className="edit-reply-btn"
-                            title="Antwort bearbeiten"
+                            title={t("forum.editReply")}
+                            aria-label={t("forum.editReply")}
                           >
                             ✏️
                           </button>
@@ -649,7 +629,8 @@ const ForumPostDetail = () => {
                           <button
                             onClick={() => handleDeleteReply(reply.id)}
                             className="delete-reply-btn"
-                            title="Antwort löschen"
+                            title={t("forum.deleteReply")}
+                            aria-label={t("forum.deleteReply")}
                           >
                             🗑️
                           </button>
@@ -671,13 +652,13 @@ const ForumPostDetail = () => {
                             onClick={() => handleEditReply(reply.id)}
                             className="save-reply-btn"
                           >
-                            Speichern
+                            {t("common.save")}
                           </button>
                           <button
                             onClick={cancelEditing}
                             className="cancel-reply-btn"
                           >
-                            Abbrechen
+                            {t("common.cancel")}
                           </button>
                         </div>
                       </div>
@@ -697,10 +678,13 @@ const ForumPostDetail = () => {
                 onClick={() => setCurrentPage((prev) => Math.max(0, prev - 1))}
                 disabled={currentPage === 0}
               >
-                ← Zurück
+                ← {t("forum.prev")}
               </button>
               <span className="pagination-info">
-                Seite {currentPage + 1} von {totalPages}
+                {t("forum.pageOf", {
+                  page: currentPage + 1,
+                  total: totalPages,
+                })}
               </span>
               <button
                 className="pagination-btn"
@@ -709,7 +693,7 @@ const ForumPostDetail = () => {
                 }
                 disabled={currentPage === totalPages - 1}
               >
-                Weiter →
+                {t("forum.next")} →
               </button>
             </div>
           )}
