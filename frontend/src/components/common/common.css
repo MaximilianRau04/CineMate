@@ -1,0 +1,78 @@
+.cm-poster-fallback {
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
+  height: 100%;
+  padding: 0.75rem;
+  background:
+    repeating-linear-gradient(
+      135deg,
+      rgba(243, 233, 218, 0.03) 0 10px,
+      transparent 10px 20px
+    ),
+    linear-gradient(160deg, var(--cm-surface-3), var(--cm-surface));
+  color: var(--cm-dust);
+  font-family: var(--cm-font-display);
+  font-weight: 800;
+  font-size: 1.05rem;
+  line-height: 1.05;
+  text-transform: uppercase;
+  overflow: hidden;
+}
+
+.cm-poster-fallback span {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cm-star-input {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.cm-star-half {
+  position: absolute;
+  top: 0;
+  width: 50%;
+  height: 100%;
+  z-index: 1;
+}
+
+.cm-star-half-left {
+  left: 0;
+}
+
+.cm-star-half-right {
+  right: 0;
+}
+
+.cm-star-value {
+  margin-left: 0.75rem;
+  font-family: var(--cm-font-mono);
+  font-size: 0.95rem;
+  color: var(--cm-brass);
+  min-width: 2.5rem;
+}
+
+/* generic panel used by many pages */
+.cm-panel {
+  background: var(--cm-surface);
+  border: 1px solid var(--cm-line);
+  border-radius: var(--cm-radius-lg);
+  padding: 1.5rem;
+}
+
+.cm-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--cm-font-display);
+  font-weight: 800;
+  font-size: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin: 0 0 1rem;
+}

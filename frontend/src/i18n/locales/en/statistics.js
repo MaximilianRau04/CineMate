@@ -1,0 +1,31 @@
+const statistics = {
+  statistics: {
+    eyebrow: "Your viewing in numbers",
+    title: "Statistics",
+    loading: "Crunching your numbers…",
+    loadError: "Couldn't load your statistics",
+    compareUnavailable: "Friend comparison isn't available right now.",
+    compareError: "Couldn't load your friends' statistics.",
+    period: "Period",
+    lastMonth: "Last month",
+    lastYear: "Last year",
+    allTime: "All time",
+    compare: "Compare with friends",
+    hoursWatched: "Hours watched",
+    moviesWatched: "Movies watched",
+    seriesWatched: "Series watched",
+    averageRating: "Avg. rating",
+    friendsComparison: "You vs. your friends",
+    user: "User",
+    activity: "Activity over time",
+    topGenres: "Top genres",
+    favoriteActors: "Favorite actors",
+    favoriteDirectors: "Favorite directors",
+    titleCount: "Titles",
+    recentActivity: "Recent activity",
+    noActivity: "No recent activity.",
+    ratedAction: "Rated {rating} stars",
+  },
+};
+
+export default statistics;
