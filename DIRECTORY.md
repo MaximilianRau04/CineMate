@@ -223,12 +223,13 @@
 📂 public/
 📂 src/
   📂 assets/
-    📄 App.css
     📄 index.css
+    📄 theme.css
   📂 components/
     📂 achievements/
       📄 AchievementsPage.css
       📄 AchievementsPage.jsx
+      📄 localize.js
       📄 UserAchievementBadges.jsx
     📂 admin/
       📂 forms/
@@ -260,6 +261,10 @@
     📂 auth/
       📄 ProtectedRoute.jsx
       📄 PublicRoute.jsx
+    📂 common/
+      📄 common.css
+      📄 Poster.jsx
+      📄 StarInput.jsx
     📂 details/
       📂 sections/
         📄 CastSection.jsx
@@ -271,6 +276,7 @@
         📄 useMediaDetail.jsx
         📄 useMediaInteractions.js
         📄 useReviews.jsx
+      📄 Detail.css
       📄 MediaHeader.jsx
       📄 MovieDetail.jsx
       📄 SeriesDetail.jsx
@@ -284,6 +290,7 @@
       📂 utils/
         📄 useFilters.jsx
         📄 useMediaData.jsx
+      📄 Explore.css
       📄 ExplorePage.jsx
       📄 FilterPanel.jsx
       📄 MediaCard.jsx
@@ -310,7 +317,9 @@
       📄 Login.css
       📄 Login.jsx
     📂 navigation/
+      📄 Header.css
       📄 Header.jsx
+      📄 LanguageSwitcher.jsx
     📂 notifications/
       📄 NotificationSystem.jsx
     📂 profile/
@@ -320,10 +329,12 @@
       📄 CompactNotificationSettings.jsx
       📄 MediaCard.jsx
       📄 NotificationSettings.jsx
+      📄 Profile.css
       📄 UserMediaTabs.jsx
       📄 UserProfile.jsx
       📄 Watchlist.jsx
     📂 recommendations/
+      📄 localizeReason.js
       📄 RecommendationsPage.css
       📄 RecommendationsPage.jsx
     📂 social/
@@ -339,9 +350,39 @@
       📄 StreamingIndicator.jsx
     📂 toasts/
       📄 index.jsx
+      📄 Toast.css
       📄 Toast.jsx
       📄 ToastContainer.jsx
       📄 ToastContext.jsx
+  📂 i18n/
+    📂 locales/
+      📂 de/
+        📄 achievements.js
+        📄 admin.js
+        📄 core.js
+        📄 details.js
+        📄 explore.js
+        📄 forum.js
+        📄 lists.js
+        📄 profile.js
+        📄 recommendations.js
+        📄 social.js
+        📄 statistics.js
+      📂 en/
+        📄 achievements.js
+        📄 admin.js
+        📄 core.js
+        📄 details.js
+        📄 explore.js
+        📄 forum.js
+        📄 lists.js
+        📄 profile.js
+        📄 recommendations.js
+        📄 social.js
+        📄 statistics.js
+      📄 de.js
+      📄 en.js
+    📄 I18nContext.jsx
   📂 utils/
     📄 api.js
     📄 AuthContext.jsx
