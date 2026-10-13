@@ -16,7 +16,6 @@ import lombok.Setter;
 public class UserResponseDTO implements Serializable {
   private String id;
   private String username;
-  private String password;
   private String email;
   private String bio;
   private String avatarUrl;
@@ -26,7 +25,6 @@ public class UserResponseDTO implements Serializable {
   public UserResponseDTO(User user) {
     this.id = user.getId();
     this.username = user.getUsername();
-    this.password = user.getPassword();
     this.email = user.getEmail();
     this.bio = user.getBio();
     this.avatarUrl = user.getAvatarUrl();

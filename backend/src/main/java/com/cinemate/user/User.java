@@ -4,6 +4,7 @@ import com.cinemate.movie.Movie;
 import com.cinemate.notification.preference.NotificationPreference;
 import com.cinemate.series.Series;
 import com.cinemate.user.DTOs.UserRequestDTO;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -26,6 +27,8 @@ public class User {
   @Id private String id;
   @NotNull private String username;
 
+  // never serialize the password hash, e.g. when a User is embedded in a list or friendship
+  @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
   @Size(min = 6, max = 40)
   @NotNull
   private String password;

@@ -1,5 +1,6 @@
 package com.cinemate.user;
 
+import com.cinemate.auth.AccessGuard;
 import com.cinemate.movie.DTOs.MovieResponseDTO;
 import com.cinemate.series.DTOs.SeriesResponseDTO;
 import com.cinemate.user.DTOs.UserRequestDTO;
@@ -19,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class UserController {
 
   private final UserService userService;
+  private final AccessGuard accessGuard;
 
   /**
    * returns all users
@@ -85,6 +87,7 @@ public class UserController {
    */
   @PostMapping
   public ResponseEntity<UserResponseDTO> createUser(@Valid @RequestBody UserRequestDTO user) {
+    accessGuard.requireAdmin();
     return userService.createUser(user);
   }
 
@@ -101,6 +104,7 @@ public class UserController {
       @PathVariable String id,
       @RequestPart("user") UserRequestDTO updatedUser,
       @RequestPart(value = "avatar", required = false) MultipartFile avatar) {
+    accessGuard.requireSelfOrAdmin(id);
     return userService.updateUser(id, updatedUser, avatar);
   }
 
@@ -111,6 +115,7 @@ public class UserController {
    */
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> deleteUser(@PathVariable String id) {
+    accessGuard.requireSelfOrAdmin(id);
     userService.deleteUser(id);
     return ResponseEntity.noContent().build();
   }
@@ -125,6 +130,7 @@ public class UserController {
   @PutMapping("/{id}/watchlist/movies/{movieId}")
   public ResponseEntity<List<MovieResponseDTO>> addMovieToWatchlist(
       @PathVariable String id, @PathVariable String movieId) {
+    accessGuard.requireSelfOrAdmin(id);
     return userService.addMovieToWatchlist(id, movieId);
   }
 
@@ -138,6 +144,7 @@ public class UserController {
   @PutMapping("/{id}/watchlist/series/{seriesId}")
   public ResponseEntity<List<SeriesResponseDTO>> addSeriesToWatchlist(
       @PathVariable String id, @PathVariable String seriesId) {
+    accessGuard.requireSelfOrAdmin(id);
     return userService.addSeriesToWatchlist(id, seriesId);
   }
 
@@ -150,6 +157,7 @@ public class UserController {
   @DeleteMapping("/{id}/watchlist/movies/{movieId}")
   public ResponseEntity<Void> removeMovieFromWatchlist(
       @PathVariable String id, @PathVariable String movieId) {
+    accessGuard.requireSelfOrAdmin(id);
     userService.removeMovieFromWatchlist(id, movieId);
     return ResponseEntity.noContent().build();
   }
@@ -163,6 +171,7 @@ public class UserController {
   @DeleteMapping("/{id}/watchlist/series/{seriesId}")
   public ResponseEntity<Void> removeSeriesFromWatchlist(
       @PathVariable String id, @PathVariable String seriesId) {
+    accessGuard.requireSelfOrAdmin(id);
     userService.removeSeriesFromWatchlist(id, seriesId);
     return ResponseEntity.noContent().build();
   }
@@ -199,6 +208,7 @@ public class UserController {
   @PutMapping("/{id}/favorites/movies/{movieId}")
   public ResponseEntity<List<MovieResponseDTO>> addMovieToFavorites(
       @PathVariable String id, @PathVariable String movieId) {
+    accessGuard.requireSelfOrAdmin(id);
     return userService.addMovieToFavorites(id, movieId);
   }
 
@@ -212,6 +222,7 @@ public class UserController {
   @PutMapping("/{id}/favorites/series/{seriesId}")
   public ResponseEntity<List<SeriesResponseDTO>> addSeriesToFavorites(
       @PathVariable String id, @PathVariable String seriesId) {
+    accessGuard.requireSelfOrAdmin(id);
     return userService.addSeriesToFavorites(id, seriesId);
   }
 
@@ -224,6 +235,7 @@ public class UserController {
   @DeleteMapping("/{id}/favorites/movies/{movieId}")
   public ResponseEntity<Void> removeMovieFromFavorites(
       @PathVariable String id, @PathVariable String movieId) {
+    accessGuard.requireSelfOrAdmin(id);
     userService.removeMovieFromFavorites(id, movieId);
     return ResponseEntity.noContent().build();
   }
@@ -237,6 +249,7 @@ public class UserController {
   @DeleteMapping("/{id}/favorites/series/{seriesId}")
   public ResponseEntity<Void> removeSeriesFromFavorites(
       @PathVariable String id, @PathVariable String seriesId) {
+    accessGuard.requireSelfOrAdmin(id);
     userService.removeSeriesFromFavorites(id, seriesId);
     return ResponseEntity.noContent().build();
   }
@@ -275,6 +288,7 @@ public class UserController {
   @PutMapping("/{id}/watched/movies/{movieId}")
   public ResponseEntity<List<MovieResponseDTO>> addMovieToWatched(
       @PathVariable String id, @PathVariable String movieId) {
+    accessGuard.requireSelfOrAdmin(id);
     return userService.addMovieToWatched(id, movieId);
   }
 
@@ -288,6 +302,7 @@ public class UserController {
   @PutMapping("/{id}/watched/series/{seriesId}")
   public ResponseEntity<List<SeriesResponseDTO>> addSeriesToWatched(
       @PathVariable String id, @PathVariable String seriesId) {
+    accessGuard.requireSelfOrAdmin(id);
     return userService.addSeriesToWatched(id, seriesId);
   }
 
@@ -300,6 +315,7 @@ public class UserController {
   @DeleteMapping("/{id}/watched/movies/{movieId}")
   public ResponseEntity<Void> removeMovieFromWatched(
       @PathVariable String id, @PathVariable String movieId) {
+    accessGuard.requireSelfOrAdmin(id);
     userService.removeMovieFromWatched(id, movieId);
     return ResponseEntity.noContent().build();
   }
@@ -313,6 +329,7 @@ public class UserController {
   @DeleteMapping("/{id}/watched/series/{seriesId}")
   public ResponseEntity<Void> removeSeriesFromWatched(
       @PathVariable String id, @PathVariable String seriesId) {
+    accessGuard.requireSelfOrAdmin(id);
     userService.removeSeriesFromWatched(id, seriesId);
     return ResponseEntity.noContent().build();
   }

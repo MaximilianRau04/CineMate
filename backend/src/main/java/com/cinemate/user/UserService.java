@@ -17,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -27,6 +28,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -41,6 +43,7 @@ public class UserService {
   private final ApplicationEventPublisher eventPublisher;
   private final RecommendationTriggerUtil recommendationTrigger;
   private final PointsEventListener pointsEventListener;
+  private final PasswordEncoder passwordEncoder;
 
   /**
    * returns the currently logged in user
@@ -143,6 +146,8 @@ public class UserService {
    */
   public ResponseEntity<UserResponseDTO> createUser(UserRequestDTO userRequestDTO) {
     User user = new User(userRequestDTO);
+    user.setPassword(passwordEncoder.encode(userRequestDTO.getPassword()));
+    if (user.getJoinedAt() == null) user.setJoinedAt(new Date());
     User savedUser = userRepository.save(user);
     UserResponseDTO userResponseDTO = new UserResponseDTO(savedUser);
 
@@ -169,7 +174,7 @@ public class UserService {
     if (userRequestDTO.getUsername() != null)
       existingUser.setUsername(userRequestDTO.getUsername());
     if (userRequestDTO.getPassword() != null)
-      existingUser.setPassword(userRequestDTO.getPassword());
+      existingUser.setPassword(passwordEncoder.encode(userRequestDTO.getPassword()));
     if (userRequestDTO.getEmail() != null) existingUser.setEmail(userRequestDTO.getEmail());
     if (userRequestDTO.getBio() != null) existingUser.setBio(userRequestDTO.getBio());
     if (userRequestDTO.getRole() != null) existingUser.setRole(userRequestDTO.getRole());
@@ -186,7 +191,13 @@ public class UserService {
       existingUser.setAvatarUrl(null);
     } else if (avatar != null && !avatar.isEmpty()) {
       try {
-        String filename = UUID.randomUUID() + "_" + avatar.getOriginalFilename();
+        // keep only a safe file extension so the client cannot choose the target path
+        String original = avatar.getOriginalFilename();
+        String extension = "";
+        if (original != null && original.matches(".*\\.[A-Za-z0-9]{1,5}$")) {
+          extension = original.substring(original.lastIndexOf('.')).toLowerCase();
+        }
+        String filename = UUID.randomUUID() + extension;
         Path path = Paths.get("uploads").resolve(filename);
         Files.createDirectories(path.getParent());
         Files.copy(avatar.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
