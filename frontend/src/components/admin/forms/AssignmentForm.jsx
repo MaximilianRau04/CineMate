@@ -1,3 +1,4 @@
+import { useTranslation } from "../../../i18n/I18nContext";
 const AssignmentForm = ({
   contentType,
   setContentType,
@@ -5,10 +6,11 @@ const AssignmentForm = ({
   setSelectedContent,
   contents,
 }) => {
+  const { t } = useTranslation();
   return (
     <>
       <div className="mb-3">
-        <label className="form-label">Medientyp</label>
+        <label className="form-label">{t("admin.fields.mediaType")}</label>
         <div>
           <div className="form-check form-check-inline">
             <input
@@ -21,7 +23,7 @@ const AssignmentForm = ({
               onChange={() => setContentType("movie")}
             />
             <label className="form-check-label" htmlFor="movieType">
-              Film
+              {t("common.movie")}
             </label>
           </div>
           <div className="form-check form-check-inline">
@@ -35,17 +37,19 @@ const AssignmentForm = ({
               onChange={() => setContentType("series")}
             />
             <label className="form-check-label" htmlFor="seriesType">
-              Serie
+              {t("common.series")}
             </label>
           </div>
         </div>
       </div>
       <div className="mb-3">
         <label className="form-label">
-          {contentType === "movie" ? "Film auswählen" : "Serie auswählen"}
+          {contentType === "movie"
+            ? t("admin.fields.selectMovie")
+            : t("admin.fields.selectSeries")}
         </label>
         <select
-          className="form-control"
+          className="form-select"
           value={selectedContent?.id || ""}
           onChange={(e) => {
             const id = e.target.value;
@@ -53,7 +57,7 @@ const AssignmentForm = ({
             setSelectedContent(content);
           }}
         >
-          <option value="">Bitte auswählen</option>
+          <option value="">{t("admin.fields.pleaseSelect")}</option>
           {contents.map((item) => (
             <option key={item.id} value={item.id}>
               {item.title}

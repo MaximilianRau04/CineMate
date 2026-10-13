@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { FaTrash } from "react-icons/fa";
 import { formatDate } from "../utils/utils";
+import { useTranslation } from "../../../i18n/I18nContext";
 
 const UserManagement = ({ users, onDeleteUser }) => {
   const [filterRole, setFilterRole] = useState("all");
+  const { t } = useTranslation();
 
   const filteredUsers =
     filterRole === "all"
@@ -12,28 +14,32 @@ const UserManagement = ({ users, onDeleteUser }) => {
 
   return (
     <div>
-      <h4 className="mb-4">Benutzerverwaltung</h4>
+      <h4 className="mb-4">{t("admin.tabs.users")}</h4>
 
       <div className="card mb-4">
         <div className="card-body">
           <div className="d-flex justify-content-end mb-3">
-            <div className="btn-group" role="group" aria-label="User filter">
+            <div
+              className="btn-group"
+              role="group"
+              aria-label={t("admin.users.filter")}
+            >
               <button
-                className={`btn ${filterRole === "all" ? "btn-primary" : "btn-light border"}`}
+                className={`btn ${filterRole === "all" ? "btn-primary" : "btn-outline-secondary"}`}
                 onClick={() => setFilterRole("all")}
               >
                 <i className="bi bi-people me-1"></i>
-                Alle
+                {t("common.all")}
               </button>
               <button
-                className={`btn ${filterRole === "USER" ? "btn-primary" : "btn-light border"}`}
+                className={`btn ${filterRole === "USER" ? "btn-primary" : "btn-outline-secondary"}`}
                 onClick={() => setFilterRole("USER")}
               >
                 <i className="bi bi-person me-1"></i>
                 User
               </button>
               <button
-                className={`btn ${filterRole === "ADMIN" ? "btn-primary" : "btn-light border"}`}
+                className={`btn ${filterRole === "ADMIN" ? "btn-primary" : "btn-outline-secondary"}`}
                 onClick={() => setFilterRole("ADMIN")}
               >
                 <i className="bi bi-shield-check me-1"></i>
@@ -46,11 +52,11 @@ const UserManagement = ({ users, onDeleteUser }) => {
             <table className="table">
               <thead>
                 <tr>
-                  <th>Benutzername</th>
-                  <th>E-Mail</th>
-                  <th>Rolle</th>
-                  <th>Registriert am</th>
-                  <th>Aktionen</th>
+                  <th>{t("auth.username")}</th>
+                  <th>{t("auth.email")}</th>
+                  <th>{t("auth.role")}</th>
+                  <th>{t("admin.users.registered")}</th>
+                  <th>{t("common.actions")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -73,14 +79,16 @@ const UserManagement = ({ users, onDeleteUser }) => {
                           onClick={() => {
                             if (
                               window.confirm(
-                                `Möchten Sie den Benutzer "${user.username}" wirklich löschen?`,
+                                t("admin.users.confirmDelete", {
+                                  name: user.username,
+                                }),
                               )
                             ) {
                               onDeleteUser(user.id);
                             }
                           }}
                         >
-                          <FaTrash /> Löschen
+                          <FaTrash className="me-1" /> {t("common.delete")}
                         </button>
                       )}
                     </td>
