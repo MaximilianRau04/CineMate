@@ -1,14 +1,18 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import { FaUserFriends, FaEye, FaHeart, FaStar, FaLock } from "react-icons/fa";
+import { Link, useParams } from "react-router-dom";
+import { FaUserFriends, FaEye, FaStar, FaLock } from "react-icons/fa";
 import { useToast } from "../toasts";
 import UserMediaTabs from "../profile/UserMediaTabs";
 import api from "../../utils/api";
 import { useAuth } from "../../utils/AuthContext";
+import { LoadingSpinner } from "../explore/FilterPanel";
+import "../profile/Profile.css";
+import { useTranslation } from "../../i18n/I18nContext";
 
 const FriendProfile = () => {
   const { userId } = useParams();
   const { success, error: showError } = useToast();
+  const { t, formatDate } = useTranslation();
   const { user: currentUser } = useAuth();
   const [user, setUser] = useState(null);
   const [userPoints, setUserPoints] = useState(null);
@@ -35,8 +39,8 @@ const FriendProfile = () => {
       return (
         <img
           src={`${import.meta.env.VITE_BASE_URL}${avatarUrl}`}
-          alt={username}
-          className="img-fluid rounded-circle shadow-sm mb-3"
+          alt=""
+          className="rounded-circle"
           style={{
             width: `${size}px`,
             height: `${size}px`,
@@ -44,19 +48,19 @@ const FriendProfile = () => {
           }}
         />
       );
-    } else {
-      return (
-        <div
-          className="rounded-circle bg-secondary d-flex align-items-center justify-content-center shadow-sm mb-3"
-          style={{ width: `${size}px`, height: `${size}px` }}
-        >
-          <i
-            className="bi bi-person-fill text-white"
-            style={{ fontSize: `${size * 0.6}px` }}
-          ></i>
-        </div>
-      );
     }
+    return (
+      <span
+        className="cm-avatar"
+        style={{
+          width: `${size}px`,
+          height: `${size}px`,
+          fontSize: `${size * 0.32}px`,
+        }}
+      >
+        {username?.slice(0, 2).toUpperCase()}
+      </span>
+    );
   };
 
   /**
@@ -102,7 +106,7 @@ const FriendProfile = () => {
       setUserPoints(pointsData);
     } catch (error) {
       console.error("Error loading user points:", error);
-      showError("Punkte konnten nicht geladen werden");
+      showError(t("leaderboard.pointsError"));
     }
   };
 
@@ -117,7 +121,7 @@ const FriendProfile = () => {
       setFriends(friendsData);
     } catch (error) {
       console.error("Error loading user friends:", error);
-      showError("Freunde konnten nicht geladen werden");
+      showError(t("social.loadFriendsError"));
     }
   };
 
@@ -133,7 +137,7 @@ const FriendProfile = () => {
       setIsFriend(friendshipExists);
     } catch (error) {
       console.error("Error checking friendship:", error);
-      showError("Freundschaftsstatus konnte nicht geprüft werden");
+      showError(t("social.friendshipCheckError"));
     }
   };
 
@@ -145,46 +149,27 @@ const FriendProfile = () => {
   const sendFriendRequest = async () => {
     try {
       await api.post(`/social/friends/request/${userId}`);
-      success("Freundschaftsanfrage gesendet!");
+      success(t("social.requestSent"));
     } catch (error) {
       console.error("Error sending friend request:", error);
       showError(
         error.response?.data
-          ? `Fehler: ${error.response.data}`
-          : "Fehler beim Senden der Freundschaftsanfrage",
+          ? t("social.errorDetail", { message: error.response.data })
+          : t("social.requestSendError"),
       );
     }
   };
 
   if (loading) {
-    return (
-      <div className="container py-5">
-        <div className="text-center">
-          <div className="spinner-border" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-          <p className="mt-2">Lade Benutzerprofil...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner message={t("social.loadingProfile")} />;
   }
 
-  if (error) {
+  if (error || !user) {
     return (
-      <div className="container py-5">
-        <div className="alert alert-danger" role="alert">
-          <h4 className="alert-heading">Fehler</h4>
-          <p>{error}</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="container py-5">
-        <div className="alert alert-warning" role="alert">
-          Benutzer nicht gefunden.
+      <div className="container cm-page">
+        <div className="cm-empty">
+          <h3>{t("social.userNotFound")}</h3>
+          {error && <p className="mb-0">{error}</p>}
         </div>
       </div>
     );
@@ -193,180 +178,131 @@ const FriendProfile = () => {
   const isOwnProfile = currentUser?.id === userId;
   const canViewProfile = isOwnProfile || isFriend || user.profilePublic;
 
-  const formattedDate = new Date(user.joinedAt).toLocaleDateString("de-DE", {
+  const formattedDate = formatDate(user.joinedAt, {
     year: "numeric",
     month: "long",
     day: "numeric",
   });
 
   return (
-    <div className="container py-5">
-      <div className="card shadow-lg border-0">
-        <div className="row g-0">
-          {/* Profile Header */}
-          <div className="col-md-4 d-flex flex-column align-items-center justify-content-center bg-dark text-white p-4">
-            {renderProfileImage(user.avatarUrl, user.username, 150)}
-            <h3 className="mb-2">{user.username}</h3>
-
-            {!isOwnProfile && !isFriend && user.allowFriendRequests && (
-              <button
-                className="btn btn-light mt-2 fw-bold"
-                onClick={sendFriendRequest}
-                style={{ color: "#0d6efd", borderColor: "#0d6efd" }}
-              >
-                <FaUserFriends className="me-2" />
-                Freundschaftsanfrage senden
-              </button>
+    <div className="container-xxl cm-page">
+      <section className="cm-profile-head">
+        <div className="cm-profile-avatar">
+          <div className="cm-avatar-xl">
+            {user.avatarUrl ? (
+              <img
+                src={`${import.meta.env.VITE_BASE_URL}${user.avatarUrl}`}
+                alt=""
+              />
+            ) : (
+              <span>{user.username?.slice(0, 2).toUpperCase()}</span>
             )}
-
-            {isFriend && (
-              <span className="badge bg-success mt-2">
-                <FaUserFriends className="me-1" />
-                Freund
-              </span>
-            )}
-          </div>
-
-          {/* Profile Content */}
-          <div className="col-md-8 p-4">
-            <div className="row">
-              <div className="col-12">
-                <h2 className="mb-3">{user.username}</h2>
-
-                {!canViewProfile ? (
-                  <div className="text-center py-5">
-                    <FaLock className="fs-1 text-muted mb-3" />
-                    <h4>Privates Profil</h4>
-                    <p className="text-muted">
-                      Dieses Profil ist privat. Du musst mit {user.username}{" "}
-                      befreundet sein, um mehr zu sehen.
-                    </p>
-                  </div>
-                ) : (
-                  <>
-                    {/* Bio */}
-                    {user.bio && (
-                      <div className="mb-3">
-                        <label className="form-label mb-2">
-                          <strong>Über mich:</strong>
-                        </label>
-                        <div className="bio-container p-3 bg-light rounded">
-                          <p className="mb-0">{user.bio}</p>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Stats */}
-                    <div className="row mb-4">
-                      <div className="col-md-3 col-6">
-                        <div className="card text-center">
-                          <div className="card-body py-3">
-                            <FaUserFriends className="fs-3 text-primary mb-2" />
-                            <h5 className="mb-0">{friends.length}</h5>
-                            <small className="text-muted">Freunde</small>
-                          </div>
-                        </div>
-                      </div>
-
-                      {userPoints && (
-                        <>
-                          <div className="col-md-3 col-6">
-                            <div className="card text-center">
-                              <div className="card-body py-3">
-                                <FaStar className="fs-3 text-warning mb-2" />
-                                <h5 className="mb-0">
-                                  {userPoints.totalPoints}
-                                </h5>
-                                <small className="text-muted">Punkte</small>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-md-3 col-6">
-                            <div className="card text-center">
-                              <div className="card-body py-3">
-                                <FaEye className="fs-3 text-info mb-2" />
-                                <h5 className="mb-0">
-                                  {userPoints.watchPoints}
-                                </h5>
-                                <small className="text-muted">Gesehen</small>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-md-3 col-6">
-                            <div className="card text-center">
-                              <div className="card-body py-3">
-                                <FaHeart className="fs-3 text-danger mb-2" />
-                                <h5 className="mb-0">
-                                  {userPoints.reviewPoints}
-                                </h5>
-                                <small className="text-muted">Reviews</small>
-                              </div>
-                            </div>
-                          </div>
-                        </>
-                      )}
-                    </div>
-
-                    <p className="text-muted">
-                      <strong>Beigetreten:</strong> {formattedDate}
-                    </p>
-
-                    {/* Media Content - Only for friends or public profiles */}
-                    {(isFriend || user.profilePublic || isOwnProfile) && (
-                      <div className="card shadow-lg border-0 mt-4">
-                        <div className="card-header bg-white">
-                          <h4 className="mb-0">{user.username}s Medien</h4>
-                        </div>
-                        <div
-                          className="card-body"
-                          style={{
-                            maxHeight: "350px",
-                            overflowY: "auto",
-                          }}
-                        >
-                          <UserMediaTabs userId={userId} />
-                        </div>
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
-            </div>
           </div>
         </div>
 
-        {/* Friends List */}
-        {canViewProfile && friends.length > 0 && (
-          <div className="card-footer">
-            <h6 className="mb-3">Freunde ({friends.length})</h6>
-            <div className="row">
-              {friends.slice(0, 6).map((friend) => (
-                <div key={friend.id} className="col-md-2 col-4 mb-2">
-                  <div className="text-center">
-                    {renderProfileImage(friend.avatarUrl, friend.username, 60)}
-                    <small className="d-block text-truncate">
-                      {friend.username}
-                    </small>
-                  </div>
-                </div>
-              ))}
-              {friends.length > 6 && (
-                <div className="col-md-2 col-4 mb-2">
-                  <div className="text-center">
-                    <div
-                      className="rounded-circle bg-light d-flex align-items-center justify-content-center mb-1"
-                      style={{ width: "60px", height: "60px" }}
-                    >
-                      <span className="text-muted">+{friends.length - 6}</span>
-                    </div>
-                    <small className="d-block">weitere</small>
-                  </div>
-                </div>
-              )}
-            </div>
+        <div className="min-w-0 flex-grow-1">
+          <div className="cm-eyebrow">
+            {t("profile.memberSince", { date: formattedDate })}
           </div>
-        )}
-      </div>
+          <h1 className="cm-profile-name">{user.username}</h1>
+
+          <div className="d-flex flex-wrap gap-2 align-items-center mb-3">
+            {isFriend && (
+              <span className="cm-tag cm-tag-brass">
+                <FaUserFriends className="me-1" />
+                {t("social.friend")}
+              </span>
+            )}
+            {!isOwnProfile && !isFriend && user.allowFriendRequests && (
+              <button
+                className="btn btn-primary btn-sm"
+                onClick={sendFriendRequest}
+              >
+                <FaUserFriends className="me-2" />
+                {t("social.sendRequest")}
+              </button>
+            )}
+          </div>
+
+          {canViewProfile && user.bio && <p className="cm-bio">{user.bio}</p>}
+        </div>
+      </section>
+
+      {!canViewProfile ? (
+        <div className="cm-empty mt-4">
+          <FaLock className="fs-2 mb-3" />
+          <h3>{t("social.privateProfile")}</h3>
+          <p className="mb-0">
+            {t("social.privateProfileHint", { name: user.username })}
+          </p>
+        </div>
+      ) : (
+        <>
+          <div className="cm-stat-tiles my-4">
+            <div className="cm-stat-tile">
+              <div className="cm-stat-value">{friends.length}</div>
+              <div className="cm-stat-label">{t("nav.friends")}</div>
+            </div>
+            {userPoints && (
+              <>
+                <div className="cm-stat-tile">
+                  <div className="cm-stat-value">{userPoints.totalPoints}</div>
+                  <div className="cm-stat-label">
+                    {t("leaderboard.totalPoints")}
+                  </div>
+                </div>
+                <div className="cm-stat-tile">
+                  <div className="cm-stat-value">{userPoints.watchPoints}</div>
+                  <div className="cm-stat-label">
+                    <FaEye className="me-1" />
+                    {t("leaderboard.watched")}
+                  </div>
+                </div>
+                <div className="cm-stat-tile">
+                  <div className="cm-stat-value">{userPoints.reviewPoints}</div>
+                  <div className="cm-stat-label">
+                    <FaStar className="me-1" />
+                    {t("leaderboard.reviews")}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
+          <section className="cm-panel">
+            <h2 className="cm-panel-title">
+              {t("social.libraryOf", { name: user.username })}
+            </h2>
+            <UserMediaTabs userId={userId} readOnly={!isOwnProfile} />
+          </section>
+
+          {friends.length > 0 && (
+            <section className="cm-panel mt-4">
+              <h2 className="cm-panel-title">
+                {t("nav.friends")}{" "}
+                <span className="cm-count">{friends.length}</span>
+              </h2>
+              <div className="d-flex flex-wrap gap-3">
+                {friends.slice(0, 12).map((friend) => (
+                  <Link
+                    key={friend.id}
+                    to={`/profile/${friend.id}`}
+                    className="cm-friend-chip"
+                  >
+                    {renderProfileImage(friend.avatarUrl, friend.username, 36)}
+                    <span className="text-truncate">{friend.username}</span>
+                  </Link>
+                ))}
+                {friends.length > 12 && (
+                  <span className="text-muted align-self-center">
+                    {t("lists.moreTags", { count: friends.length - 12 })}
+                  </span>
+                )}
+              </div>
+            </section>
+          )}
+        </>
+      )}
     </div>
   );
 };

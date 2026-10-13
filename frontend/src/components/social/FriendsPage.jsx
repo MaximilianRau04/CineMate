@@ -11,6 +11,8 @@ import {
 import { useToast } from "../toasts";
 import api from "../../utils/api";
 import { useAuth } from "../../utils/AuthContext";
+import { LoadingSpinner } from "../explore/FilterPanel";
+import { useTranslation } from "../../i18n/I18nContext";
 
 const FriendsPage = () => {
   const [friends, setFriends] = useState([]);
@@ -21,6 +23,7 @@ const FriendsPage = () => {
   const [loading, setLoading] = useState(true);
   const [allUsers, setAllUsers] = useState([]);
   const { success, error: showError } = useToast();
+  const { t, formatDate } = useTranslation();
   const { user: currentUser } = useAuth();
 
   useEffect(() => {
@@ -54,7 +57,7 @@ const FriendsPage = () => {
       setFriends(data);
     } catch (error) {
       console.error("Error loading friends:", error);
-      showError("Freunde konnten nicht geladen werden");
+      showError(t("social.loadFriendsError"));
     }
   };
 
@@ -69,7 +72,7 @@ const FriendsPage = () => {
       setPendingRequests(data);
     } catch (error) {
       console.error("Error loading pending requests:", error);
-      showError("Anfragen konnten nicht geladen werden");
+      showError(t("social.loadRequestsError"));
     }
   };
 
@@ -90,7 +93,7 @@ const FriendsPage = () => {
       setAllUsers(filteredUsers);
     } catch (error) {
       console.error("Error loading users:", error);
-      showError("Benutzer konnten nicht geladen werden");
+      showError(t("social.loadUsersError"));
     }
   };
 
@@ -103,15 +106,15 @@ const FriendsPage = () => {
   const sendFriendRequest = async (userId) => {
     try {
       await api.post(`/social/friends/request/${userId}`);
-      success("Freundschaftsanfrage gesendet!");
+      success(t("social.requestSent"));
       setAllUsers((prev) => prev.filter((user) => user.id !== userId));
       loadData();
     } catch (error) {
       console.error("Error sending friend request:", error);
       showError(
         error.response?.data
-          ? `Fehler: ${error.response.data}`
-          : "Fehler beim Senden der Freundschaftsanfrage",
+          ? t("social.errorDetail", { message: error.response.data })
+          : t("social.requestSendError"),
       );
     }
   };
@@ -125,14 +128,14 @@ const FriendsPage = () => {
   const acceptFriendRequest = async (friendshipId) => {
     try {
       await api.post(`/social/friends/accept/${friendshipId}`);
-      success("Freundschaftsanfrage akzeptiert!");
+      success(t("social.requestAccepted"));
       loadData();
     } catch (error) {
       console.error("Error accepting friend request:", error);
       showError(
         error.response?.data
-          ? `Fehler: ${error.response.data}`
-          : "Fehler beim Akzeptieren der Freundschaftsanfrage",
+          ? t("social.errorDetail", { message: error.response.data })
+          : t("social.requestAcceptError"),
       );
     }
   };
@@ -146,14 +149,14 @@ const FriendsPage = () => {
   const declineFriendRequest = async (friendshipId) => {
     try {
       await api.post(`/social/friends/decline/${friendshipId}`);
-      success("Freundschaftsanfrage abgelehnt");
+      success(t("social.requestDeclined"));
       loadPendingRequests();
     } catch (error) {
       console.error("Error declining friend request:", error);
       showError(
         error.response?.data
-          ? `Fehler: ${error.response.data}`
-          : "Fehler beim Ablehnen der Freundschaftsanfrage",
+          ? t("social.errorDetail", { message: error.response.data })
+          : t("social.requestDeclineError"),
       );
     }
   };
@@ -165,20 +168,20 @@ const FriendsPage = () => {
    * @throws {Error} if the request fails or the user confirms removal
    */
   const removeFriend = async (friendId) => {
-    if (!window.confirm("Möchtest du diesen Freund wirklich entfernen?")) {
+    if (!window.confirm(t("social.confirmRemove"))) {
       return;
     }
 
     try {
       await api.delete(`/social/friends/${friendId}`);
-      success("Freund entfernt");
+      success(t("social.friendRemoved"));
       loadFriends();
     } catch (error) {
       console.error("Error removing friend:", error);
       showError(
         error.response?.data
-          ? `Fehler: ${error.response.data}`
-          : "Fehler beim Entfernen des Freundes",
+          ? t("social.errorDetail", { message: error.response.data })
+          : t("social.removeError"),
       );
     }
   };
@@ -231,17 +234,15 @@ const FriendsPage = () => {
       />
     ) : (
       <div
-        className="rounded-circle bg-secondary d-flex align-items-center justify-content-center"
+        className="cm-avatar"
         style={{
           width: `${size}px`,
           height: `${size}px`,
+          fontSize: `${size * 0.32}px`,
           cursor: userId ? "pointer" : "default",
         }}
       >
-        <i
-          className="bi bi-person-fill text-white"
-          style={{ fontSize: `${size * 0.6}px` }}
-        ></i>
+        {username?.slice(0, 2).toUpperCase()}
       </div>
     );
 
@@ -257,26 +258,22 @@ const FriendsPage = () => {
   };
 
   if (loading) {
-    return (
-      <div className="container py-5">
-        <div className="text-center">
-          <div className="spinner-border" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-          <p className="mt-2">Lade Freunde...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner message={t("social.loadingFriends")} />;
   }
 
   return (
-    <div className="container py-5">
+    <div className="container-xxl cm-page">
       <div className="row">
         <div className="col-12">
-          <h1 className="mb-4">
-            <FaUserFriends className="me-2" />
-            Freunde verwalten
-          </h1>
+          <header className="cm-page-head">
+            <div>
+              <div className="cm-eyebrow">
+                <FaUserFriends className="me-2" />
+                {t("nav.community")}
+              </div>
+              <h1>{t("social.title")}</h1>
+            </div>
+          </header>
 
           {/* Navigation Tabs */}
           <ul className="nav nav-tabs mb-4">
@@ -285,7 +282,7 @@ const FriendsPage = () => {
                 className={`nav-link ${activeTab === "friends" ? "active" : ""}`}
                 onClick={() => setActiveTab("friends")}
               >
-                Meine Freunde ({friends.length})
+                {t("social.myFriends")} ({friends.length})
               </button>
             </li>
             <li className="nav-item">
@@ -293,7 +290,7 @@ const FriendsPage = () => {
                 className={`nav-link ${activeTab === "requests" ? "active" : ""}`}
                 onClick={() => setActiveTab("requests")}
               >
-                Anfragen ({pendingRequests.length})
+                {t("social.requests")} ({pendingRequests.length})
               </button>
             </li>
             <li className="nav-item">
@@ -301,7 +298,7 @@ const FriendsPage = () => {
                 className={`nav-link ${activeTab === "search" ? "active" : ""}`}
                 onClick={() => setActiveTab("search")}
               >
-                Neue Freunde finden
+                {t("social.findFriends")}
               </button>
             </li>
           </ul>
@@ -310,14 +307,11 @@ const FriendsPage = () => {
           {activeTab === "friends" && (
             <div className="card">
               <div className="card-header">
-                <h5>Meine Freunde</h5>
+                <h5 className="mb-0">{t("social.myFriends")}</h5>
               </div>
               <div className="card-body">
                 {friends.length === 0 ? (
-                  <p className="text-muted">
-                    Du hast noch keine Freunde. Nutze die Suche, um neue Freunde
-                    zu finden!
-                  </p>
+                  <p className="text-muted">{t("social.noFriends")}</p>
                 ) : (
                   <div className="row">
                     {friends.map((friend) => (
@@ -341,9 +335,17 @@ const FriendsPage = () => {
                               </div>
                             </div>
                             <div className="d-flex justify-content-between">
+                              <Link
+                                to={`/profile/${friend.id}`}
+                                className="btn btn-outline-secondary btn-sm"
+                              >
+                                {t("social.viewProfile")}
+                              </Link>
                               <button
                                 className="btn btn-outline-danger btn-sm"
                                 onClick={() => removeFriend(friend.id)}
+                                title={t("social.removeFriend")}
+                                aria-label={t("social.removeFriend")}
                               >
                                 <FaTrash />
                               </button>
@@ -362,13 +364,11 @@ const FriendsPage = () => {
           {activeTab === "requests" && (
             <div className="card">
               <div className="card-header">
-                <h5>Freundschaftsanfragen</h5>
+                <h5 className="mb-0">{t("social.friendRequests")}</h5>
               </div>
               <div className="card-body">
                 {pendingRequests.length === 0 ? (
-                  <p className="text-muted">
-                    Keine offenen Freundschaftsanfragen.
-                  </p>
+                  <p className="text-muted">{t("social.noRequests")}</p>
                 ) : (
                   <div className="list-group">
                     {pendingRequests.map((request) => (
@@ -387,9 +387,7 @@ const FriendsPage = () => {
                                 {request.requester.username}
                               </h6>
                               <small className="text-muted">
-                                {new Date(
-                                  request.requestedAt,
-                                ).toLocaleDateString("de-DE")}
+                                {formatDate(request.requestedAt)}
                               </small>
                             </div>
                           </div>
@@ -398,13 +396,13 @@ const FriendsPage = () => {
                               className="btn btn-success btn-sm me-2"
                               onClick={() => acceptFriendRequest(request.id)}
                             >
-                              <FaCheck /> Akzeptieren
+                              <FaCheck className="me-1" /> {t("social.accept")}
                             </button>
                             <button
-                              className="btn btn-danger btn-sm"
+                              className="btn btn-outline-danger btn-sm"
                               onClick={() => declineFriendRequest(request.id)}
                             >
-                              <FaTimes /> Ablehnen
+                              <FaTimes className="me-1" /> {t("social.decline")}
                             </button>
                           </div>
                         </div>
@@ -420,7 +418,7 @@ const FriendsPage = () => {
           {activeTab === "search" && (
             <div className="card">
               <div className="card-header">
-                <h5>Neue Freunde finden</h5>
+                <h5 className="mb-0">{t("social.findFriends")}</h5>
               </div>
               <div className="card-body">
                 <div className="mb-4">
@@ -431,7 +429,7 @@ const FriendsPage = () => {
                     <input
                       type="text"
                       className="form-control"
-                      placeholder="Benutzername oder E-Mail suchen..."
+                      placeholder={t("social.searchPlaceholder")}
                       value={searchQuery}
                       onChange={(e) => handleSearch(e.target.value)}
                     />
@@ -441,7 +439,7 @@ const FriendsPage = () => {
                 {searchQuery.length > 2 && (
                   <div>
                     {searchUsers.length === 0 ? (
-                      <p className="text-muted">Keine Benutzer gefunden.</p>
+                      <p className="text-muted">{t("social.noUsersFound")}</p>
                     ) : (
                       <div className="row">
                         {searchUsers.map((user) => (
@@ -474,7 +472,7 @@ const FriendsPage = () => {
                                       style={{ fontSize: "0.85rem" }}
                                     />
                                     <span style={{ fontSize: "0.85rem" }}>
-                                      Anfrage senden
+                                      {t("social.sendRequest")}
                                     </span>
                                   </button>
                                 </div>

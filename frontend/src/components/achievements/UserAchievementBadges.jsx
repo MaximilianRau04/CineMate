@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react";
 import { FaTrophy, FaMedal, FaStar } from "react-icons/fa";
 import api from "../../utils/api";
+import { achievementTitle, achievementDescription } from "./localize";
+import { useTranslation } from "../../i18n/I18nContext";
 
 const UserAchievementBadges = ({ userId, limit = 3, showCount = true }) => {
   const [achievements, setAchievements] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { t, has } = useTranslation();
 
   useEffect(() => {
     const loadUserAchievements = async () => {
@@ -74,9 +77,9 @@ const UserAchievementBadges = ({ userId, limit = 3, showCount = true }) => {
     return (
       <div className="d-flex align-items-center">
         <div className="spinner-border spinner-border-sm me-2" role="status">
-          <span className="visually-hidden">Loading...</span>
+          <span className="visually-hidden">{t("common.loading")}</span>
         </div>
-        <small className="text-muted">Lade Achievements...</small>
+        <small className="text-muted">{t("achievements.loading")}</small>
       </div>
     );
   }
@@ -84,7 +87,7 @@ const UserAchievementBadges = ({ userId, limit = 3, showCount = true }) => {
   if (achievements.length === 0) {
     return (
       <div className="text-muted">
-        <small>Noch keine Achievements freigeschaltet</small>
+        <small>{t("achievements.noneUnlocked")}</small>
       </div>
     );
   }
@@ -96,7 +99,7 @@ const UserAchievementBadges = ({ userId, limit = 3, showCount = true }) => {
           <div
             key={userAchievement.id}
             className={`achievement-mini-badge ${getBadgeClass(userAchievement.achievement.badgeColor)}`}
-            title={`${userAchievement.achievement.title} - ${userAchievement.achievement.description}`}
+            title={`${achievementTitle(userAchievement.achievement, t)} – ${achievementDescription(userAchievement.achievement, t, has)}`}
             data-bs-toggle="tooltip"
           >
             {getBadgeIcon(userAchievement.achievement.type)}
@@ -104,29 +107,28 @@ const UserAchievementBadges = ({ userId, limit = 3, showCount = true }) => {
         ))}
 
         {showCount && achievements.length >= limit && (
-          <small className="text-muted ms-2">und weitere...</small>
+          <small className="text-muted ms-2">{t("achievements.andMore")}</small>
         )}
       </div>
 
       {showCount && (
         <small className="text-muted d-block mt-1">
-          {achievements.length} Achievement
-          {achievements.length !== 1 ? "s" : ""} freigeschaltet
+          {t("achievements.unlockedCount", { count: achievements.length })}
         </small>
       )}
 
-      <style jsx>{`
+      <style>{`
         .achievement-mini-badge {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          width: 32px;
-          height: 32px;
+          width: 40px;
+          height: 40px;
           border-radius: 50%;
-          font-size: 0.8rem;
+          font-size: 1rem;
           cursor: help;
           transition: transform 0.2s ease;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 0 0 3px var(--cm-bg), 0 0 0 4px var(--cm-line-strong);
         }
 
         .achievement-mini-badge:hover {
@@ -134,7 +136,7 @@ const UserAchievementBadges = ({ userId, limit = 3, showCount = true }) => {
         }
 
         .achievement-mini-icon {
-          font-size: 0.8rem;
+          font-size: 1rem;
         }
 
         .user-achievement-badges {

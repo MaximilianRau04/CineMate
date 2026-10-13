@@ -3,9 +3,13 @@ import { FaTrophy, FaMedal, FaStar, FaLock, FaUnlock } from "react-icons/fa";
 import "./AchievementsPage.css";
 import api from "../../utils/api";
 import { useToast } from "../toasts";
+import { LoadingSpinner } from "../explore/FilterPanel";
+import { achievementTitle, achievementDescription } from "./localize";
+import { useTranslation } from "../../i18n/I18nContext";
 
 const AchievementsPage = ({ userId }) => {
   const { error: showError } = useToast();
+  const { t, has, formatDate } = useTranslation();
   const [userAchievements, setUserAchievements] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -35,7 +39,7 @@ const AchievementsPage = ({ userId }) => {
         setUserAchievements(data);
       } catch (error) {
         console.error("Error loading user achievements:", error);
-        showError("Erfolge konnten nicht geladen werden");
+        showError(t("achievements.loadError"));
       }
     };
 
@@ -48,14 +52,14 @@ const AchievementsPage = ({ userId }) => {
         setStats(data);
       } catch (error) {
         console.error("Error loading achievement stats:", error);
-        showError("Statistiken konnten nicht geladen werden");
+        showError(t("achievements.statsError"));
       }
     };
 
     if (userId) {
       loadAchievements();
     }
-  }, [userId]);
+  }, [userId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /**
    * Get the badge icon for a specific achievement.
@@ -114,169 +118,134 @@ const AchievementsPage = ({ userId }) => {
     const progressPercentage = userAchievement.progressPercentage || 0;
 
     return (
-      <div
+      <article
         key={userAchievement.id}
         className={`achievement-card ${isUnlocked ? "unlocked" : "locked"}`}
       >
         <div
           className={`achievement-badge ${getBadgeClass(achievement.badgeColor)}`}
         >
-          {isUnlocked ? (
-            <FaUnlock className="unlock-icon" />
-          ) : (
-            <FaLock className="lock-icon" />
-          )}
           {getBadgeIcon(achievement)}
+          {!isUnlocked && <FaLock className="lock-icon" />}
         </div>
 
         <div className="achievement-content">
-          <h5 className="achievement-title">{achievement.title}</h5>
-          <p className="achievement-description">{achievement.description}</p>
+          <h3 className="achievement-title">
+            {achievementTitle(achievement, t)}
+          </h3>
+          <p className="achievement-description">
+            {achievementDescription(achievement, t, has)}
+          </p>
 
           {!isUnlocked && (
             <div className="progress-container">
-              <div className="progress">
+              <div
+                className="progress"
+                role="progressbar"
+                aria-valuenow={progressPercentage}
+                aria-valuemin="0"
+                aria-valuemax="100"
+              >
                 <div
                   className="progress-bar"
                   style={{ width: `${progressPercentage}%` }}
                 ></div>
               </div>
               <small className="progress-text">
-                {userAchievement.progress} / {achievement.threshold} (
-                {progressPercentage.toFixed(1)}%)
+                {userAchievement.progress} / {achievement.threshold}
               </small>
             </div>
           )}
 
           <div className="achievement-footer">
             <span className="achievement-points">
-              <FaTrophy className="me-1" />
-              {achievement.points} Punkte
+              {t("achievements.points", { count: achievement.points })}
             </span>
             {isUnlocked && userAchievement.unlockedAt && (
               <small className="text-muted">
-                Freigeschaltet:{" "}
-                {new Date(userAchievement.unlockedAt).toLocaleDateString(
-                  "de-DE",
-                )}
+                {formatDate(userAchievement.unlockedAt)}
               </small>
             )}
           </div>
         </div>
-      </div>
+      </article>
     );
   };
 
   if (loading) {
-    return (
-      <div className="container py-5">
-        <div className="text-center">
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-          <p className="mt-3">Achievements werden geladen...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner message={t("achievements.loading")} />;
   }
 
+  const unlocked = getUnlockedAchievements();
+  const inProgress = getInProgressAchievements();
+
   return (
-    <div className="container py-5">
-      {/* Header */}
-      <div className="row mb-4">
-        <div className="col-12">
-          <h1 className="achievements-title">
-            <FaTrophy className="me-3" />
-            Meine Achievements
-          </h1>
-          {stats && (
-            <div className="achievement-stats">
-              <div className="row">
-                <div className="col-md-4">
-                  <div className="stat-card">
-                    <h3>{stats.unlockedAchievements}</h3>
-                    <p>Freigeschaltet</p>
-                  </div>
-                </div>
-                <div className="col-md-4">
-                  <div className="stat-card">
-                    <h3>{stats.totalAchievements}</h3>
-                    <p>Gesamt verfügbar</p>
-                  </div>
-                </div>
-                <div className="col-md-4">
-                  <div className="stat-card">
-                    <h3>{stats.progressPercentage.toFixed(1)}%</h3>
-                    <p>Fortschritt</p>
-                  </div>
-                </div>
-              </div>
+    <div className="container-xxl cm-page">
+      <header className="cm-page-head">
+        <div>
+          <div className="cm-eyebrow">{t("achievements.eyebrow")}</div>
+          <h1>{t("achievements.title")}</h1>
+        </div>
+        {stats && (
+          <dl className="cm-stat-strip">
+            <div>
+              <dt>{t("achievements.unlocked")}</dt>
+              <dd>{stats.unlockedAchievements}</dd>
             </div>
-          )}
-        </div>
-      </div>
+            <div>
+              <dt>{t("achievements.total")}</dt>
+              <dd>{stats.totalAchievements}</dd>
+            </div>
+            <div>
+              <dt>{t("achievements.progress")}</dt>
+              <dd>{Math.round(stats.progressPercentage)}%</dd>
+            </div>
+          </dl>
+        )}
+      </header>
 
-      {/* Tabs */}
-      <div className="row mb-4">
-        <div className="col-12">
-          <ul className="nav nav-tabs achievement-tabs">
-            <li className="nav-item">
-              <button
-                className={`nav-link ${activeTab === "unlocked" ? "active" : ""}`}
-                onClick={() => setActiveTab("unlocked")}
-              >
-                <FaUnlock className="me-2" />
-                Freigeschaltet ({getUnlockedAchievements().length})
-              </button>
-            </li>
-            <li className="nav-item">
-              <button
-                className={`nav-link ${activeTab === "progress" ? "active" : ""}`}
-                onClick={() => setActiveTab("progress")}
-              >
-                <FaLock className="me-2" />
-                In Bearbeitung ({getInProgressAchievements().length})
-              </button>
-            </li>
-          </ul>
-        </div>
-      </div>
+      <ul className="nav nav-tabs mb-4">
+        <li className="nav-item">
+          <button
+            className={`nav-link ${activeTab === "unlocked" ? "active" : ""}`}
+            onClick={() => setActiveTab("unlocked")}
+          >
+            <FaUnlock className="me-2" />
+            {t("achievements.unlocked")} ({unlocked.length})
+          </button>
+        </li>
+        <li className="nav-item">
+          <button
+            className={`nav-link ${activeTab === "progress" ? "active" : ""}`}
+            onClick={() => setActiveTab("progress")}
+          >
+            <FaLock className="me-2" />
+            {t("achievements.inProgress")} ({inProgress.length})
+          </button>
+        </li>
+      </ul>
 
-      {/* Achievement Grid */}
-      <div className="row">
-        <div className="col-12">
+      {activeTab === "unlocked" ? (
+        unlocked.length > 0 ? (
           <div className="achievements-grid">
-            {activeTab === "unlocked" ? (
-              getUnlockedAchievements().length > 0 ? (
-                getUnlockedAchievements().map((ua) =>
-                  renderAchievementCard(ua, true),
-                )
-              ) : (
-                <div className="text-center py-5">
-                  <FaTrophy className="text-muted display-1 mb-3" />
-                  <h4>Noch keine Achievements freigeschaltet</h4>
-                  <p className="text-muted">
-                    Schaue Filme, schreibe Reviews und sammle Freunde, um deine
-                    ersten Achievements zu bekommen!
-                  </p>
-                </div>
-              )
-            ) : getInProgressAchievements().length > 0 ? (
-              getInProgressAchievements().map((ua) =>
-                renderAchievementCard(ua, false),
-              )
-            ) : (
-              <div className="text-center py-5">
-                <FaMedal className="text-muted display-1 mb-3" />
-                <h4>Alle Achievements freigeschaltet!</h4>
-                <p className="text-muted">
-                  Du hast alle verfügbaren Achievements erreicht. Glückwunsch!
-                </p>
-              </div>
-            )}
+            {unlocked.map((ua) => renderAchievementCard(ua, true))}
           </div>
+        ) : (
+          <div className="cm-empty">
+            <h3>{t("achievements.noneUnlocked")}</h3>
+            <p className="mb-0">{t("achievements.noneUnlockedHint")}</p>
+          </div>
+        )
+      ) : inProgress.length > 0 ? (
+        <div className="achievements-grid">
+          {inProgress.map((ua) => renderAchievementCard(ua, false))}
         </div>
-      </div>
+      ) : (
+        <div className="cm-empty">
+          <h3>{t("achievements.allUnlocked")}</h3>
+          <p className="mb-0">{t("achievements.allUnlockedHint")}</p>
+        </div>
+      )}
     </div>
   );
 };
