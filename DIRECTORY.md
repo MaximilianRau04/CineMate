@@ -34,6 +34,7 @@
             📄 ActorRepository.java
             📄 ActorService.java
           📂 auth/
+            📄 AccessGuard.java
             📄 AuthController.java
             📄 JwtAuthFilter.java
             📄 JwtUtil.java
@@ -257,7 +258,6 @@
         📄 utils.jsx
       📄 AdminPanel.jsx
       📄 Dashboard.jsx
-      📄 Sidebar.jsx
     📂 auth/
       📄 ProtectedRoute.jsx
       📄 PublicRoute.jsx
@@ -328,7 +328,6 @@
         📄 useNotificationSettings.jsx
       📄 CompactNotificationSettings.jsx
       📄 MediaCard.jsx
-      📄 NotificationSettings.jsx
       📄 Profile.css
       📄 UserMediaTabs.jsx
       📄 UserProfile.jsx
